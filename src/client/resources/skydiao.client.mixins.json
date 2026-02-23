@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"package": "pers.XiaoShadiao.skydiao.mixin.client",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+      "MixinMinecraft"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

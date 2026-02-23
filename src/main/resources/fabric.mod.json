@@ -1,37 +1,36 @@
 {
 	"schemaVersion": 1,
-	"id": "modid",
+	"id": "skydiao",
 	"version": "${version}",
-	"name": "Example mod",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"name": "SkyDiao",
+	"description": "一个高版本Hypixel Skyblock Mod",
 	"authors": [
-		"Me!"
+		"SuperShadiao"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://xiaoshadiao.club",
+		"sources": "https://github.com/SuperShadiao/skydiao"
 	},
-	"license": "CC0-1.0",
-	"icon": "assets/modid/icon.png",
-	"environment": "*",
+	"icon": "assets/skydiao/icon.png",
+	"environment": "client",
 	"entrypoints": {
 		"main": [
-			"com.example.ExampleMod"
+          "pers.XiaoShadiao.skydiao.SkyDiaoMod"
 		],
 		"client": [
-			"com.example.ExampleModClient"
+          "pers.XiaoShadiao.skydiao.SkyDiaoModClient"
 		]
 	},
 	"mixins": [
-		"modid.mixins.json",
+      "skydiao.mixins.json",
 		{
-			"config": "modid.client.mixins.json",
+			"config": "skydiao.client.mixins.json",
 			"environment": "client"
 		}
 	],
 	"depends": {
 		"fabricloader": ">=0.18.2",
-		"minecraft": "~1.21.11",
+		"minecraft": "~1.21.10",
 		"java": ">=21",
 		"fabric-api": "*"
 	},

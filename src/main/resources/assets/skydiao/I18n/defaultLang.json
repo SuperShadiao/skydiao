@@ -1,0 +1,835 @@
+{
+  "configcategory": {
+    "自动类": "自动类",
+    "工具类": "工具类",
+    "自动钓鱼": "自动钓鱼",
+    "家园类": "家园类",
+    "街机类": "街机类",
+    "战绩查询": "战绩查询",
+    "渲染类": "渲染类",
+    "界面类": "界面类",
+    "Yqloss动态模糊": "Yqloss动态模糊",
+    "起床类": "起床类",
+    "空战类": "空战类",
+    "密室杀手类": "密室杀手类",
+    "超级战墙类": "超级战墙类",
+    "建筑类": "建筑类",
+    "B站直播间": "B站直播间",
+    "输入类": "输入类",
+    "寻路系统": "寻路系统",
+    "Boss栏": "Boss栏",
+    "Skyblock": "Skyblock",
+    "杂项": "杂项",
+    "雕反": "雕反",
+    "雕反菜单": "雕反菜单",
+    "更好的聊天栏": "更好的聊天栏",
+    "游戏内Title偏移": "游戏内Title偏移",
+    "账号安全": "账号安全",
+    "关于": "关于",
+    "小沙雕点歌台": "小沙雕点歌台",
+    "聊天栏管理": "聊天栏管理",
+    "快捷指令菜单设置": "快捷指令菜单设置",
+    "Overlay位置设置": "Overlay位置设置",
+    "配置文件": "配置文件",
+    "搜索": "搜索",
+    "语言": "语言"
+  },
+  "config": {
+    "0": "§c关",
+    "disabled": "§c关",
+    "1": "§a开",
+    "enabled": "§a开",
+    "autogg": {
+      "configname": "§e全自动刷人品值装置",
+      "description": "§e小游戏结束时自动发gg"
+    },
+    "secondmessage": {
+      "configname": "§e二次消息",
+      "description": "§e发送gg后发送第二条消息(比如 \"Good Job!\",\"Nice!\",小沙雕默认写的一堆语录[?],要修改请使用/openconfig)"
+    },
+    "autoggdelay": {
+      "configname": "§e全自动刷人品值装置延时",
+      "description": "§e设置autogg的延时"
+    },
+    "secondmessagedelay": {
+      "configname": "§e二次消息延时",
+      "description": "§e设置二次消息的延迟"
+    },
+    "housingautowelcome": {
+      "configname": "§e家园自动欢迎",
+      "description": "§e有人进入你的家园时自动发送欢迎语 (前提是开启家园设置中聊天框提示消息)"
+    },
+    "housingruncommandwhenplayergivecookie": {
+      "configname": "§e自动给居民权限",
+      "description": "§e当访客给你曲奇时运行一个指令 (例如 /groups)"
+    },
+    "allowuseinotherserver": {
+      "configname": "§e允许在其他服务器用AutoGG",
+      "description": "§e如果你打开了,你就可以在其他服务器使用AutoGG (警告: Mod只为Hypixel打造,放在其他服务器我不确定会发生什么事情)"
+    },
+    "cooltitle": {
+      "configname": "§e沙雕の弱智窗口标题",
+      "description": "§e修改游戏窗口标题"
+    },
+    "useallchatcommand": {
+      "configname": "§e自动\"/ac\"指令",
+      "description": "§e开启后AutoGG会使用/ac指令发送"
+    },
+    "autoacceptfriendrequest": {
+      "configname": "§e自动同意好友请求",
+      "description": "§e当别人在Hypixel加你为好友时自动同意"
+    },
+    "autoacceptguildjoinrequest": {
+      "configname": "§e自动同意公会请求",
+      "description": "§e当别人在Hypixel加入你的公会时自动同意"
+    },
+    "vapemode": {
+      "configname": "§aVAPE v4",
+      "description": "§e启用§c外挂端 (VAPE v4破解) §e游玩Hypixel服务器, 肥肠有用! (开启后自动注入)"
+    },
+    "adsender": {
+      "configname": "§e广告发送(就是刷屏器)",
+      "description": "§e开启后发送广告 (建议发公会广告, 发其他的链接啥的你号会怎样我就不管了)"
+    },
+    "adsendmindelay": {
+      "configname": "§e广告发送最低延迟",
+      "description": "§e广告发送的最低延迟"
+    },
+    "adsendmaxdelay": {
+      "configname": "§e广告发送最高延迟",
+      "description": "§e广告发送的最高延迟"
+    },
+    "adsendrandommessage": {
+      "configname": "§e广告发送随机消息",
+      "description": "§e关闭时, 会按照配置文件按行顺序发送, 开启后会随机选择行发送"
+    },
+    "autoinvite": {
+      "configname": "§e自动邀请",
+      "description": "§e如果有人在组队频道发/p xxx则自动拉进队伍"
+    },
+    "autofish": {
+      "configname": "§e自动钓鱼",
+      "description": "§e自动钓鱼 (目前不建议在Hypixel开启)"
+    },
+    "autol": {
+      "configname": "§e自动扣L",
+      "description": "§e杀死玩家时自动发L (在组队/pc瞎玩就够了, 少在公屏发这玩意罢)"
+    },
+    "autofixwindows": {
+      "configname": "§e自动修窗",
+      "description": "§e僵尸末日靠近窗户自动潜行 (做的不咋好)"
+    },
+    "removeduplicatemessage": {
+      "configname": "§e聊天框消息折叠",
+      "description": "§e折叠短时间内聊天框产生的重复消息"
+    },
+    "chatbutton": {
+      "configname": "§e聊天框消息按钮",
+      "description": "§e在每个聊天框消息后面添加一个按钮方便直接复制/翻译"
+    },
+    "blockingdeadchesthighlight": {
+      "configname": "§e行尸走肉助手",
+      "description": "§e标注可以打开的箱子, 以及小僵尸和人形僵尸显示等"
+    },
+    "blockingdeadrunoutofammotip": {
+      "configname": "§e行尸走肉弹药耗尽提示",
+      "description": "§e在行尸走肉中, 若你拿的枪没有子弹则会提示你避免没弹药了还在那里开枪awa"
+    },
+    "removeinvamsthitbox": {
+      "configname": "§e移除隐身盔甲架碰撞箱",
+      "description": "§e当你拿着剑, 弓, 工具等物品时自动移除隐身盔甲架的碰撞箱防止物品无法使用 (注意, 有些服务器可能使用隐身盔甲架检测作弊者, 请小心使用)"
+    },
+    "notification": {
+      "configname": "§e提示消息",
+      "description": "§e显示提示信息在界面上 (有点丑别介意)"
+    },
+    "printerrormessageonntf": {
+      "configname": "§e显示日志报错信息",
+      "description": "§e把错误信息显示在提示信息上 (仅部分情况调试, 可以开)"
+    },
+    "bwkdchecker": {
+      "configname": "§e床战KD检测器",
+      "description": "§e在起床战争查别人KD以避免与强大的敌人 (安全黑客) 打 (得先开提示消息)"
+    },
+    "antiafk": {
+      "configname": "§e防挂机",
+      "description": "§e自动移动防止挂机被踢 (小心被抓)"
+    },
+    "autoplay": {
+      "configname": "§e自动游玩",
+      "description": "§e游戏结束时自动进入下一局"
+    },
+    "autoreconnect": {
+      "configname": "§e自动重连",
+      "description": "§e当连接断开时自动重连"
+    },
+    "mmshowbowlocation": {
+      "configname": "§e显示弓位置",
+      "description": "§e密室杀手显示侦探弓位置"
+    },
+    "bwkdcheckerdelay": {
+      "configname": "§e床战KD检测器显示时间",
+      "description": "§e床战KD检测器显示时间"
+    },
+    "bwkdcheckerml": {
+      "configname": "§e床战KD检测器高等级提示",
+      "description": "§eBWKDChecker极限等级提示, 当发现有人等级大于此值时提示"
+    },
+    "bwkdcheckermfkd": {
+      "configname": "§e床战KD检测器高FKD显示",
+      "description": "§eBWKDChecker极限FKD显示, 当发现有人FKD大于此值时提示"
+    },
+    "bwaddons": {
+      "configname": "§e关于起床战争的一些辅助功能",
+      "description": "§e起床战争辅助"
+    },
+    "dyingtip": {
+      "configname": "§e残血提示",
+      "description": "§e渲染红框来提示你残血"
+    },
+    "bwhideteammates": {
+      "configname": "§e起床隐藏队友",
+      "description": "§e起床战争当你在战斗时停止渲染你的队友并隐藏他们的碰撞箱"
+    },
+    "bwautobackward": {
+      "configname": "§e起床自动后退",
+      "description": "§e起床战争游戏开始时自动后退到资源点"
+    },
+    "bossbar": {
+      "configname": "§eBoss栏",
+      "description": "§e小沙雕Boss栏"
+    },
+    "bossbarshowhealth": {
+      "configname": "§e在Boss栏显示血量",
+      "description": "§e在Boss栏显示Boss血量"
+    },
+    "bossbaraddtargetentity": {
+      "configname": "§e添加攻击目标到Boss栏",
+      "description": "§e当你攻击一个实体时, 自动将它临时加入Boss栏 (一段时间未攻击会消失)"
+    },
+    "bossbardisplaylimit": {
+      "configname": "§eBoss栏显示数",
+      "description": "§e最大Boss栏显示数量, 限制数量以防占屏"
+    },
+    "sbautoplayenchant": {
+      "configname": "§e自动游玩附魔游戏",
+      "description": "§e在空岛生存自动玩附魔台游戏 (From: https://github.com/ItzGreenCat/Antimony-SkyBlock/blob/master/src/main/java/com/greencat/antimony/common/function/ExperimentsBot.java)"
+    },
+    "sbmarcoerdetector": {
+      "configname": "§eMarcoer检测",
+      "description": "§e在矿区检测开脚本/Marco的人 (From: https://github.com/ItzGreenCat/Antimony-SkyBlock/blob/master/src/main/java/com/greencat/antimony/common/function/MacroerDetector.java)"
+    },
+    "allowothermodgettingtoken": {
+      "configname": "§eToken授权",
+      "description": "§e允许其他mod获取你的Minecraft Token (警告: 打开这个你的账号可能有被盗的风险, 可能其他别有用心的mod作者会获取你的token并绕过登录直接进入服务器, 但如果有mod必须需要使用token且你十分信任此mod, 请打开这个)"
+    },
+    "clientnickname": {
+      "configname": "§e客户端匿名",
+      "description": "§e用你自定义的匿名替换你的真实玩家名 (使用/openconfig, 找到clientnickname.txt打开进行修改你的匿名)"
+    },
+    "xsdac": {
+      "configname": "§eXSD AC",
+      "description": "§e一个可以检测他人是否为机构的功能"
+    },
+    "xsdacdebug": {
+      "configname": "§eXSD AC Debug",
+      "description": "§e关于XSD AC功能的调试, 这个嘛, 如果你想开的话, 可别怕刷屏哦 :((((("
+    },
+    "xsdacoutputdelay": {
+      "configname": "§eXSD AC Output Delay",
+      "description": "§eXSD AC输出延迟, 当VL数是此值的整数倍时XSD AC才会进行输出, 以防刷屏"
+    },
+    "xsdacmotionaoutput": {
+      "configname": "§eXSD AC Motion A Output",
+      "description": "§e建议关闭"
+    },
+    "gtbhelper": {
+      "configname": "§e建筑猜猜乐助手",
+      "description": "§e通过建筑猜猜乐游戏给出的提示帮你猜出建筑"
+    },
+    "lavafishhook": {
+      "configname": "§e岩浆鱼钩",
+      "description": "§e允许你的钓鱼钩能浮在岩浆上"
+    },
+    "genshinimpactloading": {
+      "configname": "§e原神, 启动!",
+      "description": "§e原来你也玩原神!?"
+    },
+    "betterchat": {
+      "configname": "§e更好的聊天栏",
+      "description": "§e更好的聊天栏 (开关后需要重启才能生效)"
+    },
+    "betterchatsmooth": {
+      "configname": "§eBetterchat 聊天栏动画",
+      "description": "§e聊天栏动画"
+    },
+    "betterchatclear": {
+      "configname": "§eBetterchat 聊天栏黑底",
+      "description": "§e聊天栏黑色背景"
+    },
+    "betterchatoffersetx": {
+      "configname": "§eBetterchat 聊天栏偏移X",
+      "description": "§e聊天栏在原版位置向X轴偏移的距离"
+    },
+    "betterchatoffersety": {
+      "configname": "§eBetterchat 聊天栏偏移Y",
+      "description": "§e聊天栏在原版位置向Y轴偏移的距离"
+    },
+    "bwbedalertrange": {
+      "configname": "§e床战拆家报警",
+      "description": "§e当敌人接近你的床且在你设置的距离范围时自动报警"
+    },
+    "keyboardrender": {
+      "configname": "§e按键显示",
+      "description": "§e显示按键"
+    },
+    "swstrengthbuffalert": {
+      "configname": "§e空战玩家力量显示",
+      "description": "§e在空战中, 玩家因击杀其他玩家获得力量Buff时, 会用红框标记他们"
+    },
+    "autoclaimdailyrewards": {
+      "configname": "§e自动每日奖励",
+      "description": "§e当rewards.hypixel.net生成时自动领取奖励"
+    },
+    "bwcustomkillmessage": {
+      "configname": "§e床战自定义击杀信息",
+      "description": "§e使用自定义起床击杀信息, 更加酷炫!"
+    },
+    "potioneffectdisplay": {
+      "configname": "§e药水效果显示",
+      "description": "§e显示你的药水效果"
+    },
+    "potioneffectdisplaybt": {
+      "configname": "§e药水效果边框显示",
+      "description": "§e药水效果显示时增加一个边框"
+    },
+    "blivelistener": {
+      "configname": "§e哔哩哔哩直播间监听器",
+      "description": "§e监听你的B站直播间 (具体使用方法你需要加入小沙雕的QQ群找小沙雕询问, 这里不赘述过多)"
+    },
+    "rawmouseinput": {
+      "configname": "§e原生鼠标输入",
+      "description": "§e改善鼠标移动质量 §c(警告: 如果开启这个后崩端, 请关闭这个) (需要重启客户端生效)"
+    },
+    "mwkdchecker": {
+      "configname": "§e超战KD检测器",
+      "description": "§e在超级战墙查别人KD以避免与强大的敌人 (安全黑客) 打 (得先开提示消息)"
+    },
+    "antiantiautofisher": {
+      "configname": "§e反反自动钓鱼",
+      "description": "§e自动钓鱼如果有人试图干扰你钓鱼则发出警告并尝试脱离干扰 §d(你需要打开聊天栏后该功能才会工作)"
+    },
+    "autofishautoescape": {
+      "configname": "§e自动钓鱼-自动逃离",
+      "description": "§e自动钓鱼时若有玩家靠近你则自动逃离至其他服务器 (注意: 自动逃离触发后将自动关闭)"
+    },
+    "autofishantiexplode": {
+      "configname": "§e自动钓鱼反被炸飞",
+      "description": "§e当有些反自动钓鱼的人使用TNT套装效果将你炸飞时, 自动寻路回到原来的位置 §c(警告: 寻路返回由机器人控制, 不稳定, 且若使用过长时间可能会被客服制裁)"
+    },
+    "titlexoffset": {
+      "configname": "§e标题X位移",
+      "description": "§e标题X坐标的位移 (输入负数向左偏移, 正数向右偏移)"
+    },
+    "titleyoffset": {
+      "configname": "§e标题Y位移",
+      "description": "§e标题Y坐标的位移 (输入负数向左偏移, 正数向右偏移)"
+    },
+    "subtitlexoffset": {
+      "configname": "§e子标题X位移",
+      "description": "§e子标题X坐标的位移 (输入负数向左偏移, 正数向右偏移)"
+    },
+    "subtitleyoffset": {
+      "configname": "§e子标题Y位移",
+      "description": "§e子标题Y坐标的位移 (输入负数向左偏移, 正数向右偏移)"
+    },
+    "bwminiworldkillsound": {
+      "configname": "§e起床战争迷你世界击杀音效",
+      "description": "§e起床战争中击杀敌人时播放迷你世界音效"
+    },
+    "autofishautoscreenshot": {
+      "configname": "§e自动钓鱼自动截屏",
+      "description": "§e如果出现AntiAutofisher干扰你钓鱼, 自动截屏 (发送截屏给小沙雕可帮助改善Autofish!)"
+    },
+    "autofishautoswitchback": {
+      "configname": "§e自动钓鱼自动切回钓竿",
+      "description": "§e如果出现AntiAutofisher干扰你钓鱼, 将你的物品栏位置改变, 自动切回原钓竿"
+    },
+    "pathfinderallowplace": {
+      "configname": "§e寻路允许放置",
+      "description": "§e允许寻路系统放置方块"
+    },
+    "pathfinderallowbreak": {
+      "configname": "§e寻路允许破坏",
+      "description": "§e允许寻路系统破坏方块"
+    },
+    "pathfinderdepth": {
+      "configname": "§e寻路深度",
+      "description": "§c该选项已弃用, 请使用\"寻路超时时间\"代替"
+    },
+    "pathfindertimeout": {
+      "configname": "§e寻路超时时间",
+      "description": "§e寻路超时时间, 如果消耗的时间超过该值, 寻路会提前终止"
+    },
+    "pathfinderstopwhentp": {
+      "configname": "§e安全寻路",
+      "description": "§e若检测收到S08包(被服务器TP, 可能被Staff TP), 寻路自动终止"
+    },
+    "dontopenchestincombat": {
+      "configname": "§e战斗时防开箱子",
+      "description": "§e在战斗时阻止格挡导致打开箱子"
+    },
+    "removeblindnessrender": {
+      "configname": "§e减少失明效果渲染",
+      "description": "§e减少对失明效果的黑屏渲染"
+    },
+    "removeblindnessrenderfully": {
+      "configname": "§e移除失明效果渲染",
+      "description": "§e开启减少失明效果渲染后, 完全移除失明效果渲染"
+    },
+    "nosuffoverlay": {
+      "configname": "§e无卡墙贴图",
+      "description": "§e卡在墙里时不渲染卡墙贴图"
+    },
+    "dontresetview": {
+      "configname": "§e不重置F5视角",
+      "description": "§e卡在墙里时不重置F5视角"
+    },
+    "f5noclip": {
+      "configname": "§eF5视角穿墙",
+      "description": "§e允许F5视角穿墙"
+    },
+    "autofishautoescaperange": {
+      "configname": "§e自动钓鱼自动逃离检测范围",
+      "description": "§e检测玩家的范围, 当指定范围内存在玩家则触发自动逃离"
+    },
+    "pathfinderallowbreakwhengetslowmining": {
+      "configname": "§e允许挖掘疲劳破坏方块",
+      "description": "§e允许你在拥有挖掘疲劳buff时破坏方块"
+    },
+    "bwautobeyond": {
+      "configname": "§e起床战争自动凌驾",
+      "description": "§e起床战争胜利时自动播放凌驾动画"
+    },
+    "mwwitheralertrange": {
+      "configname": "§e超级战墙凋零受击检测范围",
+      "description": "§e设置检测范围"
+    },
+    "mwwitheralert": {
+      "configname": "§e超级战墙凋零受击提醒",
+      "description": "§e当超级战墙的凋零受到攻击时提醒你"
+    },
+    "skyblockriftautodanceroom": {
+      "configname": "§e自动跳舞机",
+      "description": "§e在Skyblock Rift中的跳舞房中自动跳舞 (赫赫, 你一定需要的, 因为小沙雕已经高血压了bushi)"
+    },
+    "accountratkiller": {
+      "configname": "§eAccount Rat Killer",
+      "description": "§e打开这个来向骗账号的骗子的服务器发送垃圾数据 :D (如果你很讨厌骗子, 打开它) (注意可能占用一点带宽?)"
+    },
+    "displayselfsnametag": {
+      "configname": "§e自己的Nametag渲染",
+      "description": "§e渲染自己的Nametag"
+    },
+    "customselftag": {
+      "configname": "§e自定义Nametag",
+      "description": "§e在你的Nametag上渲染一个你自定义的文本"
+    },
+    "customselftagoffset": {
+      "configname": "§e自定义Nametag偏移",
+      "description": "§e自定义Nametag的Y坐标偏移"
+    },
+    "skyblockautoplayharp": {
+      "configname": "§eSkyblock自动弹竖琴",
+      "description": "§e在Skyblock中自动进行竖琴演奏 (Melody NPC)"
+    },
+    "pathfinderxray": {
+      "configname": "§e寻路路径透视",
+      "description": "§e透过方块渲染路径"
+    },
+    "skyblockautobloodfiend": {
+      "configname": "§eSkyblock自动吸血鬼",
+      "description": "§eBloodfiend生成时与其自动战斗"
+    },
+    "skyblockautobloodfiendlowhealth": {
+      "configname": "§eSkyblock自动吸血鬼自动回血",
+      "description": "§e当生命值低于此值时自动恢复生命值 (注意: 血条上一颗心代表2点生命值)"
+    },
+    "notificationsound": {
+      "configname": "§e提示消息声音",
+      "description": "§e当Notification展示时播放提示音"
+    },
+    "autofishautoescapewhenfindautofishe": {
+      "configname": "§e自动钓鱼检测Autofishe",
+      "description": "§e如果在世界上发现Autofishe (这是一个玩家名), 触发自动逃离"
+    },
+    "autochangenickwhengameover": {
+      "configname": "§e自动改Nick",
+      "description": "§e你需要启用自动游玩, 且需要一个MVP++ Rank. 游戏结束后自动切换nick"
+    },
+    "freecamflyspeed": {
+      "configname": "§eFreecam飞行速度",
+      "description": "§e调整Freecam飞行的速度"
+    },
+    "autofishautojump": {
+      "configname": "§e自动钓鱼反挂机1",
+      "description": "§e钓鱼的时候自动跳跃"
+    },
+    "autofishautomove": {
+      "configname": "§e自动钓鱼反挂机2",
+      "description": "§e钓鱼的时候自动移动"
+    },
+    "autofishautorotation": {
+      "configname": "§e自动钓鱼反挂机3",
+      "description": "§e钓鱼的时候进行微小的转头"
+    },
+    "autofishrethrowhookdelay": {
+      "configname": "§e自动钓鱼抛竿延迟",
+      "description": "§e自动钓鱼抛竿的延迟时间"
+    },
+    "bwrenderfireballpath": {
+      "configname": "§e起床战争火球和弓箭路径渲染",
+      "description": "§e显示所有火球和弓箭的飞行路径, 以避免你被远程攻击到 (需开启: 起床战争辅助)"
+    },
+    "skyblockmineshaftsharing": {
+      "configname": "§eSkyblock Mineshaft分享",
+      "description": "§e将你的Glacite Mineshaft自动分享给其他Hypixel Helper用户, 并且你必须开启这个才能看见其他人的邀请!"
+    },
+    "skyblockmineshaftsharingskyblockonly": {
+      "configname": "§eSkyblock Mineshaft仅Skb提示",
+      "description": "§eMineshaft的分享提示仅在Skyblock中提示"
+    },
+    "skyblockautotimite": {
+      "configname": "§eSkyblock自动挖Timite",
+      "description": "§e自动挖Skyblock Rift中的Timite"
+    },
+    "skyblocksafeisland": {
+      "configname": "§eSkyblock安全岛屿",
+      "description": "§e防止你在私人岛屿上使用镐子的技能"
+    },
+    "mmautowhackme": {
+      "configname": "§e自动打地鼠",
+      "description": "§e在密室杀手中自动玩打地鼠游戏"
+    },
+    "mmautopunchingball": {
+      "configname": "§e自动拳击球",
+      "description": "§e在密室杀手中自动玩拳击球游戏"
+    },
+    "bwantidropsword": {
+      "configname": "§e床战防止释放剑气",
+      "description": "§e在起床战争中防止意外按丢弃键将剑丢弃"
+    },
+    "nohurtcam": {
+      "configname": "§e无受伤动画",
+      "description": "§e受伤时取消受伤的摇晃动画"
+    },
+    "autolobbytrain": {
+      "configname": "§e自动大厅高速火车",
+      "description": "§e在大厅使用高速火车小道具时自动开高速火车"
+    },
+    "autolobbytrainplaysoundaftercrash": {
+      "configname": "§e自动大厅高速火车坠毁音效",
+      "description": "§e在你的高速火车不小心坠毁时播放坠毁音效"
+    },
+    "bwdiedsound": {
+      "configname": "§e起床战争最终死亡音效",
+      "description": "§e起床战争中当你最终死亡时播放死亡音效"
+    },
+    "mainlobbymythicalfishcounter": {
+      "configname": "§e主大厅神话鱼计数器",
+      "description": "§e显示你在主大厅钓了多少神话鱼"
+    },
+    "autofishwindowsontop": {
+      "configname": "§e自动钓鱼窗口置顶",
+      "description": "§e当你在钓鱼并且处于挂机状态时, 将窗口置顶 (你可以缩小窗口并放在一个角落里)"
+    },
+    "autofishffocuswindowswhenalert": {
+      "configname": "§e自动钓鱼自动窗口聚焦",
+      "description": "§e若被Staff tp, 则立即最大化并激活客户端窗口 (不建议挂多个客户端时开启, 因为如果staff检查多个端/账号会很难响应)"
+    },
+    "freecamfollowselfentity": {
+      "configname": "§e自由相机跟随自身实体",
+      "description": "§e当自己本体位置改变时, 自由相机跟随自身实体改变坐标"
+    },
+    "freelookfollowselfrotation": {
+      "configname": "§e自由视角跟随自身视角",
+      "description": "§e当自己本体视角改变时, 自由视角跟随自身实体改变视角"
+    },
+    "replacehypnickskinwithselfskin": {
+      "configname": "§eHypixel移除匿名皮肤",
+      "description": "§e在游戏中Nick用你自己的皮肤替换Hypixel的皮肤 (若未生效请返回大厅5秒后重进游戏)"
+    },
+    "nostuckinputmethod": {
+      "configname": "§e防卡输入法",
+      "description": "§e防止在游戏内卡输入法, 例如按AWSD的时候 (在部分GUI下可以按Alt键启用输入法)"
+    },
+    "mainlobbycookhelper": {
+      "configname": "§e主大厅烘焙助手",
+      "description": "§e在主大厅烘焙游戏中显示材料位置"
+    },
+    "blockingdeaddrawlinetochest": {
+      "configname": "§e行尸走肉箱子连线",
+      "description": "§e在行尸走肉中从准星向箱子绘制一条线 (仅在禁用视角摇晃时生效)"
+    },
+    "bwplaymatchfoundsound": {
+      "configname": "§e起床战争匹配成功音效",
+      "description": "§e起床战争游戏开始时播放匹配成功音效"
+    },
+    "xsdachousingsetbackwhenvl": {
+      "configname": "§eXSD AC Housing Set Back",
+      "description": "§e在家园世界中如果有玩家触发了检查项, 则拉回该玩家"
+    },
+    "xsdacdontdetectself": {
+      "configname": "§eXSD AC Don't Detect Self",
+      "description": "§e避免XSD AC检测自己 (神秘)"
+    },
+    "xsdacdontdetectpartymember": {
+      "configname": "§eXSDAC Don't Detect Party Member",
+      "description": "§e避免XSD AC检测组队中的玩家 (依旧神秘)"
+    },
+    "customcape": {
+      "configname": "§e自定义披风",
+      "description": "§e导入并显示你自定义的披风, 就像赛飞儿那样要啥有啥! (使用/openconfig指令并在打开的目录进入customcape文件夹, 然后导入你要的披风并重命名为cape.png, 完成后重进服务器即可)"
+    },
+    "bossbardisplaycustomboss": {
+      "configname": "§eBoss栏显示自定义boss",
+      "description": "§e在Boss栏显示自定义boss (例如Skyblock地牢中的Boss, 如Sadan, Livid等)"
+    },
+    "skyblockendermanslayerbeaconrenderer": {
+      "configname": "§eSkyblock末影人讨伐信标显示",
+      "description": "§e在Skyblock末影人讨伐中标记出信标的位置"
+    },
+    "skyblockdungeonenemydisplay": {
+      "configname": "§eSkyblock地牢敌人显示",
+      "description": "§e显示一些\"稍微\"危险的敌人 (?)"
+    },
+    "skyblockdungeonf7inactiveterminaldisplay": {
+      "configname": "§eSkyblock F7终端标记",
+      "description": "§e标记出未完成的终端"
+    },
+    "smartentityrenderer": {
+      "configname": "§e智能实体渲染",
+      "description": "§e被方块与地形遮挡的, 隐身的实体等看不见的实体将被停止渲染. 开启后帧数会在特定情况下有小幅提升, 但是部分实体渲染可能会变得比较奇怪."
+    },
+    "smartentityrenderercountlimit": {
+      "configname": "§e智能实体渲染数量限制",
+      "description": "§e限制在游戏中渲染的实体数量 (不包括盔甲架)"
+    },
+    "smartentityrenderercountlimitcountarmorstand": {
+      "configname": "§e智能实体渲染盔甲架数量限制",
+      "description": "§e限制在游戏中渲染的实体数量的同时限制盔甲架, 共享限制数量"
+    },
+    "smartentityrenderernametagcountlimit": {
+      "configname": "§e智能实体渲染NameTag限制",
+      "description": "§e限制在游戏中渲染的实体NameTag数量 (包括盔甲架, 不会影响到可渲染实体)"
+    },
+    "smartentityrendererdontrenderhiddenentitynametag": {
+      "configname": "§e智能实体渲染不渲染隐藏实体NameTag",
+      "description": "§e在游戏中渲染实体时, 不渲染隐藏实体的NameTag"
+    },
+    "worldtimelocker": {
+      "configname": "§e世界时间锁定",
+      "description": "§e锁定世界的时间, 仅在服务器下生效, 单位为Tick, 设置为负数即跟随服务器的世界时间"
+    },
+    "pixelpartyhelper": {
+      "configname": "§e色盲派对助手",
+      "description": "§e在色盲派对中显示最近的目标方块"
+    },
+    "bwpartydetector": {
+      "configname": "§e起床战争车队检测",
+      "description": "§e在起床战争中检测车队并标记"
+    },
+    "bwautorq": {
+      "configname": "§e起床战争自动重开",
+      "description": "§e起床战争等待中如果有车队, 则自动重开"
+    },
+    "bwautorqstrictmode": {
+      "configname": "§e起床战争自动重开严格模式",
+      "description": "§e起床战争等待中如果有疑似车队, 也会自动重开"
+    }
+  },
+  "about": {
+    "about1": "§e小沙雕的QQ: 3381949033",
+    "about2": "§e小沙雕の狗窝: https://xiaoshadiao.club/qqg",
+    "about3": "§e部分快捷键设置可在 ESC->选项(设置)->控制 中找到",
+    "about4": "§e喜欢Hypixel Helper的话就点个赞叭(?)"
+  },
+  "key": {
+    "HypixelHelperKey": "Hypixel Helper",
+    "acceptRequestInhypixel": "Hypixel 同意申请",
+    "denyRequestInhypixel": "Hypixel 拒绝申请",
+    "customRequestInhypixel": "Hypixel 自定义指令处理申请",
+    "zombiesAutomaticFiring": "僵尸末日 - 自动开枪",
+    "cancelAutoPlay": "取消Auto Play操作",
+    "playAgain": "一键重开",
+    "fastMenu": "快速指令菜单",
+    "bedDefence": "检查床的防御",
+    "kasi": "客户端无响应5s",
+    "musicSwitch": "XSDMusic - 切歌",
+    "musicPlayStop": "XSDMusic - 播放/停止",
+    "autoLottery": "起床自动抽奖刷票",
+    "autoSpawnNick": "自动刷匿名",
+    "pollQueue": "B站直播间邀请下一名预约成员",
+    "skipQueue": "B站直播间跳过下一名预约成员",
+    "toggleFreelook": "切换Freelook",
+    "freelook": "Freelook",
+    "toggleFreecam": "切换Freecam",
+    "toggleSprint": "切换强制疾跑"
+  },
+  "gui": {
+    "overlay": {
+      "pathfinderinfo": "寻路信息",
+      "bwtrapdisplay": "起床战争陷阱显示",
+      "keyboardrender": "按键显示",
+      "lyricrender": "小沙雕点歌台歌词",
+      "magicmilkcountdown": "起床战争魔法牛奶倒计时",
+      "mythicalfishcounter": "神话鱼计数器",
+      "potioneffectdisplay": "药水效果显示",
+      "blockingdeadzombiecounter": "行尸走肉僵尸指示器",
+      "bdammodisplay": "行尸走肉子弹数量显示",
+      "blockamounttip": "起床战争剩余方块数量",
+      "bwresdisplay": "起床战争背包资源计数器",
+      "SkyblockCrystalHollowHeat_yuanhua": "Skyblock原神炎热值寒冷值显示"
+    },
+    "languagesettings": {
+      "buttonsave": "保存",
+      "buttonback": "返回",
+      "buttonhelptranslate": "帮助翻译"
+    },
+    "configsettings": {
+      "buttonfriendlink": "友情链接",
+      "buttonsaveback": "保存并返回",
+      "tip1": "§d输入框只能输入§c§n数字§d, 输入其他字符§c§n后果自负",
+      "tip2": "§d如果有提到延迟的设置项那么单位均为§a§n毫秒(ms)",
+      "tip3": "§a滚轮滑动一下, 说不定还有东西",
+      "searchtip1": "§a按回车显示结果",
+      "searchtip2": "§a再次点击搜索分类重置"
+    },
+    "disconnected": {
+      "buttonreconnect": "重新连接%s",
+      "buttonrefreshsessionandreconnect": "刷新会话并重连%s",
+      "refreshsessionnotice1": "刷新登录态并重连",
+      "refreshsessionnotice2": "如果你在Hypixel Helper的账号管理处登录了你的账号",
+      "refreshsessionnotice3": "点击后客户端会自动刷新登录态并重连",
+      "refreshsessionnotice4": "如果你还没有登录, 试试点击左下角登录一下"
+    },
+    "selectsettingmenu": {
+      "buttonchoosexiaoshadiao": "打开小沙雕的设置菜单",
+      "buttonchooseoneconfig": "打开OneConfig菜单",
+      "buttonback": "返回"
+    },
+    "accountmanager": {
+      "buttonentrance": "多账号管理",
+      "buttonexport": "明文导出账号文件",
+      "buttonimport": "从剪切板导入无密码账号文件",
+      "buttonexportpsw": "带密码导出账号文件",
+      "buttonimportpsw": "从剪切板导入带密码账号文件",
+      "tipimporterror": "无法导入这个文件! 请检查剪切板上的文件是否有效或密码是否正确!",
+      "tipimportsuccess": "载入成功!",
+      "tipexportsuccess": "导出成功!",
+      "tipexporterror": "导出失败!",
+      "tipaccountloginsuccess": "登录成功!",
+      "tipaccountloginerror": {
+        "exception": "登录失败! 请重试! 如果此问题频繁发生, 尝试删除该账号重新登录! 错误信息详见日志...",
+        "expired": "登录态已失效, 请你重新登录.",
+        "notpurchased": "此账号未购买MC Java Edition, 若确定已经购买, 请前往minecraft.net登录一次账号后再试"
+      },
+      "tipexport1": "点击导出按钮后, ",
+      "tipexport2": "一个配置文件将会被释放到你的桌面上",
+      "tipexport3": "在输入框内输入你的密码来将其加密导出,",
+      "tipexport4": "留空则明文导出, 建议加密防止文件被窃取",
+      "tipimport1": "点击前, 请将要导入的账号配置文件复制到剪切板上",
+      "tipimport2": "然后点击导入按钮, 此时会自动读取剪切板文件",
+      "tipimport3": "若文件带密码, 请在输入框内输入密码, 留空表示无密码配置文件",
+      "tipimport4": "若配置文件的密码错误会导入失败",
+      "tiploginstage": "请完成登录操作...",
+      "tipdelete": "删除%s成功!",
+      "buttonback": "返回",
+      "buttonaddmicrosoftaccount": "添加Mircosoft账号"
+    },
+    "custombackgroundsettings": {
+      "toggleon": "§a自定义背景: 开",
+      "toggleoff": "§c自定义背景: 关",
+      "buttonnextstep": "下一步",
+      "buttonopenfolder": "打开文件夹",
+      "bglimit": "§a背景数量限制",
+      "tip1": "§a点击打开文件夹按钮, 将你要替换的背景放入并命名成bgX.png",
+      "tip2": "§a其中名字中的X为数字, 可以设多个背景, 从1依次增加",
+      "tip3": "§a例如bg1.png bg2.png bg3.png (不可跳数字, 例如不能从1跳到3)",
+      "tip4": "§a然后在下面的背景数量限制输入框输入X的最大值 (你放入的图片数量)",
+      "buttonentrance": "自定义背景设置",
+      "bgparticle": "切换背景粒子开关",
+      "bgswapbg": "背景轮换开关"
+    },
+    "xsdac": {
+      "toggleon": "§a雕反总开关: 开",
+      "toggleoff": "§c雕反总开关: 关",
+      "buttonsave": "保存",
+      "falsedetecttip": "§c不稳定 (误报多)",
+      "checkdescriptiontip": "解释: %s"
+    }
+  },
+  "hhscmenu": {
+    "main": {
+      "name": "§d-----------常用指令表-----------",
+      "1": "§e/hhm - §b打开设置页面",
+      "2": "§e/hhsc translate <text> (/hht <text>) - 翻译指定的文本",
+      "3": "§e/hhsc format <text> (/hhf <text>) - 转义指定的文本, 具体内容可在指令后面Tab补全",
+      "4": "§e/hhmusic - 打开点歌台",
+      "5": "§e/hhsc blp - 查询并狙击黑名单玩家",
+      "6": "§e/hhsc setnextsecondmessage <text> - 设置AutoGG的下一个二次消息, 触发后失效",
+      "7": "§e/hhsc reload - 立即重新加载配置文件",
+      "8": "§e/hhpf - 寻路指令",
+      "9": "§e/hhping - 一键测试连接延迟 (仅在Hypixel可用)",
+      "10": "§e/openconfig [filename] - 打开指定配置文件, 可按Tab进行补全"
+    },
+    "legacy": {
+      "name": "§d---------已停止维护的指令---------",
+      "1": "§e/hhsc autobedwars - 自动化起床战争, 掉KD和§c死号§e神器 §c(警告, 该功能已停止维护, Hypixel本身禁止此类功能, 现在无法保证其安全性, 使用造成的任何后果自负)"
+    }
+  },
+  "features": {
+    "xsdac": {
+      "checks": {
+        "description": {
+          "Motion A": "移动速度过快!",
+          "Motion B": "当前Motion与上一个Motion相差较大!",
+          "Motion C": "异常的Motion, 上一个MotionY多次比当前MotionY小, 可能是飞行",
+          "Motion D": "检测到Air Jump",
+          "Motion E": "线性回归拟合成功",
+          "Motion F": "当前头的转向无法走出直线",
+          "Motion G": "当前头的转向无法走出这个路径",
+          "Killaura A": "过度瞄准敌人",
+          "Killaura B": "转头过快",
+          "Killaura C": "附近多个敌人受到伤害",
+          "Killaura D": "距离过长",
+          "Killaura E": "自动格挡",
+          "Killaura F": "不好, 是隔墙",
+          "Velocity A": "被攻击了, 但是原地未动",
+          "Velocity B": "错误的击退方向",
+          "GroundSpoof B": "意外的onGround属性",
+          "Nofall A": "无摔落伤害",
+          "Nofall B": "疑似瞬移式无摔落伤害",
+          "Scaffold A": "搭路时居然转头了",
+          "Scaffold B": "检测到Same Y",
+          "Scaffold C": "搭路速度太快",
+          "Scaffold D": "可疑的搭路路径",
+          "Scaffold E": "单Tick潜行",
+          "Scaffold F": "在极限pitch下无潜行搭路",
+          "Invaild A": "异常的瞬移",
+          "Invaild B": "疑似数据包补偿瞬移",
+          "AutoClicker A": "点击速度过快"
+        }
+      },
+      "notification": {
+        "detected": "检测到"
+      }
+    }
+  },
+  "xsdchat": {
+    "afk": {
+      "in": "暂时离开了...",
+      "out": "回来了..."
+    }
+  }
+}

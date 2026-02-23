@@ -1,0 +1,66 @@
+package pers.XiaoShadiao.skydiao;
+
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
+import net.hypixel.modapi.HypixelModAPI;
+import net.hypixel.modapi.fabric.FabricModAPI;
+import net.hypixel.modapi.handler.ClientboundPacketHandler;
+import net.hypixel.modapi.packet.impl.clientbound.ClientboundHelloPacket;
+import net.hypixel.modapi.packet.impl.clientbound.ClientboundPartyInfoPacket;
+import net.hypixel.modapi.packet.impl.clientbound.ClientboundPingPacket;
+import net.hypixel.modapi.packet.impl.clientbound.ClientboundPlayerInfoPacket;
+import net.hypixel.modapi.packet.impl.clientbound.event.ClientboundLocationPacket;
+import pers.XiaoShadiao.skydiao.commands.CommandManager;
+import pers.XiaoShadiao.skydiao.eventbuslistenrt.AbstractListener;
+import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
+import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
+import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
+
+import java.util.concurrent.TimeUnit;
+
+public class SkyDiaoModClient implements ClientModInitializer {
+
+    public static final String MOD_ID = "skydiao";
+    public static final String VERSION = "0.0.1";
+
+	@Override
+	public void onInitializeClient() {
+
+        try {
+            CrowdinI18nManager.initI18n(CrowdinI18nManager.LangCode.chinese).future.get(10, TimeUnit.SECONDS);
+            CrowdinI18nManager.initI18n(CrowdinI18nManager.LangCode.english).future.get(10, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // System.out.println(getClass().getClassLoader());
+        // This entrypoint is suitable for setting up client-specific logic, such as rendering.
+        AbstractListener.initListeners();
+        ChatClientManager.refreshChatClient();
+
+        ClientboundPacketHandler handler = p -> {
+            ToolList.getInstance().log.info(p.getIdentifier());
+            ToolList.getInstance().log.info("Hyp Packet: " + p);
+
+            CustomFabricEvents.HYPIXEL_PACKET_EVENT.invoker().onPacket(p);
+        };
+
+        HypixelModAPI.getInstance().createHandler(ClientboundLocationPacket.class, handler);
+        HypixelModAPI.getInstance().createHandler(ClientboundHelloPacket.class, handler);
+        HypixelModAPI.getInstance().createHandler(ClientboundPingPacket.class, handler);
+        HypixelModAPI.getInstance().createHandler(ClientboundPartyInfoPacket.class, handler);
+        HypixelModAPI.getInstance().createHandler(ClientboundPlayerInfoPacket.class, handler);
+
+        HypixelModAPI.getInstance().subscribeToEventPacket(ClientboundLocationPacket.class);
+
+        if(!FabricLoader.getInstance().isModLoaded("hypixel-mod-api")) {
+            ToolList.getInstance().log.info("Hypixel Mod API未加载, 手动执行加载中...");
+            new FabricModAPI();
+        } else {
+            ToolList.getInstance().log.info("Hypixel Mod API已安装&加载");
+        }
+
+        CommandManager.registerCommands();
+	}
+}
