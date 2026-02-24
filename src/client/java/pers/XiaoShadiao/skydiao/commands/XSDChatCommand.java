@@ -24,7 +24,7 @@ public class XSDChatCommand extends BaseCommand {
     @Override
     public List<RequiredArgumentBuilder<FabricClientCommandSource, ?>> getArgs() {
         return List.of(
-                getArgInstanceAndRunNode("chat", StringArgumentType.greedyString())
+                getArgInstanceAndRunNode("chat", StringArgumentType.greedyString()).suggests((context, builder) -> builder.suggest("输入你想要发送的消息").buildFuture())
         );
     }
 

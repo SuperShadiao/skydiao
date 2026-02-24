@@ -1,6 +1,5 @@
 package pers.XiaoShadiao.skydiao.utils;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -13,6 +12,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.security.MessageDigest;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Random;
@@ -24,7 +26,11 @@ import java.util.function.Consumer;
 
 public class ToolList {
 
-    public static final Minecraft mc = Minecraft.getInstance();
+    public static final Minecraft mc;
+    static {
+         mc = Minecraft.getInstance();
+         if(mc == null) throw new AssertionError("不允许在Minecraft实例启动前加载ToolList");
+    }
 
     private static ToolList instance;
 
@@ -40,6 +46,10 @@ public class ToolList {
 
     public static void destroy() {
         instance = null;
+    }
+
+    public static boolean isInSkyblock() {
+        return "SkyBlock".equals(StatusManager.get().getType());
     }
 
     public boolean isXiaoShadiao() {
@@ -163,6 +173,96 @@ public class ToolList {
 
     }
 
+    public boolean verifyFileWithMD5(File file, String md5) {
+        if (!file.exists()) return false;
+        String realMD5 = getMD5(file);
+        return realMD5.equals(md5);
+    }
+
+    public byte[] downloadFileWithMD5(String url, String md5) throws IOException {
+        try(InputStream is = makeReqToURL(url, true)) {
+            byte[] bytes = is.readAllBytes();
+
+            String realMD5 = getMD5(bytes);
+            if (realMD5.equals(md5)) {
+                return bytes;
+
+            } else {
+                throw new IOException("MD5校验失败, Current: " + realMD5 + ", required: " + md5);
+            }
+        } catch (Exception e) {
+            throw new IOException("无法下载文件", e);
+        }
+    }
+
+    private String byteToHex(byte[] bytes) {
+        StringBuilder hexString = new StringBuilder(32); // 预分配长度
+        for (byte b : bytes) {
+            int i = b & 0xFF;
+            if (i < 16) {
+                hexString.append('0');
+            }
+            hexString.append(Integer.toHexString(i));
+        }
+        return hexString.toString();
+    }
+
+    public String getMD5(File file) {
+        try {
+            return getMD5(Files.newInputStream(file.toPath()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String getMD5(InputStream inputStream) {
+        try {
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            byte[] buffer = new byte[8192]; // 8KB缓冲区
+            int bytesRead;
+
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                md5.update(buffer, 0, bytesRead); // 分块更新摘要
+            }
+
+            byte[] digest = md5.digest();
+            return byteToHex(digest);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public String getMD5(byte[] bl) {
+        try {
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            return byteToHex(md5.digest(bl));
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String getMD5(String s, boolean utf8) {
+
+        if(utf8) {
+            return getMD5(s.getBytes(StandardCharsets.UTF_8));
+        } else return getMD5(s.getBytes());
+
+    }
+
+    public String getMD5(String s) {
+        return getMD5(s,true);
+    }
+
+    public String deleteColorCode(String string) {
+        return string.replaceAll("§.", "");
+    }
+
     //    public static class DevelopmentEnvironmentDetector {
     //
     //        public final boolean isDevMode;
@@ -239,6 +339,57 @@ public class ToolList {
         if(ToolList.mc != null && ToolList.mc.gui != null && ToolList.mc.gui.getChat() != null) {
             ToolList.mc.execute(() -> ToolList.mc.gui.getChat().addMessage(msg));
         }
+    }
+
+    public static void sendChatMessage(String msg) {
+        if(mc.player != null) {
+            if (msg.startsWith("/")) {
+                mc.player.connection.sendCommand(msg.substring(1));
+            } else {
+                mc.player.connection.sendChat(msg);
+            }
+        }
+    }
+
+    public String encodeString(String message) {
+        char key = (char) random.nextInt(0x10000);
+        char key2 = (char) (key ^ 2888);
+        char[] bl = message.toCharArray();
+        for(int i = 0;i < bl.length;i++) {
+            bl[i] = (char) (bl[i] ^ key ^ ((i * key2 + 100) % 0x10000));
+        }
+
+        String s = key + new String(bl) + key2;
+        if(!decodeString(s).equals(message)) {
+            throw new AssertionError("加密时出错");
+        }
+        return s;
+    }
+
+    public String decodeString(String message) {
+
+        try {
+            String decodeString = message;
+            if(decodeString == null) return null;
+            if(decodeString.isEmpty()) return "";
+            char key1 = decodeString.substring(0,1).charAt(0);
+            decodeString = decodeString.substring(1);
+            char key2 = decodeString.substring(decodeString.length() - 1,decodeString.length()).charAt(0);
+            // log.info(key1);
+
+            if((key1 ^ key2) != 2888) return null;
+
+            char[] newchars = new char[decodeString.length() - 1];
+            char[] oldchars = decodeString.toCharArray();
+            for(int i = 0;i < decodeString.length() - 1;i++) {
+                newchars[i] = (char) (oldchars[i] ^ key1 ^ ((i * key2 + 100) % 0x10000));
+            }
+
+            return new String(newchars);
+        } catch(Exception e) {
+            return null;
+        }
+
     }
 
 }

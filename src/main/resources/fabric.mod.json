@@ -1,40 +1,53 @@
 {
-	"schemaVersion": 1,
-	"id": "skydiao",
-	"version": "${version}",
-	"name": "SkyDiao",
-	"description": "一个高版本Hypixel Skyblock Mod",
-	"authors": [
-		"SuperShadiao"
-	],
-	"contact": {
-		"homepage": "https://xiaoshadiao.club",
-		"sources": "https://github.com/SuperShadiao/skydiao"
-	},
-	"icon": "assets/skydiao/icon.png",
-	"environment": "client",
-	"entrypoints": {
-		"main": [
-          "pers.XiaoShadiao.skydiao.SkyDiaoMod"
-		],
-		"client": [
-          "pers.XiaoShadiao.skydiao.SkyDiaoModClient"
-		]
-	},
-	"mixins": [
-      "skydiao.mixins.json",
-		{
-			"config": "skydiao.client.mixins.json",
-			"environment": "client"
-		}
-	],
-	"depends": {
-		"fabricloader": ">=0.18.2",
-		"minecraft": "~1.21.10",
-		"java": ">=21",
-		"fabric-api": "*"
-	},
-	"suggests": {
-		"another-mod": "*"
-	}
+  "schemaVersion": 1,
+  "id": "skydiao",
+  "version": "${version}",
+  "name": "SkyDiao",
+  "description": "一个高版本Hypixel Skyblock Mod",
+  "authors": [
+    "SuperShadiao"
+  ],
+  "contact": {
+    "homepage": "https://xiaoshadiao.club",
+    "issues": "https://xiaoshadiao.club/qqg",
+    "sources": "https://github.com/SuperShadiao/skydiao"
+  },
+  "icon": "assets/skydiao/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "main": [
+      "pers.XiaoShadiao.skydiao.SkyDiaoMod"
+    ],
+    "client": [
+      "pers.XiaoShadiao.skydiao.SkyDiaoModClient"
+    ],
+    "modmenu": [
+      "pers.XiaoShadiao.skydiao.adapters.ModMenuModApi"
+    ]
+  },
+  "mixins": [
+    "skydiao.mixins.json",
+    {
+      "config": "skydiao.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.18.2",
+    "minecraft": "~1.21.10",
+    "java": ">=21",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "another-mod": "*"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "QQ群": "https://xiaoshadiao.club/qqg",
+        "modmenu.discord": "https://xiaoshadiao.club/dc"
+      },
+      "update_checker": true
+    }
+  }
 }

@@ -2,6 +2,7 @@ package pers.XiaoShadiao.skydiao.irc;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
 
@@ -43,7 +44,7 @@ public class ClientReceiveHandler {
                 ToolList.printChatMessage(Component.literal("§a[XSDChat] " + packet.getRank(true) + "§d" + packet.sender + (Boolean.parseBoolean(packet.message) ? " §7" + CrowdinI18nManager.translate("xsdchat.afk.in") : " §e" + CrowdinI18nManager.translate("xsdchat.afk.out"))));
                 break;
             case "glacite_mineshaft_share":
-                // 抽象の监听器.监听器_GlaciteMineshaftShare.onIRCMineshaftSharePacket(packet);
+                AbstractListener.mineshaftShareListener.onIRCMineshaftSharePacket(packet);
                 break;
             case "lps":
 //                JsonObject jo = 工具列表.getInstance().解析Json(packet.message).getAsJsonObject();

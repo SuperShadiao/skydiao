@@ -1,0 +1,221 @@
+package pers.XiaoShadiao.skydiao.eventbuslistener;
+
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
+import org.jetbrains.annotations.Nullable;
+import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
+import pers.XiaoShadiao.skydiao.irc.ChatPacket;
+import pers.XiaoShadiao.skydiao.utils.StatusManager;
+import pers.XiaoShadiao.skydiao.utils.ToolList;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedDeque;
+
+public class MineshaftShareListener extends AbstractListener {
+
+    private static final Object inviteLock = new Object();
+
+    public Queue<String> playerList = new ConcurrentLinkedDeque<>();
+
+    public boolean inMineshaftDebug;
+
+    private boolean allowShare;
+    private boolean mineshaftClosed;
+
+    private boolean inviteThreadRunning;
+
+    @Override
+    public String getListenerName() {
+        return "MineshaftShareListener";
+    }
+
+    @Override
+    protected void registerListeners() {
+        ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register(this::worldUnload);
+        ClientReceiveMessageEvents.GAME.register(this::onChat);
+        ClientTickEvents.START_CLIENT_TICK.register(this::onTick);
+    }
+
+    public void onIRCMineshaftSharePacket(ChatPacket p) {
+
+        if("0".equals(p.message) && ConfigManager.mineshaftSharing.getValue()) {
+
+            // if(mc.getSession().getUsername().equals(p.sender)) return;
+
+            Style cs = Style.EMPTY
+                    .withClickEvent(new ClickEvent.RunCommand("/hhjoinmineshaft " + p.sender))
+                    .withHoverEvent(new HoverEvent.ShowText(Component.literal("§a点击后会立即加入§bGlacite Mineshaft§a, 请确保你手里的工作都完成了哦!\n§6注意! 点击后你当前的组队队伍会自动退出!\n§6如果响应后你没能成功进入Mineshaft, 请再点击试一次!")));
+
+            ToolList.printChatMessage(Component.literal("").withStyle(cs));
+            ToolList.printChatMessage(Component.literal("§b===============[§aXSD§bMS]===============").withStyle(cs));
+            ToolList.printChatMessage(Component.literal("§e" + p.sender + "§a的§bGlacite Mineshaft§a可以加入! §e[点击这里]").withStyle(cs));
+            ToolList.printChatMessage(Component.literal("§b=====================================").withStyle(cs));
+            ToolList.printChatMessage(Component.literal("§b").withStyle(cs));
+
+            // 工具列表.getInstance().playSound("hypixelhelper:hh.tip");
+        } else {
+            String selfName = mc.getUser().getName();
+            if(("1_" + selfName).equals(p.message)) {
+
+                if(mineshaftClosed) {
+                    sendMineshaftSharePacket("REJECT_" + p.sender + "_" + selfName + ": Mineshaft入口已关闭! 无法加入!");
+                } else if(!allowShare) {
+                    sendMineshaftSharePacket("REJECT_" + p.sender + "_" + selfName + ": 人家没有发现Mineshaft, 或者不愿意分享给你!");
+                } else {
+                    ToolList.printChatMessage(Component.literal("§a[XSD§bMS§a] §a玩家§e" + p.sender + "§a请求加入§bMineshaft§a!"));
+                    playerList.add(p.sender);
+                }
+
+            } else if(p.message.startsWith("REJECT_" + selfName + "_")) {
+                String message = p.message.replace("REJECT_" + selfName + "_", "");
+                ToolList.printChatMessage(Component.literal("§a[XSD§bMS§a] §c" + message));
+            } else if(p.message.equals("100_" + selfName)) {
+                if(!inviteThreadRunning) runCommand("/p leave");
+                new Thread(() -> {
+                    synchronized (inviteLock) {
+                        try { Thread.sleep(1000); } catch (InterruptedException e) {}
+                        runCommand("/p join " + p.sender);
+                        try { Thread.sleep(1500); } catch (InterruptedException e) {}
+                    }
+                }).start();
+            }
+        }
+
+    }
+
+    public void worldUnload(Minecraft mc, ClientLevel clientLevel) {
+        mineshaftClosed = false;
+        if(isInMineshaft()) allowShare = false;
+        inMineshaftDebug = false;
+    }
+
+    public void onChat(Component component, boolean b) {
+        String message = ToolList.getInstance().deleteColorCode(component.getString());
+
+        if(message.matches("MINESHAFT! A Mineshaft portal spawned nearby!(.*)")) {
+            if(ConfigManager.mineshaftSharing.getValue()) {
+                allowShare = true;
+                playerList.clear();
+                sendMineshaftSharePacket("0");
+                ToolList.printChatMessage(Component.literal("§a[XSD§bMS§a] §a你的§bGlacite Mineshaft§a已被广播!"));
+            } else {
+                allowShare = false;
+            }
+        } else if(message.equals("The mineshaft entrance has caved in... it doesn't look like anyone else will be able to get in here.")) {
+            mineshaftClosed = true;
+        }
+    }
+
+    public void onTick(Minecraft mc) {
+        if(!inviteThreadRunning && !mineshaftClosed && isInMineshaft()) {
+            interrupt();
+        }
+    }
+
+    public void run() {
+        while (true) {
+            try {
+                inviteThreadRunning = false;
+                Thread.sleep(Long.MAX_VALUE);
+            } catch (InterruptedException ignored) {
+
+            }
+            try {
+                executeThread();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void executeThread() {
+        inviteThreadRunning = true;
+
+        while(!mineshaftClosed && isInMineshaft()) {
+            if(!playerList.isEmpty()) {
+
+                runCommand("/p leave");
+                try { Thread.sleep(1000); } catch (InterruptedException e) {}
+
+                while(!mineshaftClosed && isInMineshaft()) {
+                    if(!playerList.isEmpty()) {
+                        String player;
+                        List<String> inviteList = new ArrayList<>();
+                        while(true) {
+                            player = playerList.poll();
+                            if(player != null) {
+                                inviteList.add(player);
+                            }
+                            if(player == null || inviteList.size() >= 5) {
+
+                                synchronized (inviteLock) {
+                                    runCommand("/p invite " + String.join(" ", inviteList));
+                                    for(String p : inviteList) {
+                                        sendMineshaftSharePacket("100_" + p);
+                                    }
+                                    inviteList.clear();
+
+                                    if(player != null) {
+                                        try { Thread.sleep(600); } catch (InterruptedException e) {}
+                                    } else {
+                                        break;
+                                    }
+                                }
+
+                            }
+                        }
+                        try { Thread.sleep(3300); } catch (InterruptedException e) {}
+                        runCommand("/p warp");
+                        try { Thread.sleep(5500);  } catch (InterruptedException e) {}
+                        runCommand("/p warp");
+                        try { Thread.sleep(1500);  } catch (InterruptedException e) {}
+
+                        runCommand("/p disband");
+                    }
+                    try { Thread.sleep(500); } catch (InterruptedException e) {}
+                }
+            }
+            try { Thread.sleep(500); } catch (InterruptedException e) {}
+        }
+        inviteThreadRunning = false;
+    }
+
+    private boolean isInMineshaft() {
+        return inMineshaftDebug || "mineshaft".equals(StatusManager.get().getMode());
+    }
+
+    private void sendMineshaftSharePacket(String customMessage) {
+        ChatPacket p = new ChatPacket();
+        p.packetType = "glacite_mineshaft_share";
+        p.message = customMessage;
+        p.initSender();
+
+        ChatClientManager.trySendOrWarning(p);
+    }
+
+    public void tryToJoinPlayersMineshaft(String playerName) {
+        ChatPacket p = new ChatPacket();
+
+        p.packetType = "glacite_mineshaft_share";
+        p.message = "1_" + playerName;
+        p.initSender();
+
+        ChatClientManager.trySendOrWarning(p);
+    }
+
+    private void runCommand(String s) {
+        ToolList.printChatMessage(Component.literal("§a[XSD§bMS§a] 执行命令: §e" + s));
+        ToolList.sendChatMessage(s);
+    }
+
+}

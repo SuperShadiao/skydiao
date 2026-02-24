@@ -1,21 +1,21 @@
 package pers.XiaoShadiao.skydiao.commands;
 
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.commands.MsgCommand;
 
 import java.lang.reflect.Field;
 
-public class CommandManager {
+public interface CommandManager {
 
     public static final XSDChatCommand XSD_CHAT_COMMAND = new XSDChatCommand();
+    public static final OpenConfigMenuCommand OPEN_CONFIG_MENU_COMMAND = new OpenConfigMenuCommand();
+    public static final HHSCCommand HHSC_COMMAND = new HHSCCommand();
+    public static final HHMCommand HHM_COMMAND = new HHMCommand();
+    public static final JoinMineshaftCommand JOIN_MINESHAFT_COMMAND = new JoinMineshaftCommand();
+    public static final JoinMineshaft2Command JOIN_MINESHAFT2_COMMAND = new JoinMineshaft2Command();
 
     public static void registerCommands() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
@@ -30,8 +30,9 @@ public class CommandManager {
                         for(RequiredArgumentBuilder<FabricClientCommandSource, ?> arg : cmd.getArgs()) {
                             register = register.then(arg);
                         }
+                        cmd.lastCallRootCmdNode(register);
 
-                        dispatcher.register(register);
+                        cmd.setCommandNode(dispatcher.register(register));
                     } catch (IllegalArgumentException | IllegalAccessException e) {
                         throw new RuntimeException("Error registering command", e);
                     }

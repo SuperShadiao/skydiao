@@ -1,11 +1,16 @@
 {
-	"required": true,
-	"package": "pers.XiaoShadiao.skydiao.mixin.client",
-	"compatibilityLevel": "JAVA_21",
-	"client": [
-      "MixinMinecraft"
-	],
-	"injectors": {
-		"defaultRequire": 1
-	}
+  "required": true,
+  "package": "pers.XiaoShadiao.skydiao.mixin.client",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "MixinMinecraft",
+    "MixinMinecraftSessionAccessor",
+    "MixinRealmStatusReset"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "mixins": [
+    "MixinReportTypeCustomMessage"
+  ]
 }

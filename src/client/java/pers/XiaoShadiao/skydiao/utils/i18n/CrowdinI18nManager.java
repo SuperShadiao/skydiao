@@ -44,7 +44,7 @@ public class CrowdinI18nManager {
     public static final List<LangCode> supportedLangCodes = List.of(LangCode.values());
 
     public static ToolList.ThreadedTask<?> initI18nFromConfig() {
-        return initI18n(LangCode.values()[/*Config管理.getConfigKeyValue("language")*/0]);
+        return initI18n(LangCode.values()[ConfigManager.language.getValue()]);
     }
 
     public static ToolList.ThreadedTask<?> initI18n(LangCode langCode) {

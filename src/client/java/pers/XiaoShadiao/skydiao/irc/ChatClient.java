@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
-import pers.XiaoShadiao.skydiao.eventbuslistenrt.AbstractListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 public class ChatClient extends Thread {

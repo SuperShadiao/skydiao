@@ -3,7 +3,7 @@
 	"package": "pers.XiaoShadiao.skydiao.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-      "ExampleMixin"
+      "MixinMinecraftServer"
 	],
 	"injectors": {
 		"defaultRequire": 1

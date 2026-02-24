@@ -32,7 +32,9 @@
     "Overlay位置设置": "Overlay位置设置",
     "配置文件": "配置文件",
     "搜索": "搜索",
-    "语言": "语言"
+    "语言": "语言",
+    "basic": "基本设置",
+    "mining": "挖矿类"
   },
   "config": {
     "0": "§c关",
@@ -646,6 +648,10 @@
     "bwautorqstrictmode": {
       "configname": "§e起床战争自动重开严格模式",
       "description": "§e起床战争等待中如果有疑似车队, 也会自动重开"
+    },
+    "language": {
+      "configname": "§e语言",
+      "description": "§e设置你的的语言"
     }
   },
   "about": {
@@ -724,6 +730,8 @@
       "buttonimport": "从剪切板导入无密码账号文件",
       "buttonexportpsw": "带密码导出账号文件",
       "buttonimportpsw": "从剪切板导入带密码账号文件",
+      "buttonlogin": "登录",
+      "buttondelete": "删除",
       "tipimporterror": "无法导入这个文件! 请检查剪切板上的文件是否有效或密码是否正确!",
       "tipimportsuccess": "载入成功!",
       "tipexportsuccess": "导出成功!",

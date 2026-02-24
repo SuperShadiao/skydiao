@@ -11,29 +11,49 @@ import net.hypixel.modapi.packet.impl.clientbound.ClientboundPingPacket;
 import net.hypixel.modapi.packet.impl.clientbound.ClientboundPlayerInfoPacket;
 import net.hypixel.modapi.packet.impl.clientbound.event.ClientboundLocationPacket;
 import pers.XiaoShadiao.skydiao.commands.CommandManager;
-import pers.XiaoShadiao.skydiao.eventbuslistenrt.AbstractListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
+import pers.XiaoShadiao.skydiao.screen.mircosoftaccount.AccountSelectScreen;
+import pers.XiaoShadiao.skydiao.utils.AutoUpdater;
+import pers.XiaoShadiao.skydiao.utils.ExecuteOfflineThread;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
+import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
 
 import java.util.concurrent.TimeUnit;
 
 public class SkyDiaoModClient implements ClientModInitializer {
 
     public static final String MOD_ID = "skydiao";
-    public static final String VERSION = "0.0.1";
+    public static final String VERSION = "0.0.2";
 
-	@Override
+    public static final String CONST_QQGROUP_MAIN = "728972740";
+    public static final String CONST_QQGROUP_OTHER1 = "1103539591";
+
+    public static String currentNewVersion = VERSION;
+
+    public static void setNewestVersion(String newVer) {
+        currentNewVersion = newVer;
+    }
+
+    public static String getCurrentNewVersion() {
+        return currentNewVersion;
+    }
+
+    @Override
 	public void onInitializeClient() {
-
+        AutoUpdater.checkUpdate();
         try {
             CrowdinI18nManager.initI18n(CrowdinI18nManager.LangCode.chinese).future.get(10, TimeUnit.SECONDS);
             CrowdinI18nManager.initI18n(CrowdinI18nManager.LangCode.english).future.get(10, TimeUnit.SECONDS);
+            CrowdinI18nManager.initI18nFromConfig();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+        MinecraftLogin.replaceSession(ToolList.mc.getUser());
+        AccountSelectScreen.load();
         // System.out.println(getClass().getClassLoader());
         // This entrypoint is suitable for setting up client-specific logic, such as rendering.
         AbstractListener.initListeners();
@@ -62,5 +82,6 @@ public class SkyDiaoModClient implements ClientModInitializer {
         }
 
         CommandManager.registerCommands();
+        Runtime.getRuntime().addShutdownHook(new Thread(new ExecuteOfflineThread()));
 	}
 }
