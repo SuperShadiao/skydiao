@@ -1,9 +1,8 @@
 package pers.XiaoShadiao.skydiao.commands;
 
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.network.chat.Component;
 import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
@@ -18,7 +17,7 @@ public class OpenConfigMenuCommand extends BaseRootRunnableCommand {
     }
 
     @Override
-    public List<RequiredArgumentBuilder<FabricClientCommandSource, ?>> getArgs() {
+    public List<ArgumentBuilder<FabricClientCommandSource, ?>> getArgs() {
         return Collections.emptyList();
     }
 

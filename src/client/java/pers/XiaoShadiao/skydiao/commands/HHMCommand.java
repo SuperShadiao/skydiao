@@ -1,14 +1,13 @@
 package pers.XiaoShadiao.skydiao.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.screens.Screen;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 public class HHMCommand extends OpenConfigMenuCommand {
@@ -19,7 +18,7 @@ public class HHMCommand extends OpenConfigMenuCommand {
     }
 
     @Override
-    public List<RequiredArgumentBuilder<FabricClientCommandSource, ?>> getArgs() {
+    public List<ArgumentBuilder<FabricClientCommandSource, ?>> getArgs() {
         return !FabricLoader.getInstance().isModLoaded("modmenu") ? super.getArgs() : List.of(
                 getArgInstance("extra", StringArgumentType.word()).executes(this::onExecute)
         );

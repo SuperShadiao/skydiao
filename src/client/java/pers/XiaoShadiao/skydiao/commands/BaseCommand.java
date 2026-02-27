@@ -1,6 +1,7 @@
 package pers.XiaoShadiao.skydiao.commands;
 
 import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -20,7 +21,7 @@ public abstract class BaseCommand implements CommandManager {
     private LiteralCommandNode<FabricClientCommandSource> commandNode;
 
     public abstract String getCommandName();
-    public abstract List<RequiredArgumentBuilder<FabricClientCommandSource, ?>> getArgs();
+    public abstract List<ArgumentBuilder<FabricClientCommandSource, ?>> getArgs();
 
     public final int executeCommand0(CommandContext<FabricClientCommandSource> context) {
         try {
@@ -40,6 +41,14 @@ public abstract class BaseCommand implements CommandManager {
 
     public final <T> RequiredArgumentBuilder<FabricClientCommandSource, T> getArgInstanceAndRunNode(String name, ArgumentType<T> type) {
         return ClientCommandManager.argument(name, type).executes(this::executeCommand0);
+    }
+
+    public final LiteralArgumentBuilder<FabricClientCommandSource> getArgConstantInstance(String name) {
+        return ClientCommandManager.literal(name);
+    }
+
+    public final LiteralArgumentBuilder<FabricClientCommandSource> getArgConstantInstanceAndRunNode(String name) {
+        return ClientCommandManager.literal(name).executes(this::executeCommand0);
     }
 
     public void lastCallRootCmdNode(LiteralArgumentBuilder<FabricClientCommandSource> rootCmdNode) {}

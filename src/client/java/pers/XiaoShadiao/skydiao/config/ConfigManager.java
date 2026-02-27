@@ -23,6 +23,16 @@ public class ConfigManager {
 
     public static final BooleanConfigOption mineshaftSharing = new BooleanConfigOption("skyblockmineshaftsharing", true);
     public static final SelectConfigOption language = new SelectConfigOption("language", CrowdinI18nManager.fromSystemLanguage().ordinal(), Arrays.stream(CrowdinI18nManager.LangCode.values()).map(v -> v.displayName).toList());
+    public static final BooleanConfigOption dungeonRenderDangerousEnemy = new BooleanConfigOption("skyblockdungeonenemydisplay", false);
+
+    public static final List<Map.Entry<String, List<ConfigOption<?>>>> categories = List.of(
+            Map.entry("basic", List.of(language)),
+            Map.entry("mining", List.of(mineshaftSharing)),
+            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy))
+    );
+
+
+    /* ==================init================== */
 
     public static final List<ConfigOption<?>> optionList = Arrays.stream(ConfigManager.class.getDeclaredFields()).filter(field -> ConfigOption.class.isAssignableFrom(field.getType())).map(field -> {
         try {
@@ -32,11 +42,6 @@ public class ConfigManager {
             throw new RuntimeException("Error getting config option", e);
         }
     }).collect(Collectors.toList());
-
-    public static final List<Map.Entry<String, List<ConfigOption<?>>>> categories = List.of(
-            Map.entry("basic", List.of(language)),
-            Map.entry("mining", List.of(mineshaftSharing))
-    );
 
     public static void saveConfig() {
         JsonObject jo = new JsonObject();

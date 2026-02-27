@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 public class SkyDiaoModClient implements ClientModInitializer {
 
     public static final String MOD_ID = "skydiao";
-    public static final String VERSION = "0.0.2";
+    public static final String VERSION = "0.0.3";
 
     public static final String CONST_QQGROUP_MAIN = "728972740";
     public static final String CONST_QQGROUP_OTHER1 = "1103539591";
@@ -76,7 +76,7 @@ public class SkyDiaoModClient implements ClientModInitializer {
 
         if(!FabricLoader.getInstance().isModLoaded("hypixel-mod-api")) {
             ToolList.getInstance().log.info("Hypixel Mod API未加载, 手动执行加载中...");
-            new FabricModAPI();
+            new FabricModAPI().onInitializeClient();
         } else {
             ToolList.getInstance().log.info("Hypixel Mod API已安装&加载");
         }

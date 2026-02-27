@@ -3,6 +3,7 @@ package pers.XiaoShadiao.skydiao.utils.mircosoftaccount;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.util.UndashedUuid;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
 import net.minecraft.client.gui.screens.TitleScreen;
@@ -343,21 +344,11 @@ public class MinecraftLogin {
                     }
                 }
             } finally {
-                if(flag) replaceSession(new XSDSafeSession(name, parseMojangUUID(uuid), getDecodedLoginToken()));
+                if(flag) replaceSession(new XSDSafeSession(name, UndashedUuid.fromString(uuid), getDecodedLoginToken()));
             }
 
             return null;
         }
-
-        public static UUID parseMojangUUID(String raw) {
-            // raw: 32位hex字符串
-            String formatted = raw.replaceFirst(
-                    "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
-                    "$1-$2-$3-$4-$5"
-            );
-            return UUID.fromString(formatted);
-        }
-
 
         public void freshToken() {
 

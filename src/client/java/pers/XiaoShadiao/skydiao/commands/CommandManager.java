@@ -1,10 +1,12 @@
 package pers.XiaoShadiao.skydiao.commands;
 
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import pers.XiaoShadiao.skydiao.utils.Register;
 
 import java.lang.reflect.Field;
 
@@ -19,26 +21,20 @@ public interface CommandManager {
 
     public static void registerCommands() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-
-            for (Field field : CommandManager.class.getDeclaredFields()) {
-                if(BaseCommand.class.isAssignableFrom(field.getType())) {
-                    field.setAccessible(true);
-                    try {
-                        BaseCommand cmd = (BaseCommand) field.get(null);
-
-                        LiteralArgumentBuilder<FabricClientCommandSource> register = ClientCommandManager.literal(cmd.getCommandName());
-                        for(RequiredArgumentBuilder<FabricClientCommandSource, ?> arg : cmd.getArgs()) {
-                            register = register.then(arg);
-                        }
-                        cmd.lastCallRootCmdNode(register);
-
-                        cmd.setCommandNode(dispatcher.register(register));
-                    } catch (IllegalArgumentException | IllegalAccessException e) {
-                        throw new RuntimeException("Error registering command", e);
+            Register.execRegister(CommandManager.class, BaseCommand.class, cmd -> {
+                try {
+                    LiteralArgumentBuilder<FabricClientCommandSource> register = ClientCommandManager.literal(cmd.getCommandName());
+                    for(ArgumentBuilder<FabricClientCommandSource, ?> arg : cmd.getArgs()) {
+                        register = register.then(arg);
                     }
+                    cmd.lastCallRootCmdNode(register);
+
+                    cmd.setCommandNode(dispatcher.register(register));
+                } catch (Throwable e) {
+                    throw new RuntimeException("Error registering command", e);
                 }
-            }
+            });
         });
-    }
+    };
 
 }

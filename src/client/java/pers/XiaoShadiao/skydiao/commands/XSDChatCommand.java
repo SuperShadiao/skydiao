@@ -1,17 +1,11 @@
 package pers.XiaoShadiao.skydiao.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.gui.components.CommandSuggestions;
-import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.commands.synchronization.ArgumentTypeInfo;
-import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.commands.FillCommand;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
-import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.List;
 
@@ -22,7 +16,7 @@ public class XSDChatCommand extends BaseCommand {
     }
 
     @Override
-    public List<RequiredArgumentBuilder<FabricClientCommandSource, ?>> getArgs() {
+    public List<ArgumentBuilder<FabricClientCommandSource, ?>> getArgs() {
         return List.of(
                 getArgInstanceAndRunNode("chat", StringArgumentType.greedyString()).suggests((context, builder) -> builder.suggest("输入你想要发送的消息").buildFuture())
         );

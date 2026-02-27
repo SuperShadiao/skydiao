@@ -14,6 +14,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -31,6 +32,7 @@ import pers.XiaoShadiao.skydiao.screen.mircosoftaccount.AccountSelectScreen;
 import pers.XiaoShadiao.skydiao.utils.AutoUpdater;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -61,6 +63,8 @@ public class BasicListener extends AbstractListener {
     private void onDisconnect(ClientPacketListener clientPacketListener, Minecraft minecraft) {
         logger.info("已断开服务器连接: " + clientPacketListener.getConnection().getRemoteAddress());
         isConnectedToServer = false;
+
+        mc.execute(CustomRenderPipeline::closeAll);
     }
 
     private void onJoinServer(ClientPacketListener clientPacketListener, PacketSender packetSender, Minecraft minecraft) {
@@ -73,8 +77,8 @@ public class BasicListener extends AbstractListener {
                     ToolList.printChatMessage(Component.literal("§a[小沙雕] 欢迎使用SkyDiao Mod, 使用/skydiao指令打开菜单看看有什么吧!"));
                     AutoUpdater update = AutoUpdater.getInstance();
                     if (null != update) {
-                        ToolList.printChatMessage(Component.literal("§a[小沙雕] 新版本可用: " + update.newVer));
                         if (!SkyDiaoModClient.VERSION.equals(update.newVer)) {
+                            ToolList.printChatMessage(Component.literal("§a[小沙雕] 新版本可用: " + update.newVer));
                             ToolList.printChatMessage(update.downlanded ?
                                     Component.literal("§a[小沙雕] 新版本已下载完成, 本次重启后自动更新") :
                                     Component.literal("§a[小沙雕] §c新版本未能成功下载, 但你可以§e点击这里§c尝试手动更新").withStyle(Style.EMPTY

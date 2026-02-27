@@ -72,6 +72,7 @@ public class AccountSelectScreen extends Screen {
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
 
     private void saveConfig() {
+        save();
     }
 
     private static JsonObject MSC_To_Json(MinecraftLogin.MinecraftSessionContainer in) {
@@ -159,7 +160,6 @@ public class AccountSelectScreen extends Screen {
             e.printStackTrace();
             accounts.clear();
             accounts.addAll(backup);
-            save();
         }
 
         if(firstLoad) {
@@ -168,6 +168,7 @@ public class AccountSelectScreen extends Screen {
             for (MinecraftLogin.MinecraftSessionContainer account : accounts) {
                 account.freshToken();
             }
+            save();
         }
 
     }

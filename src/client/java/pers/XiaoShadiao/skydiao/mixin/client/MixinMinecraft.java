@@ -68,10 +68,11 @@ public class MixinMinecraft {
     }
 
     public void setUser(User user) {
-        if (user.equals(this.user0)) return;
-        user0 = user;
+        if (!user.equals(this.user0)) {
+            try { ChatClient.socket.close(); } catch (Exception ignored) {}
+        }
         MixinRealmStatusReset.setFuture(null);
-        try { ChatClient.socket.close(); } catch (Exception ignored) {}
+        user0 = user;
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;runTick(Z)V"), method = "run")

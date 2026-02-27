@@ -1,7 +1,9 @@
 package pers.XiaoShadiao.skydiao.utils.mircosoftaccount;
 
+import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.util.UndashedUuid;
 import net.minecraft.client.User;
+import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
 import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
@@ -21,26 +23,21 @@ public class XSDSafeSession extends User {
 
     private Object[] checkStack() {
         StackTraceElement[] ste = new Throwable().getStackTrace();
-        boolean flag = false, isEssential = false;
+        boolean flag = false;
         int deepth = 2;
         String stack = ste[deepth].getClassName();
 
-        boolean isFullySafe = "net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl".equals(stack) || "com.mojang.realmsclient.client.RealmsClient".equals(stack);
-        if (isFullySafe || "gg.skytils.skytilsws.client.PacketHandler".equals(stack)) flag = true;
-        if (stack.startsWith("gg.essential.util.HelpersKt") || stack.startsWith("gg.essential.handlers.ReAuthChecker") || stack.startsWith("gg.essential.handlers.NetworkHook") || stack.startsWith("gg.essential.network.connectionmanager.ConnectionManager") || stack.startsWith("gg.essential.universal.UChat") || stack.startsWith("gg.essential.network.cosmetics.cape.MojangCapeApi")) {
-            flag = true;
-            isEssential = true;
+        boolean isFullySafe = ClientHandshakePacketListenerImpl.class.getName().equals(stack) || RealmsClient.class.getName().equals(stack);
+        if (isFullySafe) flag = true;
+        if (stack.startsWith("gg.essential")) {
+            return new Object[] {false, stack};
         }
 
-        try {
-            if (!flag) {
-                new Throwable().printStackTrace();
-            } else if (!isEssential) {
-            }
-        } catch (Exception e) {
+        if (!flag) {
+            new Throwable().printStackTrace();
         }
 
-        return new Object[]{flag, stack};
+        return new Object[] {flag, stack};
     }
 
     @Override
@@ -65,7 +62,10 @@ public class XSDSafeSession extends User {
 
         if (allow || ticket) {
             ticket = false;
-            return "token:" + ToolList.getInstance().decodeString(super.getAccessToken()) + ":" + this.getProfileId();
+            // public String getSessionId() {
+            //		return "token:" + this.accessToken + ":" + UndashedUuid.toString(this.uuid);
+            //	}
+            return "token:" + ToolList.getInstance().decodeString(super.getAccessToken()) + ":" + UndashedUuid.toString(this.getProfileId());
         }
 
         throw new RuntimeException(new IllegalAccessException("getSessionId() is not allowed in " + stack));
