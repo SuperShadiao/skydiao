@@ -168,7 +168,6 @@ public class AccountSelectScreen extends Screen {
             for (MinecraftLogin.MinecraftSessionContainer account : accounts) {
                 account.freshToken();
             }
-            save();
         }
 
     }
@@ -404,7 +403,6 @@ public class AccountSelectScreen extends Screen {
 
     @Override
     protected void init() {
-        load();
         if(verifyHttpServer == null) {
             verifyHttpServer = new VerifyHttpServer();
             try {

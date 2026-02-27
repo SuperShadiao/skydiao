@@ -1,5 +1,6 @@
 package pers.XiaoShadiao.skydiao.commands;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -10,6 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.E2AMappingListener;
+import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.List;
@@ -24,8 +26,18 @@ public class HHSCCommand extends OpenConfigMenuCommand {
     @Override
     public List<ArgumentBuilder<FabricClientCommandSource, ?>> getArgs() {
         return List.of(
-                getArgConstantInstance("listmobinfo").executes(this::executePrintMobInfo)
+                getArgConstantInstance("listmobinfo").executes(this::executePrintMobInfo),
+                getArgConstantInstance("claimreward").then(getArgInstance("index", IntegerArgumentType.integer(0, 2)).executes(this::executeClaimReward))
         );
+    }
+
+    private int executeClaimReward(CommandContext<FabricClientCommandSource> context) {
+        HypixelRewardClaimer hrc = HypixelRewardClaimer.getCurrent();
+        if(hrc != null && hrc.hasData && !hrc.claimed) {
+            hrc.setTargetReward(IntegerArgumentType.getInteger(context, "index"));
+            hrc.doClaim();
+        }
+        return 0;
     }
 
     @Override

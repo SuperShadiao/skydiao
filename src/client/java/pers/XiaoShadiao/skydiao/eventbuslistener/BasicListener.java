@@ -2,6 +2,7 @@ package pers.XiaoShadiao.skydiao.eventbuslistener;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
@@ -25,21 +26,29 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import org.apache.commons.io.FileUtils;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.screen.mircosoftaccount.AccountSelectScreen;
 import pers.XiaoShadiao.skydiao.utils.AutoUpdater;
+import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 
+import java.io.File;
 import java.net.URI;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager.translate;
 
 public class BasicListener extends AbstractListener {
+    public static final Pattern URL_PATTERN = Pattern.compile("(https?://)([\\w-]+\\.)?[\\w-]+\\.[\\w-]+(/[\\w.!&?-]+)*");
 
     public long lastOperationTime = System.currentTimeMillis();
     private boolean isAFK = false;
@@ -58,6 +67,19 @@ public class BasicListener extends AbstractListener {
         ScreenEvents.AFTER_INIT.register(this::onGuiFinishedInit);
         ClientPlayConnectionEvents.JOIN.register(this::onJoinServer);
         ClientPlayConnectionEvents.DISCONNECT.register(this::onDisconnect);
+        ClientReceiveMessageEvents.GAME.register(this::onChat);
+    }
+
+    private void onChat(Component component, boolean b) {
+        String message = ToolList.getInstance().deleteColorCode(component.getString());
+
+        Matcher matcher = URL_PATTERN.matcher(message);
+        if(matcher.find()) {
+            String s = matcher.group();
+            if(s.contains("hypixel.net/claim-reward/")) {
+                HypixelRewardClaimer.get(s).doConnect();
+            }
+        }
     }
 
     private void onDisconnect(ClientPacketListener clientPacketListener, Minecraft minecraft) {

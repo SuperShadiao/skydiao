@@ -263,6 +263,32 @@ public class ToolList {
         return string.replaceAll("§.", "");
     }
 
+    public String getMidOfText(String target, String left, String right) {
+        try {
+
+            int j = 0,k = 0;
+            boolean b = false;
+
+            for(int i = 0; i < target.length() - (b ? right : left).length() + 1; i++) {
+                if(target.startsWith(b ? right : left, i)) { //if(target.substring(i,i + (b ? right : left).length()).equals(b ? right : left)) {
+                    if(!b) {
+                        j = i + left.length();
+                        i += left.length() - 1;
+                        b = true;
+                    } else {
+                        k = i;
+                        break;
+                    }
+                }
+            }
+            return k * j == 0 ? "" : target.substring(j,k);
+
+        } catch(Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
     //    public static class DevelopmentEnvironmentDetector {
     //
     //        public final boolean isDevMode;
