@@ -8,6 +8,8 @@
 
 从2026/2/23 8:00:00开始, 这个mod仅有irc一个功能, 但是后面会逐步迁移各个Skyblock功能.
 
+从2026/2/27 22:00:00开始, 已迁移部分Hypixel通用功能和部分Skyblock功能. 但是部分依赖寻路的功能可能要很久之后迁移, 因为寻路要进行重写 (当然可能会直接引用Baritone)
+
 1.8.9的Hypixel Helper Mod下载: https://xiaoshadiao.club/hhdownload
 
 # 安装
