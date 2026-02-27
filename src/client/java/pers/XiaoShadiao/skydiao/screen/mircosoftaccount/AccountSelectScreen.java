@@ -168,6 +168,7 @@ public class AccountSelectScreen extends Screen {
             for (MinecraftLogin.MinecraftSessionContainer account : accounts) {
                 account.freshToken();
             }
+            save();
         }
 
     }

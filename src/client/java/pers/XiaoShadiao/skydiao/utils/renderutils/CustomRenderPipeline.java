@@ -105,7 +105,7 @@ public class CustomRenderPipeline {
         if (fillBox) {
             ShapeRenderer.addChainedFilledBoxVertices(matrices, buffer, x1, y1, z1, x2, y2, z2, r, g, b, a / 2);
         } else {
-            for (float i = -0.01f; i <= 0.01f; i += 0.01f) {
+            for (float i = -0.01f; i <= 0.01f; i += 0.00001f) {
                 ShapeRenderer.renderLineBox(matrices.last(), buffer, x1 + i, y1 + i, z1 + i, x2 - i, y2 - i, z2 - i, r, g, b, a);
             }
         }
@@ -126,7 +126,7 @@ public class CustomRenderPipeline {
             buffer = new BufferBuilder(allocator, pipeline.getVertexFormatMode(), pipeline.getVertexFormat());
         }
 
-        for (float i = -0.0005f; i <= 0.0005f; i += 0.0005f) {
+        for (float i = -0.0005f; i <= 0.0005f; i += 0.00001f) {
             ShapeRenderer.renderVector(matrices, buffer, new Vector3f(x1 - i, y1, z1 - i), new Vec3(x2 - i, y2, z2 - i), new Color(r, g, b, a).getRGB());
             ShapeRenderer.renderVector(matrices, buffer, new Vector3f(x1 - i, y1, z1 + i), new Vec3(x2 - i, y2, z2 + i), new Color(r, g, b, a).getRGB());
         }
