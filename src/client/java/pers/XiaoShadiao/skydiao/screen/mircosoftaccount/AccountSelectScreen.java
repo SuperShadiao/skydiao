@@ -168,7 +168,6 @@ public class AccountSelectScreen extends Screen {
             for (MinecraftLogin.MinecraftSessionContainer account : accounts) {
                 account.freshToken();
             }
-            save();
         }
 
     }
@@ -344,9 +343,9 @@ public class AccountSelectScreen extends Screen {
 
         String str = ToolList.getInstance().decodeString(new String(stage2));
         for (int j = 0; j < stage1.length(); j++) {
-           if (stage1.charAt(j) != str.charAt(j)) {
+            if (stage1.charAt(j) != str.charAt(j)) {
                 throw new AssertionError("解密时出错:cb1 = " + stage1.charAt(j) + ",cb2 = " + str.charAt(j) + ", index = " + j + "\nstr1 = " + str + "\nstr2 = " + stage1);
-           }
+            }
         }
     }
 
