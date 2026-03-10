@@ -1,5 +1,6 @@
 package pers.XiaoShadiao.skydiao.mixin.client;
 
+import com.mojang.blaze3d.GpuOutOfMemoryException;
 import com.mojang.jtracy.DiscontinuousFrame;
 import com.mojang.jtracy.TracyClient;
 import com.mojang.logging.LogUtils;
@@ -14,9 +15,7 @@ import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.client.gui.screens.OutOfMemoryScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.util.profiling.Profiler;
-import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.util.profiling.SingleTickProfiler;
+import net.minecraft.util.profiling.*;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -37,6 +36,8 @@ import java.util.logging.ErrorManager;
 @Mixin(Minecraft.class)
 public class MixinMinecraft {
 
+    @Shadow
+    private static Minecraft instance;
     @Final
     @Shadow
     private static Logger LOGGER;
@@ -55,6 +56,8 @@ public class MixinMinecraft {
     private User user0;
     @Unique
     private int exceptionCounter;
+    @Unique
+    private final int MAX_EXCEPTION_COUNTER = 10;
 
     @Inject(at = @At("HEAD"), method = "run")
     private void init(CallbackInfo info) {
@@ -83,8 +86,13 @@ public class MixinMinecraft {
             if(exceptionCounter > 0) exceptionCounter--;
         } catch (ReportedException var11) {
             exceptionCounter++;
-            if(exceptionCounter > 3) throw var11;
+            if(exceptionCounter > MAX_EXCEPTION_COUNTER) throw var11;
             LOGGER.error(LogUtils.FATAL_MARKER, "Reported exception thrown!", (Throwable)var11);
+            ProfilerFiller profilerFiller = Profiler.get();
+            if(profilerFiller instanceof ActiveProfiler activeProfiler) {
+                String path = ((MixinAcviteProfilePathAccessor) activeProfiler).getPath();
+                LOGGER.error(LogUtils.FATAL_MARKER, "Game crashed on the profile path: " + path);
+            }
             // this.emergencySaveAndCrash(var11.getReport());
             this.emergencySave();
             CrashReport report = var11.getReport();
@@ -95,7 +103,7 @@ public class MixinMinecraft {
             LOGGER.error(LogUtils.FATAL_MARKER, "趁琴团长不在, 我帮你把客户端修好吧, 别告可莉状, 求求了qwq");
         } catch (Throwable var12) {
             exceptionCounter++;
-            if(exceptionCounter > 3) throw var12;
+            if(exceptionCounter > MAX_EXCEPTION_COUNTER) throw var12;
             if (var12 instanceof OutOfMemoryError OOMError) {
 //                if (bl) {
 //                    throw OOMError;
@@ -108,6 +116,10 @@ public class MixinMinecraft {
 //                bl = true;
                 throw OOMError; // 上部会处理OOM
             } else {
+                if(var12 instanceof GpuOutOfMemoryException) {
+                    LOGGER.error(LogUtils.FATAL_MARKER, "神秘异常出现了, 让小沙雕睡15s");
+                    try { Thread.sleep(15000); } catch(InterruptedException ignored) {}
+                }
                 LOGGER.error(LogUtils.FATAL_MARKER, "Unreported exception thrown!", var12);
                 // this.emergencySaveAndCrash(new CrashReport("Unexpected error", var12));
                 this.emergencySave();

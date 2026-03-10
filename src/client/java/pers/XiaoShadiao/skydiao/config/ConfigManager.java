@@ -24,11 +24,21 @@ public class ConfigManager {
     public static final BooleanConfigOption mineshaftSharing = new BooleanConfigOption("skyblockmineshaftsharing", true);
     public static final SelectConfigOption language = new SelectConfigOption("language", CrowdinI18nManager.fromSystemLanguage().ordinal(), Arrays.stream(CrowdinI18nManager.LangCode.values()).map(v -> v.displayName).toList());
     public static final BooleanConfigOption dungeonRenderDangerousEnemy = new BooleanConfigOption("skyblockdungeonenemydisplay", false);
+    public static final BooleanConfigOption skyblockSafeIsland = new BooleanConfigOption("skyblocksafeisland", true);
+    public static final BooleanConfigOption dungeonRenderTraps = new BooleanConfigOption("skyblockdungeontraprender", false);
+    public static final BooleanConfigOption autoEnchantTableGame = new BooleanConfigOption("sbautoplayenchant", false);
+
+    public static final BooleanConfigOption bossbar = new BooleanConfigOption("bossbar", false);
+    public static final BooleanConfigOption bossbarShowHealth = new BooleanConfigOption("bossbarshowhealth", false);
+    public static final BooleanConfigOption bossbarAddTargetEntity = new BooleanConfigOption("bossbaraddtargetentity", false);
+    public static final IntConfigOption bossbarDisplayLimit = new IntConfigOption("bossbardisplaylimit", 3);
 
     public static final List<Map.Entry<String, List<ConfigOption<?>>>> categories = List.of(
             Map.entry("basic", List.of(language)),
-            Map.entry("mining", List.of(mineshaftSharing)),
-            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy))
+            Map.entry("自动类", List.of(autoEnchantTableGame)),
+            Map.entry("mining", List.of(mineshaftSharing, skyblockSafeIsland)),
+            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonRenderTraps)),
+            Map.entry("界面类", List.of(bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit))
     );
 
 

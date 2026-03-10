@@ -59,7 +59,7 @@ public class CustomRenderPipeline {
     );
 
     public static final RenderPipeline NO_THROUGH_WALLS_LINE = RenderPipelines.register(
-            RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
+            RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
                     .withLocation(ResourceLocation.fromNamespaceAndPath("skydiao", "pipeline/NO_THROUGH_WALLS_LINE".toLowerCase()))
                     .withVertexFormat(DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES)
                     .withBlend(BlendFunction.TRANSLUCENT)
@@ -130,6 +130,27 @@ public class CustomRenderPipeline {
             ShapeRenderer.renderVector(matrices, buffer, new Vector3f(x1 - i, y1, z1 - i), new Vec3(x2 - i, y2, z2 - i), new Color(r, g, b, a).getRGB());
             ShapeRenderer.renderVector(matrices, buffer, new Vector3f(x1 - i, y1, z1 + i), new Vec3(x2 - i, y2, z2 + i), new Color(r, g, b, a).getRGB());
         }
+        matrices.popPose();
+    }
+
+    public void renderWorldLine(WorldRenderContext context, RenderPipeline pipeline, float x1, float y1, float z1, float x2, float y2, float z2, float r1, float g1, float b1, float a1, float r2, float g2, float b2, float a2) {
+        PoseStack matrices = context.matrices();
+        Vec3 camera = context.worldState().cameraRenderState.pos;
+
+        assert matrices != null;
+        matrices.pushPose();
+        matrices.translate(-camera.x, -camera.y, -camera.z);
+
+        if (buffer == null) {
+            buffer = new BufferBuilder(allocator, pipeline.getVertexFormatMode(), pipeline.getVertexFormat());
+        }
+        int rgb1 = new Color(r1, g1, b1, a1).getRGB();
+        int rgb2 = new Color(r2, g2, b2, a2).getRGB();
+        for (float i = -0.01f; i <= 0.01f; i += 0.01f) {
+            RenderUtils.renderVector(matrices, buffer, new Vector3f(x1 - i, y1, z1 - i), new Vec3(x2 - i, y2, z2 - i), rgb1, rgb2);
+            RenderUtils.renderVector(matrices, buffer, new Vector3f(x1 - i, y1, z1 + i), new Vec3(x2 - i, y2, z2 + i), rgb1, rgb2);
+        }
+        // RenderUtils.renderVector(matrices, buffer, new Vector3f(x1, y1, z1), new Vec3(x2, y2, z2), rgb1, rgb2);
         matrices.popPose();
     }
     // :::custom-pipelines:extraction-phase
@@ -231,5 +252,6 @@ public class CustomRenderPipeline {
             vertexBuffer = null;
         }
     }
+
     // :::custom-pipelines:clean-up
 }

@@ -1,0 +1,8 @@
+{
+  "star_rail_notification": {
+    "subtitle": "Star Rail Notification",
+    "sounds": [
+      "skydiao:starrail/notification"
+    ]
+  }
+}

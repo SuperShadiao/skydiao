@@ -3,6 +3,7 @@ package pers.XiaoShadiao.skydiao.eventbuslistener;
 import net.minecraft.client.Minecraft;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.DungeonF7BossbarListener;
 import pers.XiaoShadiao.skydiao.utils.Register;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
@@ -19,6 +20,11 @@ public abstract class AbstractListener extends Thread {
     public static final MineshaftShareListener mineshaftShareListener = new MineshaftShareListener();
     public static final DungeonMobESPListener dungeonMobESPListener = new DungeonMobESPListener();
     public static final E2AMappingListener e2AMappingListener = new E2AMappingListener();
+    public static final PrivateIslandProtectorListener privateIslandProtectorListener = new PrivateIslandProtectorListener();
+    public static final DungeonTrapRenderListener dungeonTrapRenderListener = new DungeonTrapRenderListener();
+    public static final AutoEnchantmentTableGameListener autoEnchantmentTableGameListener = new AutoEnchantmentTableGameListener();
+
+    public static final DungeonF7BossbarListener dungeonF7Bossbar = new DungeonF7BossbarListener();
 
     public AbstractListener() {
         setName("LT_" + getListenerName());

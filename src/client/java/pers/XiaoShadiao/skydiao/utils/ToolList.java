@@ -1,10 +1,23 @@
 package pers.XiaoShadiao.skydiao.utils;
 
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.PacketListener;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.common.ClientCommonPacketListener;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.item.ItemStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
@@ -17,6 +30,7 @@ import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -289,6 +303,65 @@ public class ToolList {
         }
     }
 
+    public double ezStringToNumber(String number) {
+        if (number == null || number.isEmpty()) {
+            throw new IllegalArgumentException("输入字符串不能为空");
+        }
+
+        // 获取最后一个字符（可能是后缀）
+        char suffix = number.charAt(number.length() - 1);
+
+        // 判断是否是数字字符
+        if (Character.isDigit(suffix)) {
+            // 如果没有后缀，直接转换为 double
+            return Double.parseDouble(number);
+        }
+
+        // 提取数字部分
+        String numericPart = number.substring(0, number.length() - 1);
+        double value = Double.parseDouble(numericPart);
+
+        // 根据后缀进行转换
+        return switch (Character.toUpperCase(suffix)) {
+            case 'K' -> // 千
+                    value * 1_000;
+            case 'M' -> // 百万
+                    value * 1_000_000;
+            case 'B' -> // 十亿
+                    value * 1_000_000_000;
+            case 'T' -> // 万亿
+                    value * 1_000_000_000_000L;
+            default -> throw new IllegalArgumentException("不支持的后缀: " + suffix);
+        };
+    }
+
+    public String numberToEZString(double d) {
+        String[] sl = {"","k","M","B","T"};
+        double d2 = d;
+
+        for(String s : sl) {
+            d2 /= 1000;
+            if(d2 < 1) {
+                return (Math.round(d2 * 1000d * 100d) / 100d) + s;
+            }
+        }
+
+        return (Math.round(d2 * 1000d * 100d) / 100d) + sl[sl.length - 1];
+    }
+
+    @Nullable
+    public Component tryGetTitleFromPacket(Packet<?> packet) {
+        return switch (packet) {
+            case ClientboundSetTitleTextPacket titlePacket -> titlePacket.text();
+            case ClientboundSetSubtitleTextPacket subTitlePacket -> subTitlePacket.text();
+            default -> null;
+        };
+    }
+
+    public void playSound(SoundEvent soundEvent) {
+        if(mc.player != null) mc.player.playSound(soundEvent, 1.0F, 1.0F);
+    }
+
     //    public static class DevelopmentEnvironmentDetector {
     //
     //        public final boolean isDevMode;
@@ -377,6 +450,33 @@ public class ToolList {
         }
     }
 
+    public static String getFormattedString(Component component) {
+        StringBuilder sb = new StringBuilder();
+        Style style = component.getStyle();
+        if (style.getColor() != null) {
+            sb.append(style.getColor());
+        }
+        if (style.isBold()) {
+            sb.append(ChatFormatting.BOLD);
+        }
+        if (style.isItalic()) {
+            sb.append(net.minecraft.ChatFormatting.ITALIC);
+        }
+        if (style.isUnderlined()) {
+            sb.append(net.minecraft.ChatFormatting.UNDERLINE);
+        }
+        if (style.isObfuscated()) {
+            sb.append(net.minecraft.ChatFormatting.OBFUSCATED);
+        }
+        if (style.isStrikethrough()) {
+            sb.append(net.minecraft.ChatFormatting.STRIKETHROUGH);
+        }
+        sb.append(component.getString());
+        component.getSiblings().forEach(s -> sb.append(getFormattedString(s)));
+
+        return sb.toString();
+    }
+
     public String encodeString(String message) {
         char key = (char) random.nextInt(0x10000);
         char key2 = (char) (key ^ 2888);
@@ -416,6 +516,10 @@ public class ToolList {
             return null;
         }
 
+    }
+
+    public static boolean hasGlint(ItemStack stack) {
+        return Optional.ofNullable(stack.getComponentsPatch().get(DataComponents.ENCHANTMENT_GLINT_OVERRIDE)).map(Optional::isPresent).isPresent();
     }
 
 }

@@ -1,4 +1,4 @@
-package pers.XiaoShadiao.skydiao.utils;
+package pers.XiaoShadiao.skydiao.utils.autoupdater;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
+import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.io.File;
 import java.io.FileInputStream;

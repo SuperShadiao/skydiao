@@ -3,15 +3,21 @@
   "package": "pers.XiaoShadiao.skydiao.mixin.client",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "MixinBossbarEventGetter",
+    "MixinBossBarRemoveAnimation",
     "MixinGameRenderer",
     "MixinMinecraft",
     "MixinMinecraftSessionAccessor",
+    "MixinMouseHandlerListenable",
     "MixinRealmStatusReset"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [
+    "MixinAcviteProfilePathAccessor",
+    "MixinPacketListener",
+    "MixinRemoveMaxHealthLimit",
     "MixinReportTypeCustomMessage",
     "odinfix.MixinOdinPickColorTerminalFixer",
     "odinfix.MixinOdinStartWithTerminalFixer"

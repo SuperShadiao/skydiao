@@ -17,7 +17,6 @@ import java.util.regex.Pattern;
 public class E2AMappingListener extends AbstractListener {
 
     public static final Pattern timeMatcher = Pattern.compile("[\\d]+:[\\d]+");
-    public static final Pattern HIT_PATTERN = Pattern.compile("\\d+(?= Hit)");
 
     private int tickCount = 0;
     private final E2AMapping e2aMapping = new E2AMapping();
@@ -38,8 +37,8 @@ public class E2AMappingListener extends AbstractListener {
     }
 
     private void onClientTick(Minecraft mc) {
-        if(tickCount++ % 10 == 0 && mc.level != null) {
-            e2aMapping.selfCleaningAndUpdate();
+        e2aMapping.selfCleaningAndUpdate();
+        if(mc.level != null) {
 
             // 获取所有盔甲架实体
             java.util.List<ArmorStand> armorStands = new java.util.ArrayList<>();
@@ -47,17 +46,13 @@ public class E2AMappingListener extends AbstractListener {
             for (Entity entity : mc.level.entitiesForRendering()) {
                 if (entity instanceof ArmorStand armorStand) {
                     // 跳过已被绑定的盔甲架
-                    if (getLivingEntity(armorStand) != null) {
+                    if (!armorStand.hasCustomName() || getLivingEntity(armorStand) != null) {
                         continue;
                     }
                     String name = armorStand.getName().getString();
                     Matcher matcher = timeMatcher.matcher(name);
                     if (matcher.matches()) {
                         armorStandsForBoss.add(armorStand);
-                        continue;
-                    }
-
-                    if (!name.contains("❤") && !name.contains(":")) {
                         continue;
                     }
                     armorStands.add(armorStand);
@@ -70,7 +65,7 @@ public class E2AMappingListener extends AbstractListener {
                 MobInfo info = null;
                 // 跳过盔甲架本身
                 infoLabel: {
-                    if (entity instanceof ArmorStand) {
+                    if (entity instanceof ArmorStand || entity == mc.player) {
                         continue;
                     }
 
@@ -89,7 +84,7 @@ public class E2AMappingListener extends AbstractListener {
                     double currentDistance = Integer.MAX_VALUE;
                     for (ArmorStand armorStand : armorStands) {
                         double distance = getXZDistance(entity, armorStand);
-                        if (distance <= minDistance && armorStand.getY() + 1 >= entity.getY() &&
+                        if (distance <= minDistance && armorStand.getY() + 2 >= entity.getY() &&
                                 (closestArmorStand == null || distance < currentDistance)) {
                             currentDistance = distance;
                             closestArmorStand = armorStand;
@@ -145,9 +140,10 @@ public class E2AMappingListener extends AbstractListener {
             e2a.put(e, a);
             a2e.put(a, e);
             MobInfo mobInfo = new MobInfo();
+            mobInfo.theEntity = e;
             mobInfo.armorStand = a;
-            mobInfo.maxHealth = Math.max(e.getHealth(), e.getMaxHealth());
             mobInfo.health = e.getHealth();
+            mobInfo.maxHealth = Math.max(e.getMaxHealth(), Math.max(mobInfo.health, mobInfo.maxHealth));
             mobInfo.hasHittingAttr = false;
             mobInfo.hit = -1;
             mobInfo.maxHit = -1;
@@ -162,25 +158,16 @@ public class E2AMappingListener extends AbstractListener {
         }
 
         public void selfCleaningAndUpdate() {
-            e2a.entrySet().removeIf(entry -> mc.level == null || (mc.level.getEntity(entry.getKey().getId()) == null || mc.level.getEntity(entry.getValue().getId()) == null));
-            a2e.entrySet().removeIf(entry -> mc.level == null || (mc.level.getEntity(entry.getKey().getId()) == null || mc.level.getEntity(entry.getValue().getId()) == null));
+            e2a.entrySet().removeIf(entry -> mc.level == null || (mc.level.getEntity(entry.getKey().getId()) == null || mc.level.getEntity(entry.getValue().getId()) == null) || getXZDistance(entry.getKey(), entry.getValue()) >= 2);
+            a2e.entrySet().removeIf(entry -> mc.level == null || (mc.level.getEntity(entry.getKey().getId()) == null || mc.level.getEntity(entry.getValue().getId()) == null) || getXZDistance(entry.getKey(), entry.getValue()) >= 2);
 
             e2Info.entrySet().removeIf(entry -> mc.level == null || !e2a.containsKey(entry.getKey()));
             e2Info.forEach((key, mobInfo) -> {
                 mobInfo.health = key.getHealth();
-
-                Matcher m = HIT_PATTERN.matcher(ToolList.getInstance().deleteColorCode(mobInfo.armorStand.getName().getString()));
-                if(m.find()) {
-                    mobInfo.hit = ToolList.getInstance().isDevEnvironment() ? (int) mobInfo.health : Integer.parseInt(m.group());
-                    if(!mobInfo.hasHittingAttr) {
-                        mobInfo.hasHittingAttr = true;
-                        mobInfo.maxHit = mobInfo.hit;
-                    }
-                    mobInfo.maxHit = Math.max(mobInfo.hit, mobInfo.maxHit);
-                } else {
-                    mobInfo.hasHittingAttr = false;
-                    mobInfo.hit = mobInfo.maxHit = -1;
-                }
+                mobInfo.maxHealth = Math.max(key.getMaxHealth(), Math.max(mobInfo.health, mobInfo.maxHealth));
+//                System.out.println(mobInfo.theEntity.getHealth());
+//                System.out.println(mobInfo.theEntity);
+//                System.out.println(mobInfo);
             });
         }
 
@@ -200,7 +187,7 @@ public class E2AMappingListener extends AbstractListener {
         }
     }
 
-    private double getXZDistance(Entity e1, Entity e2) {
+    private static double getXZDistance(Entity e1, Entity e2) {
         return Math.sqrt((e1.getX() - e2.getX()) * (e1.getX() - e2.getX()) + (e1.getZ() - e2.getZ()) * (e1.getZ() - e2.getZ()));
     }
 
@@ -209,6 +196,7 @@ public class E2AMappingListener extends AbstractListener {
     }
 
     public static class MobInfo {
+        public LivingEntity theEntity;
         public ArmorStand armorStand;
         public double maxHealth;
         public double health;
@@ -217,6 +205,22 @@ public class E2AMappingListener extends AbstractListener {
         public boolean isBoss;
         public ArmorStand armorStandForBoss;
         public boolean hasHittingAttr;
+
+        public String toString() {
+            return health + "/" + maxHealth;
+        }
+
+        public void replaceWith(MobInfo mobInfo) {
+            this.theEntity = mobInfo.theEntity;
+            this.armorStand = mobInfo.armorStand;
+            this.maxHealth = mobInfo.maxHealth;
+            this.health = mobInfo.health;
+            this.hit = mobInfo.hit;
+            this.maxHit = mobInfo.maxHit;
+            this.isBoss = mobInfo.isBoss;
+            this.armorStandForBoss = mobInfo.armorStandForBoss;
+            this.hasHittingAttr = mobInfo.hasHittingAttr;
+        }
     }
 
 }

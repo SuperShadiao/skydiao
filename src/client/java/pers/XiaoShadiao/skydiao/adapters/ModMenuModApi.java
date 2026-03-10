@@ -3,10 +3,9 @@ package pers.XiaoShadiao.skydiao.adapters;
 import com.terraformersmc.modmenu.api.*;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
-import pers.XiaoShadiao.skydiao.utils.AutoUpdater;
+import pers.XiaoShadiao.skydiao.utils.autoupdater.AutoUpdater;
 
 import java.util.Map;
 import java.util.function.Consumer;

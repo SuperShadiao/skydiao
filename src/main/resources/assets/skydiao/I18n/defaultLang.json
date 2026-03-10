@@ -653,6 +653,10 @@
     "language": {
       "configname": "§e语言",
       "description": "§e设置你的的语言"
+    },
+    "skyblockdungeontraprender": {
+      "configname": "§eSkyblock地牢陷阱显示",
+      "description": "§e在Skyblock地牢中显示发射器陷阱"
     }
   },
   "about": {

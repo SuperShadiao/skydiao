@@ -51,6 +51,13 @@ public class DungeonMobESPListener extends AbstractListener {
                         if(!isStarMob) RenderUtils.renderESP(worldRender2, entity, 1, 1, 0, 1, false);
                         RenderUtils.renderTrace(worldRender2, entity, 1, 1, 0, 1);
                     }
+                    if(asName.contains("Frozen")) {
+                        profilerFiller.push("render");
+                        RenderUtils.renderESP(worldRender, entity, 1, 0, 1, 1, true);
+                        if(!isStarMob) RenderUtils.renderESP(worldRender2, entity, 1, 0, 1, 1, false);
+                        RenderUtils.renderTrace(worldRender2, entity, 1, 0, 1, 1);
+                        profilerFiller.pop();
+                    }
                     if(isStarMob) {
                         RenderUtils.renderESP(worldRender2, entity, 1, 0.5f, 0, 1, false);
                     }
