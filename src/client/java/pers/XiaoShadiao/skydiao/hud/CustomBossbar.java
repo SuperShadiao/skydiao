@@ -9,7 +9,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -70,6 +69,7 @@ public class CustomBossbar extends XSDHUD {
                 RenderUtils.renderESP(worldRender, entity, 1, 0, 0, 1,  false);
                 if(starRailBossBar.shouldXRayBoss()) RenderUtils.renderTrace(worldRender, entity, 1, 0, 0, 1);
             }
+            worldRender.finishDraw();
         }
     }
 
@@ -136,9 +136,9 @@ public class CustomBossbar extends XSDHUD {
 
             AnimationManager am;
             if (mobInfo != null) {
-                am = animationMap.computeIfAbsent(finalActuallyUUID, k -> new AnimationManager(mobInfo, mobInfo.theEntity));
+                am = animationMap.computeIfAbsent(finalActuallyUUID, k -> new AnimationManager(mobInfo, mobInfo.theEntity.getId()));
             } else if (entity != null) {
-                am = animationMap.computeIfAbsent(finalActuallyUUID, k -> new AnimationManager(null, entity));
+                am = animationMap.computeIfAbsent(finalActuallyUUID, k -> new AnimationManager(null, entity.getId()));
             } else {
                 am = animationMap.computeIfAbsent(finalActuallyUUID, k -> new AnimationManager(null, null));
                 am.setHealthUpdater((am2) -> {
@@ -176,7 +176,7 @@ public class CustomBossbar extends XSDHUD {
         for (Map.Entry<UUID, AnimationManager> entry : animationMap.entrySet()) {
 
             AnimationManager am = entry.getValue();
-            LivingEntity entity = am.entity;
+            LivingEntity entity = Optional.ofNullable(mc.level).filter(a -> am.entityId != null).map(l -> l.getEntity(am.entityId)).map(ItemOwner::asLivingEntity).orElse(null);
             am.updateAnimation(particalTick);
 
             int width = mc.getWindow().getGuiScaledWidth();
@@ -282,12 +282,9 @@ public class CustomBossbar extends XSDHUD {
     public void addEntityToBossbar(LivingEntity entity) {
         if(entity == null) return;
         E2AMappingListener.MobInfo mobInfo = AbstractListener.e2AMappingListener.getMobInfo(entity);
-        AnimationManager am;
-        if(mobInfo != null) {
-            am = animationMap.computeIfAbsent(entity.getUUID(), k -> new AnimationManager(mobInfo, entity));
-        } else {
-            am = animationMap.computeIfAbsent(entity.getUUID(), k -> new AnimationManager(null, entity));
-        }
+
+        AnimationManager am = animationMap.computeIfAbsent(entity.getUUID(), k -> new AnimationManager(mobInfo, entity.getId()));
+
         am.flagActive();
     }
 
@@ -305,7 +302,7 @@ public class CustomBossbar extends XSDHUD {
         public long lastActiveTime;
 
         public E2AMappingListener.MobInfo mobInfo;
-        public final LivingEntity entity;
+        public final Integer entityId;
         public float healthScale, trueScale, trueHealthScale;
         public Component bossName;
         public float maxHealth;
@@ -331,17 +328,19 @@ public class CustomBossbar extends XSDHUD {
             animationManager.maxHealth = (float) animationManager.mobInfo.maxHealth;
         };
         public static Consumer<AnimationManager> entityHealthUpdater = (animationManager) -> {
-            animationManager.currentHealth = animationManager.entity.getHealth();
-            animationManager.maxHealth = Math.max(animationManager.entity.getMaxHealth(), animationManager.currentHealth);
+            Optional.ofNullable(mc.level).map(level -> level.getEntity(animationManager.entityId)).map(ItemOwner::asLivingEntity).ifPresent(livingEntity -> {
+                animationManager.currentHealth = livingEntity.getHealth();
+                animationManager.maxHealth = Math.max(livingEntity.getMaxHealth(), animationManager.currentHealth);
+            });
         };
         public static Consumer<AnimationManager> unsupportedHealthUpdater = (animationManager) -> {
             throw new UnsupportedOperationException("MobInfo为null, 且未设置healthUpdater");
         };
 
 
-        public AnimationManager(E2AMappingListener.MobInfo mobInfo, LivingEntity entity) {
+        public AnimationManager(E2AMappingListener.MobInfo mobInfo, Integer entityId) {
             // this.mobInfo = mobInfo;
-            this.entity = entity;
+            this.entityId = entityId;
 
             healthUpdater = unsupportedHealthUpdater;
 
@@ -400,7 +399,8 @@ public class CustomBossbar extends XSDHUD {
 
         public void updateTick() {
             if (mc.level == null) return;
-            if (entity != null) {
+            Entity entity;
+            if (entityId != null && (entity = mc.level.getEntity(entityId)) != null) {
                 bossName = entity.getName();
 
                 if(entity instanceof Pig && ToolList.getInstance().isDevEnvironment()) {
@@ -476,7 +476,7 @@ public class CustomBossbar extends XSDHUD {
                 } else skyblockIsImmuneDmg = false;
 
                 // System.out.println(ComponentRenderUtilss.wrapComponents((mobInfo.armorStand != null ? mobInfo.armorStand : mobInfo.theEntity).getName(), Integer.MAX_VALUE, mc.font).getFirst().getResultOrEmpty());
-                bossName = (mc.level.getEntity(mobInfo.theEntity.getId()) != null && mobInfo.armorStand != null ? mobInfo.armorStand : mobInfo.theEntity).getName();
+                bossName = (ToolList.getInstance().isEntityOnWorld(mobInfo.theEntity) && mobInfo.armorStand != null ? mobInfo.armorStand : mobInfo.theEntity).getName();
             }
         }
 
@@ -491,7 +491,7 @@ public class CustomBossbar extends XSDHUD {
 
             if (mobInfo != null) {
                 setHealthUpdater(mobInfoHealthUpdater);
-            } else if (entity != null) {
+            } else if (entityId != null) {
                 setHealthUpdater(entityHealthUpdater);
             } else {
                 setHealthUpdater(unsupportedHealthUpdater);
@@ -531,6 +531,8 @@ public class CustomBossbar extends XSDHUD {
         public boolean isPowerUp();
         public ResourceLocation getPowerUpPotionIcon();
         public int getPowerUp();
+        public default Color getPwoerUpColor() { return POWERUP; };
+        public PowerUpStyle getPowerUpStyle();
         public int getMaxPowerUp();
         public PowerUpTextState getPowerUpTextState();
         public boolean isBattleOver();
@@ -554,6 +556,11 @@ public class CustomBossbar extends XSDHUD {
         NONE
     }
 
+    public enum PowerUpStyle {
+        CHARGING,
+        READY
+    }
+
     private IStarRailBossBar starRailBossBar = null;
     private float animationFade = 0;
 
@@ -574,7 +581,7 @@ public class CustomBossbar extends XSDHUD {
         return starRailBossBar;
     }
 
-    private final Color
+    private static final Color
             HEALTH_DAMAGED = new Color(0xF9, 0xCE, 0xCE, 255),
             HEALTH_JUST_DAMAGED = new Color(255, 255, 255, 255),
             HEALTH_HEAL = new Color(0x0E, 0xA7, 0x39, 255),
@@ -727,7 +734,7 @@ public class CustomBossbar extends XSDHUD {
             }
         }
 
-        stage:{
+        stage: if(bossBar.getMaxStage() > 1) {
             float offset = 3;
             for(int i = 0; i < bossBar.getMaxStage(); i++) {
                 int stage = bossBar.getStage();
@@ -773,12 +780,16 @@ public class CustomBossbar extends XSDHUD {
                 };
                 if(bossBar.isPowerUp()) {
                     powerupAnimation -= 6 * partialTick;
-                    RenderUtils.drawCircle(context, x1, y1, 0, 360, radius, POWERUP.getRGB());
+                    RenderUtils.drawCircle(context, x1, y1, 0, 360, radius, bossBar.getPwoerUpColor().getRGB());
                     context.blitSprite(RenderPipelines.GUI_TEXTURED, bossBar.getPowerUpPotionIcon(), (int) (x1 - potionWidth / 2), (int) (y1 - potionHeight / 2), (int) potionWidth + 2, (int) potionHeight + 2);
                     RenderUtils.drawRoundedCircleFadeToNoAlpha(context, x1, y1, (int) powerupAnimation, (int) (150 + powerupAnimation), radius - 2, 2, Color.white.getRGB(), true);
                 } else {
                     RenderUtils.drawCircle(context, x1, y1, 0, 360, radius, NO_POWERUP.getRGB());
                     context.blitSprite(RenderPipelines.GUI_TEXTURED, bossBar.getPowerUpPotionIcon(), (int) (x1 - potionWidth / 2), (int) (y1 - potionHeight / 2), (int) potionWidth + 2, (int) potionHeight + 2);
+                    if(bossBar.getPowerUpStyle() == PowerUpStyle.CHARGING) {
+                        RenderUtils.drawRoundedCircle(context, x1, y1, 0, 360, radius - 2, 2, ICON_BACKGROUND.getRGB());
+                        RenderUtils.drawRoundedCircle(context, x1, y1, -90, -91 + 361 * bossBar.getPowerUp() / bossBar.getMaxPowerUp(), radius - 2, 2, bossBar.getPwoerUpColor().getRGB());
+                    }
                 }
                 textDraw.run();
             }

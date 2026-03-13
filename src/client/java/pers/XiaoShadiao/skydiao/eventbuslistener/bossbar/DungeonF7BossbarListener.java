@@ -115,6 +115,11 @@ public class DungeonF7BossbarListener extends AbstractBossbarListener {
     }
 
     @Override
+    public CustomBossbar.PowerUpStyle getPowerUpStyle() {
+        return CustomBossbar.PowerUpStyle.READY;
+    }
+
+    @Override
     public int getMaxPowerUp() {
         return terminals;
     }
@@ -223,7 +228,7 @@ public class DungeonF7BossbarListener extends AbstractBossbarListener {
             E2AMappingListener.MobInfo mobInfo = e2AMappingListener.getMobInfo(living);
             if(temp instanceof WitherBoss) {
                 if(f7BossTarget != temp) {
-                    if(!temp.isInvisible() && Optional.ofNullable(mobInfo).map(b -> b.armorStand).map(info -> getBossIndex(info.getName().getString())).orElse(-1) >= currentStage - 1) {
+                    if(!temp.isInvisible() && Math.max(ToolList.getInstance().isDevEnvironment() ? getBossIndex(temp.getName().getString()) : -1, Optional.ofNullable(mobInfo).map(b -> b.armorStand).map(info -> getBossIndex(info.getName().getString())).orElse(-1)) >= currentStage - 1) {
                         f7BossTarget = (WitherBoss) temp;
                     } else {
                         f7BossTarget = null;

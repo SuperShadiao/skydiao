@@ -31,30 +31,12 @@ public class DungeonMobESPListener extends AbstractListener {
                 if (armorStand != null) {
                     String asName = ToolList.getInstance().deleteColorCode(armorStand.getName().getString());
                     boolean isStarMob = StatusManager.get().isInDungeon() && asName.contains("✯");
-                    if(asName.contains("Sniper")) {
-                        RenderUtils.renderESP(worldRender, entity, 1, 0, 0, 1, true);
-                        if(!isStarMob) RenderUtils.renderESP(worldRender2, entity, 1, 0, 0, 1, false);
-                        RenderUtils.renderTrace(worldRender2, entity, 1, 0, 0, 1);
-                    }
-                    if(asName.contains("Prime")) {
-                        RenderUtils.renderESP(worldRender, entity, 0.5f, 1f, 0, 1, true);
-                        if(!isStarMob) RenderUtils.renderESP(worldRender2, entity, 1, 0.5f, 0, 1, false);
-                        RenderUtils.renderTrace(worldRender2, entity, 0.5f, 1f, 0, 1);
-                    }
-                    if(asName.contains("Shadow")) {
-                        RenderUtils.renderESP(worldRender, entity, 1, 1, 1, 1, true);
-                        if(!isStarMob) RenderUtils.renderESP(worldRender2, entity, 1, 1, 1, 1, false);
-                        RenderUtils.renderTrace(worldRender2, entity, 1, 1, 1, 1);
-                    }
-                    if(asName.contains("Angry") || asName.contains("Lost")) {
-                        RenderUtils.renderESP(worldRender, entity, 1, 1, 0, 1, true);
-                        if(!isStarMob) RenderUtils.renderESP(worldRender2, entity, 1, 1, 0, 1, false);
-                        RenderUtils.renderTrace(worldRender2, entity, 1, 1, 0, 1);
-                    }
-                    if(asName.contains("Frozen")) {
-                        RenderUtils.renderESP(worldRender, entity, 1, 0, 1, 1, true);
-                        if(!isStarMob) RenderUtils.renderESP(worldRender2, entity, 1, 0, 1, 1, false);
-                        RenderUtils.renderTrace(worldRender2, entity, 1, 0, 1, 1);
+                    for (MobType type : MobType.values()) {
+                        if(asName.contains(type.name)) {
+                            RenderUtils.renderESP(worldRender, entity, type.r, type.g, type.b, 1, true);
+                            if(!isStarMob) RenderUtils.renderESP(worldRender2, entity, type.r, type.g, type.b, 1, false);
+                            RenderUtils.renderTrace(worldRender2, entity, type.r, type.g, type.b, 1);
+                        }
                     }
                     if(isStarMob) {
                         RenderUtils.renderESP(worldRender2, entity, 1, 0.5f, 0, 1, false);
@@ -63,6 +45,28 @@ public class DungeonMobESPListener extends AbstractListener {
             }
             worldRender.finishDraw();
             worldRender2.finishDraw();
+        }
+    }
+
+    private enum MobType {
+        Sniper(1, 0, 0, "Sniper"),
+        Prime(0.5f, 1f, 0, "Prime"),
+        Shadow(1, 1, 1, "Shadow"),
+        Angry(1, 1, 0, "Angry"),
+        Lost(1, 1, 0, "Lost"),
+        Frozen(1, 0, 1, "Frozen"),
+        Bear(1, 0, 1, "Bear");
+
+        public final float r;
+        public final float g;
+        public final float b;
+        public final String name;
+
+        MobType(float r, float g, float b, String name) {
+            this.r = r;
+            this.g = g;
+            this.b = b;
+            this.name = name;
         }
     }
 

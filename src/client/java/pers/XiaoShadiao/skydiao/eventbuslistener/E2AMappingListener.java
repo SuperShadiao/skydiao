@@ -55,10 +55,10 @@ public class E2AMappingListener extends AbstractListener {
                         armorStandsForBoss.add(armorStand);
                         continue;
                     }
+                    // System.out.println(armorStand.getName().getString());
                     armorStands.add(armorStand);
                 }
             }
-
             // 为每个非盔甲架实体找到最近的盔甲架
             for (Entity entity : mc.level.entitiesForRendering()) {
 
@@ -158,8 +158,8 @@ public class E2AMappingListener extends AbstractListener {
         }
 
         public void selfCleaningAndUpdate() {
-            e2a.entrySet().removeIf(entry -> mc.level == null || (mc.level.getEntity(entry.getKey().getId()) == null || mc.level.getEntity(entry.getValue().getId()) == null) || getXZDistance(entry.getKey(), entry.getValue()) >= 2);
-            a2e.entrySet().removeIf(entry -> mc.level == null || (mc.level.getEntity(entry.getKey().getId()) == null || mc.level.getEntity(entry.getValue().getId()) == null) || getXZDistance(entry.getKey(), entry.getValue()) >= 2);
+            e2a.entrySet().removeIf(entry -> mc.level == null || (!ToolList.getInstance().isEntityOnWorld(entry.getKey()) || !ToolList.getInstance().isEntityOnWorld(entry.getValue()) || getXZDistance(entry.getKey(), entry.getValue()) >= 2));
+            a2e.entrySet().removeIf(entry -> mc.level == null || (!ToolList.getInstance().isEntityOnWorld(entry.getKey()) || !ToolList.getInstance().isEntityOnWorld(entry.getValue()) || getXZDistance(entry.getKey(), entry.getValue()) >= 2));
 
             e2Info.entrySet().removeIf(entry -> mc.level == null || !e2a.containsKey(entry.getKey()));
             e2Info.forEach((key, mobInfo) -> {

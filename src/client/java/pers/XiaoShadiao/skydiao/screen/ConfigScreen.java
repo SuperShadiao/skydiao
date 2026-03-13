@@ -18,6 +18,7 @@ import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.EditGameRulesScreen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
@@ -29,6 +30,7 @@ import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager.translate;
@@ -43,6 +45,8 @@ public class ConfigScreen extends Screen {
 
     private Tab[] tabs;
 
+    private Runnable delayedSearchHandler;
+
     private void saveConfig() {
         ConfigManager.saveConfig();
         CrowdinI18nManager.initI18nFromConfig();
@@ -54,6 +58,19 @@ public class ConfigScreen extends Screen {
         ToolList.mc.setScreen(lastScreen);
     }
 
+    @Override
+    public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean bl) {
+        boolean b = super.mouseClicked(mouseButtonEvent, bl);
+        simulateScroll();
+        return b;
+    }
+
+    private void simulateScroll() {
+        double i = ToolList.mc.mouseHandler.getScaledXPos(ToolList.mc.getWindow());
+        double j = ToolList.mc.mouseHandler.getScaledYPos(ToolList.mc.getWindow());
+        this.mouseScrolled(i, j + 40, 0, 0);
+    }
+
     private void onClose(Button button) {
         onClose();
     }
@@ -61,6 +78,15 @@ public class ConfigScreen extends Screen {
     public ConfigScreen(Screen lastScreen) {
         super(Component.literal("SkyDiao Mod"));
         this.lastScreen = lastScreen;
+    }
+
+    @Override
+    public void tick() {
+        if(delayedSearchHandler != null) {
+            delayedSearchHandler.run();
+            delayedSearchHandler = null;
+        }
+        super.tick();
     }
 
     @Override
@@ -104,6 +130,7 @@ public class ConfigScreen extends Screen {
 
     private Tab[] getTabs() {
         List<ConfigTab> list = ConfigManager.categories.stream().map(entry -> new ConfigTab(entry.getKey(), entry.getValue())).collect(Collectors.toList());
+        list.add(new SearchConfigTab());
         if(ToolList.getInstance().isDevEnvironment()) {
             List<ConfigOption<?>> test = new ArrayList<>();
             for (int i = 0; i < 50; i++) {
@@ -131,6 +158,113 @@ public class ConfigScreen extends Screen {
         return list.toArray(Tab[]::new);
     }
 
+    public abstract static class AbstractConfigEntry extends ContainerObjectSelectionList.Entry<AbstractConfigEntry> {}
+
+    public class SearchConfigTab extends ConfigTab {
+
+        public SearchConfigTab() {
+            super("搜索", ConfigManager.optionList);
+        }
+
+        @Override
+        public ConfigList getListInstance() {
+            return new SearchConfigList();
+        }
+
+        public class SearchConfigList extends ConfigTab.ConfigList {
+            private final EditBox searchBox;
+            public SearchConfigList() {
+                super(SearchConfigTab.this);
+                searchBox = new EditBox(ToolList.mc.font, 0, 0, 200, 20, Component.literal(translate("configcategory.搜索")));
+                searchBox.setValue("");
+                searchBox.setResponder(this::updateSearchResult);
+                updateSearchResult("");
+            }
+
+            private void updateSearchResult(String text) {
+                Optional<SearchConfigEntry> searchEntry = children().stream().filter(child -> child instanceof SearchConfigEntry).map(child -> (SearchConfigEntry) child).findFirst();
+
+                clearEntries();
+                String text1 = text.trim();
+                addEntryToTop(searchEntry.orElseGet(SearchConfigEntry::new));
+
+                delayedSearchHandler = () -> {
+                    for (Tab tab : tabs) {
+                        if(tab instanceof SearchConfigTab) continue;
+                        for (AbstractConfigEntry child0 : ((ConfigTab) tab).configList.children()) {
+                            if(child0 instanceof ConfigEntry child) {
+                                if(text1.isEmpty() || child.option.getI18nName().toLowerCase().contains(text1.toLowerCase()) || child.option.getI18nDesc().toLowerCase().contains(text.toLowerCase())) {
+                                    addEntry(new RedirectConfigEntry(child));
+                                }
+                            }
+                        }
+                    }
+                };
+
+            }
+
+            public class SearchConfigEntry extends AbstractConfigEntry {
+                @Override
+                public @NotNull List<? extends GuiEventListener> children() {
+                    return List.of(searchBox);
+                }
+
+                @Override
+                public void renderContent(GuiGraphics guiGraphics, int left, int top, boolean bl, float f) {
+                    searchBox.setX(getContentRight() - (getContentWidth() + searchBox.getWidth()) / 2);
+                    searchBox.setY(getContentY());
+                    searchBox.render(guiGraphics, left, top, f);
+                }
+
+                @Override
+                public @NotNull List<? extends NarratableEntry> narratables() {
+                    return List.of(searchBox);
+                }
+            }
+
+            public class RedirectConfigEntry extends AbstractConfigEntry {
+
+                private final Button widget;
+                private final ConfigEntry configEntry;
+
+                public RedirectConfigEntry(ConfigEntry configEntry) {
+                    this.configEntry = configEntry;
+                    widget = Button.builder(Component.literal("->"), this::redirect).size(70, 20).build();
+                }
+
+                private void redirect(Button button) {
+                    delayedSearchHandler = () -> {
+                        int tabIndex = List.of(tabs).indexOf(configEntry.tab);
+                        tabNavigationBar.selectTab(tabIndex, true);
+                        configEntry.tab.configList.setSelected(configEntry);
+                        ConfigScreen.this.setFocused(configEntry.widget);
+                    };
+                }
+
+                @Override
+                public @NotNull List<? extends NarratableEntry> narratables() {
+                    return List.of(widget);
+                }
+
+                @Override
+                public void renderContent(GuiGraphics guiGraphics, int left, int top, boolean bl, float f) {
+                    String name = configEntry.option.getI18nName();
+                    // guiGraphics.drawString(Minecraft.getInstance().font, name, getContentX() - 5, getContentY() + 5, 0xFFFFFFFF);
+                    RenderUtils.renderScrollingString(guiGraphics, ToolList.mc.font, Component.literal(name), getContentX(), getContentX(), getContentY() - 25, getContentX() + 100, getContentY() + 44, 0xFFFFFFFF);
+                    widget.setX(getContentRight() - widget.getWidth() + 5);
+                    widget.setY(getContentY());
+                    widget.render(guiGraphics, left, top, f);
+                }
+
+                @Override
+                public @NotNull List<? extends GuiEventListener> children() {
+                    return List.of(widget);
+                }
+            }
+        }
+    }
+
+
     public class ConfigTab extends GridLayoutTab {
         public final List<ConfigOption<?>> configOptions;
         public ConfigList configList;
@@ -138,8 +272,12 @@ public class ConfigScreen extends Screen {
         public ConfigTab(String categoryName, List<ConfigOption<?>> configOptions) {
             super(Component.literal(translate("configcategory." + categoryName)));
             this.configOptions = configOptions;
-            configList = new ConfigList();
+            configList = getListInstance();
             this.layout.addChild(configList,0,0);
+        }
+
+        public ConfigList getListInstance() {
+            return new ConfigList(this);
         }
 
         public void updateConfigList() {
@@ -151,13 +289,16 @@ public class ConfigScreen extends Screen {
             configList.updateSize(ConfigScreen.this.width, ConfigScreen.this.layout);
         }
 
-        public class ConfigList extends ContainerObjectSelectionList<ConfigList.ConfigEntry> {
+        public class ConfigList extends ContainerObjectSelectionList<AbstractConfigEntry> {
 
-            public ConfigList() {
+            public final ConfigTab tab;
+
+            public ConfigList(ConfigTab tab) {
                 super(Minecraft.getInstance(), ConfigScreen.this.width, ConfigScreen.this.layout.getContentHeight(), ConfigScreen.this.layout.getHeaderHeight(), 20);
                 for (ConfigOption<?> configOption : configOptions) {
-                    addEntry(new ConfigEntry(configOption));
+                    addEntry(new ConfigEntry(configOption, tab));
                 }
+                this.tab = tab;
             }
 
             @Override
@@ -165,11 +306,13 @@ public class ConfigScreen extends Screen {
                 return 305;
             }
 
-            public static class ConfigEntry extends ContainerObjectSelectionList.Entry<ConfigEntry> {
+            public static class ConfigEntry extends AbstractConfigEntry {
                 private final ConfigOption<?> option;
                 private final AbstractWidget widget;
-                public ConfigEntry(ConfigOption<?> option) {
+                private final ConfigTab tab;
+                public ConfigEntry(ConfigOption<?> option, ConfigTab tab) {
                     this.option = option;
+                    this.tab = tab;
                     this.widget = switch(option) {
                         case BooleanConfigOption boolOption -> Button.builder(
                                 Component.literal(boolOption.getI18nValue()),
@@ -222,7 +365,7 @@ public class ConfigScreen extends Screen {
 
                 @Override
                 public void renderContent(GuiGraphics guiGraphics, int left, int top, boolean bl, float f) {
-                    String name = translate("config." + option.getName() + ".configname");
+                    String name = option.getI18nName();
                     // guiGraphics.drawString(Minecraft.getInstance().font, name, getContentX() - 5, getContentY() + 5, 0xFFFFFFFF);
                     RenderUtils.renderScrollingString(guiGraphics, ToolList.mc.font, Component.literal(name), getContentX(), getContentX(), getContentY() - 25, getContentX() + 100, getContentY() + 44, 0xFFFFFFFF);
                     widget.setX(getContentRight() - widget.getWidth() + 5);

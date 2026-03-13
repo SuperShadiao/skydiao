@@ -55,7 +55,7 @@ public class HHSCCommand extends OpenConfigMenuCommand {
 
             @Override
             public int getMaxStage() {
-                return 3;
+                return 2;
             }
 
             @Override
@@ -100,7 +100,7 @@ public class HHSCCommand extends OpenConfigMenuCommand {
 
             @Override
             public boolean isPowerUp() {
-                return true;
+                return false;
             }
 
             @Override
@@ -110,7 +110,12 @@ public class HHSCCommand extends OpenConfigMenuCommand {
 
             @Override
             public int getPowerUp() {
-                return 5;
+                return 2;
+            }
+
+            @Override
+            public CustomBossbar.PowerUpStyle getPowerUpStyle() {
+                return CustomBossbar.PowerUpStyle.CHARGING;
             }
 
             @Override

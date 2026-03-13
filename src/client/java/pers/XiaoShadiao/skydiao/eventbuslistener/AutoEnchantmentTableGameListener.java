@@ -24,6 +24,7 @@ import java.util.*;
 
 /*
  * 好的抄写, 来自GreenCat ((
+ * https://github.com/ItzGreenCat/Antimony-SkyBlock/blob/master/src/main/java/com/greencat/antimony/common/function/ExperimentsBot.java
  */
 public class AutoEnchantmentTableGameListener extends AbstractListener {
     private ExperimentType currentExperiment = ExperimentType.NONE;
@@ -199,11 +200,6 @@ public class AutoEnchantmentTableGameListener extends AbstractListener {
                 tickPassed = 0;
             }
         } else tickPassed = 0;
-    }
-
-    private <T> T printThis(T obj) {
-        System.out.println(obj);
-        return obj;
     }
 
     enum ExperimentType {

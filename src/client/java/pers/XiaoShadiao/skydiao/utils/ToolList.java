@@ -1,20 +1,18 @@
 package pers.XiaoShadiao.skydiao.utils;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.network.PacketListener;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.numbers.NumberFormat;
+import net.minecraft.network.chat.numbers.StyledFormat;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.common.ClientCommonPacketListener;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.scores.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -28,22 +26,21 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class ToolList {
 
     public static final Minecraft mc;
+
     static {
-         mc = Minecraft.getInstance();
-         if(mc == null) throw new AssertionError("不允许在Minecraft实例启动前加载ToolList");
+        mc = Minecraft.getInstance();
+        if (mc == null) throw new AssertionError("不允许在Minecraft实例启动前加载ToolList");
     }
 
     private static ToolList instance;
@@ -53,8 +50,9 @@ public class ToolList {
     private DevelopmentEnvironmentDetector devDetectorInstance;
     public Logger log = LogManager.getLogger("XSD Utils");
 
+
     public static ToolList getInstance() {
-        if(instance == null) instance = new ToolList();
+        if (instance == null) instance = new ToolList();
         return instance;
     }
 
@@ -84,21 +82,22 @@ public class ToolList {
 
     public InputStream makeReqToURL(String url, boolean allowErrorStream, Consumer<URLConnection> ucin, Consumer<String> onRedirect, boolean disableSSL) {
 
-        if(url.contains("hypixelhelper.pages.dev")) url = url.replace("hypixelhelper.pages.dev", "xiaoshadiao.club");
+        if (url.contains("hypixelhelper.pages.dev")) url = url.replace("hypixelhelper.pages.dev", "xiaoshadiao.club");
 
-        if(url.contains("mojang")) disableSSL = true;
+        if (url.contains("mojang")) disableSSL = true;
 
-        if(!url.contains("hypixel") || isDevEnvironment()) log.info(url);
+        if (!url.contains("hypixel") || isDevEnvironment()) log.info(url);
         HttpURLConnection uc = null;
         try {
             uc = (HttpURLConnection) new URL(url/*.replace("http://", "https://")*/).openConnection();
-            uc.setRequestProperty("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0");
+            uc.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0");
 
-            if(url.contains("https://www.gitlink.org.cn")) uc.addRequestProperty("Referer", "https://www.gitlink.org.cn/SuperShadiao/hypixelhelper");
+            if (url.contains("https://www.gitlink.org.cn"))
+                uc.addRequestProperty("Referer", "https://www.gitlink.org.cn/SuperShadiao/hypixelhelper");
 
             uc.setInstanceFollowRedirects(true);
-            if(uc instanceof HttpsURLConnection) {
-                if(disableSSL) {
+            if (uc instanceof HttpsURLConnection) {
+                if (disableSSL) {
                     ((HttpsURLConnection) uc).setSSLSocketFactory(HttpSSLDisabler.getTrustAll());
                     ((HttpsURLConnection) uc).setHostnameVerifier((h, s) -> true);
                 } else {
@@ -108,21 +107,21 @@ public class ToolList {
             uc.setConnectTimeout(30000);
             uc.setReadTimeout(30000);
 
-            if(ucin != null) ucin.accept(uc);
+            if (ucin != null) ucin.accept(uc);
 
             uc.connect();
 
             if (uc.getResponseCode() == 302) {
                 log.info("网页重定向");
                 String newUrl = uc.getHeaderField("Location");
-                if(onRedirect != null) onRedirect.accept(newUrl);
+                if (onRedirect != null) onRedirect.accept(newUrl);
                 return makeReqToURL(newUrl, allowErrorStream, ucin, onRedirect);
             }
             return allowErrorStream && uc.getResponseCode() != 200 ? uc.getErrorStream() : uc.getInputStream();
 
-        } catch(Exception e) {
+        } catch (Exception e) {
 
-            if(url.contains("//api.hypixel.net")) {
+            if (url.contains("//api.hypixel.net")) {
                 try {
                     return makeReqToURL("https://xiaoshadiao.club/datagetter?url=" + URLEncoder.encode(url, "UTF-8"), allowErrorStream, ucin, onRedirect);
                 } catch (UnsupportedEncodingException ex) {
@@ -135,14 +134,14 @@ public class ToolList {
 //				log.warn("使用外置程序请求网站!");
 //				return 请求网站E(url);
 //			}
-            if(e instanceof javax.net.ssl.SSLException) {
+            if (e instanceof javax.net.ssl.SSLException) {
                 if (e.toString().contains("plaintext connection")) {
                     log.warn("出现了非常逆天的问题: " + url + " -> " + e);
                     log.warn("尝试强转http重试...");
                     return makeReqToURL(url.replace("https://", "http://"), allowErrorStream, ucin, onRedirect, true);
                 }
 
-                if(e instanceof javax.net.ssl.SSLHandshakeException && !disableSSL) {
+                if (e instanceof javax.net.ssl.SSLHandshakeException && !disableSSL) {
                     log.warn("出现了非常逆天的问题: " + url + " -> " + e);
                     log.warn("尝试禁用SSL重试...");
                     return makeReqToURL(url, allowErrorStream, ucin, onRedirect, true);
@@ -160,11 +159,11 @@ public class ToolList {
 
     public boolean isDevEnvironment() {
 
-        if(devDetectorInstance == null) {
+        if (devDetectorInstance == null) {
 
-            if(true) {
+            if (true) {
                 boolean temp = FabricLoader.getInstance().isDevelopmentEnvironment();
-                if(temp) {
+                if (temp) {
                     log.info("Develop环境");
                 } else {
                     log.info("非Develop环境, 正式游戏");
@@ -194,7 +193,7 @@ public class ToolList {
     }
 
     public byte[] downloadFileWithMD5(String url, String md5) throws IOException {
-        try(InputStream is = makeReqToURL(url, true)) {
+        try (InputStream is = makeReqToURL(url, true)) {
             byte[] bytes = is.readAllBytes();
 
             String realMD5 = getMD5(bytes);
@@ -256,21 +255,21 @@ public class ToolList {
         try {
             MessageDigest md5 = MessageDigest.getInstance("MD5");
             return byteToHex(md5.digest(bl));
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     public String getMD5(String s, boolean utf8) {
 
-        if(utf8) {
+        if (utf8) {
             return getMD5(s.getBytes(StandardCharsets.UTF_8));
         } else return getMD5(s.getBytes());
 
     }
 
     public String getMD5(String s) {
-        return getMD5(s,true);
+        return getMD5(s, true);
     }
 
     public String deleteColorCode(String string) {
@@ -280,12 +279,12 @@ public class ToolList {
     public String getMidOfText(String target, String left, String right) {
         try {
 
-            int j = 0,k = 0;
+            int j = 0, k = 0;
             boolean b = false;
 
-            for(int i = 0; i < target.length() - (b ? right : left).length() + 1; i++) {
-                if(target.startsWith(b ? right : left, i)) { //if(target.substring(i,i + (b ? right : left).length()).equals(b ? right : left)) {
-                    if(!b) {
+            for (int i = 0; i < target.length() - (b ? right : left).length() + 1; i++) {
+                if (target.startsWith(b ? right : left, i)) { //if(target.substring(i,i + (b ? right : left).length()).equals(b ? right : left)) {
+                    if (!b) {
                         j = i + left.length();
                         i += left.length() - 1;
                         b = true;
@@ -295,9 +294,9 @@ public class ToolList {
                     }
                 }
             }
-            return k * j == 0 ? "" : target.substring(j,k);
+            return k * j == 0 ? "" : target.substring(j, k);
 
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return "";
         }
@@ -336,12 +335,12 @@ public class ToolList {
     }
 
     public String numberToEZString(double d) {
-        String[] sl = {"","k","M","B","T"};
+        String[] sl = {"", "k", "M", "B", "T"};
         double d2 = d;
 
-        for(String s : sl) {
+        for (String s : sl) {
             d2 /= 1000;
-            if(d2 < 1) {
+            if (d2 < 1) {
                 return (Math.round(d2 * 1000d * 100d) / 100d) + s;
             }
         }
@@ -359,7 +358,11 @@ public class ToolList {
     }
 
     public void playSound(SoundEvent soundEvent) {
-        if(mc.player != null) mc.player.playSound(soundEvent, 1.0F, 1.0F);
+        if (mc.player != null) mc.player.playSound(soundEvent, 1.0F, 1.0F);
+    }
+
+    public boolean isEntityOnWorld(Entity entity) {
+        return mc.level != null && mc.level.getEntity(entity.getId()) == entity;
     }
 
     //    public static class DevelopmentEnvironmentDetector {
@@ -371,7 +374,8 @@ public class ToolList {
     //        }
     //
     //    }
-    public record DevelopmentEnvironmentDetector(boolean isDevMode) {}
+    public record DevelopmentEnvironmentDetector(boolean isDevMode) {
+    }
 
     private static final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
@@ -397,8 +401,8 @@ public class ToolList {
         }
 
         public Object getOriginalTask() {
-            if(runnable != null) return runnable;
-            if(callable != null) return callable;
+            if (runnable != null) return runnable;
+            if (callable != null) return callable;
             throw new IllegalStateException("R & C both null");
         }
 
@@ -409,12 +413,16 @@ public class ToolList {
         public void reRunWithDelayMS(Collection<ThreadedTask<?>> ttl, long ms) {
             ttl.add(addThreadedTask(() -> {
                 R v;
-                if(ms > 0) try { Thread.sleep(ms); } catch (InterruptedException e) {};
+                if (ms > 0) try {
+                    Thread.sleep(ms);
+                } catch (InterruptedException e) {
+                }
+                ;
 
-                if(runnable != null) {
+                if (runnable != null) {
                     runnable.run();
                     v = value;
-                } else if(callable != null) {
+                } else if (callable != null) {
                     v = callable.call();
                 } else {
                     throw new IllegalStateException("R & C both null");
@@ -435,13 +443,13 @@ public class ToolList {
 
     @SuppressWarnings("ConstantConditions")
     public static void printChatMessage(Component msg) {
-        if(ToolList.mc != null && ToolList.mc.gui != null && ToolList.mc.gui.getChat() != null) {
+        if (ToolList.mc != null && ToolList.mc.gui != null && ToolList.mc.gui.getChat() != null) {
             ToolList.mc.execute(() -> ToolList.mc.gui.getChat().addMessage(msg));
         }
     }
 
     public static void sendChatMessage(String msg) {
-        if(mc.player != null) {
+        if (mc.player != null) {
             if (msg.startsWith("/")) {
                 mc.player.connection.sendCommand(msg.substring(1));
             } else {
@@ -450,43 +458,16 @@ public class ToolList {
         }
     }
 
-    public static String getFormattedString(Component component) {
-        StringBuilder sb = new StringBuilder();
-        Style style = component.getStyle();
-        if (style.getColor() != null) {
-            sb.append(style.getColor());
-        }
-        if (style.isBold()) {
-            sb.append(ChatFormatting.BOLD);
-        }
-        if (style.isItalic()) {
-            sb.append(net.minecraft.ChatFormatting.ITALIC);
-        }
-        if (style.isUnderlined()) {
-            sb.append(net.minecraft.ChatFormatting.UNDERLINE);
-        }
-        if (style.isObfuscated()) {
-            sb.append(net.minecraft.ChatFormatting.OBFUSCATED);
-        }
-        if (style.isStrikethrough()) {
-            sb.append(net.minecraft.ChatFormatting.STRIKETHROUGH);
-        }
-        sb.append(component.getString());
-        component.getSiblings().forEach(s -> sb.append(getFormattedString(s)));
-
-        return sb.toString();
-    }
-
     public String encodeString(String message) {
         char key = (char) random.nextInt(0x10000);
         char key2 = (char) (key ^ 2888);
         char[] bl = message.toCharArray();
-        for(int i = 0;i < bl.length;i++) {
+        for (int i = 0; i < bl.length; i++) {
             bl[i] = (char) (bl[i] ^ key ^ ((i * key2 + 100) % 0x10000));
         }
 
         String s = key + new String(bl) + key2;
-        if(!decodeString(s).equals(message)) {
+        if (!decodeString(s).equals(message)) {
             throw new AssertionError("加密时出错");
         }
         return s;
@@ -496,23 +477,23 @@ public class ToolList {
 
         try {
             String decodeString = message;
-            if(decodeString == null) return null;
-            if(decodeString.isEmpty()) return "";
-            char key1 = decodeString.substring(0,1).charAt(0);
+            if (decodeString == null) return null;
+            if (decodeString.isEmpty()) return "";
+            char key1 = decodeString.substring(0, 1).charAt(0);
             decodeString = decodeString.substring(1);
-            char key2 = decodeString.substring(decodeString.length() - 1,decodeString.length()).charAt(0);
+            char key2 = decodeString.substring(decodeString.length() - 1, decodeString.length()).charAt(0);
             // log.info(key1);
 
-            if((key1 ^ key2) != 2888) return null;
+            if ((key1 ^ key2) != 2888) return null;
 
             char[] newchars = new char[decodeString.length() - 1];
             char[] oldchars = decodeString.toCharArray();
-            for(int i = 0;i < decodeString.length() - 1;i++) {
+            for (int i = 0; i < decodeString.length() - 1; i++) {
                 newchars[i] = (char) (oldchars[i] ^ key1 ^ ((i * key2 + 100) % 0x10000));
             }
 
             return new String(newchars);
-        } catch(Exception e) {
+        } catch (Exception e) {
             return null;
         }
 
@@ -522,4 +503,70 @@ public class ToolList {
         return Optional.ofNullable(stack.getComponentsPatch().get(DataComponents.ENCHANTMENT_GLINT_OVERRIDE)).map(Optional::isPresent).isPresent();
     }
 
+    private static final Comparator<PlayerScoreEntry> scoreEntryComparator = Comparator.comparing(PlayerScoreEntry::value)
+            .reversed()
+            .thenComparing(PlayerScoreEntry::owner, String.CASE_INSENSITIVE_ORDER);
+
+    private Objective getScoreboardObjective() {
+        if (mc.level == null || mc.player == null) return null;
+        Scoreboard scoreboard = mc.level.getScoreboard();
+        Objective objective = null;
+        PlayerTeam playerTeam = scoreboard.getPlayersTeam(mc.player.getScoreboardName());
+        if (playerTeam != null) {
+            DisplaySlot displaySlot = DisplaySlot.teamColorToSlot(playerTeam.getColor());
+            if (displaySlot != null) {
+                objective = scoreboard.getDisplayObjective(displaySlot);
+            }
+        }
+        return objective != null ? objective : scoreboard.getDisplayObjective(DisplaySlot.SIDEBAR);
+    }
+
+    public Component getScoreboardTitle() {
+        if (mc.level == null || mc.player == null) return Component.empty();
+        Objective objective2 = getScoreboardObjective();
+        if (objective2 != null) {
+            return objective2.getDisplayName();
+        }
+        return Component.empty();
+    }
+
+    public String getScoreboardTitleNoColor() {
+        return deleteColorCode(getScoreboardTitle().getString());
+    }
+
+    public List<Component> fetchScoreboardLines() {
+        Scoreboard scoreboard = mc.level.getScoreboard();
+        Objective objective2 = getScoreboardObjective();
+        if (objective2 != null) {
+            List<Component> lines = new ArrayList<>();
+//            Collection<PlayerScoreEntry> entries = scoreboard.listPlayerScores(objective2);
+//            for (PlayerScoreEntry entry : entries) {
+//                PlayerTeam playerTeam2 = scoreboard.getPlayersTeam(entry.owner());
+//                Component componentx2 = entry.ownerName();
+//                Component component2 = PlayerTeam.formatNameForTeam(playerTeam2, componentx2);
+//                NumberFormat numberFormat = objective2.numberFormatOrDefault(StyledFormat.SIDEBAR_DEFAULT);
+//                Component component3 = entry.formatValue(numberFormat);
+//                lines.add(Component.empty().append(componentx2).append(component2).append(component3));
+//            }
+            NumberFormat numberFormat = objective2.numberFormatOrDefault(StyledFormat.SIDEBAR_DEFAULT);
+            scoreboard.listPlayerScores(objective2)
+                    .stream()
+                    .filter(playerScoreEntry -> !playerScoreEntry.isHidden())
+                    .sorted(scoreEntryComparator)
+                    .limit(15L)
+                    .forEach(playerScoreEntry -> {
+                        PlayerTeam playerTeam2 = scoreboard.getPlayersTeam(playerScoreEntry.owner());
+                        Component componentx = playerScoreEntry.ownerName();
+                        Component component2 = PlayerTeam.formatNameForTeam(playerTeam2, componentx);
+                        Component component3 = playerScoreEntry.formatValue(numberFormat);
+                        lines.add(Component.empty().append(componentx).append(component2).append(component3));
+                    });
+            return lines;
+        }
+        return List.of();
+    }
+
+    public List<String> fetchScoreboardLinesNoColor() {
+        return fetchScoreboardLines().stream().map(Component::getString).map(this::deleteColorCode).collect(Collectors.toList());
+    }
 }

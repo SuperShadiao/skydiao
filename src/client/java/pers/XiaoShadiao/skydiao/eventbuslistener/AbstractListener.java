@@ -3,6 +3,8 @@ package pers.XiaoShadiao.skydiao.eventbuslistener;
 import net.minecraft.client.Minecraft;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.DungeonF1BossbarListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.DungeonF2BossbarListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.DungeonF7BossbarListener;
 import pers.XiaoShadiao.skydiao.utils.Register;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
@@ -24,6 +26,8 @@ public abstract class AbstractListener extends Thread {
     public static final DungeonTrapRenderListener dungeonTrapRenderListener = new DungeonTrapRenderListener();
     public static final AutoEnchantmentTableGameListener autoEnchantmentTableGameListener = new AutoEnchantmentTableGameListener();
 
+    public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
+    public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();
     public static final DungeonF7BossbarListener dungeonF7Bossbar = new DungeonF7BossbarListener();
 
     public AbstractListener() {
@@ -52,5 +56,10 @@ public abstract class AbstractListener extends Thread {
 
     @Override
     public void run() {}
+
+    public static <T> T printThis(T t) {
+        System.out.println(t);
+        return t;
+    }
 
 }
