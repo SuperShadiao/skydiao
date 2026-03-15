@@ -23,6 +23,7 @@ import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.client.telemetry.TelemetryProperty;
 import net.minecraft.client.telemetry.events.GameLoadTimesEvent;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.NativeModuleLister;
 import net.minecraft.util.datafix.DataFixTypes;
@@ -53,6 +54,7 @@ public class MixinUserDataSecurer {
 
     // 尝试覆写所有方法来保证Main入口未被修改。
 
+    @DontObfuscate
     @Overwrite
     public static void main(String[] strings) {
         OptionParser optionParser = new OptionParser();
