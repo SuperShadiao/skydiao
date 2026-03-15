@@ -1,37 +1,27 @@
 package pers.XiaoShadiao.skydiao.utils.renderutils;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.minecraft.client.gui.render.GuiRenderer;
-import net.minecraft.client.gui.render.TextureSetup;
-import net.minecraft.client.gui.render.state.ColoredRectangleRenderState;
-import net.minecraft.client.gui.render.state.GuiElementRenderState;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.Pose;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
 import org.joml.Vector3f;
-import org.lwjgl.opengl.GL11;
+import pers.XiaoShadiao.skydiao.mixin.client.MixinAbstractContainerScreenPosGetter;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
-import java.awt.*;
 import java.util.List;
 
 public class RenderUtils {
@@ -143,6 +133,11 @@ public class RenderUtils {
         context.fill(x1, y1, x1 - 1, y2, rgb);
         context.fill(x1, y2 + 1, x2, y2, rgb);
         context.fill(x2, y1, x2 + 1, y2, rgb);
+    }
+
+    public static void renderSlot(GuiGraphics guiGraphics, AbstractContainerScreen<?> abstractContainerScreen, Slot slot, int rgb) {
+        MixinAbstractContainerScreenPosGetter getter = (MixinAbstractContainerScreenPosGetter) abstractContainerScreen;
+        guiGraphics.fill(getter.getLeftPos() + slot.x, getter.getTopPos() + slot.y, getter.getLeftPos() + slot.x + 16, getter.getTopPos() + slot.y + 16, rgb);
     }
 
     public static class WorldRender {

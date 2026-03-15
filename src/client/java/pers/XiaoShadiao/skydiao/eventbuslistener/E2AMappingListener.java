@@ -161,13 +161,14 @@ public class E2AMappingListener extends AbstractListener {
             e2a.entrySet().removeIf(entry -> mc.level == null || (!ToolList.getInstance().isEntityOnWorld(entry.getKey()) || !ToolList.getInstance().isEntityOnWorld(entry.getValue()) || getXZDistance(entry.getKey(), entry.getValue()) >= 2));
             a2e.entrySet().removeIf(entry -> mc.level == null || (!ToolList.getInstance().isEntityOnWorld(entry.getKey()) || !ToolList.getInstance().isEntityOnWorld(entry.getValue()) || getXZDistance(entry.getKey(), entry.getValue()) >= 2));
 
-            e2Info.entrySet().removeIf(entry -> mc.level == null || !e2a.containsKey(entry.getKey()));
+            e2Info.entrySet().removeIf(entry -> mc.level == null || !e2a.containsKey(entry.getKey()) || !ToolList.getInstance().isEntityOnWorld(entry.getKey()));
             e2Info.forEach((key, mobInfo) -> {
                 mobInfo.health = key.getHealth();
                 mobInfo.maxHealth = Math.max(key.getMaxHealth(), Math.max(mobInfo.health, mobInfo.maxHealth));
 //                System.out.println(mobInfo.theEntity.getHealth());
 //                System.out.println(mobInfo.theEntity);
 //                System.out.println(mobInfo);
+                mobInfo.theEntity = key;
             });
         }
 

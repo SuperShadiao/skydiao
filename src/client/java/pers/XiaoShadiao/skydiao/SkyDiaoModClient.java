@@ -10,6 +10,7 @@ import net.hypixel.modapi.packet.impl.clientbound.ClientboundPartyInfoPacket;
 import net.hypixel.modapi.packet.impl.clientbound.ClientboundPingPacket;
 import net.hypixel.modapi.packet.impl.clientbound.ClientboundPlayerInfoPacket;
 import net.hypixel.modapi.packet.impl.clientbound.event.ClientboundLocationPacket;
+import net.minecraft.client.User;
 import pers.XiaoShadiao.skydiao.commands.CommandManager;
 import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
@@ -22,6 +23,7 @@ import pers.XiaoShadiao.skydiao.utils.autoupdater.ExecuteOfflineThread;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
+import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.XSDSafeSession;
 
 import java.util.concurrent.TimeUnit;
 
@@ -58,10 +60,10 @@ public class SkyDiaoModClient implements ClientModInitializer {
         }
         CrowdinI18nManager.initI18nFromConfig();
 
-        MinecraftLogin.replaceSession(ToolList.mc.getUser());
+        User currentInstance = ToolList.mc.getUser();
+        if(!(currentInstance instanceof XSDSafeSession)) throw new AssertionError("你的账号可能被老鼠 (盗号) 了。检查一下Mod看看。 (" + currentInstance + ")");
+        MinecraftLogin.replaceSession(currentInstance);
         AccountSelectScreen.load();
-        // System.out.println(getClass().getClassLoader());
-        // This entrypoint is suitable for setting up client-specific logic, such as rendering.
         AbstractListener.initListeners();
         ChatClientManager.refreshChatClient();
         XSDHUD.init();

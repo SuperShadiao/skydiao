@@ -16,7 +16,7 @@ import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.*;
 
-public class DungeonF2BossbarListener extends AbstractBossbarListener {
+public class DungeonF2BossbarListener extends AbstractDungeonBossbar {
 
     public static final ResourceLocation SCARF_ICON = Objects.requireNonNull(ResourceLocation.tryBuild("skydiao", "textures/skyblock/boss/scarf.png"));
     public static final Component NAME = Component.literal("Scarf");
@@ -49,7 +49,7 @@ public class DungeonF2BossbarListener extends AbstractBossbarListener {
     }
 
     private void onClientTick(Minecraft mc) {
-        if(mc.level == null) return;
+        if(mc.level == null || !isInCorrectDungeon()) return;
 
         for (Entity temp : mc.level.entitiesForRendering()) {
             LivingEntity living = temp.asLivingEntity();
@@ -211,5 +211,10 @@ public class DungeonF2BossbarListener extends AbstractBossbarListener {
     @Override
     public boolean shouldXRayBoss() {
         return true;
+    }
+
+    @Override
+    public int getFloor() {
+        return 2;
     }
 }

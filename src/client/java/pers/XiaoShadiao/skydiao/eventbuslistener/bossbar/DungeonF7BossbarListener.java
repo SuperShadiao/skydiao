@@ -27,7 +27,7 @@ import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.*;
 
-public class DungeonF7BossbarListener extends AbstractBossbarListener {
+public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
     public static final ResourceLocation F7_BOSS_ICON = Objects.requireNonNull(ResourceLocation.tryBuild("skydiao", "textures/skyblock/boss/wither.png"));
     public static final Component[] NAMES = new Component[]{Component.literal("Maxor"), Component.literal("Storm"), Component.literal("Goldor"), Component.literal("Necron")};
@@ -205,7 +205,7 @@ public class DungeonF7BossbarListener extends AbstractBossbarListener {
     }
 
     private void onClientTick(Minecraft mc) {
-        if(mc.level == null) return;
+        if(mc.level == null || isInMasterDungeonFloor() || !isInCorrectDungeon()) return;
 
         MixinBossbarEventGetter bossbarEventGetter = (MixinBossbarEventGetter) mc.gui.getBossOverlay();
         boolean[] flag = new boolean[] {false};
@@ -361,4 +361,8 @@ public class DungeonF7BossbarListener extends AbstractBossbarListener {
         return -1;
     }
 
+    @Override
+    public int getFloor() {
+        return 7;
+    }
 }

@@ -21,8 +21,4 @@ public abstract class AbstractBossbarListener extends AbstractListener implement
         XSDHUD.customBossbar.loadStarRailBossBar(bossbar);
     }
 
-    public static boolean isInMasterDungeonFloor() {
-        return (StatusManager.get().isInDungeon() && ToolList.getInstance().fetchScoreboardLinesNoColor().stream().anyMatch(line -> line.contains("The Catacombs (M")));
-    }
-
 }

@@ -1,5 +1,7 @@
 package pers.XiaoShadiao.skydiao.mixin.client;
 
+import com.mojang.authlib.minecraft.UserApiService;
+import com.mojang.authlib.yggdrasil.ProfileResult;
 import com.mojang.blaze3d.GpuOutOfMemoryException;
 import com.mojang.jtracy.DiscontinuousFrame;
 import com.mojang.jtracy.TracyClient;
@@ -8,6 +10,7 @@ import com.mojang.realmsclient.RealmsAvailability;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportType;
 import net.minecraft.ReportedException;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
 import net.minecraft.client.gui.components.CommandSuggestions;
@@ -15,6 +18,10 @@ import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.client.gui.screens.OutOfMemoryScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.multiplayer.ProfileKeyPairManager;
+import net.minecraft.client.resources.SplashManager;
+import net.minecraft.client.telemetry.ClientTelemetryManager;
+import net.minecraft.server.Services;
 import net.minecraft.util.profiling.*;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.*;
@@ -29,6 +36,7 @@ import pers.XiaoShadiao.skydiao.screen.MinecraftCrashedScreen;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.ErrorManager;
@@ -41,6 +49,7 @@ public class MixinMinecraft {
     @Final
     @Shadow
     private static Logger LOGGER;
+    @Mutable
     @Final
     @Shadow
     private User user;
@@ -49,15 +58,35 @@ public class MixinMinecraft {
     public File gameDirectory;
     @Shadow
     private Supplier<CrashReport> delayedCrash;
+    @Mutable
+    @Final
+    @Shadow
+    private CompletableFuture<ProfileResult> profileFuture;
+    @Final
+    @Shadow
+    private Services services;
+    @Mutable
+    @Final
+    @Shadow
+    private ClientTelemetryManager telemetryManager;
+    @Final
+    @Shadow
+    private UserApiService userApiService;
+    @Mutable
+    @Final
+    @Shadow
+    private ProfileKeyPairManager profileKeyPairManager;
+    @Mutable
+    @Final
+    @Shadow
+    private SplashManager splashManager;
 
     // =========== SHADOW END =============
 
     @Unique
-    private User user0;
-    @Unique
     private int exceptionCounter;
     @Unique
-    private final int MAX_EXCEPTION_COUNTER = 10;
+    private final int MAX_EXCEPTION_COUNTER = 10;;
 
     @Inject(at = @At("HEAD"), method = "run")
     private void init(CallbackInfo info) {
@@ -66,16 +95,22 @@ public class MixinMinecraft {
 
     @Overwrite
     public User getUser() {
-        if(user0 == null) user0 = user;
-        return user0;
+        return user;
     }
 
     public void setUser(User user) {
-        if (!user.equals(this.user0)) {
+        Minecraft mc = (Minecraft) (Object) this;
+        if (!user.equals(this.user)) {
             try { ChatClient.socket.close(); } catch (Exception ignored) {}
         }
         MixinRealmStatusReset.setFuture(null);
-        user0 = user;
+        MixinRealmsClientReseter.setRealmsClientInstance(null);
+        this.user = user;
+        this.profileFuture = CompletableFuture.supplyAsync(() -> this.services.sessionService().fetchProfile(this.user.getProfileId(), true), Util.nonCriticalIoPool());
+
+        this.telemetryManager = new ClientTelemetryManager(mc, this.userApiService, this.user);
+        this.profileKeyPairManager = ProfileKeyPairManager.create(this.userApiService, this.user, mc.gameDirectory.toPath());
+        this.splashManager = new SplashManager(this.user);
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;runTick(Z)V"), method = "run")

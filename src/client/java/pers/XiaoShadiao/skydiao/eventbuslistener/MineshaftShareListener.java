@@ -52,15 +52,17 @@ public class MineshaftShareListener extends AbstractListener {
 
             // if(mc.getSession().getUsername().equals(p.sender)) return;
 
-            Style cs = Style.EMPTY
-                    .withClickEvent(new ClickEvent.RunCommand("/hhjoinmineshaft " + p.sender))
-                    .withHoverEvent(new HoverEvent.ShowText(Component.literal("§a点击后会立即加入§bGlacite Mineshaft§a, 请确保你手里的工作都完成了哦!\n§6注意! 点击后你当前的组队队伍会自动退出!\n§6如果响应后你没能成功进入Mineshaft, 请再点击试一次!")));
+            if(shouldPopMessage()) {
+                Style cs = Style.EMPTY
+                        .withClickEvent(new ClickEvent.RunCommand("/hhjoinmineshaft " + p.sender))
+                        .withHoverEvent(new HoverEvent.ShowText(Component.literal("§a点击后会立即加入§bGlacite Mineshaft§a, 请确保你手里的工作都完成了哦!\n§6注意! 点击后你当前的组队队伍会自动退出!\n§6如果响应后你没能成功进入Mineshaft, 请再点击试一次!")));
 
-            ToolList.printChatMessage(Component.literal("").withStyle(cs));
-            ToolList.printChatMessage(Component.literal("§b===============[§aXSD§bMS]===============").withStyle(cs));
-            ToolList.printChatMessage(Component.literal("§e" + p.sender + "§a的§bGlacite Mineshaft§a可以加入! §e[点击这里]").withStyle(cs));
-            ToolList.printChatMessage(Component.literal("§b=====================================").withStyle(cs));
-            ToolList.printChatMessage(Component.literal("§b").withStyle(cs));
+                ToolList.printChatMessage(Component.literal("").withStyle(cs));
+                ToolList.printChatMessage(Component.literal("§b===============[§aXSD§bMS]===============").withStyle(cs));
+                ToolList.printChatMessage(Component.literal("§e" + p.sender + "§a的§bGlacite Mineshaft§a可以加入! §e[点击这里]").withStyle(cs));
+                ToolList.printChatMessage(Component.literal("§b=====================================").withStyle(cs));
+                ToolList.printChatMessage(Component.literal("§b").withStyle(cs));
+            }
 
             // 工具列表.getInstance().playSound("hypixelhelper:hh.tip");
         } else {
@@ -91,6 +93,10 @@ public class MineshaftShareListener extends AbstractListener {
             }
         }
 
+    }
+
+    private boolean shouldPopMessage() {
+        return !StatusManager.get().isInDungeon();
     }
 
     public void worldUnload(Minecraft mc, ClientLevel clientLevel) {

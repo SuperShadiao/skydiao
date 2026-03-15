@@ -25,6 +25,7 @@ public abstract class AbstractListener extends Thread {
     public static final PrivateIslandProtectorListener privateIslandProtectorListener = new PrivateIslandProtectorListener();
     public static final DungeonTrapRenderListener dungeonTrapRenderListener = new DungeonTrapRenderListener();
     public static final AutoEnchantmentTableGameListener autoEnchantmentTableGameListener = new AutoEnchantmentTableGameListener();
+    public static final InventoryItemFilter inventoryItemFilter = new InventoryItemFilter();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();

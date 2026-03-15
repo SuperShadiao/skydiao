@@ -657,6 +657,10 @@
     "skyblockdungeontraprender": {
       "configname": "§eSkyblock地牢陷阱显示",
       "description": "§e在Skyblock地牢中显示发射器陷阱"
+    },
+    "skyblockinventoryitemfilter": {
+      "configname": "§e物品栏筛选",
+      "description": "§e在容器 (包括背包) 页面添加物品搜索高亮功能"
     }
   },
   "about": {
@@ -843,6 +847,20 @@
     "afk": {
       "in": "暂时离开了...",
       "out": "回来了..."
+    }
+  },
+  "skydiao": {
+    "gui": {
+      "itemfilter": {
+        "buttonback": "返回",
+        "buttonaddplan": "添加预设",
+        "buttonapply": "应用",
+        "buttondelete": "删除",
+        "buttonentrance": "预设...",
+        "inputtipsearch": "搜索物品",
+        "inputtipregex": "可用正则表达式",
+        "title": "预设设置"
+      }
     }
   }
 }
