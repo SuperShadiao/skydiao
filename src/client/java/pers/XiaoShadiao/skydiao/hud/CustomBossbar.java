@@ -285,7 +285,9 @@ public class CustomBossbar extends XSDHUD {
 
         AnimationManager am = animationMap.computeIfAbsent(entity.getUUID(), k -> new AnimationManager(mobInfo, entity.getId()));
 
+        am.setMobInfo(mobInfo);
         am.flagActive();
+
     }
 
     public static class AnimationManager {

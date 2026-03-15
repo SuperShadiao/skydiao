@@ -7,6 +7,8 @@
     "MixinAbstractContainerScreenPosGetter",
     "MixinBossbarEventGetter",
     "MixinBossBarRemoveAnimation",
+    "MixinDeleteWallEffect",
+    "MixinFogRendererRemoveBlindness",
     "MixinGameRenderer",
     "MixinMinecraft",
     "MixinMinecraftSessionAccessor",

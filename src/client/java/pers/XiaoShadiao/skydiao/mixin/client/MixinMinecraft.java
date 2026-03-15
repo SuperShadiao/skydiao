@@ -45,7 +45,7 @@ import java.util.logging.ErrorManager;
 public class MixinMinecraft {
 
     @Shadow
-    private static Minecraft instance;
+    static Minecraft instance;
     @Final
     @Shadow
     private static Logger LOGGER;
