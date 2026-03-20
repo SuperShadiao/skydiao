@@ -21,3 +21,5 @@
 这会不打算像Hypixel Helper那样闭源了, 这个项目直接开源得了 (doge
 
 若要使用本仓库的代码, 请**注明出处**
+
+注明方式: https://5ixsd.top/qqg 和 https://5ixsd.top/skydiao 两个链接二选一备注即可
