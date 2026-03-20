@@ -1,4 +1,4 @@
-package pers.XiaoShadiao.skydiao.eventbuslistener.bossbar;
+package pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
@@ -59,6 +59,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     @Override
     public double getHealth() {
         // float health = f7Boss.getHealth();
+        if(f7Boss == null) return 0;
         double scale = f7Boss.getProgress();
         return getMaxHealth() * (scale < 0.02 ? 0 : scale);
     }
@@ -316,7 +317,6 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     private boolean onPacket(Packet<PacketListener> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
         Map.Entry<String, StarRailNotification.Type> turnItToStarRailMsg = null;
         boolean cancelFlag = true;
-
 
         Component ic = ToolList.getInstance().tryGetTitleFromPacket(packet);
         if(ic == null) return false;

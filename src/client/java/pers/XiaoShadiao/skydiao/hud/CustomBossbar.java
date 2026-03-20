@@ -66,8 +66,9 @@ public class CustomBossbar extends XSDHUD {
             LivingEntity entity = starRailBossBar.getTargetEntity();
             RenderUtils.WorldRender worldRender = RenderUtils.createWorldRenderInstance(context, starRailBossBar.shouldXRayBoss() ? CustomRenderPipeline.THROUGH_WALLS_LINE : CustomRenderPipeline.NO_THROUGH_WALLS_LINE);
             if(entity != null) {
-                RenderUtils.renderESP(worldRender, entity, 1, 0, 0, 1,  false);
-                if(starRailBossBar.shouldXRayBoss()) RenderUtils.renderTrace(worldRender, entity, 1, 0, 0, 1);
+                Color c = starRailBossBar.getRenderBossColor();
+                RenderUtils.renderESP(worldRender, entity, c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, 1,  false);
+                if(starRailBossBar.shouldXRayBoss()) RenderUtils.renderTrace(worldRender, entity, c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, 1);
             }
             worldRender.finishDraw();
         }
@@ -517,6 +518,8 @@ public class CustomBossbar extends XSDHUD {
 
     public interface IStarRailBossBar {
 
+        public static final Color DEFAULT_BOSS_COLOR = new Color(255, 0, 0);
+
         public int getStage();
         public int getMaxStage();
         public double getHealth();
@@ -548,6 +551,10 @@ public class CustomBossbar extends XSDHUD {
 
         public boolean shouldNotRenderOtherBoss(LivingEntity e);
         public boolean shouldXRayBoss();
+
+        public default Color getRenderBossColor() {
+            return DEFAULT_BOSS_COLOR;
+        };
 
     }
 
@@ -772,7 +779,7 @@ public class CustomBossbar extends XSDHUD {
                             text = String.valueOf(bossBar.getPowerUp());
                             break;
                         case PERCENT:
-                            text = (bossBar.getPowerUp() / bossBar.getMaxPowerUp() * 100) + "%";
+                            text = (bossBar.getPowerUp() * 100 / bossBar.getMaxPowerUp()) + "%";
                             break;
                         case NONE:
                         default:

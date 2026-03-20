@@ -17,6 +17,7 @@ import net.minecraft.world.effect.MobEffects;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
+import pers.XiaoShadiao.skydiao.config.ConfigManager;
 
 import java.util.Objects;
 
@@ -33,9 +34,9 @@ public class BlindOrDying extends XSDHUD {
     public void render(GuiGraphics context, DeltaTracker tickCounter) {
         effectAnimation += tickCounter.getGameTimeDeltaTicks() / 7.5f;
         if(mc.player == null) return;
-        if(mc.player.getHealth() / mc.player.getMaxHealth() < 0.25) {
+        if(ConfigManager.dyingtip.getValue() && mc.player.getHealth() / mc.player.getMaxHealth() < 0.25) {
             draw(context, 0xFFFF0000);
-        } else if(mc.player.hasEffect(MobEffects.BLINDNESS)) {
+        } else if(ConfigManager.noblind.getValue() && mc.player.hasEffect(MobEffects.BLINDNESS)) {
             draw(context, 0xFF000000);
         }
     }

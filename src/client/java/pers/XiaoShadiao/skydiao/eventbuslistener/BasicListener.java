@@ -24,6 +24,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
+import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.screen.mircosoftaccount.AccountSelectScreen;
@@ -34,6 +35,7 @@ import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -135,6 +137,8 @@ public class BasicListener extends AbstractListener {
         ChatClientManager.getChatClient();
     }
 
+    private boolean chatPatcherInstalled;
+
     private void onStartClientTick(Minecraft mc) {
         if((!(mc.screen instanceof ChatScreen) || mc.screen.getClass().getName().startsWith("pers.XiaoShadiao")) && Arrays.stream(mc.options.keyMappings).anyMatch(KeyMapping::isDown))  {
             if(isAFK) {
@@ -146,6 +150,22 @@ public class BasicListener extends AbstractListener {
         if(System.currentTimeMillis() - lastOperationTime > 120000 && !isAFK) {
             isAFK = true;
             if(ChatClientManager.serverAvailable()) ChatClientManager.getChatClient().sender.sendAFK(true);
+        }
+        if(ConfigManager.chatbutton.getValue()) {
+            if(!chatPatcherInstalled) {
+                if(!FabricLoader.getInstance().isModLoaded("chatpatches")) {
+                    ConfigManager.chatbutton.setValue(false);
+                    try {
+                        ToolList.printChatMessage(Component.literal("§a[小沙雕] §c翻译功能需要你安装ChatPatcher后才可以使用, 请§e点击这里§c下载并安装").withStyle(Style.EMPTY
+                                .withHoverEvent(new HoverEvent.ShowText(Component.literal("§a点击前往下载")))
+                                .withClickEvent(new ClickEvent.OpenUrl(new URI("https://modrinth.com/mod/chatpatches")))));
+                    } catch (URISyntaxException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    chatPatcherInstalled = true;
+                }
+            }
         }
     }
 

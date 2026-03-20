@@ -20,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(FogRenderer.class)
@@ -67,7 +68,7 @@ public class MixinFogRendererRemoveBlindness {
 
     @Inject(method = "setupFog", at = @At("HEAD"))
     public void setupFog(Camera camera, int i, boolean bl, DeltaTracker deltaTracker, float f, ClientLevel clientLevel, CallbackInfoReturnable<Vector4f> cir) {
-        FOG_ENVIRONMENTS = ConfigManager.noblind.getValue() ? modified : original;
+        FOG_ENVIRONMENTS = new ArrayList<>(ConfigManager.noblind.getValue() ? modified : original);
     }
 
 }

@@ -72,6 +72,7 @@ public class InventoryItemFilter extends AbstractListener {
         filterTextBox.setHint(Component.literal(ToolList.getInstance().random.nextBoolean() ? "搜索物品" : "可用正则表达式"));
         filterTextBox.setX(10);
         filterTextBox.setY(screen.height / 2 - 20);
+        filterTextBox.setMaxLength(Integer.MAX_VALUE);
         filterTextBox.setValue(ConfigManager.inventoryFilterRegex.getValue());
 
         buttons.add(filterTextBox);

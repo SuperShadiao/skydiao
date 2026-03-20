@@ -861,6 +861,11 @@
         "inputtipregex": "可用正则表达式",
         "title": "预设设置"
       }
+    },
+    "feature": {
+      "chatbutton": {
+        "translate": "翻译消息"
+      }
     }
   }
 }

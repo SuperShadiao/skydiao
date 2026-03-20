@@ -177,6 +177,7 @@ public class ConfigScreen extends Screen {
                 super(SearchConfigTab.this);
                 searchBox = new EditBox(ToolList.mc.font, 0, 0, 200, 20, Component.literal(translate("configcategory.搜索")));
                 searchBox.setValue("");
+                searchBox.setMaxLength(1000);
                 searchBox.setResponder(this::updateSearchResult);
                 updateSearchResult("");
             }
@@ -349,6 +350,7 @@ public class ConfigScreen extends Screen {
                         }
                         case StringConfigOption stringOption -> {
                             EditBox editBox = new EditBox(ToolList.mc.font, 0, 0, 100, 20, Component.literal(stringOption.getI18nName()));
+                            editBox.setMaxLength(1000);
                             editBox.setValue(stringOption.getValue());
                             editBox.setResponder(stringOption::setValue);
                             yield editBox;

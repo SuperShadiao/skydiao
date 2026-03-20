@@ -1,5 +1,6 @@
-package pers.XiaoShadiao.skydiao.eventbuslistener.bossbar;
+package pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon;
 
+import pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.AbstractBossbarListener;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 

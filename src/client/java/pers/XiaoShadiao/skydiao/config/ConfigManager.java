@@ -35,17 +35,19 @@ public class ConfigManager {
     public static final BooleanConfigOption noblind = new BooleanConfigOption("removeblindnessrender", false);
     public static final BooleanConfigOption nosuffoverlay = new BooleanConfigOption("nosuffoverlay", false);
     public static final BooleanConfigOption inventoryFilter = new BooleanConfigOption("skyblockinventoryitemfilter", false);
+    public static final BooleanConfigOption dyingtip = new BooleanConfigOption("dyingtip", false);
     public static final StringConfigOption inventoryFilterRegex = new StringConfigOption("inventoryfilterregex", "");
     public static final StringConfigOption inventoryFilterRegexList = new StringConfigOption("inventoryfilterregexlist", "[]");
 
+    public static final BooleanConfigOption chatbutton = new BooleanConfigOption("chatbutton", false);
 
     public static final List<Map.Entry<String, List<ConfigOption<?>>>> categories = List.of(
             Map.entry("basic", List.of(language)),
-            Map.entry("工具类", List.of(inventoryFilter)),
+            Map.entry("工具类", List.of(inventoryFilter, chatbutton)),
             Map.entry("自动类", List.of(autoEnchantTableGame)),
             Map.entry("mining", List.of(mineshaftSharing, skyblockSafeIsland)),
             Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonRenderTraps)),
-            Map.entry("界面类", List.of(bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, noblind, nosuffoverlay))
+            Map.entry("界面类", List.of(bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, dyingtip, noblind, nosuffoverlay))
     );
 
 

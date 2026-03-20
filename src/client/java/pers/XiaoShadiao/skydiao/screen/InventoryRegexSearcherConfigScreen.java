@@ -105,6 +105,7 @@ public class InventoryRegexSearcherConfigScreen extends Screen {
 
             public RegexEntry(String str) {
                 this.editBox = new EditBox(ToolList.mc.font, getContentX(), getContentY(), getContentRight() - getContentX() - 110, 20, Component.literal(""));
+                this.editBox.setMaxLength(Integer.MAX_VALUE);
                 this.editBox.setValue(str);
                 this.editBox.moveCursorToStart(false);
 

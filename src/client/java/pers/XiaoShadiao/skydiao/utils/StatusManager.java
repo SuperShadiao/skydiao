@@ -134,5 +134,8 @@ public class StatusManager extends Thread {
     public boolean isInDungeon() {
         return "DUNGEON".equalsIgnoreCase(gameMode);
     }
+    public boolean isInSkyblock() {
+        return "SkyBlock".equals(gameType);
+    }
 
 }

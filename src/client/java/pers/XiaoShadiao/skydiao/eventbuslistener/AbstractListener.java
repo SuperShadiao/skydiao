@@ -3,13 +3,12 @@ package pers.XiaoShadiao.skydiao.eventbuslistener;
 import net.minecraft.client.Minecraft;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.DungeonF1BossbarListener;
-import pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.DungeonF2BossbarListener;
-import pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.DungeonF7BossbarListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon.*;
 import pers.XiaoShadiao.skydiao.utils.Register;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class AbstractListener extends Thread {
@@ -29,6 +28,10 @@ public abstract class AbstractListener extends Thread {
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();
+    public static final DungeonF3BossbarListener dungeonF3Bossbar = new DungeonF3BossbarListener();
+    public static final DungeonF4BossbarListener dungeonF4Bossbar = new DungeonF4BossbarListener();
+    public static final DungeonF5BossbarListener dungeonF5Bossbar = new DungeonF5BossbarListener();
+    public static final DungeonF6BossbarListener dungeonF6Bossbar = new DungeonF6BossbarListener();
     public static final DungeonF7BossbarListener dungeonF7Bossbar = new DungeonF7BossbarListener();
 
     public AbstractListener() {
@@ -49,6 +52,7 @@ public abstract class AbstractListener extends Thread {
             listeners.add(listener);
             listener.registerListeners();
         });
+        listeners = Collections.unmodifiableList(listeners);
     }
 
     public abstract String getListenerName();
@@ -61,6 +65,10 @@ public abstract class AbstractListener extends Thread {
     public static <T> T printThis(T t) {
         System.out.println(t);
         return t;
+    }
+
+    public String toString() {
+        return "Listener " + getListenerName() + " | " + super.toString();
     }
 
 }

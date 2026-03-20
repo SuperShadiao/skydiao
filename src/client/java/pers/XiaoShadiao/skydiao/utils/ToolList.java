@@ -45,7 +45,7 @@ public class ToolList {
 
     private static ToolList instance;
 
-    private final boolean imXiaoShadiao = System.getenv().get("USERNAME").equals("小沙雕");
+    private final boolean imXiaoShadiao = System.getenv().getOrDefault("USERNAME", "").equals("小沙雕");
     public Random random = new Random();
     private DevelopmentEnvironmentDetector devDetectorInstance;
     public Logger log = LogManager.getLogger("XSD Utils");
