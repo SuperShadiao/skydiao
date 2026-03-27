@@ -49,7 +49,7 @@ public class DungeonF4BossbarListener extends AbstractDungeonBossbar {
     }
 
     @Override
-    protected void registerListeners() {
+    public void registerListeners() {
         ClientTickEvents.START_CLIENT_TICK.register(this::onClientTick);
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
     }

@@ -11,10 +11,10 @@ import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 public class XSDSafeSession extends User {
 
-    private static long lastPrintTime = 0;
     private static final Logger log = LogManager.getLogger();
     private boolean ticket = false;
 
@@ -35,12 +35,8 @@ public class XSDSafeSession extends User {
         int deepth = 2;
         String stack = ste[deepth].getClassName();
 
-        List<Class<?>> acceptClass = List.of(
-                ClientHandshakePacketListenerImpl.class,
-                RealmsClient.class,
-                Minecraft.class,
-                XSDSafeSession.class
-        );
+        List<Class<?>> acceptClass = getAcceptableClasses();
+
         Optional<Class<?>> opt = acceptClass.stream().filter(c -> c.getName().equals(stack)).findAny();
         boolean isFullySafe = opt.isPresent();
         if (isFullySafe) flag = true;
@@ -116,9 +112,7 @@ public class XSDSafeSession extends User {
     }
 
     private void printGetterStack(String str, String stack) {
-        if(System.currentTimeMillis() - lastPrintTime > 10000) {
-            log.warn("椎栈" + stack + "在刚才调用了" + str + "()");
-        }
+        log.warn("椎栈" + stack + "在刚才调用了" + str + "()");
     }
 
     private void throwException(String str, String stack) {
@@ -169,4 +163,48 @@ public class XSDSafeSession extends User {
         }
 
     }
+
+    private List<Class<?>> classes;
+
+    private List<Class<?>> mcClasses;
+
+    private List<Class<?>> _3rdClasses;
+
+    private List<Class<?>> getAcceptableClasses() {
+        if(classes == null) {
+            classes = Stream.of(getMcClasses(), get3rdClasses()).flatMap(List::stream).toList();
+        }
+        return classes;
+    }
+
+    private List<Class<?>> getMcClasses() {
+        if(mcClasses == null) {
+            mcClasses = List.of(
+                    ClientHandshakePacketListenerImpl.class,
+                    RealmsClient.class,
+                    Minecraft.class,
+                    XSDSafeSession.class
+            );
+        }
+        return mcClasses;
+    }
+
+    private List<Class<?>> get3rdClasses() {
+
+        // 授予部分第三方类的权限用于鉴权
+
+        if(_3rdClasses == null) {
+            _3rdClasses = Stream.of(
+                    "me.owdding.skyblockpv.api.PvAPI"
+            ).map(n -> {
+                try {
+                    return Class.forName(n);
+                } catch (ClassNotFoundException e) {
+                    return (Class<?>) null;
+                }
+            }).filter(Objects::nonNull).toList();
+        }
+        return _3rdClasses;
+    }
+
 }

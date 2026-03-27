@@ -56,7 +56,7 @@ public class DungeonF6BossbarListener extends AbstractDungeonBossbar {
     }
 
     @Override
-    protected void registerListeners() {
+    public void registerListeners() {
         ClientTickEvents.START_CLIENT_TICK.register(this::onClientTick);
         ClientReceiveMessageEvents.GAME.register(this::onChat);
     }

@@ -19,19 +19,19 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.Style;
+import net.minecraft.client.player.KeyboardInput;
+import net.minecraft.network.chat.*;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.screen.mircosoftaccount.AccountSelectScreen;
+import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 import pers.XiaoShadiao.skydiao.utils.autoupdater.AutoUpdater;
 import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.playerinput.XSDSimulatorInput;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 
 import java.net.URI;
@@ -57,7 +57,7 @@ public class BasicListener extends AbstractListener {
     }
 
     @Override
-    protected void registerListeners() {
+    public void registerListeners() {
         ClientTickEvents.START_CLIENT_TICK.register(this::onStartClientTick);
         ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register(this::onWorldChange);
         CustomFabricEvents.HYPIXEL_PACKET_EVENT.register(this::onHypixelPacket);
@@ -65,6 +65,7 @@ public class BasicListener extends AbstractListener {
         ClientPlayConnectionEvents.JOIN.register(this::onJoinServer);
         ClientPlayConnectionEvents.DISCONNECT.register(this::onDisconnect);
         ClientReceiveMessageEvents.GAME.register(this::onChat);
+
     }
 
     private void onChat(Component component, boolean b) {
@@ -77,6 +78,22 @@ public class BasicListener extends AbstractListener {
                 HypixelRewardClaimer.get(s).doConnect();
             }
         }
+
+        Matcher m = Pattern.compile("[a-zA-Z]+").matcher(message);
+        while(m.find()) {
+            String words = m.group();
+            if(words.toLowerCase().contains("discord") || words.toLowerCase().endsWith("dc") || (words.toLowerCase().contains("dc") && words.length() <= 3)) {
+                MutableComponent ic = Component.literal("§a[小沙雕] §c请不要相信任何以免费rank, 语音 (vc) 为由邀请你加入Discord服务器的老外, 更不要相信Discord服务器内的\"微软账号验证\"。" +
+                        "如果你信了, 相信小沙雕, 你会后悔终身!");
+                Style cs = Style.EMPTY
+                        .withClickEvent(new ClickEvent.OpenUrl(URI.create("https://xiaoshadiao.club/antiscamming")))
+                        .withHoverEvent(new HoverEvent.ShowText(Component.literal("点击查看骗子诈骗账号的方式")));
+                MutableComponent ic2 = Component.literal(" §e[点击这里查看为什么]").setStyle(cs);
+
+                ToolList.printChatMessage(ic.append(ic2));
+                break;
+            }
+        }
     }
 
     private void onDisconnect(ClientPacketListener clientPacketListener, Minecraft minecraft) {
@@ -84,6 +101,8 @@ public class BasicListener extends AbstractListener {
         isConnectedToServer = false;
 
         mc.execute(CustomRenderPipeline::closeAll);
+        StatusManager.cleanHypixelPacket();
+        StatusManager.destory();
     }
 
     private void onJoinServer(ClientPacketListener clientPacketListener, PacketSender packetSender, Minecraft minecraft) {
@@ -104,6 +123,12 @@ public class BasicListener extends AbstractListener {
                                             .withHoverEvent(new HoverEvent.ShowText(Component.literal("§e点击这里打开链接")))
                                             .withClickEvent(new ClickEvent.OpenUrl(URI.create("https://5ixsd.top/skydiao")))
                                     ));
+                            if(update.downlanded) {
+                                ToolList.printChatMessage(Component.literal("§a[小沙雕] 若重启后自动更新程序未弹出, 请§e点击这里§a尝试手动更新 :>").withStyle(Style.EMPTY
+                                        .withHoverEvent(new HoverEvent.ShowText(Component.literal("§e点击这里打开链接")))
+                                        .withClickEvent(new ClickEvent.OpenUrl(URI.create("https://5ixsd.top/skydiao")))
+                                ));
+                            }
                         }
                     }
                     if (FabricLoader.getInstance().isModLoaded("modmenu")) {
@@ -135,11 +160,27 @@ public class BasicListener extends AbstractListener {
 
     private void onWorldChange(Minecraft mc, ClientLevel clientLevel) {
         ChatClientManager.getChatClient();
+
+        InputSimulator.forward = false;
+        InputSimulator.backward = false;
+        InputSimulator.left = false;
+        InputSimulator.right = false;
+        InputSimulator.jump = false;
+        InputSimulator.shift = false;
+        InputSimulator.sprint = false;
+        InputSimulator.releaseLeftClick();
+        InputSimulator.releaseRightClick();
     }
 
     private boolean chatPatcherInstalled;
 
     private void onStartClientTick(Minecraft mc) {
+        if(mc.player != null && mc.level != null) InputSimulator.updateTick();
+        if(mc.player != null) {
+            if(mc.player.input.getClass() == KeyboardInput.class) {
+                mc.player.input = new XSDSimulatorInput(mc.options);
+            }
+        }
         if((!(mc.screen instanceof ChatScreen) || mc.screen.getClass().getName().startsWith("pers.XiaoShadiao")) && Arrays.stream(mc.options.keyMappings).anyMatch(KeyMapping::isDown))  {
             if(isAFK) {
                 isAFK = false;

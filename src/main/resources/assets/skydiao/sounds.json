@@ -4,5 +4,13 @@
     "sounds": [
       "skydiao:starrail/notification"
     ]
+  },
+  "alert_macro_check": {
+    "subtitle": "Alert! Macro Check!",
+    "sounds": [
+      "skydiao:getchecked/1",
+      "skydiao:getchecked/2",
+      "skydiao:getchecked/3"
+    ]
   }
 }

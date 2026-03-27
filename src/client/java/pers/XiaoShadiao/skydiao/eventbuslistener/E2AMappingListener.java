@@ -27,7 +27,7 @@ public class E2AMappingListener extends AbstractListener {
     }
 
     @Override
-    protected void registerListeners() {
+    public void registerListeners() {
         ClientTickEvents.START_CLIENT_TICK.register(this::onClientTick);
         ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register(this::onWorldUnload);
     }

@@ -176,10 +176,6 @@ public class MinecraftLogin {
         conn.setRequestMethod("POST");
         conn.setDoOutput(true);
 
-        if(conn instanceof HttpsURLConnection) {
-            ((HttpsURLConnection) conn).setSSLSocketFactory(HttpSSLDisabler.getTrustAll());
-            ((HttpsURLConnection) conn).setHostnameVerifier((h, s) -> true);
-        }
         if(consumer != null) consumer.accept(conn);
 
         try (OutputStream os = conn.getOutputStream()) {
@@ -195,21 +191,13 @@ public class MinecraftLogin {
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
         conn.setRequestProperty("Authorization", "Bearer " + accessToken);
-        if(conn instanceof HttpsURLConnection) {
-            ((HttpsURLConnection) conn).setSSLSocketFactory(HttpSSLDisabler.getTrustAll());
-            ((HttpsURLConnection) conn).setHostnameVerifier((h, s) -> true);
-        }
 
         return getResponse(conn);
     }
 
     private String getResponse(HttpURLConnection conn) throws Exception {
-        int responseCode = conn.getResponseCode();
-        if (responseCode != HttpURLConnection.HTTP_OK) {
-            // System.out.println("非正常请求，响应码: " + responseCode + ", url: " + conn.getURL());
-        }
         StringBuilder response = new StringBuilder();
-        InputStream in1; // = // responseCode == HttpURLConnection.HTTP_OK ? conn.getInputStream() : conn.getErrorStream();
+        InputStream in1;
         try {
             in1 = conn.getInputStream();
         } catch (Exception e) {
@@ -221,31 +209,8 @@ public class MinecraftLogin {
                 response.append(inputLine);
             }
         }
-        String string = response.toString();
-        // System.out.println(string);
-        return string;
-        // } else {
-        //     throw new Exception("请求失败，响应码: " + responseCode + ", url: " + conn.getURL());
-        // }
+        return response.toString();
     }
-
-    /*public static void main(String[] args) {
-        try {
-
-
-
-
-            MinecraftLogin login = new MinecraftLogin();
-            String key = "M.C504_BAY.0.U.-CrtqPWP2lYdXBfdF0ALCPbDX*MZ*xROKZvkdp8USmo2evIW41LQRxSzdOeRCLH7yzg3RqS2ax0hcIOoWWDn7YMm5tJB2itiYrdfAAe1hQjMNxkr*AtlEsTsYGT*sHonNCNKwbYI43NTyXNiZEpVF24v5S7PjVLFM8jR5*kSobYFbCAFbQl06QivHL4mjQz9RXLPCRZg3bYtXsVCx0rlfQAiJq1XLZO!adgFnNNdAFLrV5u8FNb9!d5qRvtdB5tTkxdLM3A4VTnnroTespg9B*sel5c*hiUUTBjI7KGy9!usPRbO3jKzJYxlQDGIajCsPPuNEcRYGZ6jeZzoBxxcpWkmKJljGbXtMTIIwLs1AQQcu1QslANl3AYMGcxrLIWKoWA$$"; // 替换为实际的授权码或刷新令牌
-            // String rr = "re"; // 或 "refresh"
-            boolean refresh = true;
-            MinecraftSessionContainer msc = login.initializeAccount(key, refresh);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
-    }*/
 
     public static class MinecraftSessionContainer {
         @Deprecated

@@ -4,8 +4,10 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.hypixel.modapi.HypixelModAPI;
 import net.minecraft.network.chat.Component;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
+import pers.XiaoShadiao.skydiao.utils.StatusManager;
 
 import java.util.List;
 
@@ -21,13 +23,20 @@ public class JoinMineshaftCommand extends BaseCommand {
     @Override
     public List<ArgumentBuilder<FabricClientCommandSource, ?>> getArgs() {
         return List.of(
-                getArgInstanceAndRunNode("player", StringArgumentType.word())
+                getArgInstanceAndRunNode("player", StringArgumentType.word()).suggests((context, builder) -> {
+                    AbstractListener.mineshaftShareListener.getAvailableShaftPlayerNames().forEach(builder::suggest);
+                    return builder.buildFuture();
+                })
         );
     }
 
     @Override
     public int executeCommand(CommandContext<FabricClientCommandSource> context) {
 
+        if(!StatusManager.get().isInSkyblock()) {
+            context.getSource().sendFeedback(Component.literal("§a[小沙雕] §c你只能在Skyblock内使用该指令!"));
+            return -1;
+        }
         if(System.currentTimeMillis() - lastRun < 5000) {
             context.getSource().sendError(Component.literal("§a[小沙雕] §c呜, 太快了, 会坏掉的..."));
             return -1;

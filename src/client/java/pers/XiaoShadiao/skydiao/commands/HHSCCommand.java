@@ -1,5 +1,6 @@
 package pers.XiaoShadiao.skydiao.commands;
 
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -20,6 +21,7 @@ import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
 import java.util.List;
 
@@ -32,18 +34,57 @@ public class HHSCCommand extends OpenConfigMenuCommand {
 
     @Override
     public List<ArgumentBuilder<FabricClientCommandSource, ?>> getArgs() {
+
+        LiteralArgumentBuilder<FabricClientCommandSource> devcommand = getArgConstantInstance("devcommand");
+        if(ToolList.getInstance().isDevEnvironment()) {
+            devcommand.then(getArgConstantInstance("leftclick").then(getArgInstance("click", BoolArgumentType.bool()).executes((context) -> owo(() -> InputSimulator.isMouseLeftHolding = BoolArgumentType.getBool(context, "click")))));
+            devcommand.then(getArgConstantInstance("rightclick").then(getArgInstance("click", BoolArgumentType.bool()).executes((context) -> owo(() -> InputSimulator.isMouseRightHolding = BoolArgumentType.getBool(context, "click")))));
+            devcommand.then(getArgConstantInstance("leftfastclick").then(getArgInstance("count", IntegerArgumentType.integer(0)).then(getArgInstance("delay", IntegerArgumentType.integer(0)).executes((context) -> awa(() -> {
+                try {
+                    int count = IntegerArgumentType.getInteger(context, "count");
+                    long delay = IntegerArgumentType.getInteger(context, "delay");
+                    for(int i = 0; i < count; i++) {
+                        Thread.sleep(delay);
+                        InputSimulator.singleLeftClick();
+                    }
+                } catch (Exception e) {
+
+                }
+            })))));
+            devcommand.then(getArgConstantInstance("rightfastclick").then(getArgInstance("count", IntegerArgumentType.integer(0)).then(getArgInstance("delay", IntegerArgumentType.integer(0)).executes((context) -> awa(() -> {
+                try {
+                    int count = IntegerArgumentType.getInteger(context, "count");
+                    long delay = IntegerArgumentType.getInteger(context, "delay");
+                    for(int i = 0; i < count; i++) {
+                        Thread.sleep(delay);
+                        InputSimulator.singleRightClick();
+                    }
+                } catch (Exception e) {
+
+                }
+            })))));
+        } else {
+            devcommand.executes((context) -> owo(() -> context.getSource().sendFeedback(Component.literal("§a[小沙雕] §c当前不是Dev环境..."))));
+        }
+
         return List.of(
                 getArgConstantInstance("listmobinfo").executes(this::executePrintMobInfo),
                 getArgConstantInstance("claimreward").then(getArgInstance("index", IntegerArgumentType.integer(0, 2)).executes(this::executeClaimReward)),
                 getArgConstantInstance("loadtestboss").executes(this::loadTestBoss),
                 getArgConstantInstance("teststarrailmsg1").then(getArgInstance("msg", StringArgumentType.greedyString()).executes((context -> owo(() -> XSDHUD.starRailNotification.updateMessage(context.getArgument("msg", String.class), StarRailNotification.Type.success))))),
                 getArgConstantInstance("teststarrailmsg2").then(getArgInstance("msg", StringArgumentType.greedyString()).executes((context -> owo(() -> XSDHUD.starRailNotification.updateMessage(context.getArgument("msg", String.class), StarRailNotification.Type.warning))))),
-                getArgConstantInstance("translate").redirect(HHT_COMMAND.getCommandNode())
+                getArgConstantInstance("translate").redirect(HHT_COMMAND.getCommandNode()),
+                devcommand
         );
     }
 
     private int owo(Runnable runnable) {
         runnable.run();
+        return 0;
+    }
+
+    private int awa(Runnable runnable) {
+        new Thread(runnable).start();
         return 0;
     }
 

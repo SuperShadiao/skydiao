@@ -42,6 +42,7 @@
     "disabled": "§c关",
     "1": "§a开",
     "enabled": "§a开",
+    "macrofeaturealert": "§c§l警告: 该功能为Macro功能, Hypixel禁止这种自动化功能, 使用该功能造成的任何后果自负.",
     "autogg": {
       "configname": "§e全自动刷人品值装置",
       "description": "§e小游戏结束时自动发gg"
@@ -661,6 +662,10 @@
     "skyblockinventoryitemfilter": {
       "configname": "§e物品栏筛选",
       "description": "§e在容器 (包括背包) 页面添加物品搜索高亮功能"
+    },
+    "disasterhelper": {
+      "configname": "§e灾难模拟器助手",
+      "description": "§e在灾难模拟器中帮你标注一些有用的东西"
     }
   },
   "about": {

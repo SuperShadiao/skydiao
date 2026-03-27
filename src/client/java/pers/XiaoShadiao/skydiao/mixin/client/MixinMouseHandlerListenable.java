@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
+import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
 @Mixin(MouseHandler.class)
 public class MixinMouseHandlerListenable {
@@ -16,6 +17,11 @@ public class MixinMouseHandlerListenable {
         if (CustomFabricEvents.MOUSE_BUTTON_EVENT.invoker().onMouseButton(l, mouseButtonInfo, i)) {
             ci.cancel();
         }
+    }
+
+    @Inject(method = "turnPlayer", at = @At("TAIL"))
+    private void turnPlayer(double d, CallbackInfo ci) {
+        InputSimulator.updatePlayerRotation();
     }
 
 }

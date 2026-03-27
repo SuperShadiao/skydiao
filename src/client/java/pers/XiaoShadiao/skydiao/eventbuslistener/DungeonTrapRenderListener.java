@@ -31,7 +31,7 @@ public class DungeonTrapRenderListener extends AbstractListener {
     }
 
     @Override
-    protected void registerListeners() {
+    public void registerListeners() {
         ClientTickEvents.START_CLIENT_TICK.register(this::onTick);
         WorldRenderEvents.END_MAIN.register(this::onRender);
     }

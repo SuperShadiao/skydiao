@@ -27,6 +27,6 @@
     "MixinReportTypeCustomMessage",
     "MixinUserDataSecurer",
     "odinfix.MixinOdinPickColorTerminalFixer",
-    "odinfix.MixinOdinStartWithTerminalFixer"
+    "odinfix.MixinOdinStartWithTerminalFixer",
   ]
 }

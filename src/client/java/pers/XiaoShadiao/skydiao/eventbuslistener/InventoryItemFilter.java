@@ -46,7 +46,7 @@ public class InventoryItemFilter extends AbstractListener {
     }
 
     @Override
-    protected void registerListeners() {
+    public void registerListeners() {
         ScreenEvents.AFTER_INIT.register(this::afterScreenInit);
     }
 

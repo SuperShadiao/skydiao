@@ -1,23 +1,20 @@
 package pers.XiaoShadiao.skydiao.mixin.client;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.minecraft.UserApiService;
 import com.mojang.authlib.yggdrasil.ProfileResult;
 import com.mojang.blaze3d.GpuOutOfMemoryException;
-import com.mojang.jtracy.DiscontinuousFrame;
-import com.mojang.jtracy.TracyClient;
 import com.mojang.logging.LogUtils;
-import com.mojang.realmsclient.RealmsAvailability;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportType;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
-import net.minecraft.client.gui.components.CommandSuggestions;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
-import net.minecraft.client.gui.screens.OutOfMemoryScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.multiplayer.ProfileKeyPairManager;
 import net.minecraft.client.resources.SplashManager;
 import net.minecraft.client.telemetry.ClientTelemetryManager;
@@ -30,20 +27,21 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pers.XiaoShadiao.skydiao.irc.ChatClient;
-import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.screen.MinecraftCrashedScreen;
+import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.logging.ErrorManager;
 
 @Mixin(Minecraft.class)
 public class MixinMinecraft {
 
+    @Shadow
+    private int rightClickDelay;
+    @Shadow
+    public int missTime;
     @Shadow
     static Minecraft instance;
     @Final
@@ -113,10 +111,10 @@ public class MixinMinecraft {
         this.splashManager = new SplashManager(this.user);
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;runTick(Z)V"), method = "run")
-    public void run(Minecraft instance, boolean bl) {
+    @WrapOperation(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;runTick(Z)V"), method = "run")
+    public void run(Minecraft instance, boolean bl, Operation<Void> original) {
         try {
-            this.runTick(bl);
+            original.call(instance, bl);
             this.handleDelayedCrash();
             if(exceptionCounter > 0) exceptionCounter--;
         } catch (ReportedException var11) {
@@ -176,6 +174,33 @@ public class MixinMinecraft {
             delayedCrash = null;
             throw new ReportedException(crashReport);
         }
+    }
+
+    @WrapOperation(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;continueAttack(Z)V"))
+    public void handleKeyBinds(Minecraft instance, boolean bl, Operation<Void> original) {
+        boolean click = bl || InputSimulator.leftClickFlagMinecraft;
+        boolean executed = false;
+        if(!bl && missTime > 1000) {
+            InputSimulator.continueAttack(click);
+            executed = click;
+        }
+        if(!executed) original.call(instance, click);
+    }
+
+    @WrapOperation(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;isDown()Z"))
+    public boolean handleKeyBinds2(KeyMapping instance, Operation<Boolean> original) {
+        if(InputSimulator.rightClickDelay != 0) {
+            this.rightClickDelay = InputSimulator.rightClickDelay;
+        }
+        if(instance == ToolList.mc.options.keyUse) {
+            return original.call(instance) || (InputSimulator.isMouseRightHolding && InputSimulator.rightClickDelay == 0 && !InputSimulator.hasRemainRightClick() && !InputSimulator.isInventoryOpen());
+        }
+        return original.call(instance);
+    }
+
+    @Inject(method = "startUseItem", at = @At("RETURN"))
+    public void startUseItem(CallbackInfo ci) {
+        InputSimulator.rightClickDelay = this.rightClickDelay;
     }
 
     @Shadow

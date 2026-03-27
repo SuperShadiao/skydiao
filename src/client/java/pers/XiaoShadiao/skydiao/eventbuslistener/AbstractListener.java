@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon.*;
+import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
 import pers.XiaoShadiao.skydiao.utils.Register;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
@@ -17,6 +18,8 @@ public abstract class AbstractListener extends Thread {
     public static List<AbstractListener> listeners = new ArrayList<>();
     public final Logger logger = LogManager.getLogger(getListenerName());
 
+    public static final MacroManagerListener mml = new MacroManagerListener();
+
     public static final BasicListener basicListener = new BasicListener();
     public static final MineshaftShareListener mineshaftShareListener = new MineshaftShareListener();
     public static final DungeonMobESPListener dungeonMobESPListener = new DungeonMobESPListener();
@@ -25,6 +28,7 @@ public abstract class AbstractListener extends Thread {
     public static final DungeonTrapRenderListener dungeonTrapRenderListener = new DungeonTrapRenderListener();
     public static final AutoEnchantmentTableGameListener autoEnchantmentTableGameListener = new AutoEnchantmentTableGameListener();
     public static final InventoryItemFilter inventoryItemFilter = new InventoryItemFilter();
+    public static final AutoHarpListener autoHarpListener = new AutoHarpListener();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();
@@ -57,7 +61,7 @@ public abstract class AbstractListener extends Thread {
 
     public abstract String getListenerName();
 
-    protected abstract void registerListeners();
+    public abstract void registerListeners();
 
     @Override
     public void run() {}

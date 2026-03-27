@@ -27,6 +27,7 @@ public class ConfigManager {
     public static final BooleanConfigOption skyblockSafeIsland = new BooleanConfigOption("skyblocksafeisland", true);
     public static final BooleanConfigOption dungeonRenderTraps = new BooleanConfigOption("skyblockdungeontraprender", false);
     public static final BooleanConfigOption autoEnchantTableGame = new BooleanConfigOption("sbautoplayenchant", false);
+    public static final BooleanConfigOption autoHarp = new BooleanConfigOption("skyblockautoplayharp", false);
 
     public static final BooleanConfigOption bossbar = new BooleanConfigOption("bossbar", false);
     public static final BooleanConfigOption bossbarShowHealth = new BooleanConfigOption("bossbarshowhealth", false);
@@ -38,13 +39,17 @@ public class ConfigManager {
     public static final BooleanConfigOption dyingtip = new BooleanConfigOption("dyingtip", false);
     public static final StringConfigOption inventoryFilterRegex = new StringConfigOption("inventoryfilterregex", "");
     public static final StringConfigOption inventoryFilterRegexList = new StringConfigOption("inventoryfilterregexlist", "[]");
+    public static final BooleanConfigOption autoFish = new BooleanConfigOption("autofish", false).flagAsMacroFeature();
+    public static final BooleanConfigOption autoFishAutoJump = new BooleanConfigOption("autofishautojump", true).flagAsMacroFeature();
+    public static final BooleanConfigOption autoFishAutoMove = new BooleanConfigOption("autofishautomove", false).flagAsMacroFeature();
+    public static final BooleanConfigOption autoFishAutoRotation = new BooleanConfigOption("autofishautorotation", true).flagAsMacroFeature();
 
     public static final BooleanConfigOption chatbutton = new BooleanConfigOption("chatbutton", false);
 
-    public static final List<Map.Entry<String, List<ConfigOption<?>>>> categories = List.of(
+    public static final List<Map.Entry<String, List<ConfigOption<?, ?>>>> categories = List.of(
             Map.entry("basic", List.of(language)),
             Map.entry("工具类", List.of(inventoryFilter, chatbutton)),
-            Map.entry("自动类", List.of(autoEnchantTableGame)),
+            Map.entry("自动类", List.of(autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation)),
             Map.entry("mining", List.of(mineshaftSharing, skyblockSafeIsland)),
             Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonRenderTraps)),
             Map.entry("界面类", List.of(bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, dyingtip, noblind, nosuffoverlay))
@@ -53,10 +58,10 @@ public class ConfigManager {
 
     /* ==================init================== */
 
-    public static final List<ConfigOption<?>> optionList = Arrays.stream(ConfigManager.class.getDeclaredFields()).filter(field -> ConfigOption.class.isAssignableFrom(field.getType())).map(field -> {
+    public static final List<ConfigOption<?, ?>> optionList = Arrays.stream(ConfigManager.class.getDeclaredFields()).filter(field -> ConfigOption.class.isAssignableFrom(field.getType())).map(field -> {
         try {
             field.setAccessible(true);
-            return Objects.requireNonNull((ConfigOption<?>) field.get(null), field.getName());
+            return Objects.requireNonNull((ConfigOption<?, ?>) field.get(null), field.getName());
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throw new RuntimeException("Error getting config option", e);
         }
@@ -64,7 +69,7 @@ public class ConfigManager {
 
     public static void saveConfig() {
         JsonObject jo = new JsonObject();
-        for (ConfigOption<?> option : optionList) {
+        for (ConfigOption<?, ?> option : optionList) {
             Object value = option.getValue();
             if (value instanceof Boolean) {
                 jo.addProperty(option.getName(), (Boolean) value);
@@ -88,7 +93,7 @@ public class ConfigManager {
     private static void readConfig() {
         try {
             JsonObject jo = JsonParser.parseString(FileUtils.readFileToString(configFile, StandardCharsets.UTF_8)).getAsJsonObject();
-            for (ConfigOption<?> option : optionList) {
+            for (ConfigOption<?, ?> option : optionList) {
                 if (jo.has(option.getName())) {
                     try {
                         if(option instanceof BooleanConfigOption booleanOption) {

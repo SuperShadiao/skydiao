@@ -18,7 +18,7 @@ public class DungeonMobESPListener extends AbstractListener {
     }
 
     @Override
-    protected void registerListeners() {
+    public void registerListeners() {
         WorldRenderEvents.END_MAIN.register(this::onLastRender);
     }
 

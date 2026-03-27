@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.LerpingBossEvent;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -18,6 +19,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.BossEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -210,6 +212,14 @@ public class CustomBossbar extends XSDHUD {
                 context.fill(x - (am.trueScale != 0 ? 1 : 0), 13 + yOffset, (int) (x + length * am.trueScale + (am.trueScale == 1 ? 1 : 0)), 14 + yOffset, color.getRGB());
 
                 Color healthColor = AnimationManager.commonHealthColor;
+                LerpingBossEvent bossEvent = bossbarEventGetter.getEvents().get(entry.getKey());
+                if(bossEvent != null) {
+                    BossEvent.BossBarColor color1 = bossEvent.getColor();
+                    if (!color1.equals(BossEvent.BossBarColor.RED)) {
+                        Integer color2 = color1.getFormatting().getColor();
+                        if(null != color2) healthColor = new Color(color2);
+                    }
+                }
 
                 Color immuneStateHealthColor = AnimationManager.immuneStateHealthColor;
                 Color immuneStateHealthColorSwitch = AnimationManager.immuneStateHealthColorSwitch;

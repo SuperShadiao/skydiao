@@ -7,10 +7,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.numbers.NumberFormat;
 import net.minecraft.network.chat.numbers.StyledFormat;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.scores.*;
 import org.apache.logging.log4j.LogManager;
@@ -363,6 +365,14 @@ public class ToolList {
 
     public boolean isEntityOnWorld(Entity entity) {
         return mc.level != null && mc.level.getEntity(entity.getId()) == entity;
+    }
+
+    public record TPInfo(PositionMoveRotation from, PositionMoveRotation to) { }
+
+    public TPInfo parseTPPacket(ClientboundPlayerPositionPacket tpPacket) {
+        PositionMoveRotation player = PositionMoveRotation.of(mc.player);
+        PositionMoveRotation to = PositionMoveRotation.calculateAbsolute(player, tpPacket.change(), tpPacket.relatives());
+        return new TPInfo(player, to);
     }
 
     //    public static class DevelopmentEnvironmentDetector {

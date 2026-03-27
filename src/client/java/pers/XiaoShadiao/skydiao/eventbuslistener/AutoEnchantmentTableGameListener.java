@@ -45,8 +45,7 @@ public class AutoEnchantmentTableGameListener extends AbstractListener {
         chronomatronOrder.clear();
         lastAdded = 0;
         ultrasequencerOrder.clear();
-        if (!ConfigManager.autoEnchantTableGame.getValue() || !(screen instanceof ContainerScreen)) return;
-        ContainerScreen containerScreen = ((ContainerScreen) screen);
+        if (!ConfigManager.autoEnchantTableGame.getValue() || !(screen instanceof ContainerScreen containerScreen)) return;
         ChestMenu menu = containerScreen.getMenu();
         Container container = menu.getContainer();
         if (container instanceof SimpleContainer simpleContainer) {
@@ -71,7 +70,7 @@ public class AutoEnchantmentTableGameListener extends AbstractListener {
         // log.info(!(event.gui instanceof GuiChest));
         // log.info(Config管理.getSBAutoPlayEnchant() != 1);
         // log.info("=============[C]==============");
-        if (!(screen instanceof ContainerScreen) || false) return;
+        if (!(screen instanceof ContainerScreen)) return;
         ChestMenu menu = ((ContainerScreen) screen).getMenu();
         Container container = menu.getContainer();
         if (container instanceof SimpleContainer simpleContainer) {
@@ -185,7 +184,7 @@ public class AutoEnchantmentTableGameListener extends AbstractListener {
     }
 
     @Override
-    protected void registerListeners() {
+    public void registerListeners() {
         ScreenEvents.AFTER_INIT.register(this::onGuiOpen);
         ClientTickEvents.START_CLIENT_TICK.register(this::onClientTick);
     }

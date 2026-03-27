@@ -2,8 +2,9 @@ package pers.XiaoShadiao.skydiao.config.option;
 
 import static pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager.translate;
 
-public class ConfigOption<T> {
+public class ConfigOption<T, S extends ConfigOption<T, S>> {
 
+    private boolean isMacroFeature;
     protected final String name;
     protected final T defaultValue;
     protected T value;
@@ -55,4 +56,17 @@ public class ConfigOption<T> {
         return value.toString();
     }
 
+    public boolean isMacroFeature() {
+        return isMacroFeature;
+    }
+
+    public S flagAsMacroFeature() {
+        isMacroFeature = true;
+        return cast(this);
+    }
+
+    @SuppressWarnings("unchecked")
+    private S cast(ConfigOption<T, S> i) {
+        return (S) i;
+    }
 }

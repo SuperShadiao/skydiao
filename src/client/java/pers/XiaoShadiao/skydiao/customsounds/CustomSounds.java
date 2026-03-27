@@ -13,6 +13,7 @@ public class CustomSounds {
     // ITEM_METAL_WHISTLE is the name of the custom sound event
     // and is called in the mod to use the custom sound
     public static final SoundEvent STAR_RAIL_NOTIFICATION = registerSound("star_rail_notification");
+    public static final SoundEvent ALERT_MACRO_CHECK = registerSound("alert_macro_check");
 
     // actual registration of all the custom SoundEvents
     private static SoundEvent registerSound(String id) {

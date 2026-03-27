@@ -111,7 +111,7 @@ public class StatusManager extends Thread {
         return online;
     }
 
-    public void destory() {
+    public static void destory() {
         SM = null;
     }
 

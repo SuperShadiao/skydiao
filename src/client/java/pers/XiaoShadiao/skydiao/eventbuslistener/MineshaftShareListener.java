@@ -16,16 +16,19 @@ import pers.XiaoShadiao.skydiao.irc.ChatPacket;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class MineshaftShareListener extends AbstractListener {
 
     private static final Object inviteLock = new Object();
 
+    private final Map<Long, String> availableShaftPlayerNames = new HashMap<>();
     public Queue<String> playerList = new ConcurrentLinkedDeque<>();
+
+    public Collection<String> getAvailableShaftPlayerNames() {
+        return availableShaftPlayerNames.values();
+    }
 
     public boolean inMineshaftDebug;
 
@@ -40,7 +43,7 @@ public class MineshaftShareListener extends AbstractListener {
     }
 
     @Override
-    protected void registerListeners() {
+    public void registerListeners() {
         ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register(this::worldUnload);
         ClientReceiveMessageEvents.GAME.register(this::onChat);
         ClientTickEvents.START_CLIENT_TICK.register(this::onTick);
@@ -62,9 +65,11 @@ public class MineshaftShareListener extends AbstractListener {
                 ToolList.printChatMessage(Component.literal("§e" + p.sender + "§a的§bGlacite Mineshaft§a可以加入! §e[点击这里]").withStyle(cs));
                 ToolList.printChatMessage(Component.literal("§b=====================================").withStyle(cs));
                 ToolList.printChatMessage(Component.literal("§b").withStyle(cs));
+            } else {
+                ToolList.printChatMessage(Component.literal("§a[XSD§bMS§a] §e" + p.sender + "§a的§bGlacite Mineshaft§a可以加入, 但你可能不在对应的环境, 为了防止误触, 你可以输入§e/skydiaojoinmineshaft " + p.sender + "§a加入."));
             }
 
-            // 工具列表.getInstance().playSound("hypixelhelper:hh.tip");
+            availableShaftPlayerNames.put(System.currentTimeMillis(), p.sender);
         } else {
             String selfName = mc.getUser().getName();
             if(("1_" + selfName).equals(p.message)) {
@@ -96,7 +101,8 @@ public class MineshaftShareListener extends AbstractListener {
     }
 
     private boolean shouldPopMessage() {
-        return !StatusManager.get().isInDungeon();
+        StatusManager status = StatusManager.get();
+        return !status.isInDungeon() && status.isInSkyblock();
     }
 
     public void worldUnload(Minecraft mc, ClientLevel clientLevel) {
@@ -126,6 +132,8 @@ public class MineshaftShareListener extends AbstractListener {
         if(!inviteThreadRunning && !mineshaftClosed && isInMineshaft()) {
             interrupt();
         }
+
+        availableShaftPlayerNames.entrySet().removeIf(entry -> System.currentTimeMillis() - entry.getKey() > 60000);
     }
 
     public void run() {

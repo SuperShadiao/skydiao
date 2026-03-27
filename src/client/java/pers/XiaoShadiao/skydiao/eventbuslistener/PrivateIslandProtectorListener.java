@@ -22,7 +22,7 @@ public class PrivateIslandProtectorListener extends AbstractListener {
     }
 
     @Override
-    protected void registerListeners() {
+    public void registerListeners() {
         CustomFabricEvents.MOUSE_BUTTON_EVENT.register(this::onMouseButton);
     }
 

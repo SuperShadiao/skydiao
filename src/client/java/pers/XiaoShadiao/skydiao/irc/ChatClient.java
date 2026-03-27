@@ -16,7 +16,7 @@ import pers.XiaoShadiao.skydiao.utils.ToolList;
 public class ChatClient extends Thread {
 
     protected static boolean chatServerAvailable = false;
-    private static long heartbeatTime;
+    private static volatile long heartbeatTime;
     static int retryCount = 0;
 
     protected static final Logger log = LogManager.getLogger("XSDChat");

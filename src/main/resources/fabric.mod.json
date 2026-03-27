@@ -4,6 +4,7 @@
   "version": "${version}",
   "name": "SkyDiao",
   "description": "一个高版本Hypixel Skyblock Mod",
+  "license": "MIT License",
   "authors": [
     "SuperShadiao"
   ],
