@@ -43,15 +43,25 @@ public class ConfigManager {
     public static final BooleanConfigOption autoFishAutoJump = new BooleanConfigOption("autofishautojump", true).flagAsMacroFeature();
     public static final BooleanConfigOption autoFishAutoMove = new BooleanConfigOption("autofishautomove", false).flagAsMacroFeature();
     public static final BooleanConfigOption autoFishAutoRotation = new BooleanConfigOption("autofishautorotation", true).flagAsMacroFeature();
+    public static final BooleanConfigOption pfAllowBreak = new BooleanConfigOption("pathfinderallowbreak", false);
+    public static final BooleanConfigOption pfAllowPlace = new BooleanConfigOption("pathfinderallowplace", false);
+    public static final BooleanConfigOption pfStopWhenTP = new BooleanConfigOption("pathfinderstopwhentp", false);
+    public static final IntConfigOption pfTimeout = new IntConfigOption("pathfindertimeout", 60000);
+    public static final BooleanConfigOption pathfinderallowbreakwhengetslowmining = new BooleanConfigOption("pathfinderallowbreakwhengetslowmining", false);
+    public static final BooleanConfigOption pfXRay = new BooleanConfigOption("pathfinderxray", false);
+    public static final BooleanConfigOption autoDojo = new BooleanConfigOption("autodojo", false);
+    public static final IntConfigOption autoDojoControlPredictDist = new IntConfigOption("autodojocontrolpredictdist", 8);
+    public static final BooleanConfigOption necronLadderNotification = new BooleanConfigOption("necronladdernotification", true);
 
-    public static final BooleanConfigOption chatbutton = new BooleanConfigOption("chatbutton", false);
+    public static final BooleanConfigOption chatbutton = new BooleanConfigOption("chatbutton", false).setRequiredMod(new ConfigOption.ModDepends("chatpatches", "alpha.8", "https://modrinth.com/mod/chatpatches"));
 
     public static final List<Map.Entry<String, List<ConfigOption<?, ?>>>> categories = List.of(
             Map.entry("basic", List.of(language)),
             Map.entry("工具类", List.of(inventoryFilter, chatbutton)),
-            Map.entry("自动类", List.of(autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation)),
+            Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
+            Map.entry("自动类", List.of(autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, autoDojo, autoDojoControlPredictDist)),
             Map.entry("mining", List.of(mineshaftSharing, skyblockSafeIsland)),
-            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonRenderTraps)),
+            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonRenderTraps, necronLadderNotification)),
             Map.entry("界面类", List.of(bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, dyingtip, noblind, nosuffoverlay))
     );
 

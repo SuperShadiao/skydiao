@@ -23,7 +23,7 @@ public class ClientSender extends ChatClient {
 
                 socket.getOutputStream().write(buffer.toByteArray());
 
-                if(!packet.packetType.equals("heartbeat")) log.info("Send packet: " + packet.getJson());
+                if(!"heartbeat".equals(packet.packetType)) log.info("Send packet: " + packet.getJson());
             }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);

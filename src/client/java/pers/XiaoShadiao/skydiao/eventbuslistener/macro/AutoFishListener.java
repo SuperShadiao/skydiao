@@ -353,7 +353,7 @@ public class AutoFishListener extends AbstractListener implements IMacro {
 
     @Override
     public boolean onMacroCheck(PositionInfo beforeTP, PositionInfo afterTP) {
-        return false;
+        return mc.player != null && mc.player.fishing == null;
     }
 
     @Override

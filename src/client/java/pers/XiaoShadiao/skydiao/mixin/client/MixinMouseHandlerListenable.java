@@ -19,8 +19,8 @@ public class MixinMouseHandlerListenable {
         }
     }
 
-    @Inject(method = "turnPlayer", at = @At("TAIL"))
-    private void turnPlayer(double d, CallbackInfo ci) {
+    @Inject(method = "handleAccumulatedMovement", at = @At("TAIL"))
+    private void handleAccumulatedMovement(CallbackInfo ci) {
         InputSimulator.updatePlayerRotation();
     }
 

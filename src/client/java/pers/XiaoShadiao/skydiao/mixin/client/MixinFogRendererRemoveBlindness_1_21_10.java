@@ -1,6 +1,5 @@
 package pers.XiaoShadiao.skydiao.mixin.client;
 
-import com.google.common.collect.Lists;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -8,9 +7,7 @@ import net.minecraft.client.renderer.fog.FogData;
 import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.client.renderer.fog.environment.*;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.material.FogType;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4f;
@@ -24,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(FogRenderer.class)
-public class MixinFogRendererRemoveBlindness {
+public class MixinFogRendererRemoveBlindness_1_21_10 {
 
     @Mutable
     @Final
@@ -66,7 +63,7 @@ public class MixinFogRendererRemoveBlindness {
                     new AtmosphericFogEnvironment()
             );
 
-    @Inject(method = "setupFog", at = @At("HEAD"))
+    @Inject(method = "setupFog", at = @At("HEAD"), require = 0)
     public void setupFog(Camera camera, int i, boolean bl, DeltaTracker deltaTracker, float f, ClientLevel clientLevel, CallbackInfoReturnable<Vector4f> cir) {
         FOG_ENVIRONMENTS = new ArrayList<>(ConfigManager.noblind.getValue() ? modified : original);
     }

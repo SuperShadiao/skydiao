@@ -41,6 +41,12 @@ public class MinecraftCrashedScreen extends Screen {
     }
 
     @Override
+    public void removed() {
+        CrashReport.preload();
+        ToolList.getInstance().log.info("已重新创建内存缓冲");
+    }
+
+    @Override
     protected void init() {
 
         layout.addTitleHeader(Component.literal("§e§k|§e Minecraft爆炸了 §e§k|"), font);

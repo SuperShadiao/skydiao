@@ -5,6 +5,9 @@ import static pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager.translate;
 public class ConfigOption<T, S extends ConfigOption<T, S>> {
 
     private boolean isMacroFeature;
+    protected ModDepends requiredMod;
+    protected boolean isRequiredModInstalled;
+
     protected final String name;
     protected final T defaultValue;
     protected T value;
@@ -60,8 +63,17 @@ public class ConfigOption<T, S extends ConfigOption<T, S>> {
         return isMacroFeature;
     }
 
+    public ModDepends getRequiredMod() {
+        return requiredMod;
+    }
+
     public S flagAsMacroFeature() {
         isMacroFeature = true;
+        return cast(this);
+    }
+
+    public S setRequiredMod(ModDepends requiredMod) {
+        this.requiredMod = requiredMod;
         return cast(this);
     }
 
@@ -69,4 +81,14 @@ public class ConfigOption<T, S extends ConfigOption<T, S>> {
     private S cast(ConfigOption<T, S> i) {
         return (S) i;
     }
+
+    public boolean isRequiredModInstalled() {
+        return isRequiredModInstalled;
+    }
+
+    public void setRequiredModInstalled() {
+        isRequiredModInstalled = true;
+    }
+
+    public record ModDepends(String modId, String requiredVersion, String downloadUrl) { }
 }

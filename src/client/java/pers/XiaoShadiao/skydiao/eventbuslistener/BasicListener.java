@@ -23,6 +23,8 @@ import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.network.chat.*;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.config.option.BooleanConfigOption;
+import pers.XiaoShadiao.skydiao.config.option.ConfigOption;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.screen.mircosoftaccount.AccountSelectScreen;
@@ -50,6 +52,7 @@ public class BasicListener extends AbstractListener {
     public long lastOperationTime = System.currentTimeMillis();
     private boolean isAFK = false;
     private boolean isConnectedToServer;
+    private boolean testOOM;
 
     @Override
     public String getListenerName() {
@@ -65,7 +68,6 @@ public class BasicListener extends AbstractListener {
         ClientPlayConnectionEvents.JOIN.register(this::onJoinServer);
         ClientPlayConnectionEvents.DISCONNECT.register(this::onDisconnect);
         ClientReceiveMessageEvents.GAME.register(this::onChat);
-
     }
 
     private void onChat(Component component, boolean b) {
@@ -161,50 +163,69 @@ public class BasicListener extends AbstractListener {
     private void onWorldChange(Minecraft mc, ClientLevel clientLevel) {
         ChatClientManager.getChatClient();
 
-        InputSimulator.forward = false;
-        InputSimulator.backward = false;
-        InputSimulator.left = false;
-        InputSimulator.right = false;
-        InputSimulator.jump = false;
-        InputSimulator.shift = false;
-        InputSimulator.sprint = false;
-        InputSimulator.releaseLeftClick();
-        InputSimulator.releaseRightClick();
+        InputSimulator.unpressAllKey();
     }
 
-    private boolean chatPatcherInstalled;
+    private int afkHoldTick;
 
     private void onStartClientTick(Minecraft mc) {
-        if(mc.player != null && mc.level != null) InputSimulator.updateTick();
+        if(testOOM) {
+            testOOM = false;
+            System.out.println(Arrays.deepToString(new long[Integer.MAX_VALUE][Integer.MAX_VALUE][Integer.MAX_VALUE][Integer.MAX_VALUE][Integer.MAX_VALUE][Integer.MAX_VALUE]));
+        }
+        if(mc.player != null && mc.level != null && mc.gameMode != null) InputSimulator.updateTick();
         if(mc.player != null) {
             if(mc.player.input.getClass() == KeyboardInput.class) {
                 mc.player.input = new XSDSimulatorInput(mc.options);
             }
         }
         if((!(mc.screen instanceof ChatScreen) || mc.screen.getClass().getName().startsWith("pers.XiaoShadiao")) && Arrays.stream(mc.options.keyMappings).anyMatch(KeyMapping::isDown))  {
-            if(isAFK) {
-                isAFK = false;
-                if(ChatClientManager.serverAvailable()) ChatClientManager.getChatClient().sender.sendAFK(false);
+            if(afkHoldTick++ > 20) {
+                if (isAFK) {
+                    isAFK = false;
+                    if (ChatClientManager.serverAvailable()) ChatClientManager.getChatClient().sender.sendAFK(false);
+                }
+                lastOperationTime = System.currentTimeMillis();
             }
-            lastOperationTime = System.currentTimeMillis();
+        } else {
+            afkHoldTick = 0;
         }
         if(System.currentTimeMillis() - lastOperationTime > 120000 && !isAFK) {
             isAFK = true;
             if(ChatClientManager.serverAvailable()) ChatClientManager.getChatClient().sender.sendAFK(true);
         }
-        if(ConfigManager.chatbutton.getValue()) {
-            if(!chatPatcherInstalled) {
-                if(!FabricLoader.getInstance().isModLoaded("chatpatches")) {
-                    ConfigManager.chatbutton.setValue(false);
-                    try {
-                        ToolList.printChatMessage(Component.literal("§a[小沙雕] §c翻译功能需要你安装ChatPatcher后才可以使用, 请§e点击这里§c下载并安装").withStyle(Style.EMPTY
-                                .withHoverEvent(new HoverEvent.ShowText(Component.literal("§a点击前往下载")))
-                                .withClickEvent(new ClickEvent.OpenUrl(new URI("https://modrinth.com/mod/chatpatches")))));
-                    } catch (URISyntaxException e) {
-                        throw new RuntimeException(e);
+//        if(ConfigManager.chatbutton.getValue()) {
+//            if(!chatPatcherInstalled) {
+//                if(!FabricLoader.getInstance().isModLoaded("chatpatches")) {
+//                    ConfigManager.chatbutton.setValue(false);
+//                    try {
+//                        ToolList.printChatMessage(Component.literal("§a[小沙雕] §c翻译功能需要你安装ChatPatcher后才可以使用, 请§e点击这里§c下载并安装").withStyle(Style.EMPTY
+//                                .withHoverEvent(new HoverEvent.ShowText(Component.literal("§a点击前往下载")))
+//                                .withClickEvent(new ClickEvent.OpenUrl(new URI("https://modrinth.com/mod/chatpatches")))));
+//                    } catch (URISyntaxException e) {
+//                        throw new RuntimeException(e);
+//                    }
+//                } else {
+//                    chatPatcherInstalled = true;
+//                }
+//            }
+//        }
+        for (ConfigOption<?, ?> option : ConfigManager.optionList) {
+            if(option instanceof BooleanConfigOption booleanConfigOption && !booleanConfigOption.isRequiredModInstalled()) {
+                ConfigOption.ModDepends requiredMod = booleanConfigOption.getRequiredMod();
+                if (booleanConfigOption.getValue() && requiredMod != null) {
+                    if(!FabricLoader.getInstance().isModLoaded(/*"chatpatches"*/requiredMod.modId())) {
+                        booleanConfigOption.setValue(false);
+                        try {
+                            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c这个功能需要你安装版本为" + requiredMod.requiredVersion() + "的" + requiredMod.modId() + " mod后才可以使用, 请§e点击这里§c下载并安装").withStyle(Style.EMPTY
+                                    .withHoverEvent(new HoverEvent.ShowText(Component.literal("§a点击前往下载")))
+                                    .withClickEvent(new ClickEvent.OpenUrl(new URI(/*"https://modrinth.com/mod/chatpatches"*/requiredMod.downloadUrl())))));
+                        } catch (URISyntaxException e) {
+                            throw new RuntimeException(e);
+                        }
+                    } else {
+                        booleanConfigOption.setRequiredModInstalled();
                     }
-                } else {
-                    chatPatcherInstalled = true;
                 }
             }
         }
@@ -214,4 +235,7 @@ public class BasicListener extends AbstractListener {
         return System.currentTimeMillis() - lastOperationTime > 120000;
     }
 
+    public void throwOOMNextTick() {
+        testOOM = true;
+    }
 }

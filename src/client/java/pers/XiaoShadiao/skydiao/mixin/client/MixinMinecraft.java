@@ -184,7 +184,9 @@ public class MixinMinecraft {
             InputSimulator.continueAttack(click);
             executed = click;
         }
-        if(!executed) original.call(instance, click);
+        if(!executed) {
+            original.call(instance, click);
+        }
     }
 
     @WrapOperation(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;isDown()Z"))

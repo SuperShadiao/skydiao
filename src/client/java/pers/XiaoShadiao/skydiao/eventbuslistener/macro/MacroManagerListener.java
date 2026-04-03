@@ -25,6 +25,8 @@ public class MacroManagerListener extends AbstractListener {
     private final List<Vec3> historyPoses = new ArrayList<>();
 
     public static final AutoFishListener autoFishListener = new AutoFishListener();
+    public static final PathFinderExecutor pathFinderExecutor = new PathFinderExecutor();
+    public static final AutoDojo autoDojo = new AutoDojo();
 
     @Override
     public String getListenerName() {
@@ -50,13 +52,14 @@ public class MacroManagerListener extends AbstractListener {
         if(packet instanceof ClientboundPlayerPositionPacket tpPacket) {
             if(!activeMacros.isEmpty()) {
                 ToolList.TPInfo tpInfo = ToolList.getInstance().parseTPPacket(tpPacket);
-                IMacro.PositionInfo before = new IMacro.PositionInfo(tpInfo.from().position(), tpInfo.from().yRot(), tpInfo.from().xRot(), tpInfo.from().deltaMovement());
-                IMacro.PositionInfo after = new IMacro.PositionInfo(tpInfo.to().position(), tpInfo.to().yRot(), tpInfo.to().xRot(), tpInfo.to().deltaMovement());
+                IMacro.PositionInfo before = new IMacro.PositionInfo(tpInfo.from().position(), tpInfo.from().yRot() % 360, tpInfo.from().xRot(), tpInfo.from().deltaMovement());
+                IMacro.PositionInfo after = new IMacro.PositionInfo(tpInfo.to().position(), tpInfo.to().yRot() % 360, tpInfo.to().xRot(), tpInfo.to().deltaMovement());
 
                 ToolList.printChatMessage(Component.literal("§a[小沙雕] §c收到异常ClientboundPlayerPositionPacket数据包: " + after));
 
                 double distance = historyPoses.stream().mapToDouble(vec3 -> vec3.distanceTo(after.position())).min().orElse(0.0);
-                if (distance > 0.1 || Math.abs(before.yaw() - after.yaw()) > 0.05 || Math.abs(before.pitch() - after.pitch()) > 0.05 || (before.velocity().x == 0 && before.velocity().z == 0 && (after.velocity().x != 0 || after.velocity().z != 0))) {
+                float deltaYaw = Math.abs(before.yaw() - after.yaw());
+                if (distance > 0.1 || deltaYaw > 0.05 && deltaYaw < 360 - 0.05 || Math.abs(before.pitch() - after.pitch()) > 0.05) {
                     boolean flag = true;
                     for (IMacro macro : activeMacros) {
                         flag &= !macro.onMacroCheck(before, after);

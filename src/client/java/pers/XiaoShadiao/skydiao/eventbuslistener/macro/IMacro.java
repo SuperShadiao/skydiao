@@ -8,6 +8,9 @@ public interface IMacro {
 
     public boolean isMacroActive();
 
+    /**
+     * @return 返回true以取消Macro报警
+     */
     public boolean onMacroCheck(PositionInfo beforeTP, PositionInfo afterTP);
 
     public String getMacroName();

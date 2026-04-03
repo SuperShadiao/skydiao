@@ -58,7 +58,7 @@ public class MineshaftShareListener extends AbstractListener {
             if(shouldPopMessage()) {
                 Style cs = Style.EMPTY
                         .withClickEvent(new ClickEvent.RunCommand("/hhjoinmineshaft " + p.sender))
-                        .withHoverEvent(new HoverEvent.ShowText(Component.literal("§a点击后会立即加入§bGlacite Mineshaft§a, 请确保你手里的工作都完成了哦!\n§6注意! 点击后你当前的组队队伍会自动退出!\n§6如果响应后你没能成功进入Mineshaft, 请再点击试一次!")));
+                        .withHoverEvent(new HoverEvent.ShowText(Component.literal("§a点击后会立即加入§bGlacite Mineshaft§a, 请确保你手里的工作都完成了哦!\n§6注意! 点击后你当前的组队队伍会自动退出!\n§6如果响应后你没能成功进入Mineshaft, 请再点击试一次!\n§c若你没收到组队邀请, 使用/settings检查组队权限设置 (例如可能是禁止非好友和你组队)")));
 
                 ToolList.printChatMessage(Component.literal("").withStyle(cs));
                 ToolList.printChatMessage(Component.literal("§b===============[§aXSD§bMS]===============").withStyle(cs));

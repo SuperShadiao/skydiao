@@ -2,17 +2,21 @@ package pers.XiaoShadiao.skydiao.commands;
 
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import pers.XiaoShadiao.skydiao.commands.args.ClientBlockPosArgument;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.E2AMappingListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon.DungeonF7BossbarListener;
@@ -21,6 +25,7 @@ import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.playerinput.AimHelper;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
 import java.util.List;
@@ -63,6 +68,19 @@ public class HHSCCommand extends OpenConfigMenuCommand {
 
                 }
             })))));
+            devcommand.then(getArgConstantInstance("aim").then(getArgInstance("pos", ClientBlockPosArgument.blockPos()).then(getArgInstance("keepTime", LongArgumentType.longArg(0)).executes((context) -> awa(() -> {
+                try {
+                    BlockPos pos = ClientBlockPosArgument.getBlockPos(context, "pos");
+                    AimHelper aimHelper = new AimHelper();
+                    long keepTime = LongArgumentType.getLong(context, "keepTime");
+                    for(long i = 0; i < keepTime; i++) {
+                        Thread.sleep(1);
+                        AimHelper.getYawPitchByBlockPos(pos).updateToAimHelper(aimHelper);
+                    }
+                } catch (Exception e) {
+
+                }
+            })))));
         } else {
             devcommand.executes((context) -> owo(() -> context.getSource().sendFeedback(Component.literal("§a[小沙雕] §c当前不是Dev环境..."))));
         }
@@ -74,18 +92,9 @@ public class HHSCCommand extends OpenConfigMenuCommand {
                 getArgConstantInstance("teststarrailmsg1").then(getArgInstance("msg", StringArgumentType.greedyString()).executes((context -> owo(() -> XSDHUD.starRailNotification.updateMessage(context.getArgument("msg", String.class), StarRailNotification.Type.success))))),
                 getArgConstantInstance("teststarrailmsg2").then(getArgInstance("msg", StringArgumentType.greedyString()).executes((context -> owo(() -> XSDHUD.starRailNotification.updateMessage(context.getArgument("msg", String.class), StarRailNotification.Type.warning))))),
                 getArgConstantInstance("translate").redirect(HHT_COMMAND.getCommandNode()),
+                getArgConstantInstance("oomtest").executes(context -> owo(AbstractListener.basicListener::throwOOMNextTick)),
                 devcommand
         );
-    }
-
-    private int owo(Runnable runnable) {
-        runnable.run();
-        return 0;
-    }
-
-    private int awa(Runnable runnable) {
-        new Thread(runnable).start();
-        return 0;
     }
 
     private int loadTestBoss(CommandContext<FabricClientCommandSource> context) {
@@ -205,15 +214,6 @@ public class HHSCCommand extends OpenConfigMenuCommand {
                 return false;
             }
         });
-        return 0;
-    }
-
-    private int executeClaimReward(CommandContext<FabricClientCommandSource> context) {
-        HypixelRewardClaimer hrc = HypixelRewardClaimer.getCurrent();
-        if(hrc != null && hrc.hasData && !hrc.claimed) {
-            hrc.setTargetReward(IntegerArgumentType.getInteger(context, "index"));
-            hrc.doClaim();
-        }
         return 0;
     }
 

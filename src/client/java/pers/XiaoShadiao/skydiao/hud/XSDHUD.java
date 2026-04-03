@@ -9,9 +9,12 @@ import pers.XiaoShadiao.skydiao.utils.Register;
 public abstract class XSDHUD implements HudElement {
 
     public static final Minecraft mc = Minecraft.getInstance();
+
     public static final CustomBossbar customBossbar = new CustomBossbar();
     public static final StarRailNotification starRailNotification = new StarRailNotification();
     public static final BlindOrDying blindOrDying = new BlindOrDying();
+    public static final BigTitle bigTitle = new BigTitle();
+
     public static void init() {
         Register.execRegister(XSDHUD.class, XSDHUD.class, XSDHUD::runRegister);
     }

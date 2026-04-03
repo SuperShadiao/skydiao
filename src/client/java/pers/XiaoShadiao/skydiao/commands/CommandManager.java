@@ -13,16 +13,19 @@ import java.lang.reflect.Field;
 public interface CommandManager {
 
     public static final XSDChatCommand XSD_CHAT_COMMAND = new XSDChatCommand();
-    public static final OpenConfigMenuCommand OPEN_CONFIG_MENU_COMMAND = new OpenConfigMenuCommand();
     public static final HHMCommand HHM_COMMAND = new HHMCommand();
     public static final JoinMineshaftCommand JOIN_MINESHAFT_COMMAND = new JoinMineshaftCommand();
     public static final JoinMineshaft2Command JOIN_MINESHAFT2_COMMAND = new JoinMineshaft2Command();
     public static final HHTCommand HHT_COMMAND = new HHTCommand();
     public static final HHSCCommand HHSC_COMMAND = new HHSCCommand();
+    public static final OpenConfigMenuCommand OPEN_CONFIG_MENU_COMMAND = new OpenConfigMenuCommand();
+    public static final SkydiaoPFCommand SKYDIAO_PF_COMMAND = new SkydiaoPFCommand();
+    public static final HHPFCommand HHPF_COMMAND = new HHPFCommand();
 
     public static void registerCommands() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             Register.execRegister(CommandManager.class, BaseCommand.class, cmd -> {
+                cmd.setCommandBuildContext(registryAccess);
                 try {
                     LiteralArgumentBuilder<FabricClientCommandSource> register = ClientCommandManager.literal(cmd.getCommandName());
                     for(ArgumentBuilder<FabricClientCommandSource, ?> arg : cmd.getArgs()) {

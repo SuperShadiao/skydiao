@@ -9,6 +9,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.network.chat.Component;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
@@ -19,6 +20,7 @@ public abstract class BaseCommand implements CommandManager {
     public static final Minecraft mc = ToolList.mc;
 
     private LiteralCommandNode<FabricClientCommandSource> commandNode;
+    private CommandBuildContext commandBuildContext;
 
     public abstract String getCommandName();
     public abstract List<ArgumentBuilder<FabricClientCommandSource, ?>> getArgs();
@@ -63,5 +65,13 @@ public abstract class BaseCommand implements CommandManager {
 
     public final LiteralCommandNode<FabricClientCommandSource> getCommandNode() {
         return commandNode;
+    }
+
+    public void setCommandBuildContext(CommandBuildContext registryAccess) {
+        commandBuildContext = registryAccess;
+    }
+
+    public CommandBuildContext getCommandBuildContext() {
+        return commandBuildContext;
     }
 }

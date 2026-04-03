@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon.*;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.macro.PathFinderExecutor;
 import pers.XiaoShadiao.skydiao.utils.Register;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
@@ -29,6 +30,7 @@ public abstract class AbstractListener extends Thread {
     public static final AutoEnchantmentTableGameListener autoEnchantmentTableGameListener = new AutoEnchantmentTableGameListener();
     public static final InventoryItemFilter inventoryItemFilter = new InventoryItemFilter();
     public static final AutoHarpListener autoHarpListener = new AutoHarpListener();
+    public static final NecronLadderNotification necronLadderNotification = new NecronLadderNotification();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();

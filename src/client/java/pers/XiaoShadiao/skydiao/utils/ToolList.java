@@ -11,9 +11,17 @@ import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -365,6 +373,74 @@ public class ToolList {
 
     public boolean isEntityOnWorld(Entity entity) {
         return mc.level != null && mc.level.getEntity(entity.getId()) == entity;
+    }
+
+    public HitResult predictPlayerAimBlock(Entity e) {
+        return predictPlayerAimBlock(e.getEyePosition(), e.getYRot(), e.getXRot(), 3);
+    }
+
+    public HitResult predictPlayerAimBlock(Entity e, double blockReachDistance) {
+        return predictPlayerAimBlock(e.getEyePosition(), e.getYRot(), e.getXRot(), blockReachDistance);
+    }
+
+    public HitResult predictPlayerAimBlock(Entity e, float yaw, float pitch, double blockReachDistance) {
+        return predictPlayerAimBlock(e.getEyePosition(), yaw, pitch, blockReachDistance);
+    }
+
+    public HitResult predictPlayerAimBlock(Vec3 from, float yaw, float pitch, double blockReachDistance) {
+        // int blockReachDistance = 10;
+
+        float f = Mth.cos(-yaw * 0.017453292F - (float) Math.PI);
+        float f1 = Mth.sin(-yaw * 0.017453292F - (float) Math.PI);
+        float f2 = -Mth.cos(-pitch * 0.017453292F);
+        float f3 = Mth.sin(-pitch * 0.017453292F);
+
+        Vec3 vec31 = new Vec3((double) (f1 * f2), (double) f3, (double) (f * f2));
+        Vec3 vec32 = from.add(vec31.x * blockReachDistance, vec31.y * blockReachDistance, vec31.z * blockReachDistance);
+
+        return mc.level.clip(new ClipContext(from, vec32, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, mc.player));
+
+    }
+
+    public HitResult predictPlayerAimBlock(Vec3 from, Vec3 to) {
+        return mc.level.clip(new ClipContext(from, to, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, mc.player));
+    }
+
+    /**
+     *  毫秒
+     *  */
+    public String timeToString(long time) {
+        long l = time;
+        l /= 1000;
+
+        int day = (int) (l / (60 * 60 * 24));
+        l -= day * (60 * 60 * 24);
+        int hour = (int) (l / (3600));
+        l -= hour * 3600L;
+        int min = (int) (l / 60);
+        l -= min * 60L;
+        int sec = (int) l;
+
+        return (day == 0 ? "" : day + "天") + (hour == 0 ? "" : hour + "小时") + (min == 0 ? "" : min + "分钟") + (sec == 0 ? "" : sec + "秒");
+    }
+
+    public boolean isFullBlock(BlockState blockState) {
+        VoxelShape occlusionShape = blockState.getOcclusionShape();
+        if(blockState.getBlock() == Blocks.AIR || occlusionShape.isEmpty()) return false;
+        AABB bounds = occlusionShape.bounds();
+        return bounds.maxX >= 1 && bounds.maxY >= 1 && bounds.maxZ >= 1;
+    }
+
+    private static final AABB zeroAABB = new AABB(0, 0, 0, 0, 0, 0);
+
+    public boolean canThroughBlock(BlockState blockState) {
+        VoxelShape occlusionShape = blockState.getOcclusionShape();
+        // System.out.println(blockState.getBlock());
+        // System.out.println(occlusionShape);
+        if(blockState.getBlock() == Blocks.AIR || occlusionShape.isEmpty()) return true;
+        AABB bounds = occlusionShape.bounds();
+        // System.out.println(bounds);
+        return zeroAABB.equals(bounds);
     }
 
     public record TPInfo(PositionMoveRotation from, PositionMoveRotation to) { }

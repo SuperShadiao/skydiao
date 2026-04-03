@@ -7,7 +7,6 @@ import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.common.ClientCommonPacketListener;
 
 public final class CustomFabricEvents {
 
@@ -24,10 +23,10 @@ public final class CustomFabricEvents {
     }
 
     /* 0 left 1 right 2 mid */
-    public static final Event<MouseButtonEvent> MOUSE_BUTTON_EVENT = EventFactory.createArrayBacked(MouseButtonEvent.class, callbacks -> (l, mouseButtonInfo, i) -> {
+    public static final Event<MouseButtonEvent> MOUSE_BUTTON_EVENT = EventFactory.createArrayBacked(MouseButtonEvent.class, callbacks -> (windowsHandle, mouseButtonInfo, pressState) -> {
         boolean cancelled = false;
         for (MouseButtonEvent callback : callbacks) {
-            if (callback.onMouseButton(l, mouseButtonInfo, i)) {
+            if (callback.onMouseButton(windowsHandle, mouseButtonInfo, pressState)) {
                 cancelled = true;
             }
         }
@@ -35,7 +34,10 @@ public final class CustomFabricEvents {
     });
 
     public interface MouseButtonEvent {
-        public boolean onMouseButton(long l, MouseButtonInfo mouseButtonInfo, int i);
+        /**
+        * @param mouseButtonInfo 0 left 1 right 2 mid
+        */
+        public boolean onMouseButton(long windowsHandle, MouseButtonInfo mouseButtonInfo, int pressState);
     }
 
     public static final Event<PacketEvent<PacketListener>> CLIENT_PACKET_EVENT = EventFactory.createArrayBacked(PacketEvent.class, callbacks -> (packet, packetListener, packetProcessor) -> {

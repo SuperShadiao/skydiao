@@ -2,17 +2,20 @@
   "required": true,
   "package": "pers.XiaoShadiao.skydiao.mixin.client",
   "compatibilityLevel": "JAVA_21",
+  "plugin": "pers.XiaoShadiao.skydiao.mixin.client.TheMixinPlugin",
   "client": [
     "MixinAbstractContainerScreenHook",
     "MixinAbstractContainerScreenPosGetter",
     "MixinBossbarEventGetter",
     "MixinBossBarRemoveAnimation",
     "MixinDeleteWallEffect",
-    "MixinFogRendererRemoveBlindness",
+    "MixinFogRendererRemoveBlindness_1_21_10",
     "MixinGameRenderer",
     "MixinMinecraft",
     "MixinMinecraftSessionAccessor",
     "MixinMouseHandlerListenable",
+    "MixinMultiPlayerGameModeDestroyBlockDelayAccessor",
+    "MixinMultiPlayerGameModeDestroyBlockDelayFix",
     "MixinRealmsClientReseter",
     "MixinRealmStatusReset"
   ],
@@ -21,12 +24,12 @@
   },
   "mixins": [
     "MixinAcviteProfilePathAccessor",
-    "MixinChatPatcherTranslateButton",
     "MixinPacketListener",
     "MixinRemoveMaxHealthLimit",
     "MixinReportTypeCustomMessage",
     "MixinUserDataSecurer",
+    "adapter.MixinChatPatcherTranslateButton",
     "odinfix.MixinOdinPickColorTerminalFixer",
-    "odinfix.MixinOdinStartWithTerminalFixer",
+    "odinfix.MixinOdinStartWithTerminalFixer"
   ]
 }

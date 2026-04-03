@@ -1,9 +1,11 @@
 package pers.XiaoShadiao.skydiao.commands;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
+import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.Collections;
@@ -18,13 +20,35 @@ public class OpenConfigMenuCommand extends BaseRootRunnableCommand {
 
     @Override
     public List<ArgumentBuilder<FabricClientCommandSource, ?>> getArgs() {
-        return Collections.emptyList();
+        return List.of(
+                getArgConstantInstance("translate").redirect(HHT_COMMAND.getCommandNode()),
+                getArgConstantInstance("claimreward").then(getArgInstance("index", IntegerArgumentType.integer(0, 2)).executes(this::executeClaimReward))
+                );
     }
 
     @Override
     public int executeCommand(CommandContext<FabricClientCommandSource> context) {
         ToolList.addThreadedTask(() -> mc.execute(() -> mc.setScreenAndShow(new ConfigScreen(mc.screen))), null);
         return 1;
+    }
+
+    protected int owo(Runnable runnable) {
+        runnable.run();
+        return 0;
+    }
+
+    protected int awa(Runnable runnable) {
+        new Thread(runnable).start();
+        return 0;
+    }
+
+    protected int executeClaimReward(CommandContext<FabricClientCommandSource> context) {
+        HypixelRewardClaimer hrc = HypixelRewardClaimer.getCurrent();
+        if(hrc != null && hrc.hasData && !hrc.claimed) {
+            hrc.setTargetReward(IntegerArgumentType.getInteger(context, "index"));
+            hrc.doClaim();
+        }
+        return 0;
     }
 
 }

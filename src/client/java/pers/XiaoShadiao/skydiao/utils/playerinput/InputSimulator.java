@@ -2,6 +2,9 @@ package pers.XiaoShadiao.skydiao.utils.playerinput;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.BookEditScreen;
+import net.minecraft.client.gui.screens.inventory.BookSignScreen;
+import net.minecraft.client.gui.screens.inventory.BookViewScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -11,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import pers.XiaoShadiao.skydiao.mixin.client.MixinMultiPlayerGameModeDestroyBlockDelayAccessor;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 public class InputSimulator {
@@ -28,6 +32,8 @@ public class InputSimulator {
     private static final Thread leftClickThread;
     private static final Thread rightClickThread;
 
+    private static AimHelper currentAimingInstance;
+
     static {
         leftClickThread = new Thread(() -> clicker(InputSimulator::pressLeftClick, InputSimulator::releaseLeftClick), "Left Clicker Thread");
         leftClickThread.start();
@@ -42,13 +48,11 @@ public class InputSimulator {
                 try { Thread.sleep(Long.MAX_VALUE); } catch (InterruptedException e) {}
             }
             flag = true;
-            // System.out.println("0");
             press.run();
             try { Thread.sleep(60); } catch (InterruptedException e) {
-                // System.out.println("1");
+                release.run();
                 flag = false;
             }
-            // System.out.println("2");
             release.run();
         }
     }
@@ -62,13 +66,13 @@ public class InputSimulator {
     }
 
     public static void pressLeftClick() {
+        if (!isMouseLeftHolding) leftClickCounter++;
         isMouseLeftHolding = true;
-        leftClickCounter++;
     }
 
     public static void pressRightClick() {
+        if (!isMouseRightHolding) rightClickCounter++;
         isMouseRightHolding = true;
-        rightClickCounter++;
     }
 
     public static boolean hasRemainRightClick() {
@@ -91,10 +95,17 @@ public class InputSimulator {
         }
     }
 
+    private static int lastBreakDelay;
+
     private static boolean preTick() {
         if (rightClickDelay > 0) {
             rightClickDelay--;
         }
+        int currentDestroyDelay = ((MixinMultiPlayerGameModeDestroyBlockDelayAccessor) mc.gameMode).getDestroyDelay();
+        if(lastBreakDelay == 0 && currentDestroyDelay == 5) {
+            ((MixinMultiPlayerGameModeDestroyBlockDelayAccessor) mc.gameMode).setDestroyDelay(6);
+        }
+        lastBreakDelay = currentDestroyDelay;
         if (mc.getOverlay() != null || isInventoryOpen()) {
             missTime = 999999999;
             isMouseLeftHolding = isMouseRightHolding = false;
@@ -108,6 +119,7 @@ public class InputSimulator {
 
     private static void midTick() {
         boolean bl3 = false;
+        updateCurrentItemSlotIndex();
         if (mc.player.isUsingItem()) {
             if (!mc.options.keyUse.isDown() && !isMouseRightHolding) {
                 mc.gameMode.releaseUsingItem(mc.player);
@@ -118,7 +130,7 @@ public class InputSimulator {
         } else {
             while (leftClickCounter > 0) {
                 leftClickCounter--;
-                bl3 |= startAttack();
+                if(!mc.gameMode.isDestroying() && ((MixinMultiPlayerGameModeDestroyBlockDelayAccessor) mc.gameMode).getDestroyDelay() <= 1) bl3 |= startAttack();
             }
 
             while (rightClickCounter > 0) {
@@ -287,7 +299,7 @@ public class InputSimulator {
     }
 
     private static void updateInventoryState() {
-        if (mc.screen instanceof AbstractContainerScreen) {
+        if (mc.screen instanceof AbstractContainerScreen || mc.screen instanceof BookEditScreen || mc.screen instanceof BookSignScreen || mc.screen instanceof BookViewScreen) {
             isInventoryOpen = true;
         } else if(mc.screen == null) {
             isInventoryOpen = false;
@@ -310,7 +322,20 @@ public class InputSimulator {
     }
 
     public static void updatePlayerRotation() {
+        if (currentAimingInstance != null) {
+            if(currentAimingInstance.shouldUpdate()) {
+                currentAimingInstance.updateRotation();
+            } else {
+                currentAimingInstance = null;
+            }
+        }
+        if (mc.getOverlay() != null || isInventoryOpen()) {
+            hasYawValue = false;
+            hasPitchValue = false;
+            return;
+        }
         if(mc.player != null) {
+            boolean flag = getPlayerYaw() != prepareYaw;
             if(hasYawValue) {
                 mc.player.setYRot(fun(getPlayerYaw(), prepareYaw));
                 hasYawValue = false;
@@ -320,15 +345,20 @@ public class InputSimulator {
                 float to = preparePitch;
 
                 float delta = to - from;
+                if(flag) delta += (ToolList.getInstance().random.nextFloat() - 0.5f) / 5;
 
                 float f1 = (float) (0.8 / 7);
 
                 int moveCount = (int) (delta / f1);
                 to = from + (moveCount + ToolList.getInstance().random.nextInt(3) - 1) * f1;
-                mc.player.setXRot(to);
+                if(Math.abs(delta) > 0.1) mc.player.setXRot(to);
                 hasPitchValue = false;
             }
         }
+    }
+
+    public static void updateAimHelper(AimHelper aimHelper) {
+        currentAimingInstance = aimHelper;
     }
 
     private static float fun(float start, float target) {
@@ -402,6 +432,42 @@ public class InputSimulator {
 
     public static void setSprint(boolean b) {
         sprint = b;
+    }
+
+    public static int currentItemSlotIndex = -1;
+    public static boolean hasCurrentItemSlotIndex = false;
+
+    public static int getCurrentItemSlotIndex() {
+        return mc.player != null ? mc.player.getInventory().getSelectedSlot() : -1;
+    }
+
+    public static void switchItem(int index) {
+        currentItemSlotIndex = index;
+        hasCurrentItemSlotIndex = true;
+    }
+
+    private static void updateCurrentItemSlotIndex() {
+        if(hasCurrentItemSlotIndex) {
+            hasCurrentItemSlotIndex = false;
+            if(mc.player != null) mc.player.getInventory().setSelectedSlot(currentItemSlotIndex);
+        }
+    }
+
+    public static void releaseAllKey() {
+        unpressAllKey();
+    }
+
+    public static void unpressAllKey() {
+        left = false;
+        right = false;
+        forward = false;
+        backward = false;
+        jump = false;
+        shift = false;
+        sprint = false;
+        isMouseLeftHolding = false;
+        isMouseRightHolding = false;
+        rightClickCounter = leftClickCounter = 0;
     }
 
 }

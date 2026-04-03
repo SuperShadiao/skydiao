@@ -1,4 +1,4 @@
-package pers.XiaoShadiao.skydiao.mixin.client;
+package pers.XiaoShadiao.skydiao.mixin.client.adapter;
 
 import net.minecraft.client.GuiMessage;
 import net.minecraft.client.gui.components.AbstractButton;
@@ -27,10 +27,10 @@ public class MixinChatPatcherTranslateButton {
     @Shadow
     private GuiMessage selectedLine;
 
-    @Inject(at = @At(value = "INVOKE", target = "updateButtonMetadata"), method = "init", locals = LocalCapture.CAPTURE_FAILHARD)
-    public void init(Consumer<AbstractButton> addSelectableChild, CallbackInfo ci, Component text, Component timestamp, boolean timestamped, Component counter, boolean duped, int strRow) {
+    @Inject(at = @At(value = "INVOKE", target = "updateButtonMetadata"), method = "init")
+    public void init(Consumer<AbstractButton> addSelectableChild, CallbackInfo ci) {
         if(ConfigManager.chatbutton.getValue()) {
-            registerActionButton(Component.literal(/*"翻译消息"*/translate("skydiao.feature.chatbutton.translate")), 0, Items.OAK_SIGN, (button) -> {
+            registerActionButton(Component.literal(/*"翻译消息"*/translate("skydiao.feature.chatbutton.translate")), Items.OAK_SIGN, (button) -> {
                 String str = ToolList.getInstance().deleteColorCode(selectedLine.content().getString());
                 new TextTranslator(str).execute();
             });
@@ -38,6 +38,6 @@ public class MixinChatPatcherTranslateButton {
     }
 
     @Shadow
-    private void registerActionButton(Component id, int localRow, Object icon, Button.OnPress pressAction) {}
+    private void registerActionButton(Component id, Object icon, Button.OnPress pressAction) {}
 
 }

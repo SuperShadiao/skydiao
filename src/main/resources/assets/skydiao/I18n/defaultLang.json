@@ -666,9 +666,19 @@
     "disasterhelper": {
       "configname": "§e灾难模拟器助手",
       "description": "§e在灾难模拟器中帮你标注一些有用的东西"
-    }
-  },
-  "about": {
+    },
+    "autodojo": {
+      "configname": "§e自动Dojo",
+      "description": "§e自动游玩部分Dojo项目, 支持的项目会在你进去之后以聊天消息的方式提示你"
+    },
+    "autodojocontrolpredictdist": {
+      "configname": "§e自动Dojo Control项目预测距离",
+      "description": "§e根据该距离值向前预测目标位置并瞄准, 根据自身网络延迟适当设置"
+    },
+    "necronladdernotification": {
+      "configname": "§eNecron Ladder提醒",
+      "description": "§e在地牢出了Necron's Handle之后显示Necron Ladder标题"
+    },
     "about1": "§e小沙雕的QQ: 3381949033",
     "about2": "§e小沙雕の狗窝: https://xiaoshadiao.club/qqg",
     "about3": "§e部分快捷键设置可在 ESC->选项(设置)->控制 中找到",

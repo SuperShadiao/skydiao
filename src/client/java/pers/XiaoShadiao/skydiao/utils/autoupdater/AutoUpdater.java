@@ -3,6 +3,7 @@ package pers.XiaoShadiao.skydiao.utils.autoupdater;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.minecraft.SharedConstants;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -33,7 +34,7 @@ public class AutoUpdater {
     static {
         File modsFolder1;
         modsFolder1 = new File(ToolList.mc.gameDirectory, "mods");
-        File f = new File(modsFolder1, "1.21.10");
+        File f = new File(modsFolder1, SharedConstants.getCurrentVersion().name());
         if(f.exists()) modsFolder1 = f;
         modsFolder = modsFolder1;
     }
