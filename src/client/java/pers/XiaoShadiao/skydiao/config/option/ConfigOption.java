@@ -1,5 +1,8 @@
 package pers.XiaoShadiao.skydiao.config.option;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager.translate;
 
 public class ConfigOption<T, S extends ConfigOption<T, S>> {

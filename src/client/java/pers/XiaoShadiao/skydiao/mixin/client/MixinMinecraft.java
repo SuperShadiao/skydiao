@@ -28,6 +28,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pers.XiaoShadiao.skydiao.irc.ChatClient;
 import pers.XiaoShadiao.skydiao.screen.MinecraftCrashedScreen;
+import pers.XiaoShadiao.skydiao.utils.MCThreadDumper;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
@@ -85,6 +86,8 @@ public class MixinMinecraft {
     private int exceptionCounter;
     @Unique
     private final int MAX_EXCEPTION_COUNTER = 10;;
+    @Unique
+    private MCThreadDumper dumperThread;
 
     @Inject(at = @At("HEAD"), method = "run")
     private void init(CallbackInfo info) {
@@ -114,6 +117,14 @@ public class MixinMinecraft {
     @WrapOperation(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;runTick(Z)V"), method = "run")
     public void run(Minecraft instance, boolean bl, Operation<Void> original) {
         try {
+            if(ToolList.getInstance().isXiaoShadiao()) {
+                if(dumperThread == null) {
+                    Thread thread = Thread.currentThread();
+                    dumperThread = MCThreadDumper.INSTANCE;
+                    dumperThread.setMinecraftThread(thread);
+                }
+                dumperThread.flagAlive();
+            }
             original.call(instance, bl);
             this.handleDelayedCrash();
             if(exceptionCounter > 0) exceptionCounter--;

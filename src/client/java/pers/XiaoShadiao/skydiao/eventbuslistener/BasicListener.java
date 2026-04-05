@@ -194,22 +194,7 @@ public class BasicListener extends AbstractListener {
             isAFK = true;
             if(ChatClientManager.serverAvailable()) ChatClientManager.getChatClient().sender.sendAFK(true);
         }
-//        if(ConfigManager.chatbutton.getValue()) {
-//            if(!chatPatcherInstalled) {
-//                if(!FabricLoader.getInstance().isModLoaded("chatpatches")) {
-//                    ConfigManager.chatbutton.setValue(false);
-//                    try {
-//                        ToolList.printChatMessage(Component.literal("§a[小沙雕] §c翻译功能需要你安装ChatPatcher后才可以使用, 请§e点击这里§c下载并安装").withStyle(Style.EMPTY
-//                                .withHoverEvent(new HoverEvent.ShowText(Component.literal("§a点击前往下载")))
-//                                .withClickEvent(new ClickEvent.OpenUrl(new URI("https://modrinth.com/mod/chatpatches")))));
-//                    } catch (URISyntaxException e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                } else {
-//                    chatPatcherInstalled = true;
-//                }
-//            }
-//        }
+
         for (ConfigOption<?, ?> option : ConfigManager.optionList) {
             if(option instanceof BooleanConfigOption booleanConfigOption && !booleanConfigOption.isRequiredModInstalled()) {
                 ConfigOption.ModDepends requiredMod = booleanConfigOption.getRequiredMod();
@@ -226,6 +211,11 @@ public class BasicListener extends AbstractListener {
                     } else {
                         booleanConfigOption.setRequiredModInstalled();
                     }
+                }
+
+                List<BooleanConfigOption> dependsFeatures = booleanConfigOption.getDependsFeatures();
+                if(booleanConfigOption.getValue()) {
+                    dependsFeatures.forEach(o -> o.setValue(true));
                 }
             }
         }

@@ -1,7 +1,10 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener.macro;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.chat.Component;
@@ -28,6 +31,9 @@ public class MacroManagerListener extends AbstractListener {
     public static final PathFinderExecutor pathFinderExecutor = new PathFinderExecutor();
     public static final AutoDojo autoDojo = new AutoDojo();
 
+    public long lastOpenChatTime = 0;
+    public boolean isChatOpen = false;
+
     @Override
     public String getListenerName() {
         return "MacroManagerListener";
@@ -37,6 +43,7 @@ public class MacroManagerListener extends AbstractListener {
     public void registerListeners() {
         ClientTickEvents.START_CLIENT_TICK.register(this::onStartClientTick);
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
+        ScreenEvents.AFTER_INIT.register(this::afterScreenInit);
 
         Register.execRegister(MacroManagerListener.class, AbstractListener.class, listener -> {
             if(listener instanceof IMacro) {
@@ -47,10 +54,18 @@ public class MacroManagerListener extends AbstractListener {
         macros = Collections.unmodifiableList(macros);
     }
 
+    private void afterScreenInit(Minecraft mc, Screen screen, int scaledWidth, int scaledHeight) {
+        boolean temp = screen instanceof ChatScreen;
+        if(isChatOpen && !temp) {
+            lastOpenChatTime = System.currentTimeMillis();
+        }
+        isChatOpen = temp;
+    }
+
     private boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
 
         if(packet instanceof ClientboundPlayerPositionPacket tpPacket) {
-            if(!activeMacros.isEmpty()) {
+            if(System.currentTimeMillis() - lastOpenChatTime > 5000 && !activeMacros.isEmpty()) {
                 ToolList.TPInfo tpInfo = ToolList.getInstance().parseTPPacket(tpPacket);
                 IMacro.PositionInfo before = new IMacro.PositionInfo(tpInfo.from().position(), tpInfo.from().yRot() % 360, tpInfo.from().xRot(), tpInfo.from().deltaMovement());
                 IMacro.PositionInfo after = new IMacro.PositionInfo(tpInfo.to().position(), tpInfo.to().yRot() % 360, tpInfo.to().xRot(), tpInfo.to().deltaMovement());
@@ -59,7 +74,7 @@ public class MacroManagerListener extends AbstractListener {
 
                 double distance = historyPoses.stream().mapToDouble(vec3 -> vec3.distanceTo(after.position())).min().orElse(0.0);
                 float deltaYaw = Math.abs(before.yaw() - after.yaw());
-                if (distance > 0.1 || deltaYaw > 0.05 && deltaYaw < 360 - 0.05 || Math.abs(before.pitch() - after.pitch()) > 0.05) {
+                if (distance > 0.65 || deltaYaw > 0.05 && deltaYaw < 360 - 0.05 || Math.abs(before.pitch() - after.pitch()) > 0.05) {
                     boolean flag = true;
                     for (IMacro macro : activeMacros) {
                         flag &= !macro.onMacroCheck(before, after);

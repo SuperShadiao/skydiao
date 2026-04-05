@@ -2,6 +2,8 @@ package pers.XiaoShadiao.skydiao.utils;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.numbers.NumberFormat;
@@ -441,6 +443,16 @@ public class ToolList {
         AABB bounds = occlusionShape.bounds();
         // System.out.println(bounds);
         return zeroAABB.equals(bounds);
+    }
+
+    public boolean isEntityInArea(Entity entity, BlockPos pos1, BlockPos pos2) {
+        int minX = Math.min(pos1.getX(), pos2.getX());
+        int maxX = Math.max(pos1.getX(), pos2.getX());
+        int minY = Math.min(pos1.getY(), pos2.getY());
+        int maxY = Math.max(pos1.getY(), pos2.getY());
+        int minZ = Math.min(pos1.getZ(), pos2.getZ());
+        int maxZ = Math.max(pos1.getZ(), pos2.getZ());
+        return entity.getX() >= minX && entity.getX() <= maxX && entity.getY() >= minY && entity.getY() <= maxY && entity.getZ() >= minZ && entity.getZ() <= maxZ;
     }
 
     public record TPInfo(PositionMoveRotation from, PositionMoveRotation to) { }

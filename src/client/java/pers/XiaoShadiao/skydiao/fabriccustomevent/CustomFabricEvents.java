@@ -22,7 +22,9 @@ public final class CustomFabricEvents {
         public void onPacket(ClientboundHypixelPacket packet);
     }
 
-    /* 0 left 1 right 2 mid */
+    /**
+    * mouseButtonInfo 0 left 1 right 2 mid
+    */
     public static final Event<MouseButtonEvent> MOUSE_BUTTON_EVENT = EventFactory.createArrayBacked(MouseButtonEvent.class, callbacks -> (windowsHandle, mouseButtonInfo, pressState) -> {
         boolean cancelled = false;
         for (MouseButtonEvent callback : callbacks) {

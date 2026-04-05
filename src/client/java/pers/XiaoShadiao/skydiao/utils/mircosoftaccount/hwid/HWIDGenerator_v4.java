@@ -12,19 +12,20 @@ public class HWIDGenerator_v4 {
     public static String cache;
 
     public static String generateHWID() {
-
         if(cache == null) {
-            SystemInfo info = new SystemInfo();
-            StringBuilder sb = new StringBuilder();
-            info.getHardware().getDiskStores().forEach(disk -> sb.append(disk.getSerial()));
-            sb.append(info.getHardware().getProcessor().getProcessorIdentifier().getProcessorID());
-            sb.append(info.getHardware().getComputerSystem().getBaseboard().getSerialNumber());
-
-            cache = hashString(sb.toString());
+            try {
+                SystemInfo info = new SystemInfo();
+                StringBuilder sb = new StringBuilder();
+                info.getHardware().getDiskStores().forEach(disk -> sb.append(disk.getSerial()));
+                sb.append(info.getHardware().getProcessor().getProcessorIdentifier().getProcessorID());
+                sb.append(info.getHardware().getComputerSystem().getBaseboard().getSerialNumber());
+                cache = hashString(sb.toString());
+            } catch (Throwable e) {
+                cache = "Unsupported";
+            }
         }
 
         return cache;
-
     }
 
     private static String hashString(String input) {

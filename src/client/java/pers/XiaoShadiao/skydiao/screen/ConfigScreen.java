@@ -319,8 +319,13 @@ public class ConfigScreen extends Screen {
                         case BooleanConfigOption boolOption -> Button.builder(
                                 Component.literal(boolOption.getI18nValue()),
                                 b -> {
-                                    boolOption.setValue(!boolOption.getValue());
-                                    b.setMessage(Component.literal(boolOption.getI18nValue()));
+                                    List<BooleanConfigOption> list = boolOption.getUsingThisFeatures().stream().filter(ConfigOption::getValue).toList();
+                                    if(!list.isEmpty()) {
+                                        ToolList.printChatMessage(Component.literal("§a[小沙雕] §c若要关闭功能§e" + boolOption.getI18nName() + "§c, 请先关闭功能§e" + list.stream().map(ConfigOption::getI18nName).collect(Collectors.joining("§c, §e"))));
+                                    } else {
+                                        boolOption.setValue(!boolOption.getValue());
+                                        b.setMessage(Component.literal(boolOption.getI18nValue()));
+                                    }
                                 }
                         ).bounds(0, 0, 100, 20).build();
                         case SelectConfigOption selectOption -> Button.builder(

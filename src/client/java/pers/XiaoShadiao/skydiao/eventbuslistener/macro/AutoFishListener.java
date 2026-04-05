@@ -19,6 +19,7 @@ import net.minecraft.world.item.Items;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
+import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
@@ -191,68 +192,74 @@ public class AutoFishListener extends AbstractListener implements IMacro {
 
         InputSimulator.singleRightClick();
 
-        for (int i = 0; i < 20; i++) {
-            if(mythicalFishModeFlag) break;
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-            }
-        }
-
-        if (mythicalFishModeFlag) {
-            mythicalFishModeFlag = false;
-            mythicalFishMode = true;
-            int count = 0;
-            int currentCount = 10;
-            FishingHook fishEntityFlag = mc.player.fishing;
-            while (mythicalFishMode && mc.player != null && isHoldingFishRod()) {
-
-                try { Thread.sleep(100); } catch (InterruptedException e) {}
-                count++;
-
-                FishingHook fishEntity = mc.player.fishing;
-                if (fishEntity != fishEntityFlag) {
-                    mythicalFishMode = false;
-                    break;
+        if(!StatusManager.get().isInSkyblock()) {
+            for (int i = 0; i < 20; i++) {
+                if (mythicalFishModeFlag) break;
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
                 }
-                List<ArmorStand> fish = mc.level.getEntitiesOfClass(ArmorStand.class, fishEntity.getBoundingBox().inflate(1.1));
-                fish.sort(Comparator.comparingDouble(e -> e.distanceTo(fishEntity)));
-                boolean flag = false;
+            }
 
-                for (ArmorStand e : fish) {
-                    Component component = e.getName();
-                    String nameNoColor = ToolList.getInstance().deleteColorCode(component.getString());
-                    if (nameNoColor.matches("\\[\\|+\\]")) {
-                        for (Component c : component.getSiblings()) {
-                            String name = Optional.of(c.getStyle()).map(Style::getColor).map(TextColor::toString).orElse("");
-                            if (name.equals("red")) {
-                                if(count != 0 && count % currentCount == 0) {
-                                    currentCount = 7 + ToolList.getInstance().random.nextInt(6);
-                                    count = 0;
+            if (mythicalFishModeFlag) {
+                mythicalFishModeFlag = false;
+                mythicalFishMode = true;
+                int count = 0;
+                int currentCount = 10;
+                FishingHook fishEntityFlag = mc.player.fishing;
+                while (mythicalFishMode && mc.player != null && isHoldingFishRod()) {
+
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                    }
+                    count++;
+
+                    FishingHook fishEntity = mc.player.fishing;
+                    if (fishEntity != fishEntityFlag) {
+                        mythicalFishMode = false;
+                        break;
+                    }
+                    List<ArmorStand> fish = mc.level.getEntitiesOfClass(ArmorStand.class, fishEntity.getBoundingBox().inflate(1.1));
+                    fish.sort(Comparator.comparingDouble(e -> e.distanceTo(fishEntity)));
+                    boolean flag = false;
+
+                    for (ArmorStand e : fish) {
+                        Component component = e.getName();
+                        String nameNoColor = ToolList.getInstance().deleteColorCode(component.getString());
+                        if (nameNoColor.matches("\\[\\|+\\]")) {
+                            for (Component c : component.getSiblings()) {
+                                String name = Optional.of(c.getStyle()).map(Style::getColor).map(TextColor::toString).orElse("");
+                                if (name.equals("red")) {
+                                    if (count != 0 && count % currentCount == 0) {
+                                        currentCount = 7 + ToolList.getInstance().random.nextInt(6);
+                                        count = 0;
+                                        flag = true;
+                                    } else {
+                                        flag = false;
+                                        break;
+                                    }
+                                    ;
+                                }
+                                if (name.equals("green")) {
                                     flag = true;
-                                } else {
-                                    flag = false;
-                                    break;
-                                };
+                                }
                             }
-                            if (name.equals("green")) {
-                                flag = true;
-                            }
-                        }
 
+                        }
+                    }
+                    if (flag) {
+                        InputSimulator.singleRightClick();
                     }
                 }
-                if (flag) {
-                    InputSimulator.singleRightClick();
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+
                 }
+                ensureHookSummoned();
             }
-
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-
-            }
-            ensureHookSummoned();
         }
 
         try {

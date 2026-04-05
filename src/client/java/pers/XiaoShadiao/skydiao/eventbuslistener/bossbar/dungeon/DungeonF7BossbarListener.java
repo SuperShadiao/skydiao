@@ -6,7 +6,10 @@ import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.components.LerpingBossEvent;
+import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.chat.Component;
@@ -17,7 +20,11 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.E2AMappingListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.hud.CustomBossbar;
@@ -192,6 +199,14 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         return true;
     }
 
+    private BlockPos simonSaysStartButton = new BlockPos(110, 121, 91);
+    private int lastSimonSaysButtonCount;
+    private int simonSaysButtonCount;
+    private final Set<BlockPos> targetsimonSaysButton = new HashSet<>();
+    private boolean isDoingSimonSays = false;
+
+    private boolean enteredGoldorCoreTunnel;
+
     @Override
     public String getListenerName() {
         return "SRBDungeonF7Bossbar";
@@ -203,10 +218,20 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register(this::onWorldUnload);
         ClientReceiveMessageEvents.GAME.register(this::onChat);
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
+        CustomFabricEvents.MOUSE_BUTTON_EVENT.register(this::onMouseClick);
+    }
+
+    private boolean onMouseClick(long windowsHandle, MouseButtonInfo mouseButtonInfo, int pressState) {
+        if(mouseButtonInfo.button() == 1 && pressState == 1 && mc.hitResult instanceof BlockHitResult blockHitResult && blockHitResult.getType() == HitResult.Type.BLOCK && blockHitResult.getBlockPos().equals(simonSaysStartButton)) {
+            sendChatMessage(ConfigManager.dungeonf7msgbotsimonsaysstart.getValue());
+            targetsimonSaysButton.clear();
+            isDoingSimonSays = true;
+        }
+        return false;
     }
 
     private void onClientTick(Minecraft mc) {
-        if(mc.level == null || isInMasterDungeonFloor() || !isInCorrectDungeon()) return;
+        if(mc.player == null || mc.level == null || isInMasterDungeonFloor() || !isInCorrectDungeon()) return;
 
         MixinBossbarEventGetter bossbarEventGetter = (MixinBossbarEventGetter) mc.gui.getBossOverlay();
         boolean[] flag = new boolean[] {false};
@@ -269,6 +294,36 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             }
         }
 
+        if(currentStage == 3) {
+            lastSimonSaysButtonCount = simonSaysButtonCount;
+            int temp = 0;
+            for (BlockPos pos : BlockPos.betweenClosed(new BlockPos(110, 123, 92), new BlockPos(110, 120, 95))) {
+                if (mc.level.getBlockState(pos).getBlock().equals(Blocks.STONE_BUTTON)) temp++;
+            }
+            boolean hasLantern = false;
+            for (BlockPos pos : BlockPos.betweenClosed(new BlockPos(111, 123, 92), new BlockPos(111, 120, 95))) {
+                if (mc.level.getBlockState(pos).getBlock().equals(Blocks.SEA_LANTERN)) {
+                    targetsimonSaysButton.add(pos.immutable());
+                    hasLantern = true;
+                }
+            }
+            simonSaysButtonCount = temp;
+
+            if (isDoingSimonSays && simonSaysButtonCount != 16 && lastSimonSaysButtonCount == 16 && (hasLantern || targetsimonSaysButton.size() == 5)) {
+                sendChatMessage(ConfigManager.dungeonf7msgbotsimonsays.getValue().replace("[p]", targetsimonSaysButton.size() + "/5"));
+                if(targetsimonSaysButton.size() == 5) {
+                    isDoingSimonSays = false;
+                }
+            }
+            boolean inArea = ToolList.getInstance().isEntityInArea(mc.player, new BlockPos(50, 115, 56), new BlockPos(58, 122, 57));
+            if (inArea && !enteredGoldorCoreTunnel) {
+                enteredGoldorCoreTunnel = true;
+                sendChatMessage(ConfigManager.dungeonf7msgbotcoretunnel.getValue());
+            } else if(!inArea && enteredGoldorCoreTunnel) {
+                enteredGoldorCoreTunnel = false;
+            }
+        }
+
     }
 
     private void onWorldUnload(Minecraft mc, ClientLevel level) {
@@ -276,6 +331,8 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         f7BossTarget = null;
         currentStage = 0;
         visitedTerminalMsg.clear();
+        isDoingSimonSays = false;
+        targetsimonSaysButton.clear();
     }
 
     private boolean stage1LaserFlag = false;
@@ -364,5 +421,16 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     @Override
     public int getFloor() {
         return 7;
+    }
+
+    private void sendChatMessage(String message) {
+        if(ConfigManager.dungeonf7msgbot.getValue()) {
+            if(ToolList.getInstance().isDevEnvironment()) {
+                ToolList.printChatMessage(Component.literal(message));
+            } else {
+                logger.info(message);
+            }
+            if(mc.player != null && !message.trim().isEmpty()) mc.player.connection.sendChat((ToolList.getInstance().isDevEnvironment() ? "/achat" : "/pc") + " [SkyDiao] " + message);
+        }
     }
 }

@@ -3,8 +3,11 @@ package pers.XiaoShadiao.skydiao.eventbuslistener;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ambient.Bat;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.hud.CustomBossbar;
+import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
@@ -23,7 +26,7 @@ public class DungeonMobESPListener extends AbstractListener {
     }
 
     private void onLastRender(WorldRenderContext context) {
-        if (ConfigManager.dungeonRenderDangerousEnemy.getValue() && mc.level != null) {
+        if (ConfigManager.dungeonRenderDangerousEnemy.getValue() && mc.level != null && StatusManager.get().isInDungeon()) {
             RenderUtils.WorldRender worldRender = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_FILL);
             RenderUtils.WorldRender worldRender2 = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_LINE);
             for(Entity entity : mc.level.entitiesForRendering()) {
@@ -41,6 +44,11 @@ public class DungeonMobESPListener extends AbstractListener {
                     if(isStarMob) {
                         RenderUtils.renderESP(worldRender2, entity, 1, 0.5f, 0, 1, false);
                     }
+                }
+                if (entity instanceof Bat && !entity.isInvisible() && XSDHUD.customBossbar.getStarRailBossBar() == null) {
+                    RenderUtils.renderESP(worldRender, entity, 1, 0.5f, 0, 1, true);
+                    RenderUtils.renderESP(worldRender2, entity, 1, 0.5f, 0, 1, false);
+                    RenderUtils.renderTrace(worldRender2, entity, 1, 0.5f, 0, 1);
                 }
             }
             worldRender.finishDraw();

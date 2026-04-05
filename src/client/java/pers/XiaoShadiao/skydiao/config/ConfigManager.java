@@ -52,6 +52,10 @@ public class ConfigManager {
     public static final BooleanConfigOption autoDojo = new BooleanConfigOption("autodojo", false);
     public static final IntConfigOption autoDojoControlPredictDist = new IntConfigOption("autodojocontrolpredictdist", 8);
     public static final BooleanConfigOption necronLadderNotification = new BooleanConfigOption("necronladdernotification", true);
+    public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true).addDependFeature(bossbar);
+    public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
+    public static final StringConfigOption dungeonf7msgbotsimonsays = new StringConfigOption("dungeonf7msgbotsimonsays", "Simon Says已完成 [p]...");
+    public static final StringConfigOption dungeonf7msgbotcoretunnel = new StringConfigOption("dungeonf7msgbotcoretunnel", "已进入Goldor核心隧道!");
 
     public static final BooleanConfigOption chatbutton = new BooleanConfigOption("chatbutton", false).setRequiredMod(new ConfigOption.ModDepends("chatpatches", "alpha.8", "https://modrinth.com/mod/chatpatches"));
 
@@ -61,7 +65,7 @@ public class ConfigManager {
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
             Map.entry("自动类", List.of(autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, autoDojo, autoDojoControlPredictDist)),
             Map.entry("mining", List.of(mineshaftSharing, skyblockSafeIsland)),
-            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonRenderTraps, necronLadderNotification)),
+            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonRenderTraps, necronLadderNotification, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays, dungeonf7msgbotcoretunnel)),
             Map.entry("界面类", List.of(bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, dyingtip, noblind, nosuffoverlay))
     );
 
@@ -92,7 +96,7 @@ public class ConfigManager {
         try {
             FileUtils.writeStringToFile(configFile, jo.toString(), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
