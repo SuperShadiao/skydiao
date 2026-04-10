@@ -17,7 +17,8 @@
     "MixinMultiPlayerGameModeDestroyBlockDelayAccessor",
     "MixinMultiPlayerGameModeDestroyBlockDelayFix",
     "MixinRealmsClientReseter",
-    "MixinRealmStatusReset"
+    "MixinRealmStatusReset",
+    "odinfix.MixinFireOverlaySettings"
   ],
   "injectors": {
     "defaultRequire": 1

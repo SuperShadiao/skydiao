@@ -6,7 +6,6 @@ import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.components.LerpingBossEvent;
-import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -15,6 +14,7 @@ import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -223,7 +223,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
     private boolean onMouseClick(long windowsHandle, MouseButtonInfo mouseButtonInfo, int pressState) {
         if(mouseButtonInfo.button() == 1 && pressState == 1 && mc.hitResult instanceof BlockHitResult blockHitResult && blockHitResult.getType() == HitResult.Type.BLOCK && blockHitResult.getBlockPos().equals(simonSaysStartButton)) {
-            sendChatMessage(ConfigManager.dungeonf7msgbotsimonsaysstart.getValue());
+            sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotsimonsaysstart.getValue());
             targetsimonSaysButton.clear();
             isDoingSimonSays = true;
         }
@@ -310,7 +310,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             simonSaysButtonCount = temp;
 
             if (isDoingSimonSays && simonSaysButtonCount != 16 && lastSimonSaysButtonCount == 16 && (hasLantern || targetsimonSaysButton.size() == 5)) {
-                sendChatMessage(ConfigManager.dungeonf7msgbotsimonsays.getValue().replace("[p]", targetsimonSaysButton.size() + "/5"));
+                sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotsimonsays[Mth.clamp(targetsimonSaysButton.size() - 1, 0, 4)].getValue());
                 if(targetsimonSaysButton.size() == 5) {
                     isDoingSimonSays = false;
                 }
@@ -318,7 +318,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             boolean inArea = ToolList.getInstance().isEntityInArea(mc.player, new BlockPos(50, 115, 56), new BlockPos(58, 122, 57));
             if (inArea && !enteredGoldorCoreTunnel) {
                 enteredGoldorCoreTunnel = true;
-                sendChatMessage(ConfigManager.dungeonf7msgbotcoretunnel.getValue());
+                sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotcoretunnel.getValue());
             } else if(!inArea && enteredGoldorCoreTunnel) {
                 enteredGoldorCoreTunnel = false;
             }
@@ -423,14 +423,4 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         return 7;
     }
 
-    private void sendChatMessage(String message) {
-        if(ConfigManager.dungeonf7msgbot.getValue()) {
-            if(ToolList.getInstance().isDevEnvironment()) {
-                ToolList.printChatMessage(Component.literal(message));
-            } else {
-                logger.info(message);
-            }
-            if(mc.player != null && !message.trim().isEmpty()) mc.player.connection.sendChat((ToolList.getInstance().isDevEnvironment() ? "/achat" : "/pc") + " [SkyDiao] " + message);
-        }
-    }
 }

@@ -2,7 +2,6 @@ package pers.XiaoShadiao.skydiao.utils;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -16,6 +15,8 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PositionMoveRotation;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Blocks;
@@ -453,6 +454,21 @@ public class ToolList {
         int minZ = Math.min(pos1.getZ(), pos2.getZ());
         int maxZ = Math.max(pos1.getZ(), pos2.getZ());
         return entity.getX() >= minX && entity.getX() <= maxX && entity.getY() >= minY && entity.getY() <= maxY && entity.getZ() >= minZ && entity.getZ() <= maxZ;
+    }
+
+    public Slot[][] mapSlotsToArray(ChestMenu menu) {
+        int totalCount = (9 * menu.getRowCount());
+        Slot[][] slots = new Slot[9][menu.getRowCount()];
+        new Slot(null, 0, 0, 0);
+        int i = 0;
+        for (Slot slot : menu.slots) {
+            if(i >= totalCount) break;
+            if(slot != null && slot.container != mc.player.getInventory()) {
+                slots[i % 9][i / 9] = slot;
+            }
+            i++;
+        }
+        return slots;
     }
 
     public record TPInfo(PositionMoveRotation from, PositionMoveRotation to) { }

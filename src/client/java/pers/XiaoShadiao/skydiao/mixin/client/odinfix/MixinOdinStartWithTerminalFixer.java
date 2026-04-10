@@ -30,7 +30,6 @@ public class MixinOdinStartWithTerminalFixer {
             ItemStack item = items.get(index);
             if (item.getHoverName() != null) {
                 String s = ToolList.getInstance().deleteColorCode(item.getHoverName().getString());
-                System.out.println(s);
                 if (s.toLowerCase().startsWith(letter.toLowerCase())
                         && !hasGlint(item)
                         && !clickedSlots.contains(index)) {

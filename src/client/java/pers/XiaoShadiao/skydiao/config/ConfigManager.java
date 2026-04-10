@@ -29,7 +29,7 @@ public class ConfigManager {
     public static final BooleanConfigOption autoEnchantTableGame = new BooleanConfigOption("sbautoplayenchant", false);
     public static final BooleanConfigOption autoHarp = new BooleanConfigOption("skyblockautoplayharp", false);
 
-    public static final BooleanConfigOption bossbar = new BooleanConfigOption("bossbar", false);
+    public static final BooleanConfigOption bossbar = new BooleanConfigOption("bossbar", true);
     public static final BooleanConfigOption bossbarShowHealth = new BooleanConfigOption("bossbarshowhealth", false);
     public static final BooleanConfigOption bossbarAddTargetEntity = new BooleanConfigOption("bossbaraddtargetentity", false);
     public static final IntConfigOption bossbarDisplayLimit = new IntConfigOption("bossbardisplaylimit", 3);
@@ -52,21 +52,48 @@ public class ConfigManager {
     public static final BooleanConfigOption autoDojo = new BooleanConfigOption("autodojo", false);
     public static final IntConfigOption autoDojoControlPredictDist = new IntConfigOption("autodojocontrolpredictdist", 8);
     public static final BooleanConfigOption necronLadderNotification = new BooleanConfigOption("necronladdernotification", true);
-    public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true).addDependFeature(bossbar);
+    public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
-    public static final StringConfigOption dungeonf7msgbotsimonsays = new StringConfigOption("dungeonf7msgbotsimonsays", "Simon Says已完成 [p]...");
+    public static final StringConfigOption dungeonf7msgbotsimonsays1 = new StringConfigOption("dungeonf7msgbotsimonsays1", "Simon Says已完成 1/5...");
+    public static final StringConfigOption dungeonf7msgbotsimonsays2 = new StringConfigOption("dungeonf7msgbotsimonsays2", "Simon Says已完成 2/5...");
+    public static final StringConfigOption dungeonf7msgbotsimonsays3 = new StringConfigOption("dungeonf7msgbotsimonsays3", "Simon Says已完成 3/5...");
+    public static final StringConfigOption dungeonf7msgbotsimonsays4 = new StringConfigOption("dungeonf7msgbotsimonsays4", "Simon Says已完成 4/5...");
+    public static final StringConfigOption dungeonf7msgbotsimonsays5 = new StringConfigOption("dungeonf7msgbotsimonsays5", "Simon Says已完成 5/5...");
+    public static final StringConfigOption dungeonf7msgbotmelodystart = new StringConfigOption("dungeonf7msgbotmelodystart", "Melody终端开始咯!");
+    public static final StringConfigOption dungeonf7msgbotmelody1 = new StringConfigOption("dungeonf7msgbotmelody1", "Melody终端已完成 1/4...");
+    public static final StringConfigOption dungeonf7msgbotmelody2 = new StringConfigOption("dungeonf7msgbotmelody2", "Melody终端已完成 2/4...");
+    public static final StringConfigOption dungeonf7msgbotmelody3 = new StringConfigOption("dungeonf7msgbotmelody3", "Melody终端已完成 3/4...");
+    public static final StringConfigOption dungeonf7msgbotmelody4 = new StringConfigOption("dungeonf7msgbotmelody4", "Melody终端已完成 4/4...");
     public static final StringConfigOption dungeonf7msgbotcoretunnel = new StringConfigOption("dungeonf7msgbotcoretunnel", "已进入Goldor核心隧道!");
+    public static final BooleanConfigOption dungeonf7autoterm = new BooleanConfigOption("dungeonf7autoterm", false);
+    public static final BooleanConfigOption enablexsdccommandtip = new BooleanConfigOption("enablexsdccommandtip", true);
+    public static final BooleanConfigOption enableircjointip = new BooleanConfigOption("enableircjointip", true);
+    public static final SelectConfigOption fireOverlay = new SelectConfigOption("fireoverlay", 1, List.of("config.fireoverlay.options.normal", "config.fireoverlay.options.lower", "config.fireoverlay.options.remove"));
+
+    public static final StringConfigOption[] dungeonf7msgbotsimonsays = {
+            dungeonf7msgbotsimonsays1,
+            dungeonf7msgbotsimonsays2,
+            dungeonf7msgbotsimonsays3,
+            dungeonf7msgbotsimonsays4,
+            dungeonf7msgbotsimonsays5
+    };
+    public static final StringConfigOption[] dungeonf7msgbotmelody = {
+            dungeonf7msgbotmelody1,
+            dungeonf7msgbotmelody2,
+            dungeonf7msgbotmelody3,
+            dungeonf7msgbotmelody4
+    };
 
     public static final BooleanConfigOption chatbutton = new BooleanConfigOption("chatbutton", false).setRequiredMod(new ConfigOption.ModDepends("chatpatches", "alpha.8", "https://modrinth.com/mod/chatpatches"));
 
     public static final List<Map.Entry<String, List<ConfigOption<?, ?>>>> categories = List.of(
-            Map.entry("basic", List.of(language)),
+            Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip)),
             Map.entry("工具类", List.of(inventoryFilter, chatbutton)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
             Map.entry("自动类", List.of(autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, autoDojo, autoDojoControlPredictDist)),
             Map.entry("mining", List.of(mineshaftSharing, skyblockSafeIsland)),
-            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonRenderTraps, necronLadderNotification, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays, dungeonf7msgbotcoretunnel)),
-            Map.entry("界面类", List.of(bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, dyingtip, noblind, nosuffoverlay))
+            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel)),
+            Map.entry("界面类", List.of(bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, dyingtip, noblind, nosuffoverlay, fireOverlay))
     );
 
 

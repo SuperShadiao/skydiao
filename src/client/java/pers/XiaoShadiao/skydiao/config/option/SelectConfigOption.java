@@ -2,6 +2,8 @@ package pers.XiaoShadiao.skydiao.config.option;
 
 import java.util.List;
 
+import static pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager.translate;
+
 public class SelectConfigOption extends IntConfigOption {
 
     private final List<String> displayOptions;
@@ -19,7 +21,7 @@ public class SelectConfigOption extends IntConfigOption {
 
     public String getCurrentDisplayString() {
         if (value < 0 || value >= displayOptions.size()) value = 0;
-        return displayOptions.get(value);
+        return translate(displayOptions.get(value));
     }
 
     public void switchOption() {

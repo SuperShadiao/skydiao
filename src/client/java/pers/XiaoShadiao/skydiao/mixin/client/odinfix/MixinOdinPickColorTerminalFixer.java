@@ -28,7 +28,6 @@ public class MixinOdinPickColorTerminalFixer {
             ItemStack item = items.get(index);
             String s = ToolList.getInstance().deleteColorCode(item.getHoverName().getString());
             String itemLowCase = s.toLowerCase();
-            System.out.println(s);
             if (!hasGlint(item)
                     && item.getItem() != Items.BLACK_STAINED_GLASS_PANE
                     && (itemLowCase.startsWith(colorLowCase) || itemLowCase.endsWith(colorLowCase)
@@ -47,10 +46,13 @@ public class MixinOdinPickColorTerminalFixer {
     @Unique
     private boolean matchesSpecialCase(ItemStack item) {
         return switch (color) {
-            case BLACK -> item.getItem() == Items.INK_SAC;
-            case BLUE -> item.getItem() == Items.LAPIS_LAZULI;
-            case BROWN -> item.getItem() == Items.COCOA_BEANS;
-            case WHITE -> item.getItem() == Items.BONE_MEAL;
+            case DyeColor.BLACK -> item.getItem() == Items.INK_SAC;
+            case DyeColor.BLUE -> item.getItem() == Items.LAPIS_LAZULI;
+            case DyeColor.BROWN -> item.getItem() == Items.COCOA_BEANS;
+            case DyeColor.WHITE -> item.getItem() == Items.BONE_MEAL || item.getItem() == Items.WHITE_WOOL;
+            case DyeColor.GREEN -> item.getItem() == Items.CACTUS;
+            case DyeColor.RED -> item.getItem() == Items.POPPY;
+            case DyeColor.YELLOW -> item.getItem() == Items.DANDELION;
             default -> false;
         };
     }

@@ -31,6 +31,7 @@ public abstract class AbstractListener extends Thread {
     public static final InventoryItemFilter inventoryItemFilter = new InventoryItemFilter();
     public static final AutoHarpListener autoHarpListener = new AutoHarpListener();
     public static final NecronLadderNotification necronLadderNotification = new NecronLadderNotification();
+    public static final F7AutoTerminal f7AutoTerminal = new F7AutoTerminal();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();

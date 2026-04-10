@@ -1,8 +1,10 @@
 package pers.XiaoShadiao.skydiao.mixin.client;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -16,9 +18,13 @@ public class MixinMultiPlayerGameModeDestroyBlockDelayFix {
     @Shadow
     private int destroyDelay;
 
+    @Shadow
+    @Final
+    private Minecraft minecraft;
+
     @Inject(at = @At("HEAD"), method = "startDestroyBlock", cancellable = true)
     public void startDestroyBlock(BlockPos blockPos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
-        if(destroyDelay > 1) {
+        if(!this.minecraft.player.getAbilities().instabuild && destroyDelay > 1) {
             cir.setReturnValue(false);
         }
     }

@@ -23,6 +23,8 @@ import pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon.DungeonF7Bossba
 import pers.XiaoShadiao.skydiao.hud.CustomBossbar;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
+import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
+import pers.XiaoShadiao.skydiao.irc.ChatPacket;
 import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.playerinput.AimHelper;
@@ -81,6 +83,15 @@ public class HHSCCommand extends OpenConfigMenuCommand {
 
                 }
             })))));
+            devcommand.then(getArgConstantInstance("triggerfakeshaftannounce").executes((context) -> owo(AbstractListener.mineshaftShareListener::flagFoundShaft)));
+            devcommand.then(getArgConstantInstance("sendfakemacrocheck").executes((context) -> {
+                ChatPacket packet = new ChatPacket();
+                packet.initSender();
+                packet.packetType = "macro_check";
+                packet.message = "test msg";
+                ChatClientManager.getChatClient().sender.send(packet);
+                return 0;
+            }));
         } else {
             devcommand.executes((context) -> owo(() -> context.getSource().sendFeedback(Component.literal("§a[小沙雕] §c当前不是Dev环境..."))));
         }

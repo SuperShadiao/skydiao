@@ -115,16 +115,20 @@ public class MineshaftShareListener extends AbstractListener {
         String message = ToolList.getInstance().deleteColorCode(component.getString());
 
         if(message.matches("MINESHAFT! A Mineshaft portal spawned nearby!(.*)")) {
-            if(ConfigManager.mineshaftSharing.getValue()) {
-                allowShare = true;
-                playerList.clear();
-                sendMineshaftSharePacket("0");
-                ToolList.printChatMessage(Component.literal("§a[XSD§bMS§a] §a你的§bGlacite Mineshaft§a已被广播!"));
-            } else {
-                allowShare = false;
-            }
+            flagFoundShaft();
         } else if(message.equals("The mineshaft entrance has caved in... it doesn't look like anyone else will be able to get in here.")) {
             mineshaftClosed = true;
+        }
+    }
+
+    public void flagFoundShaft() {
+        if(ConfigManager.mineshaftSharing.getValue()) {
+            allowShare = true;
+            playerList.clear();
+            sendMineshaftSharePacket("0");
+            ToolList.printChatMessage(Component.literal("§a[XSD§bMS§a] §a你的§bGlacite Mineshaft§a已被广播!"));
+        } else {
+            allowShare = false;
         }
     }
 

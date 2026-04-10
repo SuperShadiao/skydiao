@@ -16,6 +16,7 @@ import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
+import pers.XiaoShadiao.skydiao.irc.ChatPacket;
 import pers.XiaoShadiao.skydiao.utils.Register;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
@@ -99,7 +100,11 @@ public class MacroManagerListener extends AbstractListener {
         }, null);
 
         if(ChatClientManager.serverAvailable()) {
-            ChatClientManager.getChatClient().sender.sendMessage("Alert! Macro check! (Info: ActiveMacros: " + activeMacros.stream().map(IMacro::getMacroName).toList() + " From: " + from + ", To: " + to + ")");
+            ChatPacket p = new ChatPacket();
+            p.initSender();
+            p.packetType = "macro_check";
+            p.message = "Alert! Macro check! (Info: ActiveMacros: " + activeMacros.stream().map(IMacro::getMacroName).toList() + " From: " + from + ", To: " + to + ")";
+            ChatClientManager.getChatClient().sender.send(p);
         }
     }
 

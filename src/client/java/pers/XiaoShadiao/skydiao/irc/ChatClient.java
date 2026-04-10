@@ -84,6 +84,7 @@ public class ChatClient extends Thread {
             log.info("创建Socket...");
             try {
                 String[] hostPort = url.replace("https://", "").replace("http://", "").replace("tcp://", "").split(":");
+                // String[] hostPort = {"localhost", "831"};
                 socket = new Socket(hostPort[0], Integer.parseInt(hostPort[1]));
             } catch (IOException e) {
                 throw new RuntimeException(e);
