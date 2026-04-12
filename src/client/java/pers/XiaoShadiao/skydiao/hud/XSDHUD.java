@@ -3,7 +3,7 @@ package pers.XiaoShadiao.skydiao.hud;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import pers.XiaoShadiao.skydiao.utils.Register;
 
 public abstract class XSDHUD implements HudElement {

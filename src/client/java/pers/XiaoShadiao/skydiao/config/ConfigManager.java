@@ -69,6 +69,7 @@ public class ConfigManager {
     public static final BooleanConfigOption enablexsdccommandtip = new BooleanConfigOption("enablexsdccommandtip", true);
     public static final BooleanConfigOption enableircjointip = new BooleanConfigOption("enableircjointip", true);
     public static final SelectConfigOption fireOverlay = new SelectConfigOption("fireoverlay", 1, List.of("config.fireoverlay.options.normal", "config.fireoverlay.options.lower", "config.fireoverlay.options.remove"));
+    public static final BooleanConfigOption skydiaocustomcape = new BooleanConfigOption("skydiaocustomcape", false);
 
     public static final StringConfigOption[] dungeonf7msgbotsimonsays = {
             dungeonf7msgbotsimonsays1,
@@ -88,7 +89,7 @@ public class ConfigManager {
 
     public static final List<Map.Entry<String, List<ConfigOption<?, ?>>>> categories = List.of(
             Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip)),
-            Map.entry("工具类", List.of(inventoryFilter, chatbutton)),
+            Map.entry("工具类", List.of(inventoryFilter, chatbutton, skydiaocustomcape)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
             Map.entry("自动类", List.of(autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, autoDojo, autoDojoControlPredictDist)),
             Map.entry("mining", List.of(mineshaftSharing, skyblockSafeIsland)),
@@ -155,4 +156,14 @@ public class ConfigManager {
             e.printStackTrace();
         }
     }
+
+    public static final File capeFolder;
+    public static final File capeFile;
+
+    static {
+        capeFolder = new File(config_folder, "customcape");
+        capeFolder.mkdirs();
+        capeFile = new File(capeFolder, "cape.png");
+    }
+
 }

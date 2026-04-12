@@ -8,8 +8,9 @@
     "MixinAbstractContainerScreenPosGetter",
     "MixinBossbarEventGetter",
     "MixinBossBarRemoveAnimation",
+    "MixinCustomCape",
     "MixinDeleteWallEffect",
-    "MixinFogRendererRemoveBlindness_1_21_10",
+    "MixinFogRendererRemoveBlindness_1_21_11",
     "MixinGameRenderer",
     "MixinMinecraft",
     "MixinMinecraftSessionAccessor",
@@ -26,6 +27,7 @@
   "mixins": [
     "MixinAcviteProfilePathAccessor",
     "MixinPacketListener",
+    "MixinRandomClassCrash",
     "MixinRemoveMaxHealthLimit",
     "MixinReportTypeCustomMessage",
     "MixinUserDataSecurer",

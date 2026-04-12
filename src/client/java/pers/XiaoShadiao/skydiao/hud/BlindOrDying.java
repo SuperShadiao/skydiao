@@ -11,7 +11,7 @@ import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.gui.render.state.ColoredRectangleRenderState;
 import net.minecraft.client.gui.render.state.GuiElementRenderState;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +27,7 @@ public class BlindOrDying extends XSDHUD {
 
     @Override
     public void runRegister() {
-        HudElementRegistry.addLast(Objects.requireNonNull(ResourceLocation.tryBuild("skydiao", "blind_or_dying_effect")), this);
+        HudElementRegistry.addLast(Objects.requireNonNull(Identifier.tryBuild("skydiao", "blind_or_dying_effect")), this);
     }
 
     @Override

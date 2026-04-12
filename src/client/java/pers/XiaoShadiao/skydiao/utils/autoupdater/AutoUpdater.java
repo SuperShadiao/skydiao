@@ -117,7 +117,7 @@ public class AutoUpdater {
         AutoUpdater up = null;
         JsonObject jo = null;
         try {
-            String[] urls = {"https://www.gitlink.org.cn/api/SuperShadiao/hypixelhelper/raw/e2.json?ref=main","https://xiaoshadiao.club/e2.json","https://github.com/SuperShadiao/hypixelhelper/raw/main/e2.json"};
+            String[] urls = {"https://www.gitlink.org.cn/api/SuperShadiao/hypixelhelper/raw/skydiao_1_21_11_update.json?ref=main","https://xiaoshadiao.club/skydiao_1_21_11_update.json","https://github.com/SuperShadiao/hypixelhelper/raw/main/skydiao_1_21_11_update.json"};
             for(String url : urls) {
                 log.info("尝试从GITHUB获取: " + url);
                 try(InputStream is = ToolList.getInstance().makeReqToURL(url)) {

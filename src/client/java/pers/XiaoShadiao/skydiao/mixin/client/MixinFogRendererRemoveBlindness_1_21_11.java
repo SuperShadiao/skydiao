@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(FogRenderer.class)
-public class MixinFogRendererRemoveBlindness_1_21_10 {
+public class MixinFogRendererRemoveBlindness_1_21_11 {
 
     @Mutable
     @Final
@@ -30,7 +30,7 @@ public class MixinFogRendererRemoveBlindness_1_21_10 {
     @Unique
     private static final FogEnvironment noLava = new FogEnvironment() {
         @Override
-        public void setupFog(FogData fogData, Entity entity, BlockPos blockPos, ClientLevel clientLevel, float f, DeltaTracker deltaTracker) {
+        public void setupFog(FogData fogData, Camera camera, ClientLevel clientLevel, float f, DeltaTracker deltaTracker) {
             fogData.environmentalStart = f * 0.05F;
             fogData.environmentalEnd = Math.min(f, 192.0F) * 0.5F;
             fogData.skyEnd = fogData.environmentalEnd;
@@ -50,7 +50,6 @@ public class MixinFogRendererRemoveBlindness_1_21_10 {
             new BlindnessFogEnvironment(),
             new DarknessFogEnvironment(),
             new WaterFogEnvironment(),
-            new DimensionOrBossFogEnvironment(),
             new AtmosphericFogEnvironment()
     ),
             modified = List.of(
@@ -59,12 +58,11 @@ public class MixinFogRendererRemoveBlindness_1_21_10 {
                     // new BlindnessFogEnvironment(),
                     // new DarknessFogEnvironment(),
                     new WaterFogEnvironment(),
-                    new DimensionOrBossFogEnvironment(),
                     new AtmosphericFogEnvironment()
             );
 
     @Inject(method = "setupFog", at = @At("HEAD"), require = 0)
-    public void setupFog(Camera camera, int i, boolean bl, DeltaTracker deltaTracker, float f, ClientLevel clientLevel, CallbackInfoReturnable<Vector4f> cir) {
+    public void setupFog(Camera camera, int i, DeltaTracker deltaTracker, float f, ClientLevel clientLevel, CallbackInfoReturnable<Vector4f> cir) {
         FOG_ENVIRONMENTS = new ArrayList<>(ConfigManager.noblind.getValue() ? modified : original);
     }
 

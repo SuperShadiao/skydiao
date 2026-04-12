@@ -7,7 +7,7 @@ import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Block;
@@ -47,7 +47,7 @@ public class DungeonF5BossbarListener extends AbstractDungeonBossbar {
     // Data from Skyblocker Mod End
 
 
-    public static final ResourceLocation LIVID_ICON = Objects.requireNonNull(ResourceLocation.tryBuild("skydiao", "textures/skyblock/boss/livid.png"));
+    public static final Identifier LIVID_ICON = Objects.requireNonNull(Identifier.tryBuild("skydiao", "textures/skyblock/boss/livid.png"));
     public static final Component NAME = Component.literal("Livid");
     public static final double HEALTH = 7_000_000;
     public static final double MM_HEALTH = 600_000_000;
@@ -134,7 +134,7 @@ public class DungeonF5BossbarListener extends AbstractDungeonBossbar {
     }
 
     @Override
-    public ResourceLocation getHeadIcon() {
+    public Identifier getHeadIcon() {
         return LIVID_ICON;
     }
 
@@ -154,7 +154,7 @@ public class DungeonF5BossbarListener extends AbstractDungeonBossbar {
     }
 
     @Override
-    public ResourceLocation getPowerUpPotionIcon() {
+    public Identifier getPowerUpPotionIcon() {
         return null;
     }
 

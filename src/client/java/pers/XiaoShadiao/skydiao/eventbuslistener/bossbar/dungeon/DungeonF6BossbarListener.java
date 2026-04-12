@@ -10,7 +10,7 @@ import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -30,7 +30,7 @@ import java.util.List;
 
 public class DungeonF6BossbarListener extends AbstractDungeonBossbar {
 
-    public static final ResourceLocation LIVID_ICON = Objects.requireNonNull(ResourceLocation.tryBuild("skydiao", "textures/skyblock/boss/sadan.png"));
+    public static final Identifier LIVID_ICON = Objects.requireNonNull(Identifier.tryBuild("skydiao", "textures/skyblock/boss/sadan.png"));
     public static final Component NAME = Component.literal("Sadan");
     public static final double HEALTH = 40_000_000;
     public static final double MM_HEALTH = 800_000_000;
@@ -148,7 +148,7 @@ public class DungeonF6BossbarListener extends AbstractDungeonBossbar {
     }
 
     @Override
-    public ResourceLocation getHeadIcon() {
+    public Identifier getHeadIcon() {
         return LIVID_ICON;
     }
 
@@ -168,7 +168,7 @@ public class DungeonF6BossbarListener extends AbstractDungeonBossbar {
     }
 
     @Override
-    public ResourceLocation getPowerUpPotionIcon() {
+    public Identifier getPowerUpPotionIcon() {
         return Gui.getMobEffectSprite(switch(stage) {
             case 1 -> MobEffects.NIGHT_VISION;
             default -> MobEffects.STRENGTH;

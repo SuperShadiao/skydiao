@@ -9,7 +9,7 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportType;
 import net.minecraft.ReportedException;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
@@ -31,6 +31,7 @@ import pers.XiaoShadiao.skydiao.screen.MinecraftCrashedScreen;
 import pers.XiaoShadiao.skydiao.utils.MCThreadDumper;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
+import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
@@ -139,6 +140,7 @@ public class MixinMinecraft {
             }
             // this.emergencySaveAndCrash(var11.getReport());
             this.emergencySave();
+            CustomRenderPipeline.closeAll();
             CrashReport report = var11.getReport();
             saveReport(this.gameDirectory, report);
             setScreen(new MinecraftCrashedScreen(var11.getCause(), report));
@@ -167,6 +169,7 @@ public class MixinMinecraft {
                 LOGGER.error(LogUtils.FATAL_MARKER, "Unreported exception thrown!", var12);
                 // this.emergencySaveAndCrash(new CrashReport("Unexpected error", var12));
                 this.emergencySave();
+                CustomRenderPipeline.closeAll();
                 CrashReport report = new CrashReport("Unexpected error", var12);
                 saveReport(this.gameDirectory, report);
                 setScreen(new MinecraftCrashedScreen(var12, report));

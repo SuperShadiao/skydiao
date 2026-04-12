@@ -26,6 +26,7 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.NativeModuleLister;
+import net.minecraft.util.Util;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.profiling.jfr.JvmProfiler;

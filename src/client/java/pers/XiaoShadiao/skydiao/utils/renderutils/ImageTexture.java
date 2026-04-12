@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.texture.TextureContents;
 import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.NotNull;
@@ -18,8 +18,8 @@ public class ImageTexture extends SimpleTexture {
     private final byte[] bytes;
     private TextureContents cache;
 
-    public ImageTexture(ResourceLocation resourceLocation, byte[] bytes) {
-        super(Objects.requireNonNull(resourceLocation));
+    public ImageTexture(Identifier Identifier, byte[] bytes) {
+        super(Objects.requireNonNull(Identifier));
         this.bytes = bytes;
     }
 

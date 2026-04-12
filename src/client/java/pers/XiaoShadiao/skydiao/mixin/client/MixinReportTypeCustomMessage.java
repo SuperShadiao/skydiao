@@ -1,7 +1,7 @@
 package pers.XiaoShadiao.skydiao.mixin.client;
 
 import net.minecraft.ReportType;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Unique;

@@ -14,7 +14,6 @@ import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;

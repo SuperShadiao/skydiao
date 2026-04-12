@@ -16,7 +16,7 @@ import net.hypixel.modapi.packet.impl.clientbound.event.ClientboundLocationPacke
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 
@@ -80,7 +80,7 @@ public class FabricModAPI implements ClientModInitializer {
 
     private static void registerClientbound(String identifier) {
         try {
-            CustomPacketPayload.Type<ClientboundHypixelPayload> clientboundId = new CustomPacketPayload.Type<>(ResourceLocation.parse(identifier));
+            CustomPacketPayload.Type<ClientboundHypixelPayload> clientboundId = new CustomPacketPayload.Type<>(Identifier.parse(identifier));
             StreamCodec<ByteBuf, ClientboundHypixelPayload> codec = ClientboundHypixelPayload.buildCodec(clientboundId);
             PayloadTypeRegistry.playS2C().register(clientboundId, codec);
             PayloadTypeRegistry.configurationS2C().register(clientboundId, codec);
@@ -132,7 +132,7 @@ public class FabricModAPI implements ClientModInitializer {
 
     private static void registerServerbound(String identifier) {
         try {
-            CustomPacketPayload.Type<ServerboundHypixelPayload> serverboundId = new CustomPacketPayload.Type<>(ResourceLocation.parse(identifier));
+            CustomPacketPayload.Type<ServerboundHypixelPayload> serverboundId = new CustomPacketPayload.Type<>(Identifier.parse(identifier));
             StreamCodec<ByteBuf, ServerboundHypixelPayload> codec = ServerboundHypixelPayload.buildCodec(serverboundId);
             PayloadTypeRegistry.playC2S().register(serverboundId, codec);
             PayloadTypeRegistry.configurationC2S().register(serverboundId, codec);

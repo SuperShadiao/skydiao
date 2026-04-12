@@ -5,14 +5,14 @@ import net.hypixel.modapi.packet.HypixelPacket;
 import net.hypixel.modapi.serializer.PacketSerializer;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class ServerboundHypixelPayload implements CustomPacketPayload {
     private final CustomPacketPayload.Type<ServerboundHypixelPayload> id;
     private final HypixelPacket packet;
 
     public ServerboundHypixelPayload(HypixelPacket packet) {
-        this.id = new CustomPacketPayload.Type<>(ResourceLocation.parse(packet.getIdentifier()));
+        this.id = new CustomPacketPayload.Type<>(Identifier.parse(packet.getIdentifier()));
         this.packet = packet;
     }
 

@@ -17,7 +17,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.InteractionHand;
@@ -25,11 +25,12 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.Pig;
+import net.minecraft.world.entity.animal.pig.Pig;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.entity.projectile.arrow.Arrow;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2fStack;
@@ -108,9 +109,11 @@ public class CustomBossbar extends XSDHUD {
             }
             for (Entity entity : mc.level.entitiesForRendering()) {
                 if(!(entity instanceof LivingEntity) || entity instanceof ArmorStand || entity == mc.player) continue;
+                AABB aabb = entity.getBoundingBox().inflate(2);
                 for (Arrow arrow : arrowList) {
-                    if(arrow.distanceToSqr(entity.getX(), entity.getY() + entity.getEyeHeight() / 2, entity.getZ()) <= 9) {
+                    if(aabb.contains(arrow.position())) {
                         addEntityToBossbar(entity.asLivingEntity());
+                        break;
                     }
                 }
             }
@@ -229,29 +232,29 @@ public class CustomBossbar extends XSDHUD {
                 if (am.skyblockIsImmuneDmg) {
                     if (am.renderFlagImmuneDmg <= 20) {
                         actualColor = new Color(
-                                (int) Mth.clampedLerp(healthColor.getRed(), immuneStateHealthColorSwitch.getRed(), am.renderFlagImmuneDmg / 20d),
-                                (int) Mth.clampedLerp(healthColor.getGreen(), immuneStateHealthColorSwitch.getGreen(), am.renderFlagImmuneDmg / 20d),
-                                (int) Mth.clampedLerp(healthColor.getBlue(), immuneStateHealthColorSwitch.getBlue(), am.renderFlagImmuneDmg / 20d)
+                                (int) Mth.clampedLerp(am.renderFlagImmuneDmg / 20d, healthColor.getRed(), immuneStateHealthColorSwitch.getRed()),
+                                (int) Mth.clampedLerp(am.renderFlagImmuneDmg / 20d, healthColor.getGreen(), immuneStateHealthColorSwitch.getGreen()),
+                                (int) Mth.clampedLerp(am.renderFlagImmuneDmg / 20d, healthColor.getBlue(), immuneStateHealthColorSwitch.getBlue())
                         );
                     } else {
                         actualColor = new Color(
-                                (int) Mth.clampedLerp(immuneStateHealthColorSwitch.getRed(), immuneStateHealthColor.getRed(), (am.renderFlagImmuneDmg - 20) / 80d),
-                                (int) Mth.clampedLerp(immuneStateHealthColorSwitch.getGreen(), immuneStateHealthColor.getGreen(), (am.renderFlagImmuneDmg - 20) / 80d),
-                                (int) Mth.clampedLerp(immuneStateHealthColorSwitch.getBlue(), immuneStateHealthColor.getBlue(), (am.renderFlagImmuneDmg - 20) / 80d)
+                                (int) Mth.clampedLerp((am.renderFlagImmuneDmg - 20) / 80d, immuneStateHealthColorSwitch.getRed(), immuneStateHealthColor.getRed()),
+                                (int) Mth.clampedLerp((am.renderFlagImmuneDmg - 20) / 80d, immuneStateHealthColorSwitch.getGreen(), immuneStateHealthColor.getGreen()),
+                                (int) Mth.clampedLerp((am.renderFlagImmuneDmg - 20) / 80d, immuneStateHealthColorSwitch.getBlue(), immuneStateHealthColor.getBlue())
                         );
                     }
                 } else {
                     if (am.renderFlagImmuneDmg >= 80) {
                         actualColor = new Color(
-                                (int) Mth.clampedLerp(immuneStateHealthColorSwitch.getRed(), immuneStateHealthColor.getRed(), (am.renderFlagImmuneDmg - 80) / 20d),
-                                (int) Mth.clampedLerp(immuneStateHealthColorSwitch.getGreen(), immuneStateHealthColor.getGreen(), (am.renderFlagImmuneDmg - 80) / 20d),
-                                (int) Mth.clampedLerp(immuneStateHealthColorSwitch.getBlue(), immuneStateHealthColor.getBlue(), (am.renderFlagImmuneDmg - 80) / 20d)
+                                (int) Mth.clampedLerp((am.renderFlagImmuneDmg - 80) / 20d, immuneStateHealthColorSwitch.getRed(), immuneStateHealthColor.getRed()),
+                                (int) Mth.clampedLerp((am.renderFlagImmuneDmg - 80) / 20d, immuneStateHealthColorSwitch.getGreen(), immuneStateHealthColor.getGreen()),
+                                (int) Mth.clampedLerp((am.renderFlagImmuneDmg - 80) / 20d, immuneStateHealthColorSwitch.getBlue(), immuneStateHealthColor.getBlue())
                         );
                     } else {
                         actualColor = new Color(
-                                (int) Mth.clampedLerp(healthColor.getRed(), immuneStateHealthColorSwitch.getRed(), am.renderFlagImmuneDmg / 80d),
-                                (int) Mth.clampedLerp(healthColor.getGreen(), immuneStateHealthColorSwitch.getGreen(), am.renderFlagImmuneDmg / 80d),
-                                (int) Mth.clampedLerp(healthColor.getBlue(), immuneStateHealthColorSwitch.getBlue(), am.renderFlagImmuneDmg / 80d)
+                                (int) Mth.clampedLerp(am.renderFlagImmuneDmg / 80d, healthColor.getRed(), immuneStateHealthColorSwitch.getRed()),
+                                (int) Mth.clampedLerp(am.renderFlagImmuneDmg / 80d, healthColor.getGreen(), immuneStateHealthColorSwitch.getGreen()),
+                                (int) Mth.clampedLerp(am.renderFlagImmuneDmg / 80d, healthColor.getBlue(), immuneStateHealthColorSwitch.getBlue())
                         );
                     }
                 }
@@ -375,7 +378,7 @@ public class CustomBossbar extends XSDHUD {
 
             healthUpdater.accept(this);
 
-            healthScale = Mth.clampedLerp(0, 1, currentHealth / maxHealth);
+            healthScale = Mth.clampedLerp(currentHealth / maxHealth, 0, 1);
 
             if (trueScale < 0) trueScale = 0;
             if (trueScale < healthScale) trueScale = healthScale;
@@ -538,13 +541,13 @@ public class CustomBossbar extends XSDHUD {
         public int getWeakness();
         public int getMaxWeakness();
 
-        public ResourceLocation getHeadIcon();
+        public Identifier getHeadIcon();
 
         public boolean isImmune();
 
         public boolean isPowerUpAvaliable();
         public boolean isPowerUp();
-        public ResourceLocation getPowerUpPotionIcon();
+        public Identifier getPowerUpPotionIcon();
         public int getPowerUp();
         public default Color getPwoerUpColor() { return POWERUP; };
         public PowerUpStyle getPowerUpStyle();

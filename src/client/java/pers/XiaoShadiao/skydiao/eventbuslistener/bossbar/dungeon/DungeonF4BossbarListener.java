@@ -12,7 +12,7 @@ import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -34,7 +34,7 @@ import java.util.List;
 
 public class DungeonF4BossbarListener extends AbstractDungeonBossbar {
 
-    public static final ResourceLocation SCARF_ICON = Objects.requireNonNull(ResourceLocation.tryBuild("skydiao", "textures/skyblock/boss/thorn.png"));
+    public static final Identifier SCARF_ICON = Objects.requireNonNull(Identifier.tryBuild("skydiao", "textures/skyblock/boss/thorn.png"));
     public static final Component NAME = Component.literal("Thorn");
     public static final double HEALTH = 4;
     public static final double MM_HEALTH = 8;
@@ -207,7 +207,7 @@ public class DungeonF4BossbarListener extends AbstractDungeonBossbar {
     }
 
     @Override
-    public ResourceLocation getHeadIcon() {
+    public Identifier getHeadIcon() {
         return SCARF_ICON;
     }
 
@@ -227,7 +227,7 @@ public class DungeonF4BossbarListener extends AbstractDungeonBossbar {
     }
 
     @Override
-    public ResourceLocation getPowerUpPotionIcon() {
+    public Identifier getPowerUpPotionIcon() {
         return Gui.getMobEffectSprite(MobEffects.LUCK);
     }
 

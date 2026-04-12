@@ -13,7 +13,7 @@ import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -36,7 +36,7 @@ import java.util.*;
 
 public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
-    public static final ResourceLocation F7_BOSS_ICON = Objects.requireNonNull(ResourceLocation.tryBuild("skydiao", "textures/skyblock/boss/wither.png"));
+    public static final Identifier F7_BOSS_ICON = Objects.requireNonNull(Identifier.tryBuild("skydiao", "textures/skyblock/boss/wither.png"));
     public static final Component[] NAMES = new Component[]{Component.literal("Maxor"), Component.literal("Storm"), Component.literal("Goldor"), Component.literal("Necron")};
     public static final double[] HEALTHES = new double[]{100_000_000, 400_000_000, 750_000_000, 1_000_000_000};
 
@@ -93,7 +93,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     }
 
     @Override
-    public ResourceLocation getHeadIcon() {
+    public Identifier getHeadIcon() {
         return F7_BOSS_ICON;
     }
 
@@ -113,7 +113,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     }
 
     @Override
-    public ResourceLocation getPowerUpPotionIcon() {
+    public Identifier getPowerUpPotionIcon() {
         return Gui.getMobEffectSprite(currentStage == 4 ? MobEffects.STRENGTH : MobEffects.RESISTANCE);
     }
 

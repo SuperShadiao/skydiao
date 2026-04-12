@@ -4,6 +4,8 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
@@ -19,8 +21,13 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.network.chat.*;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.PlayerSkin;
+import org.apache.commons.io.FileUtils;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.config.option.BooleanConfigOption;
@@ -35,12 +42,14 @@ import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.playerinput.XSDSimulatorInput;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
+import pers.XiaoShadiao.skydiao.utils.renderutils.ImageTexture;
+import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,6 +62,10 @@ public class BasicListener extends AbstractListener {
     private boolean isAFK = false;
     private boolean isConnectedToServer;
     private boolean testOOM;
+
+    public PlayerSkin selfPlayerSkin;
+
+    public static final Identifier customCape = Identifier.fromNamespaceAndPath("skydiao", "custom_cape");
 
     @Override
     public String getListenerName() {
@@ -68,6 +81,16 @@ public class BasicListener extends AbstractListener {
         ClientPlayConnectionEvents.JOIN.register(this::onJoinServer);
         ClientPlayConnectionEvents.DISCONNECT.register(this::onDisconnect);
         ClientReceiveMessageEvents.GAME.register(this::onChat);
+        WorldRenderEvents.END_MAIN.register(this::onLastRender);
+    }
+
+    private void onLastRender(WorldRenderContext context) {
+//        RenderUtils.WorldRender wr = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_LINE);
+//        if(mc.level != null) {
+//            for (Entity entity : mc.level.entitiesForRendering()) {
+//                RenderUtils.renderESP(wr, entity, 1, 0, 0, 1, false);
+//            }
+//        }
     }
 
     private void onChat(Component component, boolean b) {
@@ -110,6 +133,7 @@ public class BasicListener extends AbstractListener {
     private void onJoinServer(ClientPacketListener clientPacketListener, PacketSender packetSender, Minecraft minecraft) {
         if(!isConnectedToServer) {
             isConnectedToServer = true;
+            reloadCustomCape();
             logger.info("已连接到服务器: " + clientPacketListener.getConnection().getRemoteAddress());
             ToolList.addThreadedTask(() -> {
                 Thread.sleep(3000);
@@ -162,7 +186,7 @@ public class BasicListener extends AbstractListener {
 
     private void onWorldChange(Minecraft mc, ClientLevel clientLevel) {
         ChatClientManager.getChatClient();
-
+        reloadCustomCape();
         InputSimulator.unpressAllKey();
     }
 
@@ -178,6 +202,7 @@ public class BasicListener extends AbstractListener {
             if(mc.player.input.getClass() == KeyboardInput.class) {
                 mc.player.input = new XSDSimulatorInput(mc.options);
             }
+            Optional.ofNullable(mc.getConnection()).map(c -> c.getPlayerInfo(mc.player.getUUID())).map(PlayerInfo::getSkin).ifPresent(skin -> selfPlayerSkin = skin);
         }
         if((!(mc.screen instanceof ChatScreen) || mc.screen.getClass().getName().startsWith("pers.XiaoShadiao")) && Arrays.stream(mc.options.keyMappings).anyMatch(KeyMapping::isDown))  {
             if(afkHoldTick++ > 20) {
@@ -227,5 +252,27 @@ public class BasicListener extends AbstractListener {
 
     public void throwOOMNextTick() {
         testOOM = true;
+    }
+
+    public void reloadCustomCape() {
+        if(!ConfigManager.capeFile.exists()) {
+            resetCape();
+        }
+        try {
+            mc.getTextureManager().registerAndLoad(customCape, new ImageTexture(customCape, FileUtils.readFileToByteArray(ConfigManager.capeFile)));
+        } catch (IOException e) {
+            logger.error("Load cape failed", e);
+            logger.catching(e);
+            resetCape();
+        }
+    }
+
+    public void resetCape() {
+        try(InputStream is = BasicListener.class.getClassLoader().getResourceAsStream("assets/skydiao/textures/cape/cape.png");) {
+            FileUtils.copyInputStreamToFile(Objects.requireNonNull(is), ConfigManager.capeFile);
+        } catch (Exception e) {
+            logger.error("Error reset cape", e);
+            logger.catching(e);
+        }
     }
 }

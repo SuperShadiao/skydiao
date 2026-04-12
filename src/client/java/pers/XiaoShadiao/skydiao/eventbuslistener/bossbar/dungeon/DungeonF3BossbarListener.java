@@ -9,7 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -25,7 +25,7 @@ import java.util.Objects;
 
 public class DungeonF3BossbarListener extends AbstractDungeonBossbar {
 
-    public static final ResourceLocation SCARF_ICON = Objects.requireNonNull(ResourceLocation.tryBuild("skydiao", "textures/skyblock/boss/professor.png"));
+    public static final Identifier SCARF_ICON = Objects.requireNonNull(Identifier.tryBuild("skydiao", "textures/skyblock/boss/professor.png"));
     public static final Component NAME = Component.literal("The Professor");
     public static final double HEALTH = 3_000_000;
     public static final double MM_HEALTH = 600_000_000;
@@ -196,7 +196,7 @@ public class DungeonF3BossbarListener extends AbstractDungeonBossbar {
     }
 
     @Override
-    public ResourceLocation getHeadIcon() {
+    public Identifier getHeadIcon() {
         return SCARF_ICON;
     }
 
@@ -216,7 +216,7 @@ public class DungeonF3BossbarListener extends AbstractDungeonBossbar {
     }
 
     @Override
-    public ResourceLocation getPowerUpPotionIcon() {
+    public Identifier getPowerUpPotionIcon() {
         return Gui.getMobEffectSprite(MobEffects.RESISTANCE);
     }
 

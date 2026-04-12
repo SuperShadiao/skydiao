@@ -4,7 +4,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
@@ -16,7 +16,7 @@ public class StarRailNotification extends XSDHUD {
 
     @Override
     public void runRegister() {
-        HudElementRegistry.addLast(Objects.requireNonNull(ResourceLocation.tryBuild("skydiao", "starrailtip")), this);
+        HudElementRegistry.addLast(Objects.requireNonNull(Identifier.tryBuild("skydiao", "starrailtip")), this);
     }
 
     public String message = "";
@@ -73,13 +73,13 @@ public class StarRailNotification extends XSDHUD {
     }
 
     public enum Type {
-        warning(ResourceLocation.tryBuild("skydiao", "textures/starrail/warning.png")),
-        success(ResourceLocation.tryBuild("skydiao", "textures/starrail/success.png")),
-        tip(ResourceLocation.tryBuild("skydiao", "textures/starrail/warning.png"));
+        warning(Identifier.tryBuild("skydiao", "textures/starrail/warning.png")),
+        success(Identifier.tryBuild("skydiao", "textures/starrail/success.png")),
+        tip(Identifier.tryBuild("skydiao", "textures/starrail/warning.png"));
 
-        public final ResourceLocation resource;
+        public final Identifier resource;
 
-        Type(ResourceLocation resource) {
+        Type(Identifier resource) {
             this.resource = Objects.requireNonNull(resource);
         }
     }

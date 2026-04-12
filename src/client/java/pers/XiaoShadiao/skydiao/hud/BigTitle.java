@@ -6,7 +6,7 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import org.joml.Matrix3x2fStack;
@@ -21,7 +21,7 @@ public class BigTitle extends XSDHUD {
 
     @Override
     public void runRegister() {
-        HudElementRegistry.addLast(Objects.requireNonNull(ResourceLocation.tryBuild("skydiao", "big_title")), this);
+        HudElementRegistry.addLast(Objects.requireNonNull(Identifier.tryBuild("skydiao", "big_title")), this);
         ScreenEvents.AFTER_INIT.register(this::afterScreenInit);
     }
 

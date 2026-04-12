@@ -2,7 +2,7 @@ package pers.XiaoShadiao.skydiao.customsounds;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 
 public class CustomSounds {
@@ -17,7 +17,7 @@ public class CustomSounds {
 
     // actual registration of all the custom SoundEvents
     private static SoundEvent registerSound(String id) {
-        ResourceLocation identifier = ResourceLocation.fromNamespaceAndPath("skydiao", id);
+        Identifier identifier = Identifier.fromNamespaceAndPath("skydiao", id);
         return Registry.register(BuiltInRegistries.SOUND_EVENT, identifier, SoundEvent.createVariableRangeEvent(identifier));
     }
 

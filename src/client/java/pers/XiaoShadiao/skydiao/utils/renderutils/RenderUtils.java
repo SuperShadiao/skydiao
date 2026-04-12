@@ -3,7 +3,7 @@ package pers.XiaoShadiao.skydiao.utils.renderutils;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.*;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -11,7 +11,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.inventory.Slot;
@@ -113,7 +113,7 @@ public class RenderUtils {
     }
 
     // 使用纹理绘制圆形
-    public static void drawCircleWithTexture(GuiGraphics context, ResourceLocation texture, float x, float y, float r) {
+    public static void drawCircleWithTexture(GuiGraphics context, Identifier texture, float x, float y, float r) {
 
         for (int i = 0; i <= 180; i++) {
             float angle = (float) (i * Math.PI / 180);
@@ -240,10 +240,10 @@ public class RenderUtils {
         PoseStack.Pose pose = poseStack.last();
         vertexConsumer.addVertex(pose, vector3f)
                 .setColor(color1)
-                .setNormal(pose, (float)vec3.x * 10f, (float)vec3.y * 10f, (float)vec3.z * 10f);
+                .setNormal(pose, (float)vec3.x * 10f, (float)vec3.y * 10f, (float)vec3.z * 10f).setLineWidth(1);
         vertexConsumer.addVertex(pose, (float)(vector3f.x() + vec3.x), (float)(vector3f.y() + vec3.y), (float)(vector3f.z() + vec3.z))
                 .setColor(color2)
-                .setNormal(pose, (float)vec3.x * 10f, (float)vec3.y * 10f, (float)vec3.z * 10f);
+                .setNormal(pose, (float)vec3.x * 10f, (float)vec3.y * 10f, (float)vec3.z * 10f).setLineWidth(1);
     }
 
     public static void renderTrace(WorldRender worldRender, double x, double y, double z, float r, float g, float b, float a) {

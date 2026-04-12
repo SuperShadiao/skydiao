@@ -12,7 +12,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -146,7 +146,7 @@ public class HHSCCommand extends OpenConfigMenuCommand {
             }
 
             @Override
-            public ResourceLocation getHeadIcon() {
+            public Identifier getHeadIcon() {
                 return DungeonF7BossbarListener.F7_BOSS_ICON;
             }
 
@@ -166,7 +166,7 @@ public class HHSCCommand extends OpenConfigMenuCommand {
             }
 
             @Override
-            public ResourceLocation getPowerUpPotionIcon() {
+            public Identifier getPowerUpPotionIcon() {
                 return Gui.getMobEffectSprite(MobEffects.ABSORPTION);
             }
 

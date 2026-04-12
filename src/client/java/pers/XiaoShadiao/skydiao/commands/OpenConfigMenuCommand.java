@@ -4,6 +4,8 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.util.Util;
+import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
 import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
@@ -23,7 +25,13 @@ public class OpenConfigMenuCommand extends BaseRootRunnableCommand {
         return List.of(
                 getArgConstantInstance("translate").redirect(HHT_COMMAND.getCommandNode()),
                 getArgConstantInstance("claimreward").then(getArgInstance("index", IntegerArgumentType.integer(0, 2)).executes(this::executeClaimReward))
-                );
+                ,getArgConstantInstance("editcape").executes(this::executeEditCape)
+        );
+    }
+
+    private int executeEditCape(CommandContext<FabricClientCommandSource> context) {
+        Util.getPlatform().openFile(ConfigManager.capeFolder);
+        return 0;
     }
 
     @Override

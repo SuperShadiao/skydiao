@@ -7,7 +7,7 @@ import com.mojang.util.UndashedUuid;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
 import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.io.FileUtils;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinMinecraftSessionAccessor;
 import pers.XiaoShadiao.skydiao.screen.mircosoftaccount.AccountSelectScreen;
@@ -226,7 +226,7 @@ public class MinecraftLogin {
         public long expiresTime;
         public String skinUrl;
         public File skinFile;
-        private final ResourceLocation skinRL;
+        private final Identifier skinRL;
 
         public MinecraftSessionContainer(String loginToken, String name, String uuid, boolean isPurchased, String accessToken, String refreshToken, long expiresTime, String skinUrl) {
             this.isPurchased = isPurchased;
@@ -247,11 +247,11 @@ public class MinecraftLogin {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            this.skinRL = ResourceLocation.fromNamespaceAndPath("skydiao", (uuid + "_" + name).toLowerCase());
+            this.skinRL = Identifier.fromNamespaceAndPath("skydiao", (uuid + "_" + name).toLowerCase());
 
         }
 
-        public ResourceLocation getSkinRL() {
+        public Identifier getSkinRL() {
             if(ToolList.mc.getTextureManager() != null) {
                 try {
                     ToolList.mc.getTextureManager().registerAndLoad(skinRL, new ImageTexture(skinRL, FileUtils.readFileToByteArray(skinFile)));
