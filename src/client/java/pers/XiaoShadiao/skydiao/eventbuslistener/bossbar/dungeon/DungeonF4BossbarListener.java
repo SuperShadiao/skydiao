@@ -1,6 +1,9 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon;
 
+import com.odtheking.odin.utils.render.CustomRenderPipelines;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.player.RemotePlayer;
@@ -13,6 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -21,6 +25,8 @@ import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.hud.CustomBossbar;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
+import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 
 import java.awt.*;
 import java.util.*;
@@ -52,6 +58,21 @@ public class DungeonF4BossbarListener extends AbstractDungeonBossbar {
     public void registerListeners() {
         ClientTickEvents.START_CLIENT_TICK.register(this::onClientTick);
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
+        WorldRenderEvents.END_MAIN.register(this::onLastRender);
+    }
+
+    private void onLastRender(WorldRenderContext context) {
+        if (mc.level == null || !isInCorrectDungeon()) return;
+        RenderUtils.WorldRender wr = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_LINE);
+
+        for (Entity entity : mc.level.entitiesForRendering()) {
+            if(entity instanceof ArmorStand) {
+                if(ToolList.getInstance().deleteColorCode(entity.getName().getString()).contains("Spirit Bow")) {
+                    RenderUtils.renderESP(wr, entity, 1, 0, 1, 1, false);
+                    RenderUtils.renderTrace(wr, entity, 1, 0, 1, 1);
+                }
+            }
+        }
     }
 
     private void onClientTick(Minecraft mc) {
@@ -118,7 +139,7 @@ public class DungeonF4BossbarListener extends AbstractDungeonBossbar {
         if(ic == null) return false;
         String message = ToolList.getInstance().deleteColorCode(ic.getString());
         if(message.contains("Spirit Bow")) {
-            turnItToStarRailMsg = new AbstractMap.SimpleEntry<>(message, StarRailNotification.Type.success);
+            turnItToStarRailMsg = new AbstractMap.SimpleEntry<>(message, message.contains("didn't") ? StarRailNotification.Type.warning : StarRailNotification.Type.success);
         }
 
         if(turnItToStarRailMsg != null) {

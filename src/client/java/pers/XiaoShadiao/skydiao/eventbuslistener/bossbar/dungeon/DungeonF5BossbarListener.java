@@ -52,7 +52,8 @@ public class DungeonF5BossbarListener extends AbstractDungeonBossbar {
     public static final double HEALTH = 7_000_000;
     public static final double MM_HEALTH = 600_000_000;
 
-    private RemotePlayer bossEntity;
+    private int bossEntity;
+    private int confirmCounter;
 
     @Override
     public int getFloor() {
@@ -74,14 +75,19 @@ public class DungeonF5BossbarListener extends AbstractDungeonBossbar {
 
         Block woolBlock = mc.level.getBlockState(WOOL_POS).getBlock();
         ChatFormatting formatting = WOOL_TO_FORMATTING.get(woolBlock);
-        if(formatting != null) {
-            for (Entity temp : mc.level.entitiesForRendering()) {
-                if(temp instanceof RemotePlayer) {
-                    if(bossEntity != temp) {
-                        if(LIVID_TO_FORMATTING.get(ToolList.getInstance().deleteColorCode(temp.getName().getString())) == formatting) {
-                            bossEntity = (RemotePlayer) temp;
-                            setCurrentStarRailBossBar(this);
-                            break;
+        if(confirmCounter <= 100) {
+            if(formatting != null) {
+                for (Entity temp : mc.level.entitiesForRendering()) {
+                    if(temp instanceof RemotePlayer) {
+                        if(bossEntity != temp.getId()) {
+                            if(LIVID_TO_FORMATTING.get(ToolList.getInstance().deleteColorCode(temp.getName().getString())) == formatting) {
+                                bossEntity = temp.getId();
+                                setCurrentStarRailBossBar(this);
+                                confirmCounter = 0;
+                                break;
+                            }
+                        } else {
+                            confirmCounter++;
                         }
                     }
                 }
@@ -102,7 +108,9 @@ public class DungeonF5BossbarListener extends AbstractDungeonBossbar {
 
     @Override
     public double getHealth() {
-        return Math.min(bossEntity == null ? 0 : bossEntity.getHealth() < 50 ? 0 : bossEntity.getHealth(), getMaxHealth());
+        Entity entity = mc.level == null ? null : mc.level.getEntity(bossEntity);
+        LivingEntity livingEntity = entity == null ? null : entity.asLivingEntity();
+        return Math.min(livingEntity == null ? 0 : livingEntity.getHealth() < 50 ? 0 : livingEntity.getHealth(), getMaxHealth());
     }
 
     @Override
@@ -177,18 +185,21 @@ public class DungeonF5BossbarListener extends AbstractDungeonBossbar {
 
     @Override
     public void onBattleOver() {
-
+        confirmCounter = 0;
+        bossEntity = 0;
     }
 
     @Override
     public LivingEntity getTargetEntity() {
-        return bossEntity;
+        return Optional.ofNullable(mc.level).map(level -> level.getEntity(bossEntity)).map(Entity::asLivingEntity).orElse(null);
     }
 
     @Override
     public Component getDisplayName() {
         Component name = NAME;
-        ChatFormatting c = LIVID_TO_FORMATTING.get(ToolList.getInstance().deleteColorCode(bossEntity.getName().getString()));
+        LivingEntity living = getTargetEntity();
+        if(living == null) return name;
+        ChatFormatting c = LIVID_TO_FORMATTING.get(ToolList.getInstance().deleteColorCode(living.getName().getString()));
         if(c != null && c.getColor() != null) {
             name = Component.literal(c.toString()).append(name);
         }
@@ -211,7 +222,7 @@ public class DungeonF5BossbarListener extends AbstractDungeonBossbar {
 
     @Override
     public Color getRenderBossColor() {
-        return Optional.ofNullable(bossEntity)
+        return Optional.ofNullable(getTargetEntity())
                 .map(entity -> LIVID_TO_FORMATTING.get(ToolList.getInstance().deleteColorCode(entity.getName().getString())))
                 .map(ChatFormatting::getColor)
                 .map(Color::new)
