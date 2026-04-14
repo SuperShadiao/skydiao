@@ -14,7 +14,7 @@
 
 # 安装
 
-需要Minecraft 1.21.10的最新版Fabric加载器, 安装Fabric后将mod拖入mods文件夹食用即可.
+需要Minecraft 1.21.11的最新版Fabric加载器, 安装Fabric后将mod拖入mods文件夹食用即可.
 
 # 开源
 
