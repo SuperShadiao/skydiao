@@ -238,12 +238,13 @@ public class RenderUtils {
 
     static void renderVector(PoseStack poseStack, VertexConsumer vertexConsumer, Vector3f vector3f, Vec3 vec3, int color1, int color2) {
         PoseStack.Pose pose = poseStack.last();
+        int lineWidth = 3;
         vertexConsumer.addVertex(pose, vector3f)
                 .setColor(color1)
-                .setNormal(pose, (float)vec3.x * 10f, (float)vec3.y * 10f, (float)vec3.z * 10f).setLineWidth(1);
+                .setNormal(pose, (float)vec3.x * 10f, (float)vec3.y * 10f, (float)vec3.z * 10f).setLineWidth(lineWidth);
         vertexConsumer.addVertex(pose, (float)(vector3f.x() + vec3.x), (float)(vector3f.y() + vec3.y), (float)(vector3f.z() + vec3.z))
                 .setColor(color2)
-                .setNormal(pose, (float)vec3.x * 10f, (float)vec3.y * 10f, (float)vec3.z * 10f).setLineWidth(1);
+                .setNormal(pose, (float)vec3.x * 10f, (float)vec3.y * 10f, (float)vec3.z * 10f).setLineWidth(lineWidth);
     }
 
     public static void renderTrace(WorldRender worldRender, double x, double y, double z, float r, float g, float b, float a) {

@@ -24,4 +24,10 @@ public class MixinMouseHandlerListenable {
         InputSimulator.updatePlayerRotation();
     }
 
+    @Inject(method = "onScroll", at = @At("HEAD"), cancellable = true)
+    private void onScroll(long l, double d, double d1, CallbackInfo ci) {
+        if (CustomFabricEvents.MOUSE_SCROLL_EVENT.invoker().onMouseScroll(l,d,d1)) {
+            ci.cancel();
+        }
+    }
 }

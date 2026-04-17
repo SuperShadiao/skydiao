@@ -1,4 +1,4 @@
-package pers.XiaoShadiao.skydiao.mixin.client.odinfix;
+package pers.XiaoShadiao.skydiao.mixin.client.adapter.odinfix;
 
 import com.odtheking.odin.utils.ItemUtilsKt;
 import com.odtheking.odin.utils.skyblock.dungeon.terminals.terminalhandler.StartsWithHandler;

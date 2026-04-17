@@ -1,4 +1,4 @@
-package pers.XiaoShadiao.skydiao.mixin.client.odinfix;
+package pers.XiaoShadiao.skydiao.mixin.client.adapter.odinfix;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;

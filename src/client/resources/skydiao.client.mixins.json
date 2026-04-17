@@ -8,6 +8,7 @@
     "MixinAbstractContainerScreenPosGetter",
     "MixinBossbarEventGetter",
     "MixinBossBarRemoveAnimation",
+    "MixinClientLanguage",
     "MixinCustomCape",
     "MixinDeleteWallEffect",
     "MixinFogRendererRemoveBlindness_1_21_11",
@@ -19,7 +20,8 @@
     "MixinMultiPlayerGameModeDestroyBlockDelayFix",
     "MixinRealmsClientReseter",
     "MixinRealmStatusReset",
-    "odinfix.MixinFireOverlaySettings"
+    "MixinTooltipScroll",
+    "adapter.odinfix.MixinFireOverlaySettings"
   ],
   "injectors": {
     "defaultRequire": 1
@@ -31,8 +33,9 @@
     "MixinRemoveMaxHealthLimit",
     "MixinReportTypeCustomMessage",
     "MixinUserDataSecurer",
-    "adapter.MixinChatPatcherTranslateButton",
-    "odinfix.MixinOdinPickColorTerminalFixer",
-    "odinfix.MixinOdinStartWithTerminalFixer"
+    "adapter.chatpatches.MixinChatPatcherTranslateButton",
+    "adapter.firmament.FirmamentGithubRepoProxy",
+    "adapter.odinfix.MixinOdinPickColorTerminalFixer",
+    "adapter.odinfix.MixinOdinStartWithTerminalFixer"
   ]
 }

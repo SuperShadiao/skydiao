@@ -197,6 +197,7 @@ public class BasicListener extends AbstractListener {
             testOOM = false;
             System.out.println(Arrays.deepToString(new long[Integer.MAX_VALUE][Integer.MAX_VALUE][Integer.MAX_VALUE][Integer.MAX_VALUE][Integer.MAX_VALUE][Integer.MAX_VALUE]));
         }
+
         if(mc.player != null && mc.level != null && mc.gameMode != null) InputSimulator.updateTick();
         if(mc.player != null) {
             if(mc.player.input.getClass() == KeyboardInput.class) {

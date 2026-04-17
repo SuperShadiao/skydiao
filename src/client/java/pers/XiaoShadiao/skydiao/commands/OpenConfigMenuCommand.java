@@ -4,7 +4,9 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
+import net.minecraft.world.entity.HumanoidArm;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
 import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
@@ -24,9 +26,16 @@ public class OpenConfigMenuCommand extends BaseRootRunnableCommand {
     public List<ArgumentBuilder<FabricClientCommandSource, ?>> getArgs() {
         return List.of(
                 getArgConstantInstance("translate").redirect(HHT_COMMAND.getCommandNode()),
-                getArgConstantInstance("claimreward").then(getArgInstance("index", IntegerArgumentType.integer(0, 2)).executes(this::executeClaimReward))
-                ,getArgConstantInstance("editcape").executes(this::executeEditCape)
+                getArgConstantInstance("claimreward").then(getArgInstance("index", IntegerArgumentType.integer(0, 2)).executes(this::executeClaimReward)),
+                getArgConstantInstance("editcape").executes(this::executeEditCape),
+                getArgConstantInstance("copyitemnbt").executes(this::executeCopyNBT)
         );
+    }
+
+    private int executeCopyNBT(CommandContext<FabricClientCommandSource> context) {
+        mc.keyboardHandler.setClipboard(mc.player.getItemHeldByArm(HumanoidArm.RIGHT).getComponents().toString());
+        context.getSource().sendFeedback(Component.literal("§a[小沙雕] 成功复制NBT到剪切板!"));
+        return 0;
     }
 
     private int executeEditCape(CommandContext<FabricClientCommandSource> context) {

@@ -283,17 +283,17 @@ public class PathFinder {
                 pathHubLowDistance.add(pathHub);
                 profiler.end("AddHub");
 
-                int viewDistance = Math.max(ToolList.mc.options.renderDistance().get() * 16 - 32, 32);
+                // int viewDistance = Math.max(ToolList.mc.options.renderDistance().get() * 16 - 32, 32);
                 BlockPos blockPos = pathHub.getLoc();
-                if(blockPos.getY() >= -64 && blockPos.getY() < 320 && (
-                        // !ToolList.mc.theWorld.isBlockLoaded(blockPos) ||
-                        Math.abs(blockPos.getX() - startPath.getX()) > viewDistance ||
-                                Math.abs(blockPos.getZ() - startPath.getZ()) > viewDistance
-                )) {
-
-                    ToolList.getInstance().log.warn("Out of the border!");
-                    break label53;
-                }
+//                if(blockPos.getY() >= -64 && blockPos.getY() < 320 && (
+//                        // !ToolList.mc.theWorld.isBlockLoaded(blockPos) ||
+//                        Math.abs(blockPos.getX() - startPath.getX()) > viewDistance ||
+//                                Math.abs(blockPos.getZ() - startPath.getZ()) > viewDistance
+//                )) {
+//
+//                    ToolList.getInstance().log.warn("Out of the border!");
+//                    break label53;
+//                }
                 if(blacklistedPos.contains(blockPos)) continue;
                 if(pathHub.getLoc().getY() <= 0) continue;
 
@@ -484,6 +484,8 @@ public class PathFinder {
         boolean flag2 = !isNotPassable(block2, false);
         boolean flag3 = isNotPassable(block3, checkAir);
 
+        // if(ToolList.mc.level.getBlockState(block1).getBlock() instanceof ButtonBlock) System.out.println(flag1 +" "+flag2 +" "+flag3);
+
         return new PathBlockInfo(
                 ((flag1 && flag2 && (flag3 || !checkGround)) || (isMoveAroundAndDown && block1.equals(endPath))) && canWalkOn(block3, checkAir, isStepUp, pathBlocks, false, isMoveAround, isMoveDown, isMoveAroundAndDown) && (!isMoveDown || !hasBlockBelow_Liquid(block1)),
                 // !allowPlace ? 0 : (!hasBlock(block3) ? ((isStepUp ? 1 : !hasBlock(block3.down()) ? 2 : 2)) : 0),
@@ -502,7 +504,7 @@ public class PathFinder {
             BlockState blockState = ToolList.mc.level.getBlockState(block);
             Block b = blockState.getBlock();
 
-            return ToolList.getInstance().isFullBlock(blockState)
+            return (ToolList.getInstance().isFullBlock(blockState))
                     || b instanceof SlabBlock
                     || b instanceof StairBlock
                     || b instanceof CactusBlock
@@ -510,7 +512,7 @@ public class PathFinder {
                     || b instanceof EnderChestBlock
                     || b instanceof SkullBlock
                     || b instanceof CrossCollisionBlock
-                    || b instanceof HorizontalDirectionalBlock
+                    || (b instanceof HorizontalDirectionalBlock && !(b instanceof ButtonBlock))
                     || b instanceof FenceGateBlock
                     || b instanceof WallBlock
                     || b instanceof StainedGlassBlock
@@ -526,6 +528,7 @@ public class PathFinder {
                     || b instanceof IceBlock
                     || b instanceof SlimeBlock
                     || b instanceof CauldronBlock
+                    || b instanceof LeavesBlock
                     || (
                     (b instanceof SnowLayerBlock ||
                             ToolList.mc.level.getBlockState(block.north()).getBlock() instanceof SnowLayerBlock ||
@@ -621,7 +624,7 @@ public class PathFinder {
                         (
                                 (block2 instanceof AirBlock/* || block2 instanceof BlockLiquid*/ || block2 instanceof BushBlock || !isSlabCanWalk(pos2) || block2 instanceof SnowLayerBlock) &&
                                         (block1 instanceof AirBlock/* || block1 instanceof BlockLiquid*/ || block1 instanceof BushBlock || !isSlabCanWalk(pos1) || block1 instanceof SnowLayerBlock) ||
-                                        (block1 instanceof WebBlock || block2 instanceof WebBlock || block1 instanceof FenceBlock || block2 instanceof FenceBlock || block1 instanceof FenceGateBlock || block2 instanceof FenceGateBlock || block1 instanceof WallBlock || block2 instanceof WallBlock || block1 instanceof TrapDoorBlock || block2 instanceof TrapDoorBlock || block1 instanceof BaseRailBlock || block2 instanceof BaseRailBlock)
+                                        (block1 instanceof WebBlock || block2 instanceof WebBlock || block1 instanceof FenceBlock || block2 instanceof FenceBlock || block1 instanceof FenceGateBlock || block2 instanceof FenceGateBlock || block1 instanceof WallBlock || block2 instanceof WallBlock || block1 instanceof TrapDoorBlock || block2 instanceof TrapDoorBlock || block1 instanceof ButtonBlock || block2 instanceof ButtonBlock || block1 instanceof SignBlock || block2 instanceof SignBlock)
                         )
                 ));
     }

@@ -15,6 +15,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import pers.XiaoShadiao.skydiao.commands.args.ClientBlockPosArgument;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
@@ -104,6 +105,7 @@ public class HHSCCommand extends OpenConfigMenuCommand {
                 getArgConstantInstance("teststarrailmsg2").then(getArgInstance("msg", StringArgumentType.greedyString()).executes((context -> owo(() -> XSDHUD.starRailNotification.updateMessage(context.getArgument("msg", String.class), StarRailNotification.Type.warning))))),
                 getArgConstantInstance("translate").redirect(HHT_COMMAND.getCommandNode()),
                 getArgConstantInstance("oomtest").executes(context -> owo(AbstractListener.basicListener::throwOOMNextTick)),
+                getArgConstantInstance("getskyblockitemid").executes(context -> owo(() -> context.getSource().sendFeedback(Component.literal(ToolList.getInstance().tryGetSkyblockItemId(mc.player.getItemHeldByArm(HumanoidArm.RIGHT)))))),
                 devcommand
         );
     }

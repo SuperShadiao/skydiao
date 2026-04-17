@@ -108,9 +108,10 @@ public class CustomRenderPipeline {
         if (fillBox) {
             XSDShapeRenderer.addChainedFilledBoxVertices(matrices, buffer, x1, y1, z1, x2, y2, z2, r, g, b, a / 2);
         } else {
-            for (float i = -0.01f; i <= 0.01f; i += 0.01f) {
-                XSDShapeRenderer.renderLineBox(matrices.last(), buffer, x1 + i, y1 + i, z1 + i, x2 - i, y2 - i, z2 - i, r, g, b, a);
-            }
+//            for (float i = -0.01f; i <= 0.01f; i += 0.01f) {
+//                XSDShapeRenderer.renderLineBox(matrices.last(), buffer, x1 + i, y1 + i, z1 + i, x2 - i, y2 - i, z2 - i, r, g, b, a);
+//            }
+            XSDShapeRenderer.renderLineBox(matrices.last(), buffer, x1, y1, z1, x2, y2, z2, r, g, b, a);
         }
 
         matrices.popPose();
@@ -129,10 +130,12 @@ public class CustomRenderPipeline {
             buffer = new BufferBuilder(allocator, pipeline.getVertexFormatMode(), pipeline.getVertexFormat());
         }
 
-        for (float i = -0.0005f; i <= 0.0005f; i += 0.0005f) {
-            XSDShapeRenderer.renderVector(matrices, buffer, new Vector3f(x1 - i, y1, z1 - i), new Vec3(x2 - i, y2, z2 - i), new Color(r, g, b, a).getRGB());
-            XSDShapeRenderer.renderVector(matrices, buffer, new Vector3f(x1 - i, y1, z1 + i), new Vec3(x2 - i, y2, z2 + i), new Color(r, g, b, a).getRGB());
-        }
+//        for (float i = -0.0005f; i <= 0.0005f; i += 0.0005f) {
+//            XSDShapeRenderer.renderVector(matrices, buffer, new Vector3f(x1 - i, y1, z1 - i), new Vec3(x2 - i, y2, z2 - i), new Color(r, g, b, a).getRGB());
+//            XSDShapeRenderer.renderVector(matrices, buffer, new Vector3f(x1 - i, y1, z1 + i), new Vec3(x2 - i, y2, z2 + i), new Color(r, g, b, a).getRGB());
+//        }
+        XSDShapeRenderer.renderVector(matrices, buffer, new Vector3f(x1, y1, z1), new Vec3(x2, y2, z2), new Color(r, g, b, a).getRGB());
+
         matrices.popPose();
     }
 
@@ -149,11 +152,11 @@ public class CustomRenderPipeline {
         }
         int rgb1 = new Color(r1, g1, b1, a1).getRGB();
         int rgb2 = new Color(r2, g2, b2, a2).getRGB();
-        for (float i = -0.01f; i <= 0.01f; i += 0.01f) {
-            RenderUtils.renderVector(matrices, buffer, new Vector3f(x1 - i, y1, z1 - i), new Vec3(x2 - i, y2, z2 - i), rgb1, rgb2);
-            RenderUtils.renderVector(matrices, buffer, new Vector3f(x1 - i, y1, z1 + i), new Vec3(x2 - i, y2, z2 + i), rgb1, rgb2);
-        }
-        // RenderUtils.renderVector(matrices, buffer, new Vector3f(x1, y1, z1), new Vec3(x2, y2, z2), rgb1, rgb2);
+//        for (float i = -0.01f; i <= 0.01f; i += 0.01f) {
+//            RenderUtils.renderVector(matrices, buffer, new Vector3f(x1 - i, y1, z1 - i), new Vec3(x2 - i, y2, z2 - i), rgb1, rgb2);
+//            RenderUtils.renderVector(matrices, buffer, new Vector3f(x1 - i, y1, z1 + i), new Vec3(x2 - i, y2, z2 + i), rgb1, rgb2);
+//        }
+        RenderUtils.renderVector(matrices, buffer, new Vector3f(x1, y1, z1), new Vec3(x2, y2, z2), rgb1, rgb2);
         matrices.popPose();
     }
     // :::custom-pipelines:extraction-phase
@@ -306,30 +309,31 @@ public class CustomRenderPipeline {
             float t = (float)g;
             float u = (float)h;
             float v = (float)i;
-            vertexConsumer.addVertex(pose, q, r, s).setColor(j, o, p, m).setNormal(pose, 1.0F, 0.0F, 0.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, t, r, s).setColor(j, o, p, m).setNormal(pose, 1.0F, 0.0F, 0.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, q, r, s).setColor(n, k, p, m).setNormal(pose, 0.0F, 1.0F, 0.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, q, u, s).setColor(n, k, p, m).setNormal(pose, 0.0F, 1.0F, 0.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, q, r, s).setColor(n, o, l, m).setNormal(pose, 0.0F, 0.0F, 1.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, q, r, v).setColor(n, o, l, m).setNormal(pose, 0.0F, 0.0F, 1.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, t, r, s).setColor(j, k, l, m).setNormal(pose, 0.0F, 1.0F, 0.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, t, u, s).setColor(j, k, l, m).setNormal(pose, 0.0F, 1.0F, 0.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, t, u, s).setColor(j, k, l, m).setNormal(pose, -1.0F, 0.0F, 0.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, q, u, s).setColor(j, k, l, m).setNormal(pose, -1.0F, 0.0F, 0.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, q, u, s).setColor(j, k, l, m).setNormal(pose, 0.0F, 0.0F, 1.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, q, u, v).setColor(j, k, l, m).setNormal(pose, 0.0F, 0.0F, 1.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, q, u, v).setColor(j, k, l, m).setNormal(pose, 0.0F, -1.0F, 0.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, q, r, v).setColor(j, k, l, m).setNormal(pose, 0.0F, -1.0F, 0.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, q, r, v).setColor(j, k, l, m).setNormal(pose, 1.0F, 0.0F, 0.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, t, r, v).setColor(j, k, l, m).setNormal(pose, 1.0F, 0.0F, 0.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, t, r, v).setColor(j, k, l, m).setNormal(pose, 0.0F, 0.0F, -1.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, t, r, s).setColor(j, k, l, m).setNormal(pose, 0.0F, 0.0F, -1.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, q, u, v).setColor(j, k, l, m).setNormal(pose, 1.0F, 0.0F, 0.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, t, u, v).setColor(j, k, l, m).setNormal(pose, 1.0F, 0.0F, 0.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, t, r, v).setColor(j, k, l, m).setNormal(pose, 0.0F, 1.0F, 0.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, t, u, v).setColor(j, k, l, m).setNormal(pose, 0.0F, 1.0F, 0.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, t, u, s).setColor(j, k, l, m).setNormal(pose, 0.0F, 0.0F, 1.0F).setLineWidth(1);
-            vertexConsumer.addVertex(pose, t, u, v).setColor(j, k, l, m).setNormal(pose, 0.0F, 0.0F, 1.0F).setLineWidth(1);
+            int lineWidth = 3;
+            vertexConsumer.addVertex(pose, q, r, s).setColor(j, o, p, m).setNormal(pose, 1.0F, 0.0F, 0.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, t, r, s).setColor(j, o, p, m).setNormal(pose, 1.0F, 0.0F, 0.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, q, r, s).setColor(n, k, p, m).setNormal(pose, 0.0F, 1.0F, 0.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, q, u, s).setColor(n, k, p, m).setNormal(pose, 0.0F, 1.0F, 0.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, q, r, s).setColor(n, o, l, m).setNormal(pose, 0.0F, 0.0F, 1.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, q, r, v).setColor(n, o, l, m).setNormal(pose, 0.0F, 0.0F, 1.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, t, r, s).setColor(j, k, l, m).setNormal(pose, 0.0F, 1.0F, 0.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, t, u, s).setColor(j, k, l, m).setNormal(pose, 0.0F, 1.0F, 0.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, t, u, s).setColor(j, k, l, m).setNormal(pose, -1.0F, 0.0F, 0.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, q, u, s).setColor(j, k, l, m).setNormal(pose, -1.0F, 0.0F, 0.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, q, u, s).setColor(j, k, l, m).setNormal(pose, 0.0F, 0.0F, 1.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, q, u, v).setColor(j, k, l, m).setNormal(pose, 0.0F, 0.0F, 1.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, q, u, v).setColor(j, k, l, m).setNormal(pose, 0.0F, -1.0F, 0.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, q, r, v).setColor(j, k, l, m).setNormal(pose, 0.0F, -1.0F, 0.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, q, r, v).setColor(j, k, l, m).setNormal(pose, 1.0F, 0.0F, 0.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, t, r, v).setColor(j, k, l, m).setNormal(pose, 1.0F, 0.0F, 0.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, t, r, v).setColor(j, k, l, m).setNormal(pose, 0.0F, 0.0F, -1.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, t, r, s).setColor(j, k, l, m).setNormal(pose, 0.0F, 0.0F, -1.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, q, u, v).setColor(j, k, l, m).setNormal(pose, 1.0F, 0.0F, 0.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, t, u, v).setColor(j, k, l, m).setNormal(pose, 1.0F, 0.0F, 0.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, t, r, v).setColor(j, k, l, m).setNormal(pose, 0.0F, 1.0F, 0.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, t, u, v).setColor(j, k, l, m).setNormal(pose, 0.0F, 1.0F, 0.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, t, u, s).setColor(j, k, l, m).setNormal(pose, 0.0F, 0.0F, 1.0F).setLineWidth(lineWidth);
+            vertexConsumer.addVertex(pose, t, u, v).setColor(j, k, l, m).setNormal(pose, 0.0F, 0.0F, 1.0F).setLineWidth(lineWidth);
         }
 
         public static void addChainedFilledBoxVertices(
@@ -430,10 +434,11 @@ public class CustomRenderPipeline {
 
         public static void renderVector(PoseStack poseStack, VertexConsumer vertexConsumer, Vector3f vector3f, Vec3 vec3, int i) {
             PoseStack.Pose pose = poseStack.last();
-            vertexConsumer.addVertex(pose, vector3f).setColor(i).setNormal(pose, (float)vec3.x, (float)vec3.y, (float)vec3.z).setLineWidth(1);
+            int lineWidth = 3;
+            vertexConsumer.addVertex(pose, vector3f).setColor(i).setNormal(pose, (float)vec3.x, (float)vec3.y, (float)vec3.z).setLineWidth(lineWidth);
             vertexConsumer.addVertex(pose, (float)(vector3f.x() + vec3.x), (float)(vector3f.y() + vec3.y), (float)(vector3f.z() + vec3.z))
                     .setColor(i)
-                    .setNormal(pose, (float)vec3.x, (float)vec3.y, (float)vec3.z).setLineWidth(1);
+                    .setNormal(pose, (float)vec3.x, (float)vec3.y, (float)vec3.z).setLineWidth(lineWidth);
         }
     }
 

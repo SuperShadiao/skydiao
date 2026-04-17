@@ -205,6 +205,7 @@ public class PathFinderExecutor extends AbstractListener implements IMacro {
         playerLastPos = BlockPos.ZERO;
 
         RePather reRather = (goal, blacklistedBlocks) -> {
+            InputSimulator.unpressAllKey();
             if(pathFindQueue.isEmpty()) {
                 pathFinder = rePath(goal, blacklistedBlocks);
             } else {

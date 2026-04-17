@@ -32,11 +32,12 @@ public class AutoUpdater {
     public static final File modsFolder;
 
     static {
-        File modsFolder1;
-        modsFolder1 = new File(ToolList.mc.gameDirectory, "mods");
-        File f = new File(modsFolder1, SharedConstants.getCurrentVersion().name());
-        if(f.exists()) modsFolder1 = f;
-        modsFolder = modsFolder1;
+//        File modsFolder1;
+//        modsFolder1 = new File(ToolList.mc.gameDirectory, "mods");
+//        File f = new File(modsFolder1, SharedConstants.getCurrentVersion().name());
+//        if(f.exists()) modsFolder1 = f;
+//        modsFolder = modsFolder1;
+        modsFolder = new File(ToolList.mc.gameDirectory, "mods");
     }
 
     private static boolean passedUpdateTip;

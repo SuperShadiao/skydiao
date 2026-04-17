@@ -5,7 +5,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import org.spongepowered.asm.mixin.Mixin;
-import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 @Mixin(LegacyRandomSource.class)
 public class MixinRandomClassCrash {

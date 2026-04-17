@@ -200,6 +200,9 @@ public class MixinMinecraft {
         }
         if(!executed) {
             original.call(instance, click);
+            if(missTime == 0) {
+                InputSimulator.missTime = 0;
+            }
         }
     }
 

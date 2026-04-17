@@ -70,6 +70,8 @@ public class ConfigManager {
     public static final BooleanConfigOption enableircjointip = new BooleanConfigOption("enableircjointip", true);
     public static final SelectConfigOption fireOverlay = new SelectConfigOption("fireoverlay", 1, List.of("config.fireoverlay.options.normal", "config.fireoverlay.options.lower", "config.fireoverlay.options.remove"));
     public static final BooleanConfigOption skydiaocustomcape = new BooleanConfigOption("skydiaocustomcape", false);
+    public static final BooleanConfigOption skyblockriftautodanceroom = new BooleanConfigOption("skyblockriftautodanceroom", false);
+    public static final BooleanConfigOption mineshaftHelper = new BooleanConfigOption("mineshafthelper", true);
 
     public static final StringConfigOption[] dungeonf7msgbotsimonsays = {
             dungeonf7msgbotsimonsays1,
@@ -91,8 +93,8 @@ public class ConfigManager {
             Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip)),
             Map.entry("工具类", List.of(inventoryFilter, chatbutton, skydiaocustomcape)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
-            Map.entry("自动类", List.of(autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, autoDojo, autoDojoControlPredictDist)),
-            Map.entry("mining", List.of(mineshaftSharing, skyblockSafeIsland)),
+            Map.entry("自动类", List.of(autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, autoDojo, autoDojoControlPredictDist, skyblockriftautodanceroom)),
+            Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, skyblockSafeIsland)),
             Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel)),
             Map.entry("界面类", List.of(bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, dyingtip, noblind, nosuffoverlay, fireOverlay))
     );

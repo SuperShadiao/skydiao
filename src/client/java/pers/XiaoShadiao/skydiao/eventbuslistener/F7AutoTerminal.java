@@ -105,6 +105,7 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                     sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotmelody[3].getValue());
                 }
             }
+            blacklistedSlots.clear();
             currentTerminal = null;
             return;
         }
@@ -252,7 +253,6 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                     }
                     currentTerminal = value;
                     pendingClick = null;
-                    blacklistedSlots.clear();
                     ScreenEvents.afterRender(screen).register(this::afterScreenRender);
                     break a;
                 }

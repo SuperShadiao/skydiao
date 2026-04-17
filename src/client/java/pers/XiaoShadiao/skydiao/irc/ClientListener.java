@@ -87,6 +87,7 @@ public class ClientListener extends ChatClient {
                                     System.out.println("BAD PACKET: " + new String(data.toByteArray(), StandardCharsets.UTF_8));
                                     e.printStackTrace();
                                 }
+                                startRecordFlag = false;
                                 buffer.reset();
                                 data.reset();
                                 continue;

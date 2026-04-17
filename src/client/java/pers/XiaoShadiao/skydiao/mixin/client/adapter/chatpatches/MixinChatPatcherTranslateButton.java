@@ -1,4 +1,4 @@
-package pers.XiaoShadiao.skydiao.mixin.client.adapter;
+package pers.XiaoShadiao.skydiao.mixin.client.adapter.chatpatches;
 
 import net.minecraft.client.GuiMessage;
 import net.minecraft.client.gui.components.AbstractButton;
@@ -11,7 +11,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.utils.TextTranslator;
 import pers.XiaoShadiao.skydiao.utils.ToolList;

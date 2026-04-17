@@ -18,6 +18,7 @@ import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -469,6 +470,10 @@ public class ToolList {
             i++;
         }
         return slots;
+    }
+
+    public String tryGetSkyblockItemId(ItemStack itemStack) {
+        return itemStack.getComponents().getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getStringOr("id", "");
     }
 
     public record TPInfo(PositionMoveRotation from, PositionMoveRotation to) { }

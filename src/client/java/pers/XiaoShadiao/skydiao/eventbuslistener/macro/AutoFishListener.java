@@ -168,7 +168,7 @@ public class AutoFishListener extends AbstractListener implements IMacro {
     private void executeThread() {
 
         isThreadWorking = true;
-        if (!ConfigManager.autoFish.getValue() || InputSimulator.isInventoryOpen()) return;
+        if (!ConfigManager.autoFish.getValue() || InputSimulator.isInventoryOpen() || "kuudra".equals(StatusManager.get().getMode())) return;
         if (ToolList.getInstance().random.nextInt(3) == 1) {
             if(ConfigManager.autoFishAutoJump.getValue()) antiAFKJump.interrupt();
         } else if(ToolList.getInstance().random.nextInt(10) == 5) {
