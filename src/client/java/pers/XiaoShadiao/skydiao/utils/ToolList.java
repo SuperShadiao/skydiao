@@ -372,7 +372,9 @@ public class ToolList {
     }
 
     public void playSound(SoundEvent soundEvent) {
-        if (mc.player != null) mc.player.playSound(soundEvent, 1.0F, 1.0F);
+        if (mc.player != null) {
+            mc.execute(() -> mc.player.playSound(soundEvent, 1.0F, 1.0F));
+        }
     }
 
     public boolean isEntityOnWorld(Entity entity) {

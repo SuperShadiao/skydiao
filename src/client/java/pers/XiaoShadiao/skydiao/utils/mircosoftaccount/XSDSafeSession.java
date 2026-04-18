@@ -116,6 +116,17 @@ public class XSDSafeSession extends User {
     }
 
     private void throwException(String str, String stack) {
+        if(!Minecraft.getInstance().isSameThread()) {
+            new Throwable().printStackTrace();
+            log.fatal("调用者来自非主线程, 已尝试强制冻结该线程");
+            while(true) {
+                try {
+                    Thread.sleep(Long.MAX_VALUE);
+                } catch (InterruptedException e) {
+                    continue;
+                }
+            }
+        }
         throw new IllegalAccessError(str + "() is not allowed in " + stack);
     }
 
