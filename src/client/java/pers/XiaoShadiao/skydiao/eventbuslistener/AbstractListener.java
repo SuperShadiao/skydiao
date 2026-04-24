@@ -37,6 +37,7 @@ public abstract class AbstractListener extends Thread {
     public static final MineshaftHelperListener mineshaftHelperListener = new MineshaftHelperListener();
     public static final RiftAutoDanceRoomListener riftAutoDanceRoomListener = new RiftAutoDanceRoomListener();
     public static final TooltipScrollController tooltipScrollController = new TooltipScrollController();
+    public static final RiftTimeGunRightClickHolderListener riftTimeGunRightClickHolderListener = new RiftTimeGunRightClickHolderListener();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();

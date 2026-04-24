@@ -4,6 +4,8 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.minecraft.UserApiService;
 import com.mojang.authlib.yggdrasil.ProfileResult;
+import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+import com.mojang.authlib.yggdrasil.YggdrasilUserApiService;
 import com.mojang.blaze3d.GpuOutOfMemoryException;
 import com.mojang.logging.LogUtils;
 import net.minecraft.CrashReport;
@@ -34,6 +36,8 @@ import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 
 import java.io.File;
+import java.lang.reflect.Method;
+import java.net.Proxy;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
@@ -69,6 +73,7 @@ public class MixinMinecraft {
     @Final
     @Shadow
     private ClientTelemetryManager telemetryManager;
+    @Mutable
     @Final
     @Shadow
     private UserApiService userApiService;
@@ -80,6 +85,9 @@ public class MixinMinecraft {
     @Final
     @Shadow
     private SplashManager splashManager;
+    @Final
+    @Shadow
+    private Proxy proxy;
 
     // =========== SHADOW END =============
 
@@ -110,9 +118,21 @@ public class MixinMinecraft {
         this.user = user;
         this.profileFuture = CompletableFuture.supplyAsync(() -> this.services.sessionService().fetchProfile(this.user.getProfileId(), true), Util.nonCriticalIoPool());
 
+        this.userApiService = new YggdrasilAuthenticationService(this.proxy).createUserApiService(user.getAccessToken());
         this.telemetryManager = new ClientTelemetryManager(mc, this.userApiService, this.user);
         this.profileKeyPairManager = ProfileKeyPairManager.create(this.userApiService, this.user, mc.gameDirectory.toPath());
         this.splashManager = new SplashManager(this.user);
+
+        try {
+            Class<?> clazz = Class.forName("de.hysky.skyblocker.utils.ApiAuthentication");
+            Method method = clazz.getDeclaredMethod("updateToken");
+            method.setAccessible(true);
+            method.invoke(null);
+        } catch (Throwable e) {
+            if(!(e instanceof ClassNotFoundException)) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @WrapOperation(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;runTick(Z)V"), method = "run")

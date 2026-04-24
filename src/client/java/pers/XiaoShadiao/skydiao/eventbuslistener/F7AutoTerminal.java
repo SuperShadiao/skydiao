@@ -132,11 +132,12 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                         }
                         if (col != -1) {
                             for (int i = 0; i < slots[col].length; i++) {
+                                boolean breakFlag = false;
                                 Slot slot = slots[col][i];
                                 if (slot.getItem().getItem() == Items.LIME_STAINED_GLASS_PANE) {
                                     if (slots[7][i].getItem().getItem() == Items.LIME_TERRACOTTA) {
                                         pendingClick = new Click(menu.containerId, slots[7][i]);
-                                        break;
+                                        breakFlag = true;
                                     }
                                 }
                                 if (slot.getItem().getItem() == Items.LIME_STAINED_GLASS_PANE || slot.getItem().getItem() == Items.RED_STAINED_GLASS_PANE) {
@@ -147,6 +148,7 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                                         if(clamp >= 0) sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotmelody[clamp].getValue());
                                     }
                                 }
+                                if(breakFlag) break;
                             }
                         }
                     }
@@ -164,7 +166,6 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                                 ItemStack item = slot.getItem();
                                 if (item.getHoverName() != null) {
                                     String s = ToolList.getInstance().deleteColorCode(item.getHoverName().getString());
-                                    System.out.println(s);
                                     if (s.toLowerCase().startsWith(currentTerminal.arg.toLowerCase())
                                             && !ToolList.hasGlint(item)
                                             && !blacklistedSlots.contains(slot.index)
@@ -201,8 +202,9 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                         if (ToolList.getInstance().stringHasContext(currentTerminal.arg)) {
                             String colorRaw = currentTerminal.arg;
                             colorRaw = colorRaw.replace("SILVER", "LIGHT GRAY");
-                            String colorUpperCase = colorRaw.replace("_", " ").toUpperCase();
-                            Optional<DyeColor> dye = Arrays.stream(DyeColor.values()).filter(v -> v.name().equalsIgnoreCase(colorUpperCase)).findFirst();
+                            String colorUpperCase = colorRaw.toUpperCase();
+                            String colorItemID = colorUpperCase.replace("_", " ");
+                            Optional<DyeColor> dye = Arrays.stream(DyeColor.values()).filter(v -> v.name().equalsIgnoreCase(colorItemID)).findFirst();
                             if (dye.isPresent()) {
                                 for (Slot slot : slots1) {
                                     ItemStack item = slot.getItem();
@@ -263,7 +265,7 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
 
     private void afterScreenRender(Screen screen, GuiGraphics guiGraphics, int width, int height, float deltaTick) {
         if (!ConfigManager.dungeonf7autoterm.getValue()) return;
-        if (System.currentTimeMillis() - lastClickTime > ToolList.getInstance().random.nextInt(31) + 270 && pendingClick != null) {
+        if (System.currentTimeMillis() - lastClickTime > ToolList.getInstance().random.nextInt(31) + ConfigManager.dungeonf7autotermclickdelay.getValue() && pendingClick != null) {
             Click temp = lastClick = pendingClick;
             pendingClick = null;
             lastClickTime = System.currentTimeMillis();

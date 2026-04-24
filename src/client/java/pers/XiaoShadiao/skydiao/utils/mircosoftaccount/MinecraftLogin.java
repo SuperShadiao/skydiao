@@ -4,24 +4,22 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.util.UndashedUuid;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
-import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.multiplayer.ProfileKeyPairManager;
 import net.minecraft.resources.Identifier;
 import org.apache.commons.io.FileUtils;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinMinecraftSessionAccessor;
 import pers.XiaoShadiao.skydiao.screen.mircosoftaccount.AccountSelectScreen;
-import pers.XiaoShadiao.skydiao.utils.HttpSSLDisabler;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.renderutils.ImageTexture;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Objects;
-import java.util.UUID;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import static pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager.translate;
@@ -358,6 +356,55 @@ public class MinecraftLogin {
 
     public static void replaceSession(User session) {
         ((MixinMinecraftSessionAccessor) ToolList.mc).setUser(new XSDSafeSession(session));
+    }
+
+    private static CompletableFuture<?> checkFuture = CompletableFuture.completedFuture(null);
+
+    public static void checkSessionExpiredAndLogin() {
+        ProfileKeyPairManager keyPairManager = ((MixinMinecraftSessionAccessor) ToolList.mc).getProfileKeyPairManager();
+
+        Throwable t = new Throwable() {
+            @Override
+            public synchronized Throwable fillInStackTrace() {
+                return this;
+            }
+        };
+
+        checkFuture = checkFuture
+                .thenComposeAsync((a) -> {
+                    if(ToolList.mc.getUser() instanceof XSDSafeSession session) {
+                        return session.checkTokenVaild().thenComposeAsync(b -> b ? CompletableFuture.completedFuture(null) : CompletableFuture.failedFuture(t));
+                    } else {
+                        return CompletableFuture.failedFuture(t);
+                    }
+                })
+                .thenComposeAsync((a) -> keyPairManager.prepareKeyPair().exceptionallyAsync(e -> Optional.empty()))
+                .thenComposeAsync((keyPair) -> {
+                    if (keyPair.isEmpty() || keyPair.get().publicKey().data().hasExpired()) {
+                        return CompletableFuture.failedFuture(t);
+                    } else {
+                        return CompletableFuture.completedFuture(null);
+                    }
+                })
+                .thenAcceptAsync(o -> {
+                    ToolList.getInstance().log.info("当前Token状态正常");
+                })
+                .exceptionallyAsync(e -> {
+                    ToolList.getInstance().log.warn("当前Token已过期...");
+                    tryFindLogin();
+                    return null;
+                });
+    }
+
+    private static void tryFindLogin() {
+        for (MinecraftSessionContainer account : AccountSelectScreen.getAccounts()) {
+            if (account.name.equalsIgnoreCase(ToolList.mc.getUser().getName()) && account.uuid.equalsIgnoreCase(ToolList.mc.getUser().getProfileId().toString().replace("-", ""))) {
+                ToolList.getInstance().log.info("已找到当前账号" + ToolList.mc.getUser().getName() + "登录态, 尝试刷新token...");
+                account.freshTokenAndLogin();
+                return;
+            }
+        }
+        ToolList.getInstance().log.warn("未找到对应的账号登录态");
     }
 
 } 

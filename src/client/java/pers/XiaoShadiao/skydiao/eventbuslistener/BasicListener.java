@@ -1,5 +1,6 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener;
 
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
@@ -19,6 +20,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -35,6 +37,8 @@ import pers.XiaoShadiao.skydiao.config.option.ConfigOption;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.screen.mircosoftaccount.AccountSelectScreen;
+import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
+import pers.XiaoShadiao.skydiao.utils.musicplayer.PlayerThread;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 import pers.XiaoShadiao.skydiao.utils.autoupdater.AutoUpdater;
 import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
@@ -82,6 +86,10 @@ public class BasicListener extends AbstractListener {
         ClientPlayConnectionEvents.DISCONNECT.register(this::onDisconnect);
         ClientReceiveMessageEvents.GAME.register(this::onChat);
         WorldRenderEvents.END_MAIN.register(this::onLastRender);
+        ClientLifecycleEvents.CLIENT_STARTED.register((mc) -> {
+            PlayerThread.createThread();
+            MinecraftLogin.checkSessionExpiredAndLogin();
+        });
     }
 
     private void onLastRender(WorldRenderContext context) {
@@ -177,6 +185,8 @@ public class BasicListener extends AbstractListener {
                     AccountSelectScreen.getTitle0(),
                     (button) -> ToolList.mc.setScreen(new AccountSelectScreen(titleScreen))
             ).bounds(scaledHeight < 270 ? 10 : scaledWidth / 2 - 50, scaledHeight - (scaledHeight < 270 ? 35 : 28), scaledHeight < 270 ? Math.min(100, left - 15) : 100, 20).build());
+        } else if(screen instanceof JoinMultiplayerScreen mpscreen) {
+            MinecraftLogin.checkSessionExpiredAndLogin();
         }
     }
 

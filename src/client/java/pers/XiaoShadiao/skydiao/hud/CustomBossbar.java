@@ -32,6 +32,7 @@ import net.minecraft.world.entity.projectile.arrow.Arrow;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2fStack;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
@@ -54,6 +55,8 @@ public class CustomBossbar extends XSDHUD {
     private final Map<UUID, AnimationManager> animationMap = new HashMap<>();
 
     public static final Pattern HIT_PATTERN = Pattern.compile("\\d+(?= Hit)");
+
+    private List<UUID> eventBossbars = new ArrayList<>();
 
     @Override
     public void runRegister() {
@@ -121,9 +124,10 @@ public class CustomBossbar extends XSDHUD {
     }
 
     @Override
-    public void render(GuiGraphics context, DeltaTracker tickCounter) {
+    public void render(@NotNull GuiGraphics context, @NotNull DeltaTracker tickCounter) {
         if(mc.level == null) return;
         MixinBossbarEventGetter bossbarEventGetter = (MixinBossbarEventGetter) mc.gui.getBossOverlay();
+        List<UUID> temp = new ArrayList<>(bossbarEventGetter.getEvents().size());
         bossbarEventGetter.getEvents().forEach((uuid, lerpingBossEvent) -> {
             // System.out.println(lerpingBossEvent);
             // System.out.println(lerpingBossEvent.getName());
@@ -135,7 +139,7 @@ public class CustomBossbar extends XSDHUD {
                     actuallyUUID = entity.uuid;
                 }
             }
-
+            temp.add(actuallyUUID);
             UUID finalActuallyUUID = actuallyUUID;
             LivingEntity entity = Optional.ofNullable(mc.level).map(l -> l.getEntity(finalActuallyUUID)).map(ItemOwner::asLivingEntity).orElse(null);
             E2AMappingListener.MobInfo mobInfo = AbstractListener.e2AMappingListener.getMobInfo(entity);
@@ -156,6 +160,7 @@ public class CustomBossbar extends XSDHUD {
             am.setMobInfo(mobInfo);
             am.flagActive();
         });
+        eventBossbars = temp;
 
         int i = 0;
 
@@ -179,7 +184,12 @@ public class CustomBossbar extends XSDHUD {
         }
 
         boolean clearFlag = false;
-        for (Map.Entry<UUID, AnimationManager> entry : animationMap.entrySet()) {
+
+        for (Iterator<Map.Entry<UUID, AnimationManager>> it = animationMap.entrySet().stream().sorted(Comparator.comparingInt((e) -> {
+            AnimationManager am = e.getValue();
+            return am == null ? 0 : am.currentIndex;
+        })).iterator(); it.hasNext(); ) {
+            Map.Entry<UUID, AnimationManager> entry = it.next();
 
             AnimationManager am = entry.getValue();
             LivingEntity entity = Optional.ofNullable(mc.level).filter(a -> am.entityId != null).map(l -> l.getEntity(am.entityId)).map(ItemOwner::asLivingEntity).orElse(null);
@@ -204,7 +214,7 @@ public class CustomBossbar extends XSDHUD {
                         shealth.append(" §a").append(Math.floor((am.currentHealth / am.maxHealth * 100 + 0.05) * 10) / 10).append("%§c❤");
                 }
                 if (am.mobInfo != null && am.mobInfo.armorStandForBoss != null)
-                    s.append(" §f| ").append(am.mobInfo.armorStandForBoss.getCustomName());
+                    s.append(" §f| ").append(am.mobInfo.armorStandForBoss.getName());
                 context.drawString(mc.font, s.copy().append(shealth.toString()), (int) (width / 2 - mc.font.width(s) / 2), (int) (12 - 10 + yOffset), 0xFFFFFFFF, true);
 
                 context.fill(x, 12 + yOffset, x + length, 15 + yOffset, AnimationManager.healthBgColor.getRGB());
@@ -290,7 +300,7 @@ public class CustomBossbar extends XSDHUD {
         }
         pose.popMatrix();
         boolean finalClearFlag = clearFlag;
-        animationMap.entrySet().removeIf(entry -> (finalClearFlag || !entry.getValue().isActive()) && mc.level.getEntity(entry.getKey()) == null);
+        animationMap.entrySet().removeIf(entry -> ((finalClearFlag && !eventBossbars.contains(entry.getKey())) || !entry.getValue().isActive()) && mc.level.getEntity(entry.getKey()) == null);
     }
 
     public void addEntityToBossbar(LivingEntity entity) {
@@ -301,7 +311,6 @@ public class CustomBossbar extends XSDHUD {
 
         am.setMobInfo(mobInfo);
         am.flagActive();
-
     }
 
     public static class AnimationManager {
@@ -313,7 +322,7 @@ public class CustomBossbar extends XSDHUD {
                 immuneStateHealthColorSwitch = new Color(255, 255, 255),
                 dmgHealthColor = new Color(0xCF, 0xCA, 0x11),
                 healingHealthColor = new Color(0x0, 0xFF, 0x0);
-        ;
+
 
         public long lastActiveTime;
 
@@ -336,6 +345,10 @@ public class CustomBossbar extends XSDHUD {
         public float armorstandpartMaxHealth;
         public double renderFlagImmuneDmg;
         public Color color = new Color(0xFFEF2A25);
+
+        private static int indexId = Integer.MIN_VALUE;
+
+        public int currentIndex = indexId++;
 
         public boolean useCustomHealthUpdater;
         public Consumer<AnimationManager> healthUpdater;
@@ -515,16 +528,11 @@ public class CustomBossbar extends XSDHUD {
         }
 
         public void flagActive() {
-            // System.out.println(this);
+            if(!isActive()) currentIndex = indexId++;
             lastActiveTime = System.currentTimeMillis();
-            // System.out.println(entity);
-            // System.out.println(lastActiveTime + "");
         }
 
         public boolean isActive() {
-            // System.out.println(entity);
-            // System.out.println(this);
-            // System.out.println(System.currentTimeMillis() + " " + lastActiveTime + " " + (System.currentTimeMillis() - lastActiveTime) + " " + (System.currentTimeMillis() - lastActiveTime < 5000));
             return System.currentTimeMillis() - lastActiveTime < 5000;
         }
     }

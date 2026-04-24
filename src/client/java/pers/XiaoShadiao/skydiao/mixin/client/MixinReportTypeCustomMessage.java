@@ -33,7 +33,8 @@ public class MixinReportTypeCustomMessage {
             "Minecraft, Launch( failed)!",
             "Minecraft更好的崩溃(报告)由小沙雕制作!",
             "Autofisher: hey 5i_XiaoShadiao i see you posted a very nice hypixelhelper autofish + rat mod on github",
-            "There are so many Autofishers in main lobby #18!"
+            "There are so many Autofishers in main lobby #18!",
+            "[MVP++] SpaceByte: 5i_XiaoShadiao give m e hypixel helper source"
     );
 
     @Overwrite

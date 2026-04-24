@@ -72,6 +72,9 @@ public class ConfigManager {
     public static final BooleanConfigOption skydiaocustomcape = new BooleanConfigOption("skydiaocustomcape", false);
     public static final BooleanConfigOption skyblockriftautodanceroom = new BooleanConfigOption("skyblockriftautodanceroom", false);
     public static final BooleanConfigOption mineshaftHelper = new BooleanConfigOption("mineshafthelper", true);
+    public static final BooleanConfigOption galateashulker = new BooleanConfigOption("galateashulker", true);
+    public static final IntConfigOption dungeonf7autotermclickdelay = new IntConfigOption("dungeonf7autotermclickdelay", 270);
+    public static final BooleanConfigOption rifttimegunhelper = new BooleanConfigOption("rifttimegunhelper", false);
 
     public static final StringConfigOption[] dungeonf7msgbotsimonsays = {
             dungeonf7msgbotsimonsays1,
@@ -89,13 +92,21 @@ public class ConfigManager {
 
     public static final BooleanConfigOption chatbutton = new BooleanConfigOption("chatbutton", false).setRequiredMod(new ConfigOption.ModDepends("chatpatches", "alpha.8", "https://modrinth.com/mod/chatpatches"));
 
+    public static final StringConfigOption hypixelhelpermusicfolder = new StringConfigOption("hypixelhelpermusicfolder", "");
+    public static final BooleanConfigOption musicplayer = new BooleanConfigOption("musicplayer", true);
+    public static final SelectConfigOption musicplayermode = new SelectConfigOption("musicplayermode", 0, List.of("顺序播放", "有序随机", "无序随机", "while(true)"));
+    public static final IntConfigOption musiclastmusic = new IntConfigOption("musiclastmusic", 0);
+    public static final IntConfigOption xsdmusicvolume = new IntConfigOption("xsdmusicvolume", 100);
+
     public static final List<Map.Entry<String, List<ConfigOption<?, ?>>>> categories = List.of(
             Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip)),
             Map.entry("工具类", List.of(inventoryFilter, chatbutton, skydiaocustomcape)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
             Map.entry("自动类", List.of(autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, autoDojo, autoDojoControlPredictDist, skyblockriftautodanceroom)),
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, skyblockSafeIsland)),
-            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel)),
+            Map.entry("foraging", List.of(galateashulker)),
+            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel)),
+            Map.entry("rift", List.of(rifttimegunhelper)),
             Map.entry("界面类", List.of(bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, dyingtip, noblind, nosuffoverlay, fireOverlay))
     );
 

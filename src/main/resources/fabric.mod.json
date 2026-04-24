@@ -50,5 +50,10 @@
       },
       "update_checker": true
     }
-  }
+  },
+  "jars": [
+    {
+      "file": "lib/jlayer-1.0.1.jar"
+    }
+  ]
 }

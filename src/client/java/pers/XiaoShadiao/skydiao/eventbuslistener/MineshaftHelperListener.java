@@ -48,7 +48,7 @@ public class MineshaftHelperListener extends AbstractListener {
     }
 
     private void onLastRender(WorldRenderContext context) {
-        if(mc.level == null || !ConfigManager.mineshaftHelper.getValue()) return;
+        if(mc.level == null || mc.player == null || !ConfigManager.mineshaftHelper.getValue()) return;
 
         RenderUtils.WorldRender wr1 = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_LINE);
         RenderUtils.WorldRender wr2 = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_FILL);
@@ -62,8 +62,13 @@ public class MineshaftHelperListener extends AbstractListener {
                 float g = color.getGreen() / 255f;
                 float b = color.getBlue() / 255f;
                 float a = color.getAlpha() / 255f;
-                RenderUtils.renderESP(wr1, entity.position(), r, g, b, a, false);
-                RenderUtils.renderESP(wr2, entity.position(), r, g, b, a, true);
+                if(entity.distanceTo(mc.player) > 6) {
+                    RenderUtils.renderESP(wr1, entity.position(), r, g, b, a, false);
+                    RenderUtils.renderESP(wr2, entity.position(), r, g, b, a, true);
+                } else {
+                    RenderUtils.renderESP(wr1, entity, r, g, b, a, false);
+                    RenderUtils.renderESP(wr2, entity, r, g, b, a, true);
+                }
             }
         });
         for (Integer littleFootEntity : littleFootEntities) {
@@ -91,6 +96,7 @@ public class MineshaftHelperListener extends AbstractListener {
     private void worldUnload(Minecraft mc, ClientLevel level) {
         claimedCorpse.clear();
         corpseList.clear();
+        littleFootEntities.clear();
     }
 
     private void onClientStartTick(Minecraft mc) {

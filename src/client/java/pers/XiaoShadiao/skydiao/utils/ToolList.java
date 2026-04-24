@@ -30,6 +30,7 @@ import net.minecraft.world.scores.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
@@ -54,7 +55,7 @@ public class ToolList {
 
     static {
         mc = Minecraft.getInstance();
-        if (mc == null) throw new AssertionError("不允许在Minecraft实例启动前加载ToolList");
+        if (mc == null) throw new AssertionError("不允许在Minecraft实例启动前加载ToolList, 检查一下代码看看。(如果处于运行环境, 请将该问题报告给小沙雕! " + SkyDiaoModClient.CONST_QQGROUP_MAIN + ")");
     }
 
     private static ToolList instance;

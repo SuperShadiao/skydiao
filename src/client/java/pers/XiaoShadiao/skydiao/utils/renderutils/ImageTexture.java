@@ -32,6 +32,7 @@ public class ImageTexture extends SimpleTexture {
     }
 
     public static TextureContents load(byte[] bytes) throws IOException {
+
         NativeImage nativeImage = NativeImage.read(bytes);
 
         return new TextureContents(nativeImage, null);

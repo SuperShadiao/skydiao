@@ -1,16 +1,23 @@
 package pers.XiaoShadiao.skydiao.utils.mircosoftaccount;
 
+import com.mojang.authlib.exceptions.*;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.util.UndashedUuid;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Crypt;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
+import javax.crypto.SecretKey;
+import java.math.BigInteger;
+import java.security.PublicKey;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 public class XSDSafeSession extends User {
@@ -216,6 +223,28 @@ public class XSDSafeSession extends User {
             }).filter(Objects::nonNull).toList();
         }
         return _3rdClasses;
+    }
+
+    public CompletableFuture<Boolean> checkTokenVaild() {
+        return checkTokenVaild(UUID.randomUUID());
+    }
+
+    public CompletableFuture<Boolean> checkTokenVaild(UUID serverId0) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                String serverId = serverId0.toString();
+                ToolList.mc.services().sessionService().joinServer(getProfileId(), ToolList.getInstance().decodeString(super.getAccessToken()), serverId);
+                ToolList.getInstance().log.info("Token有效");
+                return true;
+            } catch (InvalidCredentialsException e) {
+                ToolList.getInstance().log.warn("Token已过期...");
+                return false;
+            } catch (Throwable e) {
+                ToolList.getInstance().log.error("检查Token状态时出错");
+                ToolList.getInstance().log.catching(e);
+                return false;
+            }
+        });
     }
 
 }

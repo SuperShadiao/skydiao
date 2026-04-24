@@ -35,6 +35,7 @@
     "MixinUserDataSecurer",
     "adapter.chatpatches.MixinChatPatcherTranslateButton",
     "adapter.firmament.FirmamentGithubRepoProxy",
+    "adapter.musicplayer.MixinJavaSoundAudioDeviceAccessor",
     "adapter.odinfix.MixinOdinPickColorTerminalFixer",
     "adapter.odinfix.MixinOdinStartWithTerminalFixer"
   ]

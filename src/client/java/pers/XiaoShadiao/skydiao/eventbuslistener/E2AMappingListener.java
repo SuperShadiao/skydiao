@@ -50,6 +50,7 @@ public class E2AMappingListener extends AbstractListener {
                         continue;
                     }
                     String name = armorStand.getName().getString();
+                    if (name.contains("by:")) continue;
                     Matcher matcher = timeMatcher.matcher(name);
                     if (matcher.matches()) {
                         armorStandsForBoss.add(armorStand);
@@ -158,16 +159,17 @@ public class E2AMappingListener extends AbstractListener {
         }
 
         public void selfCleaningAndUpdate() {
-            e2a.entrySet().removeIf(entry -> mc.level == null || (!ToolList.getInstance().isEntityOnWorld(entry.getKey()) || !ToolList.getInstance().isEntityOnWorld(entry.getValue()) || getXZDistance(entry.getKey(), entry.getValue()) >= 2));
-            a2e.entrySet().removeIf(entry -> mc.level == null || (!ToolList.getInstance().isEntityOnWorld(entry.getKey()) || !ToolList.getInstance().isEntityOnWorld(entry.getValue()) || getXZDistance(entry.getKey(), entry.getValue()) >= 2));
+            e2a.entrySet().removeIf(entry -> {
+                boolean flag = mc.level == null || (!ToolList.getInstance().isEntityOnWorld(entry.getKey()) || !ToolList.getInstance().isEntityOnWorld(entry.getValue()) || getXZDistance(entry.getKey(), entry.getValue()) >= 2);
+                if(flag) a2e.remove(entry.getValue());
+                return flag;
+            });
+            // a2e.entrySet().removeIf(entry -> mc.level == null || (!ToolList.getInstance().isEntityOnWorld(entry.getKey()) || !ToolList.getInstance().isEntityOnWorld(entry.getValue()) || getXZDistance(entry.getKey(), entry.getValue()) >= 2));
 
             e2Info.entrySet().removeIf(entry -> mc.level == null || !e2a.containsKey(entry.getKey()) || !ToolList.getInstance().isEntityOnWorld(entry.getKey()));
             e2Info.forEach((key, mobInfo) -> {
                 mobInfo.health = key.getHealth();
                 mobInfo.maxHealth = Math.max(key.getMaxHealth(), Math.max(mobInfo.health, mobInfo.maxHealth));
-//                System.out.println(mobInfo.theEntity.getHealth());
-//                System.out.println(mobInfo.theEntity);
-//                System.out.println(mobInfo);
                 mobInfo.theEntity = key;
             });
         }
