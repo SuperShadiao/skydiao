@@ -222,6 +222,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     }
 
     private boolean onMouseClick(long windowsHandle, MouseButtonInfo mouseButtonInfo, int pressState) {
+        if(mc.player == null || mc.level == null || isInMasterDungeonFloor() || !isInCorrectDungeon()) return false;
         if(mouseButtonInfo.button() == 1 && pressState == 1 && mc.hitResult instanceof BlockHitResult blockHitResult && blockHitResult.getType() == HitResult.Type.BLOCK && blockHitResult.getBlockPos().equals(simonSaysStartButton)) {
             sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotsimonsaysstart.getValue());
             targetsimonSaysButton.clear();
@@ -315,7 +316,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                     isDoingSimonSays = false;
                 }
             }
-            boolean inArea = ToolList.getInstance().isEntityInArea(mc.player, new BlockPos(50, 115, 56), new BlockPos(58, 122, 57));
+            boolean inArea = ToolList.getInstance().isEntityInArea(mc.player, new BlockPos(50, 115, 54), new BlockPos(58, 122, 57));
             if (inArea && !enteredGoldorCoreTunnel) {
                 enteredGoldorCoreTunnel = true;
                 sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotcoretunnel.getValue());

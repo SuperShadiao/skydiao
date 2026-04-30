@@ -774,6 +774,18 @@
       "configname": "§eRift Time Gun助手",
       "description": "§e瞄准Timie玻璃方块后自动按住右键"
     },
+    "dungeonbonzotriggered": {
+      "configname": "§e地牢F7 Bonzo Mask触发消息",
+      "description": "§e地牢F7 Bonzo Mask触发消息, 留空则禁用该消息"
+    },
+    "dungeonphoenixtriggered": {
+      "configname": "§e地牢F7 Phoenix Pet触发消息",
+      "description": "§e地牢F7 Phoenix Pet触发消息, 留空则禁用该消息"
+    },
+    "dungeonspiritmasktriggered": {
+      "configname": "§e地牢F7 Spirit Mask触发消息",
+      "description": "§e地牢F7 Spirit Mask触发消息, 留空则禁用该消息"
+    },
     "about1": "§e小沙雕的QQ: 3381949033",
     "about2": "§e小沙雕の狗窝: https://xiaoshadiao.club/qqg",
     "about3": "§e部分快捷键设置可在 ESC->选项(设置)->控制 中找到",

@@ -203,7 +203,7 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                             String colorRaw = currentTerminal.arg;
                             colorRaw = colorRaw.replace("SILVER", "LIGHT GRAY");
                             String colorUpperCase = colorRaw.toUpperCase();
-                            String colorItemID = colorUpperCase.replace("_", " ");
+                            String colorItemID = colorUpperCase.replace(" ", "_");
                             Optional<DyeColor> dye = Arrays.stream(DyeColor.values()).filter(v -> v.name().equalsIgnoreCase(colorItemID)).findFirst();
                             if (dye.isPresent()) {
                                 for (Slot slot : slots1) {
@@ -214,7 +214,7 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                                     if (!ToolList.hasGlint(item)
                                             && !blacklistedSlots.contains(slot.index)
                                             && item.getItem() != Items.BLACK_STAINED_GLASS_PANE
-                                            && (itemUpCase.startsWith(colorUpperCase) || itemUpCase.endsWith(colorUpperCase)
+                                            && (itemUpCase.startsWith(colorUpperCase) || itemUpCase.endsWith(colorUpperCase) || (item.getItem().getDescriptionId().contains(colorItemID.toLowerCase()) && !item.getItem().getDescriptionId().contains("_" + colorItemID.toLowerCase()))
                                             || matchesSpecialCase(dye.get(), item))) {
                                         pendingClick = new Click(menu.containerId, slot);
                                         break;
