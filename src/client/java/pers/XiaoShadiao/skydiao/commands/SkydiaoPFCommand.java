@@ -14,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 import pers.XiaoShadiao.skydiao.commands.args.ClientBlockPosArgument;
+import pers.XiaoShadiao.skydiao.commands.args.SimpleStringReader;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
 import pers.XiaoShadiao.skydiao.utils.pathfinder.EntityFollower;
 import pers.XiaoShadiao.skydiao.utils.pathfinder.PathFinder;
@@ -166,8 +167,8 @@ public class SkydiaoPFCommand extends BaseCommand {
                 } catch (CommandSyntaxException e) {
                     isAvoid = false;
                 }
-                (isAvoid ? avoid : targets).add(new EntityFollower.NameInfo(reader.readString(), isEqual));
-                reader.skipWhitespace();
+
+                (isAvoid ? avoid : targets).add(new EntityFollower.NameInfo(SimpleStringReader.readSimpleString(reader, false), isEqual));
             }
 
             return new Data(targets, avoid);
@@ -179,6 +180,7 @@ public class SkydiaoPFCommand extends BaseCommand {
             reader.setCursor(builder.getStart());
             boolean hasEqual = false;
             boolean hasAvoid = false;
+            boolean hasArg = false;
             do {
                 reader.skipWhitespace();
                 try {
@@ -192,23 +194,25 @@ public class SkydiaoPFCommand extends BaseCommand {
                 } catch (CommandSyntaxException e) {
                 }
                 try {
-                    reader.readString();
+                    hasArg = !SimpleStringReader.readSimpleString(reader, true).isEmpty();
                 } catch (CommandSyntaxException e) {
                 }
                 try {
                     reader.expect(' ');
                     hasAvoid = false;
                     hasEqual = false;
+                    hasArg = false;
                 } catch (CommandSyntaxException e) {
                 }
             } while(reader.canRead());
-            if(!hasEqual && !hasAvoid) {
-                return builder.createOffset(reader.getCursor()).suggest("=").suggest("!").suggest("=!").buildFuture();
-            } else if(hasEqual && !hasAvoid) {
-                return builder.createOffset(reader.getCursor()).suggest("!").buildFuture();
-            } else {
-                return ArgumentType.super.listSuggestions(context, builder);
+            if(!hasArg) {
+                if(!hasEqual && !hasAvoid) {
+                    return builder.createOffset(reader.getCursor()).suggest("=").suggest("!").suggest("=!").buildFuture();
+                } else if(hasEqual && !hasAvoid) {
+                    return builder.createOffset(reader.getCursor()).suggest("!").buildFuture();
+                }
             }
+            return ArgumentType.super.listSuggestions(context, builder);
         }
 
         public record Data(List<EntityFollower.NameInfo> targets, List<EntityFollower.NameInfo> avoid) {}

@@ -127,7 +127,7 @@ public class DungeonF3BossbarListener extends AbstractDungeonBossbar {
     }
 
     private void onClientTick(Minecraft mc) {
-        if (mc.level == null || (!passWatcherFlag && !isInCorrectDungeon())) return;
+        if (mc.level == null || !isInCorrectDungeon()) return;
 
         masterFloorFlag |= isInMasterDungeonFloor();
 

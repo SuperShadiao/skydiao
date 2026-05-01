@@ -129,6 +129,7 @@ public class MineshaftShareListener extends AbstractListener {
             ToolList.printChatMessage(Component.literal("§a[XSD§bMS§a] §a你的§bGlacite Mineshaft§a已被广播!"));
         } else {
             allowShare = false;
+            ToolList.printChatMessage(Component.literal("§a[XSD§bMS§a] §c因为你的设置, 你的§bGlacite Mineshaft§c未被广播. 但同时你也看不到其他人的Shaft广播."));
         }
     }
 

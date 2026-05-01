@@ -3,6 +3,7 @@ package pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.components.LerpingBossEvent;
@@ -37,8 +38,9 @@ import java.util.*;
 public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
     public static final Identifier F7_BOSS_ICON = Objects.requireNonNull(Identifier.tryBuild("skydiao", "textures/skyblock/boss/wither.png"));
-    public static final Component[] NAMES = new Component[]{Component.literal("Maxor"), Component.literal("Storm"), Component.literal("Goldor"), Component.literal("Necron")};
-    public static final double[] HEALTHES = new double[]{100_000_000, 400_000_000, 750_000_000, 1_000_000_000};
+    public static final Component[] NAMES = new Component[]{Component.literal("Maxor"), Component.literal("Storm"), Component.literal("Goldor"), Component.literal("Necron"), Component.literal("Wither King")};
+    public static final double[] HEALTHES = new double[]{100_000_000, 400_000_000, 750_000_000, 1_000_000_000, 5_000_000_000d};
+    public static final double[] MM_HEALTHES = new double[]{800_000_000, 1_000_000_000, 1_200_000_000, 1_400_000_000, 5_000_000_000d};
 
     private LerpingBossEvent f7Boss;
     private WitherBoss f7BossTarget;
@@ -60,7 +62,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
     @Override
     public int getMaxStage() {
-        return 4;
+        return masterFloorFlag ? 5 : 4;
     }
 
     @Override
@@ -74,7 +76,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     @Override
     public double getMaxHealth() {
         // maxHealth = Math.max(maxHealth, Math.max(f7Boss.getHealth(), f7Boss.getMaxHealth()));
-        return HEALTHES[currentStage - 1];
+        return (masterFloorFlag ? MM_HEALTHES : HEALTHES)[currentStage - 1];
     }
 
     @Override
@@ -181,6 +183,9 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             addStarRailNotification("第三阶段", StarRailNotification.Type.warning);
         }
         if(currentStage == 4) {
+            addStarRailNotification(masterFloorFlag ? "第四阶段" : "最终阶段", StarRailNotification.Type.warning);
+        }
+        if(currentStage == 5) {
             addStarRailNotification("最终阶段", StarRailNotification.Type.warning);
         }
     }
@@ -199,13 +204,17 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         return true;
     }
 
-    private BlockPos simonSaysStartButton = new BlockPos(110, 121, 91);
+    private final BlockPos simonSaysStartButton = new BlockPos(110, 121, 91);
     private int lastSimonSaysButtonCount;
     private int simonSaysButtonCount;
     private final Set<BlockPos> targetsimonSaysButton = new HashSet<>();
     private boolean isDoingSimonSays = false;
 
     private boolean enteredGoldorCoreTunnel;
+
+    private boolean passWatcherFlag;
+
+    private boolean masterFloorFlag;
 
     @Override
     public String getListenerName() {
@@ -219,10 +228,14 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         ClientReceiveMessageEvents.GAME.register(this::onChat);
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
         CustomFabricEvents.MOUSE_BUTTON_EVENT.register(this::onMouseClick);
+        ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register((a,b) -> {
+            passWatcherFlag = false;
+            masterFloorFlag = false;
+        });
     }
 
     private boolean onMouseClick(long windowsHandle, MouseButtonInfo mouseButtonInfo, int pressState) {
-        if(mc.player == null || mc.level == null || isInMasterDungeonFloor() || !isInCorrectDungeon()) return false;
+        if(mc.player == null || mc.level == null /*|| isInMasterDungeonFloor() */|| !isInCorrectDungeon()) return false;
         if(mouseButtonInfo.button() == 1 && pressState == 1 && mc.hitResult instanceof BlockHitResult blockHitResult && blockHitResult.getType() == HitResult.Type.BLOCK && blockHitResult.getBlockPos().equals(simonSaysStartButton)) {
             sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotsimonsaysstart.getValue());
             targetsimonSaysButton.clear();
@@ -232,7 +245,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     }
 
     private void onClientTick(Minecraft mc) {
-        if(mc.player == null || mc.level == null || isInMasterDungeonFloor() || !isInCorrectDungeon()) return;
+        if(mc.player == null || mc.level == null || /*isInMasterDungeonFloor() || */!isInCorrectDungeon()) return;
 
         MixinBossbarEventGetter bossbarEventGetter = (MixinBossbarEventGetter) mc.gui.getBossOverlay();
         boolean[] flag = new boolean[] {false};
@@ -341,6 +354,9 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
     private void onChat(Component component, boolean b) {
         String message = ToolList.getInstance().deleteColorCode(component.getString());
+        if (message.equals("[BOSS] The Watcher: You have proven yourself. You may pass.")) {
+            passWatcherFlag = true;
+        }
         if(currentStage == 1) {
             if (message.equals("1/2 Energy Crystals are now active!")) {
                 if(currentWeakness > 1) currentWeakness = 1;
@@ -412,7 +428,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
     private int getBossIndex(String bossName) {
         for (int i = 0; i < NAMES.length; i++) {
-            if (bossName.contains(NAMES[i].getString())) {
+            if (ToolList.getInstance().deleteColorCode(bossName).contains(NAMES[i].getString())) {
                 return i;
             }
         }
