@@ -1,5 +1,7 @@
 package pers.XiaoShadiao.skydiao.irc;
 
+import net.hypixel.modapi.HypixelModAPI;
+import net.hypixel.modapi.packet.impl.serverbound.ServerboundPartyInfoPacket;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
@@ -46,6 +48,9 @@ public class ClientReceiveHandler {
                 MutableComponent component = Component.literal("§a[XSDChat] " + packet.getRank(true) + "§d" + packet.sender + " §c触发了Macro Check警报! §e[HOVER]");
                 Style style = Style.EMPTY.withHoverEvent(new HoverEvent.ShowText(Component.literal(packet.message)));
                 ToolList.printChatMessage(component.setStyle(style));
+                break;
+            case "hyp_party":
+                HypixelModAPI.getInstance().sendPacket(new ServerboundPartyInfoPacket());
                 break;
         }
     }

@@ -40,7 +40,10 @@
     "fabric-api": "*"
   },
   "suggests": {
-    "another-mod": "*"
+    "chatpatches": "8.0-alpha.8"
+  },
+  "breaks": {
+    "chatpatches": "<8.0-alpha.8"
   },
   "custom": {
     "modmenu": {

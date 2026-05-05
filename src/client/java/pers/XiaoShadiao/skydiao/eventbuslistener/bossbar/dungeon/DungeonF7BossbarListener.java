@@ -247,6 +247,8 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     private void onClientTick(Minecraft mc) {
         if(mc.player == null || mc.level == null || /*isInMasterDungeonFloor() || */!isInCorrectDungeon()) return;
 
+        masterFloorFlag |= isInMasterDungeonFloor();
+
         MixinBossbarEventGetter bossbarEventGetter = (MixinBossbarEventGetter) mc.gui.getBossOverlay();
         boolean[] flag = new boolean[] {false};
         bossbarEventGetter.getEvents().forEach((uuid, bossEvent) -> {

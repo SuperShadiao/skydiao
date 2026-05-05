@@ -52,6 +52,14 @@ public class MusicPlayerScreen extends Screen {
         super(Component.literal("小沙雕点歌台"));
     }
 
+    private static double scroll;
+
+    @Override
+    public void onClose() {
+        scroll = musicList.scrollAmount();
+        super.onClose();
+    }
+
     @Override
     protected void init() {
         loadMusicFromFolder();
@@ -100,8 +108,9 @@ public class MusicPlayerScreen extends Screen {
         });
 
         linearLayout.setX(width / 2);
-
         musicList = new MusicList();
+        musicList.setScrollAmount(scroll);
+
         this.layout.addToContents(musicList);
         this.layout.addTitleHeader(this.title, this.font);
         this.layout.visitWidgets(abstractWidget -> {

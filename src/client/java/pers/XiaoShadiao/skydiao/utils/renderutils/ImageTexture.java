@@ -25,7 +25,7 @@ public class ImageTexture extends SimpleTexture {
 
     @Override
     public @NotNull TextureContents loadContents(ResourceManager resourceManager) throws IOException {
-        if (cache == null) {
+        if (cache == null || cache.image().getPointer() == 0) {
             cache = load(bytes);
         }
         return cache;

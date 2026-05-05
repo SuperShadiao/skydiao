@@ -1,5 +1,7 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
@@ -11,8 +13,11 @@ import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.loader.api.FabricLoader;
+import net.hypixel.modapi.HypixelModAPI;
 import net.hypixel.modapi.packet.ClientboundHypixelPacket;
+import net.hypixel.modapi.packet.impl.clientbound.ClientboundPartyInfoPacket;
 import net.hypixel.modapi.packet.impl.clientbound.event.ClientboundLocationPacket;
+import net.hypixel.modapi.packet.impl.serverbound.ServerboundPartyInfoPacket;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -36,6 +41,7 @@ import pers.XiaoShadiao.skydiao.config.option.BooleanConfigOption;
 import pers.XiaoShadiao.skydiao.config.option.ConfigOption;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
+import pers.XiaoShadiao.skydiao.irc.ChatPacket;
 import pers.XiaoShadiao.skydiao.screen.mircosoftaccount.AccountSelectScreen;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.PlayerThread;
@@ -192,12 +198,32 @@ public class BasicListener extends AbstractListener {
 
     private void onHypixelPacket(ClientboundHypixelPacket packet) {
         if(packet instanceof ClientboundLocationPacket) StatusManager.updateStatusByHypixelPacket((ClientboundLocationPacket) packet);
+        else if(packet instanceof ClientboundPartyInfoPacket partyInfoPacket) {
+            JsonArray ja = new JsonArray();
+            for (Map.Entry<UUID, ClientboundPartyInfoPacket.PartyMember> entry : partyInfoPacket.getMemberMap().entrySet()) {
+                JsonObject jo = new JsonObject();
+                jo.addProperty("uuid", entry.getValue().getUuid().toString().replace("-", ""));
+                jo.addProperty("role", entry.getValue().getRole().ordinal());
+                ja.add(jo);
+            }
+            JsonObject jo = new JsonObject();
+            jo.addProperty("inParty", partyInfoPacket.isInParty());
+            jo.add("members", ja);
+
+            ChatPacket cp = new ChatPacket();
+            cp.packetType = "hyp_party";
+            cp.message = jo.toString();
+            cp.initSender();
+            ChatClientManager.trySendOrWarning(cp);
+        }
     }
 
     private void onWorldChange(Minecraft mc, ClientLevel clientLevel) {
         ChatClientManager.getChatClient();
         reloadCustomCape();
         InputSimulator.unpressAllKey();
+
+        HypixelModAPI.getInstance().sendPacket(new ServerboundPartyInfoPacket());
     }
 
     private int afkHoldTick;
