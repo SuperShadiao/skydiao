@@ -261,7 +261,7 @@ public class RenderUtils {
     }
 
     public static void renderTrace(WorldRender worldRender, Vec3 pos, float r, float g, float b, float a) {
-        renderTrace(worldRender, pos.x + 0.5, pos.y, pos.z + 0.5, r, g, b, a);
+        renderTrace(worldRender, pos.x(), pos.y() + 0.5, pos.z(), r, g, b, a);
     }
 
     public static void renderTrace(WorldRender worldRender, Entity entity, float r, float g, float b, float a) {

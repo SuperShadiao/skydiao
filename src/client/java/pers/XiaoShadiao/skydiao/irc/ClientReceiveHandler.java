@@ -50,7 +50,10 @@ public class ClientReceiveHandler {
                 ToolList.printChatMessage(component.setStyle(style));
                 break;
             case "hyp_party":
-                HypixelModAPI.getInstance().sendPacket(new ServerboundPartyInfoPacket());
+                ToolList.getInstance().updatePartyInfo();
+                break;
+            case "slayer_together":
+                AbstractListener.slayerTogetherListener.onSlayerTogetherPacket(packet);
                 break;
         }
     }

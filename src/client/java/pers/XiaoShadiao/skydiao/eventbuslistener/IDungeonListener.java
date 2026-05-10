@@ -2,6 +2,8 @@ package pers.XiaoShadiao.skydiao.eventbuslistener;
 
 import net.minecraft.network.chat.Component;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
+import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
@@ -32,6 +34,12 @@ public interface IDungeonListener {
             }
             if(ToolList.mc.player != null && !message.trim().isEmpty() && !isSoloingDungeon()) ToolList.mc.player.connection.sendChat((ToolList.getInstance().isDevEnvironment() ? "/achat" : "/pc") + " [SkyDiao] " + message);
         }
+    }
+
+    public default boolean addStarRailNotification(String msg, StarRailNotification.Type type) {
+        if(!ConfigManager.bossbar.getValue()) return false;
+        XSDHUD.starRailNotification.updateMessage(msg, type);
+        return true;
     }
 
 }

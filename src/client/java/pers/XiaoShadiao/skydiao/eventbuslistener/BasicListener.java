@@ -223,7 +223,7 @@ public class BasicListener extends AbstractListener {
         reloadCustomCape();
         InputSimulator.unpressAllKey();
 
-        HypixelModAPI.getInstance().sendPacket(new ServerboundPartyInfoPacket());
+        ToolList.getInstance().updatePartyInfo();
     }
 
     private int afkHoldTick;

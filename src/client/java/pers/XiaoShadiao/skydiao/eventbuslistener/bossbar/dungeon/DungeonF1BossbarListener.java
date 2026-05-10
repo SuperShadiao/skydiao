@@ -39,7 +39,7 @@ public class DungeonF1BossbarListener extends AbstractDungeonBossbar {
 
     private void onChat(Component component, boolean b) {
         String message = ToolList.getInstance().deleteColorCode(component.getString());
-        if(message.contains("[BOSS] Bonzo: Sike")) {
+        if(message.contains("[BOSS] Bonzo: Oh I'm dead!")) {
             stage2EnterFlag = true;
         }
     }

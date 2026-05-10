@@ -37,7 +37,10 @@
     "mining": "挖矿类",
     "dungeon": "地牢",
     "foraging": "林业类",
-    "rift": "Rift类"
+    "rift": "Rift类",
+    "combat": "战斗类",
+    "farming": "农业类",
+    "fishing": "钓鱼类"
   },
   "config": {
     "0": "§c关",
@@ -785,6 +788,30 @@
     "dungeonspiritmasktriggered": {
       "configname": "§e地牢F7 Spirit Mask触发消息",
       "description": "§e地牢F7 Spirit Mask触发消息, 留空则禁用该消息"
+    },
+    "slayertogether": {
+      "configname": "§eSlayer Together",
+      "description": "§e允许你与其他Skydiao用户一起共享通知(Mini)Boss的生成, 适用于Slayer Carry以及Share Loot!"
+    },
+    "resurrectionitemtriggeredtitle": {
+      "configname": "§e复活物品触发标题",
+      "description": "§e当Bonzo, Spirit等物品被触发时, 显示一个标题"
+    },
+    "hubratesp": {
+      "configname": "§eHub老鼠显示",
+      "description": "§e显示Hub的老鼠"
+    },
+    "dungeonautoclosechest": {
+      "configname": "§e地牢自动关闭箱子",
+      "description": "§e找秘密时如果箱子内是Decoy, Trap等常见物品, 则自动关闭箱子页面"
+    },
+    "dungeonpuzzlehelper": {
+      "configname": "§e地牢Puzzle助手",
+      "description": "§e在地牢中帮你解决一些Puzzle"
+    },
+    "hotspotrender": {
+      "configname": "§e热点助手",
+      "description": "§e标记热点位置, 并在热点位置变更时通知你"
     },
     "about1": "§e小沙雕的QQ: 3381949033",
     "about2": "§e小沙雕の狗窝: https://xiaoshadiao.club/qqg",

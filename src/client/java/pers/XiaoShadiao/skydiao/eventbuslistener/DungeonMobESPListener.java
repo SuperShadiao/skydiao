@@ -26,10 +26,11 @@ public class DungeonMobESPListener extends AbstractListener {
     }
 
     private void onLastRender(WorldRenderContext context) {
-        if (ConfigManager.dungeonRenderDangerousEnemy.getValue() && mc.level != null && StatusManager.get().isInDungeon()) {
+        if (ConfigManager.dungeonRenderDangerousEnemy.getValue() && mc.player != null && mc.level != null && StatusManager.get().isInDungeon()) {
             RenderUtils.WorldRender worldRender = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_FILL);
             RenderUtils.WorldRender worldRender2 = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_LINE);
             for(Entity entity : mc.level.entitiesForRendering()) {
+                if(entity.distanceTo(mc.player) > 30) continue;
                 ArmorStand armorStand = e2AMappingListener.getArmorStand(entity.asLivingEntity());
                 if (armorStand != null) {
                     String asName = ToolList.getInstance().deleteColorCode(armorStand.getName().getString());

@@ -1,6 +1,9 @@
 package pers.XiaoShadiao.skydiao.utils;
 
 import net.fabricmc.loader.api.FabricLoader;
+import net.hypixel.modapi.HypixelModAPI;
+import net.hypixel.modapi.fabric.FabricModAPI;
+import net.hypixel.modapi.packet.impl.serverbound.ServerboundPartyInfoPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
@@ -477,6 +480,10 @@ public class ToolList {
 
     public String tryGetSkyblockItemId(ItemStack itemStack) {
         return itemStack.getComponents().getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getStringOr("id", "");
+    }
+
+    public void updatePartyInfo() {
+        HypixelModAPI.getInstance().sendPacket(new ServerboundPartyInfoPacket());
     }
 
     public record TPInfo(PositionMoveRotation from, PositionMoveRotation to) { }

@@ -155,6 +155,7 @@ public class ChatClient extends Thread {
         if(AbstractListener.basicListener.isAFK()) sender.sendAFK(true);
 
         sender.sendOnlineInfo();
+        ToolList.getInstance().updatePartyInfo();
     }
 
     public void flagHeartbeat() {

@@ -30,8 +30,8 @@ public class ConfigManager {
     public static final BooleanConfigOption autoHarp = new BooleanConfigOption("skyblockautoplayharp", false);
 
     public static final BooleanConfigOption bossbar = new BooleanConfigOption("bossbar", true);
-    public static final BooleanConfigOption bossbarShowHealth = new BooleanConfigOption("bossbarshowhealth", false);
-    public static final BooleanConfigOption bossbarAddTargetEntity = new BooleanConfigOption("bossbaraddtargetentity", false);
+    public static final BooleanConfigOption bossbarShowHealth = new BooleanConfigOption("bossbarshowhealth", true);
+    public static final BooleanConfigOption bossbarAddTargetEntity = new BooleanConfigOption("bossbaraddtargetentity", true);
     public static final IntConfigOption bossbarDisplayLimit = new IntConfigOption("bossbardisplaylimit", 3);
     public static final BooleanConfigOption noblind = new BooleanConfigOption("removeblindnessrender", false);
     public static final BooleanConfigOption nosuffoverlay = new BooleanConfigOption("nosuffoverlay", false);
@@ -62,7 +62,10 @@ public class ConfigManager {
     public static final BooleanConfigOption galateashulker = new BooleanConfigOption("galateashulker", true);
     public static final IntConfigOption dungeonf7autotermclickdelay = new IntConfigOption("dungeonf7autotermclickdelay", 270);
     public static final BooleanConfigOption rifttimegunhelper = new BooleanConfigOption("rifttimegunhelper", false);
-
+    public static final BooleanConfigOption slayerTogether = new BooleanConfigOption("slayertogether", true);
+    public static final BooleanConfigOption resurrectionItemTriggeredTitle = new BooleanConfigOption("resurrectionitemtriggeredtitle", true);
+    public static final BooleanConfigOption hubratesp = new BooleanConfigOption("hubratesp", true);
+    public static final BooleanConfigOption hotspotrender = new BooleanConfigOption("hotspotrender", true);
 
     public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
@@ -80,6 +83,8 @@ public class ConfigManager {
     public static final StringConfigOption dungeonBonzoTriggered = new StringConfigOption("dungeonbonzotriggered", "复活甲爆炸了。(Bonzo)");
     public static final StringConfigOption dungeonSpiritMaskTriggered = new StringConfigOption("dungeonspiritmasktriggered", "复活甲爆炸了。(Spirit)");
     public static final StringConfigOption dungeonPhoenixTriggered = new StringConfigOption("dungeonphoenixtriggered", "复活甲爆炸了。(Phoenix)");
+    public static final BooleanConfigOption dungeonAutoCloseChest = new BooleanConfigOption("dungeonautoclosechest", false);
+    public static final BooleanConfigOption dungeonPuzzleHelper = new BooleanConfigOption("dungeonpuzzlehelper", true);
 
     public static final StringConfigOption[] dungeonf7msgbotsimonsays = {
             dungeonf7msgbotsimonsays1,
@@ -109,8 +114,11 @@ public class ConfigManager {
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
             Map.entry("自动类", List.of(autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, autoDojo, autoDojoControlPredictDist, skyblockriftautodanceroom)),
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, skyblockSafeIsland)),
+            Map.entry("combat", List.of(slayerTogether)),
             Map.entry("foraging", List.of(galateashulker)),
-            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered)),
+            Map.entry("farming", List.of(hubratesp)),
+            Map.entry("fishing", List.of(hotspotrender)),
+            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered)),
             Map.entry("rift", List.of(rifttimegunhelper)),
             Map.entry("界面类", List.of(bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, dyingtip, noblind, nosuffoverlay, fireOverlay))
     );
@@ -131,12 +139,12 @@ public class ConfigManager {
         JsonObject jo = new JsonObject();
         for (ConfigOption<?, ?> option : optionList) {
             Object value = option.getValue();
-            if (value instanceof Boolean) {
-                jo.addProperty(option.getName(), (Boolean) value);
-            } else if (value instanceof Integer) {
-                jo.addProperty(option.getName(), (Integer) value);
-            } else if (value instanceof String) {
-                jo.addProperty(option.getName(), (String) value);
+            if (value instanceof Boolean value2) {
+                jo.addProperty(option.getName(), value2);
+            } else if (value instanceof Integer value2) {
+                jo.addProperty(option.getName(), value2);
+            } else if (value instanceof String value2) {
+                jo.addProperty(option.getName(), value2);
             }
         }
         try {

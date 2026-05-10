@@ -11,12 +11,6 @@ import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 public abstract class AbstractBossbarListener extends AbstractListener implements CustomBossbar.IStarRailBossBar {
 
-    protected final boolean addStarRailNotification(String msg, StarRailNotification.Type type) {
-        if(!ConfigManager.bossbar.getValue()) return false;
-        XSDHUD.starRailNotification.updateMessage(msg, type);
-        return true;
-    }
-
     protected final void setCurrentStarRailBossBar(CustomBossbar.IStarRailBossBar bossbar) {
         XSDHUD.customBossbar.loadStarRailBossBar(bossbar);
     }

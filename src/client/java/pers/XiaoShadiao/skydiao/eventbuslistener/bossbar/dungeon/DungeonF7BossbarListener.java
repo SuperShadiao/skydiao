@@ -235,7 +235,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     }
 
     private boolean onMouseClick(long windowsHandle, MouseButtonInfo mouseButtonInfo, int pressState) {
-        if(mc.player == null || mc.level == null /*|| isInMasterDungeonFloor() */|| !isInCorrectDungeon()) return false;
+        if(mc.player == null || mc.level == null /*|| isInMasterDungeonFloor() */|| (!passWatcherFlag && !isInCorrectDungeon())) return false;
         if(mouseButtonInfo.button() == 1 && pressState == 1 && mc.hitResult instanceof BlockHitResult blockHitResult && blockHitResult.getType() == HitResult.Type.BLOCK && blockHitResult.getBlockPos().equals(simonSaysStartButton)) {
             sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotsimonsaysstart.getValue());
             targetsimonSaysButton.clear();
@@ -245,7 +245,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     }
 
     private void onClientTick(Minecraft mc) {
-        if(mc.player == null || mc.level == null || /*isInMasterDungeonFloor() || */!isInCorrectDungeon()) return;
+        if(mc.player == null || mc.level == null || /*isInMasterDungeonFloor() || */(!passWatcherFlag && !isInCorrectDungeon())) return;
 
         masterFloorFlag |= isInMasterDungeonFloor();
 
