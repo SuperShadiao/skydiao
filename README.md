@@ -23,3 +23,7 @@
 若要使用本仓库的代码, 请**注明出处**
 
 注明方式: https://5ixsd.top/qqg 和 https://5ixsd.top/skydiao 两个链接二选一备注即可
+
+# 使用的组件或第三方库
+- [Hypixel Fabric Mod API](https://5ixsd.top/hmfapi)
+- jlayer
