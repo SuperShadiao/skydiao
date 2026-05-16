@@ -62,17 +62,8 @@ public class ModMenuModApi implements ModMenuApi {
         ModMenuApi.super.attachModpackBadges(consumer);
     }
 
-    private Thread thread;
-
     private AutoUpdater u() {
-        if(thread == null) {
-            thread = new Thread(() -> {
-                do {
-                    updater = AutoUpdater.checkUpdate();
-                } while(updater == null);
-            });
-            thread.start();
-        }
+        if(updater == null) updater = AutoUpdater.checkUpdate();
         return updater == null ? AutoUpdater.emptyInstance : updater;
     }
 }

@@ -27,3 +27,4 @@
 # 使用的组件或第三方库
 - [Hypixel Fabric Mod API](https://5ixsd.top/hmfapi)
 - jlayer
+- [MrXiaoM Bilibili Open Live](https://5ixsd.top/mxmbol)

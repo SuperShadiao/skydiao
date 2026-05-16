@@ -18,6 +18,7 @@ public class ResurrectionItemListener extends AbstractListener implements IDunge
     @Override
     public void registerListeners() {
         ClientReceiveMessageEvents.GAME.register(this::onChat);
+        ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
     }
 
     private void onChat(Component component, boolean b) {

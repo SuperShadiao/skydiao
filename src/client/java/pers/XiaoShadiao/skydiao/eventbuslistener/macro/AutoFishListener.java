@@ -38,6 +38,10 @@ public class AutoFishListener extends AbstractListener implements IMacro {
     private final AntiAFKThread antiAFKRotation = new AntiAFKThread(AntiAFKThread.ROTATION);
     private int catchFishCount;
 
+    private boolean isEmergencyStopped;
+    private int fishHookOnGroundTick;
+    private int fishHookOnGroundCount;
+
     class AntiAFKThread extends Thread {
 
         public static final int
@@ -167,7 +171,13 @@ public class AutoFishListener extends AbstractListener implements IMacro {
 
     private void executeThread() {
 
+        isReady = false;
         isThreadWorking = true;
+        if (isEmergencyStopped) {
+            ensureHookUnsummoned();
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c当前自动钓鱼处于急停状态, 脱离AFK状态后将自动重新启用"));
+            return;
+        }
         if (!ConfigManager.autoFish.getValue() || InputSimulator.isInventoryOpen() || "kuudra".equals(StatusManager.get().getMode())) return;
         if (ToolList.getInstance().random.nextInt(3) == 1) {
             if(ConfigManager.autoFishAutoJump.getValue()) antiAFKJump.interrupt();
@@ -184,6 +194,7 @@ public class AutoFishListener extends AbstractListener implements IMacro {
         while(true) {
             try {
                 Thread.sleep(300);
+                Thread.sleep(ConfigManager.autofishrethrowhookdelay.getValue());
                 break;
             } catch (InterruptedException e) {
 
@@ -271,7 +282,18 @@ public class AutoFishListener extends AbstractListener implements IMacro {
     }
 
     private void ensureHookSummoned() {
-        while(isHoldingFishRod() && mc.player.fishing == null) {
+        while(isHoldingFishRod() && mc.player != null && mc.player.fishing == null) {
+            InputSimulator.singleRightClick();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+
+            }
+        }
+    }
+
+    private void ensureHookUnsummoned() {
+        while(isHoldingFishRod() && mc.player != null && mc.player.fishing != null) {
             InputSimulator.singleRightClick();
             try {
                 Thread.sleep(1000);
@@ -317,11 +339,29 @@ public class AutoFishListener extends AbstractListener implements IMacro {
                     if (lastHookEntityId != armorStand.getId()) {
                         lastHookEntityId = armorStand.getId();
                         triggerFishHook();
+                        fishHookOnGroundTick = 0;
+                        fishHookOnGroundCount = 0;
                         return;
                     }
                 }
             }
         }
+
+        if(mc.player.fishing.onGround()) {
+            fishHookOnGroundTick++;
+            if(fishHookOnGroundTick > 60) {
+                fishHookOnGroundTick = 0;
+                fishHookOnGroundCount++;
+                if(fishHookOnGroundCount > 3) {
+                    fishHookOnGroundCount = 0;
+                    ToolList.printChatMessage(Component.literal("§a[小沙雕] §c警告: 当前鱼钩未能成功甩入水中, 已进入急停状态!"));
+                    isEmergencyStopped = true;
+                }
+                triggerFishHook();
+            }
+        }
+
+        isEmergencyStopped &= basicListener.isAFK();
     }
 
     private boolean isReady;
@@ -344,6 +384,8 @@ public class AutoFishListener extends AbstractListener implements IMacro {
                     short y = movePacket.getYa();
                     if(y > 0) isReady = true; else if(isReady && y < -300) {
                         isReady = false;
+                        fishHookOnGroundTick = 0;
+                        fishHookOnGroundCount = 0;
                         triggerFishHook();
                     }
                 }
@@ -360,7 +402,9 @@ public class AutoFishListener extends AbstractListener implements IMacro {
 
     @Override
     public boolean onMacroCheck(PositionInfo beforeTP, PositionInfo afterTP) {
-        return mc.player != null && mc.player.fishing == null;
+        boolean flag = mc.player != null && mc.player.fishing == null;
+        if(flag) isEmergencyStopped = true;
+        return flag;
     }
 
     @Override

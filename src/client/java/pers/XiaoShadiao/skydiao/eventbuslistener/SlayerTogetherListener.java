@@ -34,6 +34,7 @@ public class SlayerTogetherListener extends AbstractListener {
     @Override
     public void registerListeners() {
         ClientReceiveMessageEvents.GAME.register(this::onChat);
+        ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
         ClientTickEvents.START_CLIENT_TICK.register(this::onStartClientTick);
         WorldRenderEvents.END_MAIN.register(this::onLastRender);
     }

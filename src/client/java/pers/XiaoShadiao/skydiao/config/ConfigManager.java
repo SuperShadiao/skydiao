@@ -1,9 +1,14 @@
 package pers.XiaoShadiao.skydiao.config;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.apache.commons.io.FileUtils;
 import pers.XiaoShadiao.skydiao.config.option.*;
+import pers.XiaoShadiao.skydiao.eventbuslistener.bilibili.BLiveListener;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
 
@@ -20,6 +25,27 @@ import java.util.stream.Collectors;
 public class ConfigManager {
     public static final File config_folder = Paths.get(ToolList.mc.gameDirectory.getPath(), "config", "小沙雕_config", "skydiao").toFile();
     public static final File configFile = new File(config_folder, "config.json");
+
+    public static final File configResetFlag = new File(config_folder, "configResetFlag.json");
+
+    public static final BooleanConfigOption blivelistener = new BooleanConfigOption("blivelistener", false) {
+        @Override
+        public void setValue(Boolean value) {
+            if(value) {
+                BLiveListener.launch();
+            }
+            super.setValue(value);
+        }
+    };
+    public static final StringConfigOption blivelistenercode = new StringConfigOption("blivelistenercode", "");
+    public static final BooleanConfigOption cooltitle = new BooleanConfigOption("cooltitle", true) {
+        @Override
+        public void setValue(Boolean value) {
+            if(!value) ToolList.mc.updateTitle();
+            super.setValue(value);
+        }
+    };
+    public static final StringConfigOption customTitleText = new StringConfigOption("customtitletext", "");
 
     public static final BooleanConfigOption mineshaftSharing = new BooleanConfigOption("skyblockmineshaftsharing", true);
     public static final SelectConfigOption language = new SelectConfigOption("language", CrowdinI18nManager.fromSystemLanguage().ordinal(), Arrays.stream(CrowdinI18nManager.LangCode.values()).map(v -> v.displayName).toList());
@@ -43,6 +69,7 @@ public class ConfigManager {
     public static final BooleanConfigOption autoFishAutoJump = new BooleanConfigOption("autofishautojump", true).flagAsMacroFeature();
     public static final BooleanConfigOption autoFishAutoMove = new BooleanConfigOption("autofishautomove", false).flagAsMacroFeature();
     public static final BooleanConfigOption autoFishAutoRotation = new BooleanConfigOption("autofishautorotation", true).flagAsMacroFeature();
+    public static final IntConfigOption autofishrethrowhookdelay = new TimeDelayOption("autofishrethrowhookdelay", 0).flagAsMacroFeature();
     public static final BooleanConfigOption pfAllowBreak = new BooleanConfigOption("pathfinderallowbreak", false);
     public static final BooleanConfigOption pfAllowPlace = new BooleanConfigOption("pathfinderallowplace", false);
     public static final BooleanConfigOption pfStopWhenTP = new BooleanConfigOption("pathfinderstopwhentp", false);
@@ -60,7 +87,7 @@ public class ConfigManager {
     public static final BooleanConfigOption skyblockriftautodanceroom = new BooleanConfigOption("skyblockriftautodanceroom", false);
     public static final BooleanConfigOption mineshaftHelper = new BooleanConfigOption("mineshafthelper", true);
     public static final BooleanConfigOption galateashulker = new BooleanConfigOption("galateashulker", true);
-    public static final IntConfigOption dungeonf7autotermclickdelay = new IntConfigOption("dungeonf7autotermclickdelay", 270);
+    public static final TimeDelayOption dungeonf7autotermclickdelay = new TimeDelayOption("dungeonf7autotermclickdelay", 270);
     public static final BooleanConfigOption rifttimegunhelper = new BooleanConfigOption("rifttimegunhelper", false);
     public static final BooleanConfigOption slayerTogether = new BooleanConfigOption("slayertogether", true);
     public static final BooleanConfigOption resurrectionItemTriggeredTitle = new BooleanConfigOption("resurrectionitemtriggeredtitle", true);
@@ -109,10 +136,10 @@ public class ConfigManager {
     public static final IntConfigOption xsdmusicvolume = new IntConfigOption("xsdmusicvolume", 100);
 
     public static final List<Map.Entry<String, List<ConfigOption<?, ?>>>> categories = List.of(
-            Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip)),
-            Map.entry("工具类", List.of(inventoryFilter, chatbutton, skydiaocustomcape)),
+            Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip, cooltitle, customTitleText)),
+            Map.entry("工具类", List.of(inventoryFilter, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
-            Map.entry("自动类", List.of(autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, autoDojo, autoDojoControlPredictDist, skyblockriftautodanceroom)),
+            Map.entry("自动类", List.of(autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, autofishrethrowhookdelay, autoDojo, autoDojoControlPredictDist, skyblockriftautodanceroom)),
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, skyblockSafeIsland)),
             Map.entry("combat", List.of(slayerTogether)),
             Map.entry("foraging", List.of(galateashulker)),
@@ -154,6 +181,10 @@ public class ConfigManager {
         }
     }
 
+    private static final Int2ObjectMap<List<ConfigOption<?, ?>>> tryToResetToDefaultMap = Int2ObjectMap.ofEntries(
+            Int2ObjectMap.entry(0, List.of(bossbar, bossbarShowHealth, bossbarAddTargetEntity))
+    );
+
     static {
         readConfig();
     }
@@ -178,6 +209,9 @@ public class ConfigManager {
                     }
                 }
             }
+            if(resetToDefault()) {
+                saveConfig();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -190,6 +224,41 @@ public class ConfigManager {
         capeFolder = new File(config_folder, "customcape");
         capeFolder.mkdirs();
         capeFile = new File(capeFolder, "cape.png");
+    }
+
+    private static boolean resetToDefault() {
+        JsonArray ja;
+        try {
+            if(!configResetFlag.exists()) {
+                configResetFlag.createNewFile();
+                ja = new JsonArray();
+            } else {
+                ja = JsonParser.parseString(FileUtils.readFileToString(configResetFlag, StandardCharsets.UTF_8)).getAsJsonArray();
+            }
+            for (JsonElement je : ja) {
+                je.getAsInt();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            ja = new JsonArray();
+        }
+
+        Int2ObjectMap<List<ConfigOption<?, ?>>> temp = new Int2ObjectOpenHashMap<>(tryToResetToDefaultMap);
+        for (JsonElement je : ja) {
+            temp.remove(je.getAsInt());
+        }
+        boolean flag = false;
+        for (Int2ObjectMap.Entry<List<ConfigOption<?, ?>>> entry : temp.int2ObjectEntrySet()) {
+            flag = true;
+            ja.add(entry.getIntKey());
+            entry.getValue().forEach(ConfigOption::resetToDefault);
+        }
+        try {
+            FileUtils.writeStringToFile(configResetFlag, ja.toString(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return flag;
     }
 
 }

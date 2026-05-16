@@ -59,6 +59,7 @@ public class DungeonF6BossbarListener extends AbstractDungeonBossbar {
     public void registerListeners() {
         ClientTickEvents.START_CLIENT_TICK.register(this::onClientTick);
         ClientReceiveMessageEvents.GAME.register(this::onChat);
+        ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
     }
 
     private void onChat(Component component, boolean b) {
@@ -238,7 +239,7 @@ public class DungeonF6BossbarListener extends AbstractDungeonBossbar {
 
     @Override
     public boolean shouldNotRenderOtherBoss(LivingEntity e) {
-        return e instanceof RemotePlayer;
+        return e instanceof RemotePlayer && e.getName().getString().contains("Terracotta");
     }
 
     @Override

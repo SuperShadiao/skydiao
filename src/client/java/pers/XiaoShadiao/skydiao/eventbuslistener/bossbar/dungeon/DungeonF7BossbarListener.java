@@ -192,7 +192,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
     @Override
     public boolean shouldNotRenderOtherBoss(LivingEntity e) {
-        boolean flag1 = e instanceof WitherBoss || e instanceof EnderDragon;
+        boolean flag1 = e instanceof WitherBoss;
         if(flag1) return true;
         boolean flag2 = e.getHealth() <= 0;
         if(flag2) return true;
@@ -201,7 +201,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
     @Override
     public boolean shouldXRayBoss() {
-        return true;
+        return currentStage != 5;
     }
 
     private final BlockPos simonSaysStartButton = new BlockPos(110, 121, 91);
@@ -226,6 +226,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         ClientTickEvents.START_CLIENT_TICK.register(this::onClientTick);
         ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register(this::onWorldUnload);
         ClientReceiveMessageEvents.GAME.register(this::onChat);
+        ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
         CustomFabricEvents.MOUSE_BUTTON_EVENT.register(this::onMouseClick);
         ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register((a,b) -> {

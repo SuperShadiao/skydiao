@@ -44,6 +44,7 @@ public abstract class AbstractListener extends Thread {
     public static final DungeonAutoCloseChest dungeonAutoCloseChest = new DungeonAutoCloseChest();
     public static final DungeonSomePuzzleSolverListener dungeonSomePuzzleSolverListener = new DungeonSomePuzzleSolverListener();
     public static final FishingHotSpotListener fishingHotSpotListener = new FishingHotSpotListener();
+    public static final TitleChanger titleChanger = new TitleChanger();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();

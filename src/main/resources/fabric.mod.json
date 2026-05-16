@@ -24,6 +24,9 @@
     ],
     "modmenu": [
       "pers.XiaoShadiao.skydiao.adapters.ModMenuModApi"
+    ],
+    "preLaunch": [
+      "pers.XiaoShadiao.skydiao.SkyDiaoPreLaunch"
     ]
   },
   "mixins": [
@@ -53,10 +56,5 @@
       },
       "update_checker": true
     }
-  },
-  "jars": [
-    {
-      "file": "lib/jlayer-1.0.1.jar"
-    }
-  ]
+  }
 }

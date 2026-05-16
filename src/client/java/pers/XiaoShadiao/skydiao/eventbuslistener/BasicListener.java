@@ -31,14 +31,17 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.PlayerSkin;
 import org.apache.commons.io.FileUtils;
+import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.config.option.BooleanConfigOption;
 import pers.XiaoShadiao.skydiao.config.option.ConfigOption;
+import pers.XiaoShadiao.skydiao.eventbuslistener.bilibili.BLiveListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.irc.ChatPacket;
@@ -60,6 +63,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -91,11 +95,27 @@ public class BasicListener extends AbstractListener {
         ClientPlayConnectionEvents.JOIN.register(this::onJoinServer);
         ClientPlayConnectionEvents.DISCONNECT.register(this::onDisconnect);
         ClientReceiveMessageEvents.GAME.register(this::onChat);
+        ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
+        ClientReceiveMessageEvents.MODIFY_GAME.register(this::onModifyChat);
         WorldRenderEvents.END_MAIN.register(this::onLastRender);
         ClientLifecycleEvents.CLIENT_STARTED.register((mc) -> {
             PlayerThread.createThread();
             MinecraftLogin.checkSessionExpiredAndLogin();
+
+            if (ConfigManager.blivelistener.getValue()) {
+                BLiveListener.launch();
+            }
         });
+    }
+
+    private Component onModifyChat(Component component, boolean b) {
+        if(ToolList.getInstance().random.nextInt(10) == 5 && component.getString().contains("§aGalatea") && component instanceof MutableComponent m) {
+            MutableComponent component1 = Component.literal(m.getString().replace("§aGalatea", "§aGalagame"));
+            component1.getSiblings().forEach(m::append);
+            component1.setStyle(m.getStyle());
+            return component1;
+        }
+        return component;
     }
 
     private void onLastRender(WorldRenderContext context) {
@@ -224,6 +244,9 @@ public class BasicListener extends AbstractListener {
         InputSimulator.unpressAllKey();
 
         ToolList.getInstance().updatePartyInfo();
+        if (ConfigManager.blivelistener.getValue()) {
+            BLiveListener.launch();
+        }
     }
 
     private int afkHoldTick;
@@ -280,6 +303,10 @@ public class BasicListener extends AbstractListener {
                     dependsFeatures.forEach(o -> o.setValue(true));
                 }
             }
+        }
+
+        if (!ConfigManager.blivelistener.getValue() && BLiveListener.isListening()) {
+            BLiveListener.stopListen();
         }
     }
 

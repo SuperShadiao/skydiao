@@ -28,6 +28,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.irc.ChatClient;
 import pers.XiaoShadiao.skydiao.screen.MinecraftCrashedScreen;
 import pers.XiaoShadiao.skydiao.utils.MCThreadDumper;
@@ -235,6 +236,11 @@ public class MixinMinecraft {
             return original.call(instance) || (InputSimulator.isMouseRightHolding && InputSimulator.rightClickDelay == 0 && !InputSimulator.hasRemainRightClick() && !InputSimulator.isInventoryOpen());
         }
         return original.call(instance);
+    }
+
+    @WrapOperation(method = "updateTitle", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;createTitle()Ljava/lang/String;"))
+    public String updateTitle(Minecraft instance, Operation<String> original) {
+        return AbstractListener.titleChanger.updateMCTitle(original.call(instance));
     }
 
     @Inject(method = "startUseItem", at = @At("RETURN"))

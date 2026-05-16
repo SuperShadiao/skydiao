@@ -39,6 +39,7 @@ public class DungeonF2BossbarListener extends AbstractDungeonBossbar {
     public void registerListeners() {
         ClientTickEvents.START_CLIENT_TICK.register(this::onClientTick);
         ClientReceiveMessageEvents.GAME.register(this::onChat);
+        ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
     }
 
     private void onChat(Component component, boolean b) {

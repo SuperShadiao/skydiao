@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.numbers.NumberFormat;
 import net.minecraft.network.chat.numbers.StyledFormat;
 import net.minecraft.network.protocol.Packet;
@@ -33,10 +34,12 @@ import net.minecraft.world.scores.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.system.Platform;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
+import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -697,5 +700,24 @@ public class ToolList {
 
     public List<String> fetchScoreboardLinesNoColor() {
         return fetchScoreboardLines().stream().map(Component::getString).map(this::deleteColorCode).collect(Collectors.toList());
+    }
+
+    public void printComponent(Component component) {
+        if(component instanceof MutableComponent m) {
+            new Consumer<MutableComponent>() {
+                @Override
+                public void accept(MutableComponent c) {
+                    c.getContents().visit(d -> {
+                        System.out.println(d);
+                        return Optional.empty();
+                    });
+                    System.out.println(c.getContents().getClass());
+                    c.getSiblings().forEach(a -> {
+                        if (a instanceof MutableComponent m) accept(m);
+                    });
+                }
+            }.accept(m);
+            System.out.println(m.getString());
+        }
     }
 }

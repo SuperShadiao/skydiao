@@ -46,6 +46,7 @@ public class MineshaftShareListener extends AbstractListener {
     public void registerListeners() {
         ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register(this::worldUnload);
         ClientReceiveMessageEvents.GAME.register(this::onChat);
+        ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
         ClientTickEvents.START_CLIENT_TICK.register(this::onTick);
     }
 

@@ -69,6 +69,7 @@ public class AutoDojo extends AbstractListener implements IMacro {
     @Override
     public void registerListeners() {
         ClientReceiveMessageEvents.GAME.register(this::onChat);
+        ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
         ClientTickEvents.START_CLIENT_TICK.register(this::onStartTick);
         ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register(this::onWorldUnload);

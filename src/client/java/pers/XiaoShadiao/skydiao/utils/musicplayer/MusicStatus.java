@@ -1,15 +1,17 @@
 package pers.XiaoShadiao.skydiao.utils.musicplayer;
 
 import javazoom.jl.decoder.JavaLayerException;
+import javazoom.jl.player.JavaSoundAudioDevice;
 import javazoom.jl.player.advanced.PlaybackEvent;
 import javazoom.jl.player.advanced.PlaybackListener;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
-import pers.XiaoShadiao.skydiao.mixin.client.adapter.musicplayer.MixinJavaSoundAudioDeviceAccessor;
 
 import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.FloatControl.Type;
+import javax.sound.sampled.SourceDataLine;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 
 public class MusicStatus extends PlaybackListener {
     
@@ -77,9 +79,16 @@ public class MusicStatus extends PlaybackListener {
     
     public FloatControl getVolumeCtrl() {
 
-        if(volumeCtrl == null) volumeCtrl = (FloatControl)((MixinJavaSoundAudioDeviceAccessor) player.getCurrentAD())
-                .getSource()
-                .getControl(Type.MASTER_GAIN);
+        if(volumeCtrl == null) {
+            try {
+                JavaSoundAudioDevice currentAD = (JavaSoundAudioDevice) player.getCurrentAD();
+                Field sourceField = currentAD.getClass().getDeclaredField("source");
+                sourceField.setAccessible(true);
+                volumeCtrl = (FloatControl) ((SourceDataLine) sourceField.get(currentAD)).getControl(Type.MASTER_GAIN);
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        }
         if(volumeCtrl == null) throw new RuntimeException("无法获取音量控制器! 请联系小沙雕QQ3381949033或者加入雕の窝" + SkyDiaoModClient.CONST_QQGROUP_MAIN + "处理");
         
         return volumeCtrl;

@@ -33,6 +33,10 @@ public class ConfigOption<T, S extends ConfigOption<T, S>> {
         this.value = value;
     }
 
+    public void resetToDefault() {
+        setValue(getDefaultValue());
+    }
+
     public String getName() {
         return name;
     }

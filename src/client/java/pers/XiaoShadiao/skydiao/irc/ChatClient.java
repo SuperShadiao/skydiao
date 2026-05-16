@@ -96,7 +96,10 @@ public class ChatClient extends Thread {
             sender.setName("HHOnlineChatSender");
             listener.start();
             sender.start();
-            UncaughtExceptionHandler handler = (t, e) -> {};
+            UncaughtExceptionHandler handler = (t, e) -> {
+                log.info("IRC线程" + t.getName() + "发送错误");
+                e.printStackTrace();
+            };
             listener.setUncaughtExceptionHandler(handler);
             sender.setUncaughtExceptionHandler(handler);
 

@@ -43,6 +43,7 @@ public class RiftAutoDanceRoomListener extends AbstractListener {
     public void registerListeners() {
         ClientTickEvents.START_CLIENT_TICK.register(this::onClientStartTick);
         ClientReceiveMessageEvents.GAME.register(this::onChat);
+        ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
     }
 

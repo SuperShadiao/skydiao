@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.HumanoidArm;
+import org.lwjgl.system.Platform;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
 import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
@@ -28,8 +29,22 @@ public class OpenConfigMenuCommand extends BaseRootRunnableCommand {
                 getArgConstantInstance("translate").redirect(HHT_COMMAND.getCommandNode()),
                 getArgConstantInstance("claimreward").then(getArgInstance("index", IntegerArgumentType.integer(0, 2)).executes(this::executeClaimReward)),
                 getArgConstantInstance("editcape").executes(this::executeEditCape),
-                getArgConstantInstance("copyitemnbt").executes(this::executeCopyNBT)
+                getArgConstantInstance("copyitemnbt").executes(this::executeCopyNBT),
+                getArgConstantInstance("getblivelistenercode").executes(this::executeGetCode)
         );
+    }
+
+    private int executeGetCode(CommandContext<FabricClientCommandSource> context) {
+        ToolList.addThreadedTask(() -> {
+            mc.execute(() -> context.getSource().sendFeedback(Component.literal("§c咕→咕→嘎→嘎↓!")));
+            Thread.sleep(2000);
+            mc.execute(() -> context.getSource().sendFeedback(Component.literal("§c咕↓咕↓嘎→嘎↑!!")));
+            Thread.sleep(2000);
+            mc.execute(() -> context.getSource().sendFeedback(Component.literal("§c咕↑咕↑嘎↑嘎↑!!!!")));
+            Util.getPlatform().openUri("https://play-live.bilibili.com/");
+            return null;
+        });
+        return 0;
     }
 
     private int executeCopyNBT(CommandContext<FabricClientCommandSource> context) {

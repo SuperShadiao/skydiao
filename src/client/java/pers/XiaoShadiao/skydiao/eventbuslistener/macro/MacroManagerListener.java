@@ -44,7 +44,6 @@ public class MacroManagerListener extends AbstractListener {
     public void registerListeners() {
         ClientTickEvents.START_CLIENT_TICK.register(this::onStartClientTick);
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
-        ScreenEvents.AFTER_INIT.register(this::afterScreenInit);
 
         Register.execRegister(MacroManagerListener.class, AbstractListener.class, listener -> {
             if(listener instanceof IMacro) {
@@ -53,14 +52,6 @@ public class MacroManagerListener extends AbstractListener {
             }
         });
         macros = Collections.unmodifiableList(macros);
-    }
-
-    private void afterScreenInit(Minecraft mc, Screen screen, int scaledWidth, int scaledHeight) {
-        boolean temp = screen instanceof ChatScreen;
-        if(isChatOpen && !temp) {
-            lastOpenChatTime = System.currentTimeMillis();
-        }
-        isChatOpen = temp;
     }
 
     private boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
@@ -96,6 +87,7 @@ public class MacroManagerListener extends AbstractListener {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
                 }
+
             }
         }, null);
 
@@ -116,6 +108,12 @@ public class MacroManagerListener extends AbstractListener {
             activeMacros.clear();
         }
         while(historyPoses.size() > 30) historyPoses.removeFirst();
+
+        boolean temp = mc.screen instanceof ChatScreen;
+        if(isChatOpen && !temp) {
+            lastOpenChatTime = System.currentTimeMillis();
+        }
+        isChatOpen = temp;
     }
 
     public void addActiveMacro(IMacro macro) {

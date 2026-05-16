@@ -368,6 +368,10 @@ public class ConfigScreen extends Screen {
                         component.append("\n\n");
                         component.append(translate("config.macrofeaturealert"));
                     }
+                    if(option instanceof TimeDelayOption) {
+                        component.append("\n\n");
+                        component.append(translate("config.timedelaydesc"));
+                    }
                     widget.setTooltip(Tooltip.create(component));
                 }
 

@@ -13,7 +13,7 @@ public final class CustomFabricEvents {
 
     private CustomFabricEvents() { throw new UnsupportedOperationException("默认文本"); }
 
-    public static final Event<HypixelPacketEvent> HYPIXEL_PACKET_EVENT = EventFactory.createArrayBacked(HypixelPacketEvent.class, callbacks -> (packet) -> {
+    public static final Event<@NotNull HypixelPacketEvent> HYPIXEL_PACKET_EVENT = EventFactory.createArrayBacked(HypixelPacketEvent.class, callbacks -> (packet) -> {
         for (HypixelPacketEvent callback : callbacks) {
             callback.onPacket(packet);
         }

@@ -87,6 +87,7 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
         ScreenEvents.AFTER_INIT.register(this::afterScreenInit);
         ClientTickEvents.START_CLIENT_TICK.register(this::onClientTick);
         ClientReceiveMessageEvents.GAME.register(this::onChat);
+        ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
     }
 
     private void onChat(Component component, boolean b) {
