@@ -2,13 +2,10 @@ package pers.XiaoShadiao.skydiao.commands;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import pers.XiaoShadiao.skydiao.utils.Register;
-
-import java.lang.reflect.Field;
 
 public interface CommandManager {
 
@@ -19,11 +16,15 @@ public interface CommandManager {
     public static final HHTCommand HHT_COMMAND = new HHTCommand();
     public static final SkydiaoTCommand SKYDIAO_T_COMMAND = new SkydiaoTCommand();
     public static final HHSCCommand HHSC_COMMAND = new HHSCCommand();
-    public static final OpenConfigMenuCommand OPEN_CONFIG_MENU_COMMAND = new OpenConfigMenuCommand();
+    public static final SkydiaoCommand OPEN_CONFIG_MENU_COMMAND = new SkydiaoCommand();
     public static final SkydiaoPFCommand SKYDIAO_PF_COMMAND = new SkydiaoPFCommand();
     public static final HHPFCommand HHPF_COMMAND = new HHPFCommand();
     public static final HHMusicCommand HH_MUSIC_COMMAND = new HHMusicCommand();
     public static final SkydiaoMusicCommand SKYDIAO_MUSIC_COMMAND = new SkydiaoMusicCommand();
+    public static final SkydiaoFarmingScriptCommand SKYDIAO_FARMING_SCRIPT_COMMAND = new SkydiaoFarmingScriptCommand();
+    public static final HHFSCommand HHFS_COMMAND = new HHFSCommand();
+    public static final HHFarmingScriptCommand HH_FARMING_SCRIPT_COMMAND = new HHFarmingScriptCommand();
+    public static final SkydiaoFSCommand SKYDIAO_FS_COMMAND = new SkydiaoFSCommand();
 
     public static void registerCommands() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {

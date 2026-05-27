@@ -14,6 +14,8 @@ public class KeyBindsManager {
     public static final KeyMapping leftAutoClickerSwap = new KeyMapping("key.category.skydiao.leftautoclicker", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
     public static final KeyMapping rightAutoClickerSwap = new KeyMapping("key.category.skydiao.rightautoclicker", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
 
+    public static final KeyMapping toggleFarmingScript = new KeyMapping("key.category.skydiao.togglefarmingscript", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
+
     public static void registerKeyBinds() {
         Register.execRegister(KeyBindsManager.class, KeyMapping.class, KeyBindingHelper::registerKeyBinding);
     }

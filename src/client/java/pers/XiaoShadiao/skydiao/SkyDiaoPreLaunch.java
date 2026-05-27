@@ -209,10 +209,12 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
         }
         try {
             for (CompletableFuture<Boolean> downloadFuture : downloadFutures) {
-                downloadFuture.join();
+                if (!downloadFuture.get()) {
+                    throw new RuntimeException("初次使用SkyDiao，lib库文件下载失败，SkyDiao感到非常生气。请检查网络状态并尝试重启游戏！");
+                }
             }
         } catch (Throwable e) {
-            RuntimeException runtimeException = new RuntimeException("初次使用SkyDiao，lib库文件下载失败，SkyDiao感到非常生气。请检查网络状态！", e);
+            RuntimeException runtimeException = new RuntimeException("初次使用SkyDiao，lib库文件下载失败，SkyDiao感到非常生气。请检查网络状态并尝试重启游戏！", e);
             log.catching(runtimeException);
             throw runtimeException;
         }

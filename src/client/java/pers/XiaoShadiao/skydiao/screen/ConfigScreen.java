@@ -133,7 +133,7 @@ public class ConfigScreen extends Screen {
         List<ConfigTab> list = ConfigManager.categories.stream().map(entry -> new ConfigTab(entry.getKey(), entry.getValue())).collect(Collectors.toList());
         list.add(new SearchConfigTab());
         if(ToolList.getInstance().isDevEnvironment()) {
-            List<ConfigOption<?, ?>> test = new ArrayList<>();
+            List<ConfigOption<?>> test = new ArrayList<>();
             for (int i = 0; i < 50; i++) {
                 switch(ToolList.getInstance().random.nextInt(5)) {
                     case 0:
@@ -268,10 +268,10 @@ public class ConfigScreen extends Screen {
 
 
     public class ConfigTab extends GridLayoutTab {
-        public final List<ConfigOption<?, ?>> configOptions;
+        public final List<ConfigOption<?>> configOptions;
         public ConfigList configList;
 
-        public ConfigTab(String categoryName, List<ConfigOption<?, ?>> configOptions) {
+        public ConfigTab(String categoryName, List<ConfigOption<?>> configOptions) {
             super(Component.literal(translate("configcategory." + categoryName)));
             this.configOptions = configOptions;
             configList = getListInstance();
@@ -297,7 +297,7 @@ public class ConfigScreen extends Screen {
 
             public ConfigList(ConfigTab tab) {
                 super(Minecraft.getInstance(), ConfigScreen.this.width, ConfigScreen.this.layout.getContentHeight(), ConfigScreen.this.layout.getHeaderHeight(), 20);
-                for (ConfigOption<?, ?> configOption : configOptions) {
+                for (ConfigOption<?> configOption : configOptions) {
                     addEntry(new ConfigEntry(configOption, tab));
                 }
                 this.tab = tab;
@@ -309,10 +309,10 @@ public class ConfigScreen extends Screen {
             }
 
             public static class ConfigEntry extends AbstractConfigEntry {
-                private final ConfigOption<?, ?> option;
+                private final ConfigOption<?> option;
                 private final AbstractWidget widget;
                 private final ConfigTab tab;
-                public ConfigEntry(ConfigOption<?, ?> option, ConfigTab tab) {
+                public ConfigEntry(ConfigOption<?> option, ConfigTab tab) {
                     this.option = option;
                     this.tab = tab;
                     this.widget = switch(option) {

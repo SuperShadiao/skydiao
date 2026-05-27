@@ -5,7 +5,7 @@ import java.util.List;
 
 import static pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager.translate;
 
-public class ConfigOption<T, S extends ConfigOption<T, S>> {
+public class ConfigOption<T> {
 
     private boolean isMacroFeature;
     protected ModDepends requiredMod;
@@ -74,18 +74,18 @@ public class ConfigOption<T, S extends ConfigOption<T, S>> {
         return requiredMod;
     }
 
-    public S flagAsMacroFeature() {
+    public <S> S flagAsMacroFeature() {
         isMacroFeature = true;
         return cast(this);
     }
 
-    public S setRequiredMod(ModDepends requiredMod) {
+    public <S> S setRequiredMod(ModDepends requiredMod) {
         this.requiredMod = requiredMod;
         return cast(this);
     }
 
     @SuppressWarnings("unchecked")
-    private S cast(ConfigOption<T, S> i) {
+    private <S> S cast(ConfigOption<T> i) {
         return (S) i;
     }
 

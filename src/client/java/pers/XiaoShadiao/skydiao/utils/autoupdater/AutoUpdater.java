@@ -178,7 +178,7 @@ public class AutoUpdater {
                     throw new RuntimeException("Updater download failed!", eee);
                 }
 
-                newFile = new File(ToolList.mc.gameDirectory.getAbsolutePath() + "\\skydiao-" + up.newVer + ".jar");
+                newFile = new File(ToolList.mc.gameDirectory.getAbsolutePath(), "skydiao-" + up.newVer + ".jar");
                 log.info("新文件 -> " + newFile.getAbsolutePath());
 
                 byte[] bytes = is.readAllBytes();

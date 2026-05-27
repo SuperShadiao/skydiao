@@ -17,7 +17,9 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.Items;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractFishingListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.E2AMappingListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
@@ -28,14 +30,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class AutoFishListener extends AbstractListener implements IMacro {
+public class AutoFishListener extends AbstractFishingListener implements IMacro {
 
     public boolean mythicalFishModeFlag;
     public boolean mythicalFishMode;
 
+    private long lastThrowTime;
+
     private final AntiAFKThread antiAFKMove = new AntiAFKThread(AntiAFKThread.MOVE);
     private final AntiAFKThread antiAFKJump = new AntiAFKThread(AntiAFKThread.JUMP);
     private final AntiAFKThread antiAFKRotation = new AntiAFKThread(AntiAFKThread.ROTATION);
+    private final LotusAtollJumpKeeper lotusAtollJumpKeeper = new LotusAtollJumpKeeper();
+
     private int catchFishCount;
 
     private boolean isEmergencyStopped;
@@ -150,15 +156,52 @@ public class AutoFishListener extends AbstractListener implements IMacro {
         }
     }
 
+    class LotusAtollJumpKeeper extends Thread {
+
+        LotusAtollJumpKeeper() {
+            setName("Lotus Atoll Jump Keeper");
+
+            start();
+        }
+
+        @Override
+        public void run() {
+            while(true) {
+                try {
+                    try {
+                        Thread.sleep(Long.MAX_VALUE);
+                    } catch (InterruptedException e) {
+                    }
+                    ToolList.printChatMessage(Component.literal("§a[小沙雕] 保持跳跃已激活, 若要关闭可在设置里的自动类关闭!"));
+                    while (isHoldingFishRod() && !isEmergencyStopped) {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                        }
+                        InputSimulator.setJump(true);
+                    }
+
+                    InputSimulator.setJump(false);
+                } catch (Exception e) {
+
+                }
+
+            }
+        }
+
+    }
+
     private boolean isThreadWorking;
 
     private void triggerFishHook() {
+        if(System.currentTimeMillis() - lastThrowTime < ConfigManager.autofishDelayRetraction.getValue()) return;
         if(!isThreadWorking) this.interrupt();
     }
 
     @Override
     public void run() {
         while (true) {
+            lastThrowTime = System.currentTimeMillis();
             isThreadWorking = false;
             try { Thread.sleep(Long.MAX_VALUE); } catch (InterruptedException e) {}
             try {
@@ -177,6 +220,9 @@ public class AutoFishListener extends AbstractListener implements IMacro {
             ensureHookUnsummoned();
             ToolList.printChatMessage(Component.literal("§a[小沙雕] §c当前自动钓鱼处于急停状态, 脱离AFK状态后将自动重新启用"));
             return;
+        }
+        if (ConfigManager.lotusAtollAutofishKeep.getValue() && isInLotusAtoll()) {
+            lotusAtollJumpKeeper.interrupt();
         }
         if (!ConfigManager.autoFish.getValue() || InputSimulator.isInventoryOpen() || "kuudra".equals(StatusManager.get().getMode())) return;
         if (ToolList.getInstance().random.nextInt(3) == 1) {
@@ -346,6 +392,14 @@ public class AutoFishListener extends AbstractListener implements IMacro {
                 }
             }
         }
+        Entity hooked = mc.player.fishing.getHookedIn();
+        if(hooked != null) {
+            // class_1531['[Lv65] ⚓☮♃ gorF 33,000/40,000❤'/924037, l='ClientLevel', x=16.45, y=64.48, z=3.47]
+            E2AMappingListener.MobInfo mobInfo = e2AMappingListener.getMobInfo(hooked.asLivingEntity());
+            if (mobInfo != null && mobInfo.armorStand.getName().getString().contains("❤") /* 包含❤符号证明是海怪, 自动重抛 */) {
+                triggerFishHook();
+            }
+        }
 
         if(mc.player.fishing.onGround()) {
             fishHookOnGroundTick++;
@@ -408,7 +462,15 @@ public class AutoFishListener extends AbstractListener implements IMacro {
     }
 
     @Override
+    public boolean onMacroCheck(int beforeSlot, int afterSlot) {
+        boolean flag = mc.player != null && mc.player.fishing == null;
+        if(flag) isEmergencyStopped = true;
+        return flag;
+    }
+
+    @Override
     public String getMacroName() {
         return "Auto Fish";
     }
+
 }

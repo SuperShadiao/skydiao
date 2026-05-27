@@ -10,7 +10,7 @@ import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.List;
 
-public class HHMCommand extends OpenConfigMenuCommand {
+public class HHMCommand extends SkydiaoCommand {
 
     @Override
     public String getCommandName() {

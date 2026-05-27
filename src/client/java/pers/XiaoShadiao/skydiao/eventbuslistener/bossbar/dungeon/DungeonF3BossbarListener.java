@@ -121,7 +121,7 @@ public class DungeonF3BossbarListener extends AbstractDungeonBossbar {
                 entityReinforcedLastAlertTime = System.currentTimeMillis();
             }
         }
-        if(stage3Flag && currentStage == 1 && getHealth() / getMaxHealth() > 0.9) {
+        if(stage3Flag && currentStage == 1 && getHealth() / getMaxHealth() > 0.5) {
             stage3Flag = false;
             currentStage = 2;
         }

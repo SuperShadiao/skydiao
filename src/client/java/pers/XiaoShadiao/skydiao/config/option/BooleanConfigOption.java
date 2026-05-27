@@ -6,7 +6,7 @@ import java.util.List;
 
 import static pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager.translate;
 
-public class BooleanConfigOption extends ConfigOption<Boolean, BooleanConfigOption> {
+public class BooleanConfigOption extends ConfigOption<Boolean> {
 
     private final List<BooleanConfigOption> dependsFeatures = new ArrayList<>();
     private List<BooleanConfigOption> immutableDependsFeatures = Collections.emptyList();

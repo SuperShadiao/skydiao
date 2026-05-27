@@ -1,6 +1,7 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener.macro;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
@@ -9,11 +10,15 @@ import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.network.protocol.game.ClientboundSetHeldSlotPacket;
 import net.minecraft.world.entity.PositionMoveRotation;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.EasyFarmingScriptListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.irc.ChatPacket;
@@ -31,6 +36,7 @@ public class MacroManagerListener extends AbstractListener {
     public static final AutoFishListener autoFishListener = new AutoFishListener();
     public static final PathFinderExecutor pathFinderExecutor = new PathFinderExecutor();
     public static final AutoDojo autoDojo = new AutoDojo();
+    public static final EasyFarmingScriptListener farmingScript = new EasyFarmingScriptListener();
 
     public long lastOpenChatTime = 0;
     public boolean isChatOpen = false;
@@ -44,6 +50,8 @@ public class MacroManagerListener extends AbstractListener {
     public void registerListeners() {
         ClientTickEvents.START_CLIENT_TICK.register(this::onStartClientTick);
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
+        ClientReceiveMessageEvents.GAME.register(this::onChat);
+        ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
 
         Register.execRegister(MacroManagerListener.class, AbstractListener.class, listener -> {
             if(listener instanceof IMacro) {
@@ -54,48 +62,84 @@ public class MacroManagerListener extends AbstractListener {
         macros = Collections.unmodifiableList(macros);
     }
 
+    private void onChat(Component component, boolean b) {
+        String msg = ToolList.getInstance().deleteColorCode(component.getString());
+        if(msg.startsWith("Evacuating")) {
+            lastOpenChatTime = System.currentTimeMillis();
+        }
+    }
+
     private boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
+        if(mc.player != null) {
+            if(packet instanceof ClientboundPlayerPositionPacket tpPacket) {
+                if(System.currentTimeMillis() - lastOpenChatTime > 5000 && !activeMacros.isEmpty()) {
+                    ToolList.TPInfo tpInfo = ToolList.getInstance().parseTPPacket(tpPacket);
+                    IMacro.PositionInfo before = new IMacro.PositionInfo(tpInfo.from().position(), tpInfo.from().yRot() % 360, tpInfo.from().xRot(), tpInfo.from().deltaMovement());
+                    IMacro.PositionInfo after = new IMacro.PositionInfo(tpInfo.to().position(), tpInfo.to().yRot() % 360, tpInfo.to().xRot(), tpInfo.to().deltaMovement());
 
-        if(packet instanceof ClientboundPlayerPositionPacket tpPacket) {
-            if(System.currentTimeMillis() - lastOpenChatTime > 5000 && !activeMacros.isEmpty()) {
-                ToolList.TPInfo tpInfo = ToolList.getInstance().parseTPPacket(tpPacket);
-                IMacro.PositionInfo before = new IMacro.PositionInfo(tpInfo.from().position(), tpInfo.from().yRot() % 360, tpInfo.from().xRot(), tpInfo.from().deltaMovement());
-                IMacro.PositionInfo after = new IMacro.PositionInfo(tpInfo.to().position(), tpInfo.to().yRot() % 360, tpInfo.to().xRot(), tpInfo.to().deltaMovement());
+                    ToolList.printChatMessage(Component.literal("§a[小沙雕] §c收到异常ClientboundPlayerPositionPacket数据包: " + after));
 
-                ToolList.printChatMessage(Component.literal("§a[小沙雕] §c收到异常ClientboundPlayerPositionPacket数据包: " + after));
-
-                double distance = historyPoses.stream().mapToDouble(vec3 -> vec3.distanceTo(after.position())).min().orElse(0.0);
-                float deltaYaw = Math.abs(before.yaw() - after.yaw());
-                if (distance > 0.65 || deltaYaw > 0.05 && deltaYaw < 360 - 0.05 || Math.abs(before.pitch() - after.pitch()) > 0.05) {
-                    boolean flag = true;
-                    for (IMacro macro : activeMacros) {
-                        flag &= !macro.onMacroCheck(before, after);
+                    double distance = historyPoses.stream().mapToDouble(vec3 -> vec3.distanceTo(after.position())).min().orElse(0.0);
+                    float deltaYaw = Math.abs(before.yaw() - after.yaw());
+                    if (distance > 0.65 || deltaYaw > 0.05 && deltaYaw < 360 - 0.05 || Math.abs(before.pitch() - after.pitch()) > 0.05) {
+                        boolean flag = true;
+                        for (IMacro macro : activeMacros) {
+                            flag &= !macro.onMacroCheck(before, after);
+                        }
+                        if (flag) triggerAlert(before, after);
                     }
-                    if (flag) triggerAlert(before, after);
+                }
+            } else if(packet instanceof ClientboundSetHeldSlotPacket(int slot)) {
+                if(System.currentTimeMillis() - lastOpenChatTime > 5000 && !activeMacros.isEmpty()) {
+                    boolean flag = true;
+                    int selectedSlot = mc.player.getInventory().getSelectedSlot();
+                    if(selectedSlot != slot) {
+                        for (IMacro macro : activeMacros) {
+                            flag &= !macro.onMacroCheck(selectedSlot, slot);
+                        }
+                        if (flag) {
+                            StringBuilder sb = new StringBuilder("\n物品栏被切换! Info:");
+                            for (int i = 0; i < 9; i++) {
+                                sb.append("\n").append(i == selectedSlot ? "➜" : i == slot ? "⚠" : "⚔").append(Optional.of(mc.player.getInventory().getItem(i)).filter(item -> !item.isEmpty()).map(ItemStack::getHoverName).map(Component::getString).map(s -> ToolList.getInstance().deleteColorCode(s)).orElse("** nothiing **"));
+                            }
+                            sb.append("\n");
+                            triggerAlert(sb.toString());
+                        }
+                    }
                 }
             }
         }
         return false;
     }
 
-    private void triggerAlert(IMacro.PositionInfo from, IMacro.PositionInfo to) {
-        ToolList.printChatMessage(Component.literal("§a[小沙雕] §cAlert! Macro check!"));
-        ToolList.addThreadedTask(() -> {
-            for (int i = 0; i < 3; i++) {
-                ToolList.getInstance().playSound(CustomSounds.ALERT_MACRO_CHECK);
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                }
+    public void triggerAlert(IMacro.PositionInfo from, IMacro.PositionInfo to) {
+        triggerAlert("From: " + from + ", To: " + to);
+    }
 
-            }
-        }, null);
+    public List<ToolList.ThreadedTask<Void>> alertTasks = new ArrayList<>();
+
+    public void triggerAlert(String message) {
+        ToolList.printChatMessage(Component.literal("§a[小沙雕] §cAlert! Macro check!"));
+        alertTasks.removeIf(t -> t.future.isDone());
+        if(alertTasks.size() < 3) {
+            alertTasks.add(ToolList.addThreadedTask(() -> {
+                for (int i = 0; basicListener.isAFK() || i < 3; i++) {
+                    ToolList.getInstance().playSound(CustomSounds.ALERT_MACRO_CHECK);
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                    }
+
+                }
+            }, null));
+        }
+
 
         if(ChatClientManager.serverAvailable()) {
             ChatPacket p = new ChatPacket();
             p.initSender();
             p.packetType = "macro_check";
-            p.message = "Alert! Macro check! (Info: ActiveMacros: " + activeMacros.stream().map(IMacro::getMacroName).toList() + " From: " + from + ", To: " + to + ")";
+            p.message = "Alert! Macro check! (Info: ActiveMacros: " + activeMacros.stream().map(IMacro::getMacroName).toList() + " " + message + ")";
             ChatClientManager.getChatClient().sender.send(p);
         }
     }

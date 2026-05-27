@@ -333,6 +333,11 @@ public class AutoDojo extends AbstractListener implements IMacro {
     }
 
     @Override
+    public boolean onMacroCheck(int beforeSlot, int afterSlot) {
+        return true; // 马口检查了, 不会报警, 如果真发生了, 等亖吧 (bushi
+    }
+
+    @Override
     public String getMacroName() {
         return "Auto Dojo";
     }

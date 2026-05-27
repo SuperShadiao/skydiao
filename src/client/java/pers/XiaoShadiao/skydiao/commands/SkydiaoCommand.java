@@ -6,17 +6,16 @@ import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
-import org.lwjgl.system.Platform;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
 import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
-import java.util.Collections;
 import java.util.List;
 
-public class OpenConfigMenuCommand extends BaseRootRunnableCommand {
+public class SkydiaoCommand extends BaseRootRunnableCommand {
 
     @Override
     public String getCommandName() {
@@ -30,8 +29,17 @@ public class OpenConfigMenuCommand extends BaseRootRunnableCommand {
                 getArgConstantInstance("claimreward").then(getArgInstance("index", IntegerArgumentType.integer(0, 2)).executes(this::executeClaimReward)),
                 getArgConstantInstance("editcape").executes(this::executeEditCape),
                 getArgConstantInstance("copyitemnbt").executes(this::executeCopyNBT),
-                getArgConstantInstance("getblivelistenercode").executes(this::executeGetCode)
+                getArgConstantInstance("getblivelistenercode").executes(this::executeGetCode),
+                getArgConstantInstance("想看看盔甲架的世界").executes(this::executeArmorStandWorld)
         );
+    }
+
+    private int executeArmorStandWorld(CommandContext<FabricClientCommandSource> context) {
+        for (Entity entity : mc.level.entitiesForRendering()) {
+            entity.setInvisible(false);
+        }
+        context.getSource().sendFeedback(Component.literal("§a[小沙雕] §e好。给你看看盔甲架的世界。"));
+        return 0;
     }
 
     private int executeGetCode(CommandContext<FabricClientCommandSource> context) {

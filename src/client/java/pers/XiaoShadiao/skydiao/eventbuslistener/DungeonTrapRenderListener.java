@@ -7,9 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.state.BlockOutlineRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.DropperBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
@@ -45,18 +43,29 @@ public class DungeonTrapRenderListener extends AbstractListener {
 
         for (BlockPos pos : trapsList) {
             BlockState blockState = mc.level.getBlockState(pos);
-            if(blockState.getBlock() != Blocks.DISPENSER && blockState.getBlock() != Blocks.DROPPER) continue;
-            Direction direction = blockState.getValue(DropperBlock.FACING);
-            int i = 10;
-            BlockPos current = pos;
-            while(i-- > 0 && mc.level.getBlockState(current = current.relative(direction)).getBlock() == Blocks.AIR) {}
-            if(i < 9) {
-                if (pos.getY() != current.getY()) {
-                    RenderUtils.renderWorldLine(worldRender, pos, current, r, g, b, 1, r, g, b, 0);
-                } else {
-                    Vec3 vec1 = new Vec3(pos.getX(), pos.getY() - 0.15, pos.getZ());
-                    Vec3 vec2 = new Vec3(current.getX(), current.getY() - 0.15, current.getZ());
-                    RenderUtils.renderWorldLine(worldRender, vec1, vec2, r, g, b, 1, r, g, b, 0);
+            if(blockState.getBlock() == Blocks.DISPENSER || blockState.getBlock() == Blocks.DROPPER) {
+                Direction direction = blockState.getValue(DropperBlock.FACING);
+                int i = 10;
+                BlockPos current = pos;
+                while (i-- > 0 && mc.level.getBlockState(current = current.relative(direction)).getBlock() == Blocks.AIR) {}
+                if (i < 9) {
+                    if (pos.getY() != current.getY()) {
+                        RenderUtils.renderWorldLine(worldRender, pos, current, r, g, b, 1, r, g, b, 0);
+                    } else {
+                        Vec3 vec1 = new Vec3(pos.getX(), pos.getY() - 0.15, pos.getZ());
+                        Vec3 vec2 = new Vec3(current.getX(), current.getY() - 0.15, current.getZ());
+                        RenderUtils.renderWorldLine(worldRender, vec1, vec2, r, g, b, 1, r, g, b, 0);
+                    }
+                }
+            } else if(blockState.getBlock() == Blocks.TRIPWIRE_HOOK) {
+                Direction direction = blockState.getValue(TripWireHookBlock.FACING);
+                BlockPos current = pos;
+                int i = 10;
+                while (i-- > 0 && mc.level.getBlockState(current = current.relative(direction)).getBlock() == Blocks.TRIPWIRE) {}
+                if (i < 9) {
+                    Vec3 vec1 = new Vec3(pos.getX(), pos.getY() - 0.2, pos.getZ());
+                    Vec3 vec2 = new Vec3(current.getX(), current.getY() - 0.2, current.getZ());
+                    RenderUtils.renderWorldLine(worldRender, vec1, vec2, r, g, b, 1, r, g, b, 1);
                 }
             }
         }
@@ -78,7 +87,7 @@ public class DungeonTrapRenderListener extends AbstractListener {
                 BlockState blockState = mc.level.getBlockState(pos);
                 Block block = blockState.getBlock();
 
-                if(block == Blocks.DISPENSER || block == Blocks.DROPPER) {
+                if(block == Blocks.DISPENSER || block == Blocks.DROPPER || block == Blocks.TRIPWIRE_HOOK) {
                     trapsList.add(pos.immutable());
                 }
             }

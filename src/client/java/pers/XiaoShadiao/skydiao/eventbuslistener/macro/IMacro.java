@@ -13,6 +13,8 @@ public interface IMacro {
      */
     public boolean onMacroCheck(PositionInfo beforeTP, PositionInfo afterTP);
 
+    public boolean onMacroCheck(int beforeSlot, int afterSlot);
+
     public String getMacroName();
 
     public record PositionInfo(Vec3 position, float yaw, float pitch, Vec3 velocity) {

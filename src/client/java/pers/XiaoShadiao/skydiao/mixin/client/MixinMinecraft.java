@@ -31,6 +31,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.irc.ChatClient;
 import pers.XiaoShadiao.skydiao.screen.MinecraftCrashedScreen;
+import pers.XiaoShadiao.skydiao.utils.ClientRenderCrashFixer;
 import pers.XiaoShadiao.skydiao.utils.MCThreadDumper;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
@@ -161,6 +162,7 @@ public class MixinMinecraft {
             }
             // this.emergencySaveAndCrash(var11.getReport());
             this.emergencySave();
+            ClientRenderCrashFixer.fix();
             CustomRenderPipeline.closeAll();
             CrashReport report = var11.getReport();
             saveReport(this.gameDirectory, report);
@@ -190,6 +192,7 @@ public class MixinMinecraft {
                 LOGGER.error(LogUtils.FATAL_MARKER, "Unreported exception thrown!", var12);
                 // this.emergencySaveAndCrash(new CrashReport("Unexpected error", var12));
                 this.emergencySave();
+                ClientRenderCrashFixer.fix();
                 CustomRenderPipeline.closeAll();
                 CrashReport report = new CrashReport("Unexpected error", var12);
                 saveReport(this.gameDirectory, report);

@@ -1,6 +1,7 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
 import net.minecraft.client.Minecraft;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
@@ -34,6 +35,7 @@ public class TitleChanger extends AbstractListener {
     @Override
     public void registerListeners() {
         ClientTickEvents.START_CLIENT_TICK.register(this::onStartTick);
+        ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register((mc, level) -> titleParts.forEach(Part::resetTick));
     }
 
     private void onStartTick(Minecraft mc) {
@@ -59,10 +61,9 @@ public class TitleChanger extends AbstractListener {
 
     public interface Part {
         public String getContent();
-
         public void tick();
-
         public boolean shouldShow();
+        public default void resetTick() {};
     }
 
     public class Time implements Part {
@@ -116,6 +117,10 @@ public class TitleChanger extends AbstractListener {
             return true;
         }
 
+        @Override
+        public void resetTick() {
+            animationTick = 0;
+        }
     }
 
     public static class MusicLyric implements Part {

@@ -2,6 +2,7 @@ package pers.XiaoShadiao.skydiao.eventbuslistener;
 
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ambient.Bat;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -45,6 +46,12 @@ public class DungeonMobESPListener extends AbstractListener {
                     if(isStarMob) {
                         RenderUtils.renderESP(worldRender2, entity, 1, 0.5f, 0, 1, false);
                     }
+                } else if(entity instanceof RemotePlayer player) {
+                    if(ToolList.getInstance().deleteColorCode(player.getName().getString()).equals("Shadow Assassin")) {
+                        RenderUtils.renderESP(worldRender, entity, MobType.Shadow.r, MobType.Shadow.g, MobType.Shadow.b, 1, true);
+                        RenderUtils.renderESP(worldRender2, entity, MobType.Shadow.r, MobType.Shadow.g, MobType.Shadow.b, 1, false);
+                        RenderUtils.renderTrace(worldRender2, entity, MobType.Shadow.r, MobType.Shadow.g, MobType.Shadow.b, 1);
+                    }
                 }
                 if (entity instanceof Bat && !entity.isInvisible() && XSDHUD.customBossbar.getStarRailBossBar() == null) {
                     RenderUtils.renderESP(worldRender, entity, 1, 0.5f, 0, 1, true);
@@ -52,6 +59,7 @@ public class DungeonMobESPListener extends AbstractListener {
                     RenderUtils.renderTrace(worldRender2, entity, 1, 0.5f, 0, 1);
                 }
             }
+
             worldRender.finishDraw();
             worldRender2.finishDraw();
         }

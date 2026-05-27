@@ -822,6 +822,26 @@
       "configname": "§e自定义标题内容",
       "description": "§e自定义标题内容, 留空则禁用该选项"
     },
+    "dungeonbloodroomtime": {
+      "configname": "§e地牢血房时间播报",
+      "description": "§e地牢血房时间播报, 使用[time]来表示秒数, 留空则禁用该消息"
+    },
+    "dungeondrinkpotion": {
+      "configname": "§e地牢自己喝药水播报",
+      "description": "§e地牢自己喝药水播报, 留空则禁用该消息"
+    },
+    "lotusatollhelper": {
+      "configname": "§e莲花岛屿助手",
+      "description": "§e在Lotus Atoll中显示实体ESP等信息"
+    },
+    "lotusatollautofishkeepjump": {
+      "configname": "§e莲花岛屿自动钓鱼保持跳跃",
+      "description": "§e在Lotus Atoll中自动钓鱼保持跳跃来捕获特殊的鱼"
+    },
+    "autofishdelayretraction": {
+      "configname": "§e自动钓鱼延迟收杆",
+      "description": "§e鱼钩抛出后必须等待指定时间之后抓到鱼才会收杆 (群友说的啥鼻涕鱼可以设置成20000ms)"
+    },
     "about1": "§e小沙雕的QQ: 3381949033",
     "about2": "§e小沙雕の狗窝: https://xiaoshadiao.club/qqg",
     "about3": "§e部分快捷键设置可在 ESC->选项(设置)->控制 中找到",
@@ -854,7 +874,8 @@
       "skydiao": {
         "skydiao": "SkyDiao Mod",
         "leftautoclicker": "切换左键连点",
-        "rightautoclicker": "切换右键连点"
+        "rightautoclicker": "切换右键连点",
+        "togglefarmingscript": "开关农业脚本"
       }
     }
   },

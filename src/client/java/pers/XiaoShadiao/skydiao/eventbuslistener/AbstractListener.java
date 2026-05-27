@@ -45,6 +45,10 @@ public abstract class AbstractListener extends Thread {
     public static final DungeonSomePuzzleSolverListener dungeonSomePuzzleSolverListener = new DungeonSomePuzzleSolverListener();
     public static final FishingHotSpotListener fishingHotSpotListener = new FishingHotSpotListener();
     public static final TitleChanger titleChanger = new TitleChanger();
+    public static final WorldRenderCrashFix worldRenderCrashFix = new WorldRenderCrashFix();
+    public static final GhostEntityFixer ghostEntityFixer = new GhostEntityFixer();
+    public static final DungeonMiscMessageListener dungeonMiscMessageListener = new DungeonMiscMessageListener();
+    public static final LotusAtollHelper lotusAtollHelper = new LotusAtollHelper();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();

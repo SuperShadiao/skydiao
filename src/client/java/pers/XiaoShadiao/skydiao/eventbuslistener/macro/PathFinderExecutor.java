@@ -189,6 +189,17 @@ public class PathFinderExecutor extends AbstractListener implements IMacro {
     }
 
     @Override
+    public boolean onMacroCheck(int beforeSlot, int afterSlot) {
+        PathFinder.ICustomPathfinderConfig config = PathFinder.getRegisteredConfig();
+        if(isRunning) {
+            if((config == null && ConfigManager.pfStopWhenTP.getValue()) || (config != null && config.shouldStopWhenRecieveS08())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
     public String getMacroName() {
         return "Path Finder";
     }

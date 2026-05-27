@@ -176,11 +176,11 @@ public class RenderUtils {
     }
 
     public static void renderESP(WorldRender worldRender, BlockPos pos, float r, float g, float b, float a, boolean fillBox) {
-        renderESP(worldRender, pos.getX(), pos.getY(), pos.getZ() , pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1, r, g, b, a, fillBox);
+        renderESP(worldRender, pos.getX() - 0.01, pos.getY() - 0.01, pos.getZ() - 0.01 , pos.getX() + 1.01, pos.getY() + 1.01, pos.getZ() + 1.01, r, g, b, a, fillBox);
     }
 
     public static void renderESP(WorldRender worldRender, Vec3 pos, float r, float g, float b, float a, boolean fillBox) {
-        renderESP(worldRender, pos.x - 0.5, pos.y, pos.z - 0.5, pos.x + 0.5, pos.y + 1, pos.z + 0.5, r, g, b, a, fillBox);
+        renderESP(worldRender, pos.x - 0.51, pos.y - 0.01, pos.z - 0.51, pos.x + 0.51, pos.y + 1.01, pos.z + 0.51, r, g, b, a, fillBox);
     }
 
     public static void renderESP(WorldRender worldRender, Vec3 pos, float r, float g, float b, float a, boolean fillBox, double size) {

@@ -3,6 +3,8 @@ package pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -32,7 +34,10 @@ import pers.XiaoShadiao.skydiao.hud.CustomBossbar;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinBossbarEventGetter;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
+import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 
+import java.awt.*;
 import java.util.*;
 
 public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
@@ -52,6 +57,12 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     private int currentWeakness = 0;
     private int stopTick = 0;
     private Vec3 stage2LastPosition;
+
+    private boolean stage4PlatformHasBlock;
+    private boolean stage4PlatformTip;
+    //  53 64 113 56 64 116
+    private final BlockPos stage4PlatformCorn1 = new BlockPos(53, 64, 113);
+    private final BlockPos stage4PlatformCorn2 = new BlockPos(56 - 1, 64 - 1, 116 - 1);
 
     private boolean isNecronUsingUltimateSkill;
 
@@ -233,6 +244,25 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             passWatcherFlag = false;
             masterFloorFlag = false;
         });
+        WorldRenderEvents.END_MAIN.register(this::onLastRender);
+    }
+
+    private void onLastRender(WorldRenderContext context) {
+        if(mc.level == null || !isInCorrectDungeon()) return;
+
+        RenderUtils.WorldRender wr1 = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.NO_THROUGH_WALLS_LINE);
+        RenderUtils.WorldRender wr2 = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.NO_THROUGH_WALLS_FILL);
+        boolean flag = false;
+        for (BlockPos pos : BlockPos.betweenClosed(stage4PlatformCorn1, stage4PlatformCorn2)) {
+            if(mc.level.getBlockState(pos).getBlock() != Blocks.AIR) {
+                RenderUtils.renderESP(wr2, pos, 200 / 255f, 0, 1f, 1f, true);
+                RenderUtils.renderESP(wr1, pos, 200 / 255f, 0, 1f, 1f, false);
+                flag = true;
+            }
+        }
+        wr2.finishDraw();
+        wr1.finishDraw();
+        stage4PlatformHasBlock = flag;
     }
 
     private boolean onMouseClick(long windowsHandle, MouseButtonInfo mouseButtonInfo, int pressState) {
@@ -303,6 +333,14 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                         }
                     }
                 }
+            }
+            if(currentStage == 3) {
+                if(getHealth() == 0 && !stage4PlatformTip) {
+                    stage4PlatformTip = true;
+                    if(stage4PlatformHasBlock) addStarRailNotification("在第四阶段开始前通过用Dungeonbreaker破坏9个被紫色标注的方块, 来防止平台坍塌!", StarRailNotification.Type.success);
+                }
+            } else {
+                stage4PlatformTip = false;
             }
             if(currentStage == 4) {
                 if (mc.player.hasEffect(MobEffects.BLINDNESS)) {

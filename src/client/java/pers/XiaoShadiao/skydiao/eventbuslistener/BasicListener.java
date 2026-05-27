@@ -33,6 +33,7 @@ import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.PlayerSkin;
 import org.apache.commons.io.FileUtils;
@@ -42,10 +43,12 @@ import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.config.option.BooleanConfigOption;
 import pers.XiaoShadiao.skydiao.config.option.ConfigOption;
 import pers.XiaoShadiao.skydiao.eventbuslistener.bilibili.BLiveListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.irc.ChatPacket;
 import pers.XiaoShadiao.skydiao.screen.mircosoftaccount.AccountSelectScreen;
+import pers.XiaoShadiao.skydiao.utils.autoupdater.ExecuteOfflineThread;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.PlayerThread;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
@@ -138,6 +141,14 @@ public class BasicListener extends AbstractListener {
             }
         }
 
+        if(message.equals("CLICK HERE to say gg!") && ConfigManager.autogg.getValue()) {
+            ToolList.addThreadedTask(() -> {
+                Thread.sleep(1000);
+                ToolList.sendChatMessage("/ac gg");
+                return null;
+            });
+        }
+
         Matcher m = Pattern.compile("[a-zA-Z]+").matcher(message);
         while(m.find()) {
             String words = m.group();
@@ -207,10 +218,12 @@ public class BasicListener extends AbstractListener {
         if(screen instanceof TitleScreen titleScreen) {
             List<AbstractWidget> buttons = Screens.getButtons(titleScreen);
             int left = buttons.stream().min(Comparator.comparingInt(AbstractWidget::getX)).get().getX();
-            buttons.add(Button.builder(
-                    AccountSelectScreen.getTitle0(),
-                    (button) -> ToolList.mc.setScreen(new AccountSelectScreen(titleScreen))
-            ).bounds(scaledHeight < 270 ? 10 : scaledWidth / 2 - 50, scaledHeight - (scaledHeight < 270 ? 35 : 28), scaledHeight < 270 ? Math.min(100, left - 15) : 100, 20).build());
+            if(Util.getPlatform() == Util.OS.WINDOWS) {
+                buttons.add(Button.builder(
+                        AccountSelectScreen.getTitle0(),
+                        (button) -> ToolList.mc.setScreen(new AccountSelectScreen(titleScreen))
+                ).bounds(scaledHeight < 270 ? 10 : scaledWidth / 2 - 50, scaledHeight - (scaledHeight < 270 ? 35 : 28), scaledHeight < 270 ? Math.min(100, left - 15) : 100, 20).build());
+            }
         } else if(screen instanceof JoinMultiplayerScreen mpscreen) {
             MinecraftLogin.checkSessionExpiredAndLogin();
         }
@@ -247,6 +260,7 @@ public class BasicListener extends AbstractListener {
         if (ConfigManager.blivelistener.getValue()) {
             BLiveListener.launch();
         }
+        MacroManagerListener.pathFinderExecutor.stopExecution();
     }
 
     private int afkHoldTick;
@@ -280,7 +294,7 @@ public class BasicListener extends AbstractListener {
             if(ChatClientManager.serverAvailable()) ChatClientManager.getChatClient().sender.sendAFK(true);
         }
 
-        for (ConfigOption<?, ?> option : ConfigManager.optionList) {
+        for (ConfigOption<?> option : ConfigManager.optionList) {
             if(option instanceof BooleanConfigOption booleanConfigOption && !booleanConfigOption.isRequiredModInstalled()) {
                 ConfigOption.ModDepends requiredMod = booleanConfigOption.getRequiredMod();
                 if (booleanConfigOption.getValue() && requiredMod != null) {

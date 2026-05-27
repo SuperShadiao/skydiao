@@ -11,7 +11,9 @@ import pers.XiaoShadiao.blive.XSDBLiveClient;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import top.mrxiaom.bili.live.client.BApi;
 import top.mrxiaom.bili.live.client.BApiClient;
+import top.mrxiaom.bili.live.client.data.EmptyInfo;
 import top.mrxiaom.bili.live.runtime.utils.SignHolder;
 
 import javax.crypto.Mac;
@@ -26,6 +28,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 public class BLiveListener extends Thread {
 
@@ -208,7 +211,16 @@ public class BLiveListener extends Thread {
 
                 }
 
-                BApiClient.heartBeatInteractivePlay(client.gameId);
+                String heartbeatFeedback = BApi.heartBeatInteractivePlay(client.gameId);
+                if (JsonParser.parseString(heartbeatFeedback).getAsJsonObject().get("code").getAsInt() != 0) {
+                    ToolList.printChatMessage(Component.literal("§a[小沙雕] §c当前GameID无效, 尝试进行重连..."));
+                    ToolList.addThreadedTask(() -> {
+                        Thread.sleep(1000);
+                        stopListen();
+                        launch();
+                        return null;
+                    });
+                }
 
                 if(isListening && staticToken == token) {
                     try {

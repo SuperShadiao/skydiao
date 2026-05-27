@@ -239,7 +239,7 @@ public class DungeonF6BossbarListener extends AbstractDungeonBossbar {
 
     @Override
     public boolean shouldNotRenderOtherBoss(LivingEntity e) {
-        return e instanceof RemotePlayer && e.getName().getString().contains("Terracotta");
+        return e instanceof RemotePlayer && !e.getName().getString().contains("Terracotta");
     }
 
     @Override
