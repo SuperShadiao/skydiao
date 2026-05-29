@@ -22,7 +22,7 @@ import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
 
-public class FishingHotSpotListener extends AbstractListener {
+public class FishingHotSpotListener extends AbstractFishingListener {
 
     public IntSet hotspots = new IntOpenHashSet();
 

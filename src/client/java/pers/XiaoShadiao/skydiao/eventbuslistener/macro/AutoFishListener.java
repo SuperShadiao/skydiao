@@ -119,8 +119,7 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
                             } catch (InterruptedException e) {
                             }
 
-                            if (isHoldingFishRod() && !InputSimulator.isInventoryOpen())
-                                InputSimulator.setJump(false);
+                            InputSimulator.setJump(false);
                         } else if (type == ROTATION) {
 
                             float tempP = InputSimulator.getPlayerPitch();

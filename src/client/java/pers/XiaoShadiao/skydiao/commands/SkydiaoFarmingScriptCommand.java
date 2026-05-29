@@ -18,6 +18,7 @@ import pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.op.OperationPress
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.op.OperationPressMove;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.op.OperationRotation;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.op.OperationSendCommand;
+import pers.XiaoShadiao.skydiao.keybinds.KeyBindsManager;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
@@ -194,8 +195,10 @@ public class SkydiaoFarmingScriptCommand extends BaseRootRunnableCommand {
                 "§a[小沙雕] §e/skydiaofs addoperation sendcommand <command> §f- §b添加一个发送命令操作到当前正在编辑的节点, 其中<command>是你要发送的命令, 例如/warp garden",
                 "§a[小沙雕] §e/skydiaofs addoperation mouse (left/right) §f- §b添加一个鼠标键操作到当前正在编辑的节点, 其中(left/right)是你要按的鼠标键, 例如只按住左键就输入left, 同时按住两个键就输入left right",
                 "§a[小沙雕] §e/skydiaofs exitedit §f- §b退出编辑节点编辑",
-                "§a[小沙雕] §e/skydiaofs togglerendernodes §f- §b切换节点渲染"
-                // "§a[小沙雕] §e",
+                "§a[小沙雕] §e/skydiaofs togglerendernodes §f- §b切换节点渲染",
+                "§a[小沙雕] §e",
+                "§a[小沙雕] §a若要切换脚本开关, 请使用按键§e" + KeyBindsManager.toggleFarmingScript.getTranslatedKeyMessage().getString() + "§a切换 (可在控制设置里设置快捷键)"
+
         );
         for (String help : helps) {
             context.getSource().sendFeedback(Component.literal(help));

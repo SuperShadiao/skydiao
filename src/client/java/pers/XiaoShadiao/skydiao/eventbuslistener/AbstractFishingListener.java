@@ -8,4 +8,12 @@ public abstract class AbstractFishingListener extends AbstractListener {
         return "lotus_atoll".equals(StatusManager.get().getMode());
     }
 
+    public boolean isInBayou() {
+        return "fishing_1".equals(StatusManager.get().getMode());
+    }
+
+    public boolean isInWaterFishingArea() {
+        return isInLotusAtoll() || isInBayou();
+    }
+
 }

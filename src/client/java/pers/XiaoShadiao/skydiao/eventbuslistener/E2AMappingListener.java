@@ -95,6 +95,7 @@ public class E2AMappingListener extends AbstractListener {
                     // 如果找到了符合条件的盔甲架，建立绑定
                     if (closestArmorStand != null && entity instanceof LivingEntity livingEntity) {
                         info = e2aMapping.addMapping(livingEntity, closestArmorStand);
+                        armorStands.remove(closestArmorStand);
                     }
                 }
 

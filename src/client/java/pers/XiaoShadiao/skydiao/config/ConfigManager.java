@@ -99,6 +99,7 @@ public class ConfigManager {
     public static final BooleanConfigOption lotusAtollHelper = new BooleanConfigOption("lotusatollhelper", true);
     public static final BooleanConfigOption lotusAtollAutofishKeep = new BooleanConfigOption("lotusatollautofishkeepjump", true);
     public static final TimeDelayOption autofishDelayRetraction = new TimeDelayOption("autofishdelayretraction", 0);
+    public static final BooleanConfigOption fishingBigFishRender = new BooleanConfigOption("fishingbigfishrender", true);
 
     public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
@@ -150,7 +151,7 @@ public class ConfigManager {
             Map.entry("combat", List.of(slayerTogether)),
             Map.entry("foraging", List.of(galateashulker)),
             Map.entry("farming", List.of(hubratesp)),
-            Map.entry("fishing", List.of(hotspotrender, autogg, lotusAtollHelper)),
+            Map.entry("fishing", List.of(hotspotrender, autogg, lotusAtollHelper, fishingBigFishRender)),
             Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered, dungeonDrinkPotion, dungeonBloodRoomTime)),
             Map.entry("rift", List.of(rifttimegunhelper)),
             Map.entry("界面类", List.of(bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, dyingtip, noblind, nosuffoverlay, fireOverlay))

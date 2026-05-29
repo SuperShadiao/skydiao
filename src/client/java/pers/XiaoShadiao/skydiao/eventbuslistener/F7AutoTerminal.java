@@ -91,6 +91,7 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
     }
 
     private void onChat(Component component, boolean b) {
+        if (!ConfigManager.dungeonf7autoterm.getValue()) return;
         String message = ToolList.getInstance().deleteColorCode(component.getString());
         if("Already selected!".equals(message)) {
             blacklistedSlots.add(lastClick.slot.index);

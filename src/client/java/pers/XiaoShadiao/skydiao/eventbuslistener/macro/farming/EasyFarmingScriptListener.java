@@ -107,7 +107,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
     }
 
     private boolean onMouseButton(long windwos, MouseButtonInfo mouseButtonInfo, int state) {
-        if(mouseButtonInfo.button() == 1 && isHoldingMouseMat()) {
+        if(mouseButtonInfo.button() == 0 && isHoldingMouseMat()) {
             lastSendCommandTime = System.currentTimeMillis();
         }
         return false;

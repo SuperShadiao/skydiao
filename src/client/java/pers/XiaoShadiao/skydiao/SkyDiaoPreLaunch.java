@@ -31,6 +31,20 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
     public static final File libPrepareFolder = new File(libFolder, "1");
     public static final File libLoadFolder = new File(libFolder, "2");
 
+    private static SkyDiaoPreLaunch instance;
+
+    public static SkyDiaoPreLaunch getInstance() {
+        if(instance == null) throw new AssertionError("错误的调用时机");
+        return instance;
+    }
+
+    public Runnable initJars = null;
+
+    public void execInitJars() {
+        if(initJars == null) throw new AssertionError("不应该发生的错误, initJars 未初始化");
+        initJars.run();
+    }
+
     public static class Lib {
         public final String name;
         public final String url;
@@ -152,19 +166,22 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
 
     @Override
     public void onPreLaunch() {
+        instance = this;
         if(this.getClass().getClassLoader().getParent() instanceof URLClassLoader urlClassLoader) {
             moveOldLibToNewLib();
-            for (Lib lib : libs) {
-                try {
-                    if(lib.getLoadFile().exists() && !lib.isLoadExist()) {
-                        lib.getLoadFile().delete();
-                        throw new RuntimeException("lib文件" + lib.name + "已损坏, 请重新启动客户端。");
+            initJars = () -> {
+                for (Lib lib : libs) {
+                    try {
+                        if(lib.getLoadFile().exists() && !lib.isLoadExist()) {
+                            lib.getLoadFile().delete();
+                            throw new RuntimeException("lib文件" + lib.name + "已损坏, 请重新启动客户端。");
+                        }
+                        addURL(urlClassLoader, lib.getLoadFile().toURI().toURL());
+                    } catch (MalformedURLException e) {
+                        throw new RuntimeException(e);
                     }
-                    addURL(urlClassLoader, lib.getLoadFile().toURI().toURL());
-                } catch (MalformedURLException e) {
-                    throw new RuntimeException(e);
                 }
-            }
+            };
         } else {
             throw new RuntimeException("Can't lookup the URLClassLoader");
         }
