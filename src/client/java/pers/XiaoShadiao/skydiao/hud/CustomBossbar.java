@@ -490,6 +490,7 @@ public class CustomBossbar extends XSDHUD {
                         hits = Integer.parseInt(m.group());
                         if (lastHits != hits) {
                             hitsChanges = 1;
+                            if(isActive()) flagActive();
                         }
                         lastHits = hits;
                         maxHits = Math.max(hits, maxHits);

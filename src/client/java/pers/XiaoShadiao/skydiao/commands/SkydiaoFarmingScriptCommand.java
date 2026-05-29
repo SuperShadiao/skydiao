@@ -10,6 +10,7 @@ import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.EasyFarmingScriptListener;
@@ -54,8 +55,14 @@ public class SkydiaoFarmingScriptCommand extends BaseRootRunnableCommand {
                 getArgConstantInstance("clone").executes(this::cloneCurrentEditing),
                 getArgConstantInstance("listoperation").executes(this::listOperation),
                 getArgConstantInstance("exitedit").executes(this::exitEditing),
-                getArgConstantInstance("togglerendernode").executes(this::toggleRenderNode)
+                getArgConstantInstance("togglerendernode").executes(this::toggleRenderNode),
+                getArgConstantInstance("setnodeexecdelay").then(getArgInstance("delay", IntegerArgumentType.integer()).executes(this::setNodeExecDelay))
         );
+    }
+
+    private int setNodeExecDelay(CommandContext<FabricClientCommandSource> context) {
+        script.setNodeExecDelay(IntegerArgumentType.getInteger(context, "delay"));
+        return 0;
     }
 
     private int toggleRenderNode(CommandContext<FabricClientCommandSource> context) {
@@ -196,9 +203,10 @@ public class SkydiaoFarmingScriptCommand extends BaseRootRunnableCommand {
                 "§a[小沙雕] §e/skydiaofs addoperation mouse (left/right) §f- §b添加一个鼠标键操作到当前正在编辑的节点, 其中(left/right)是你要按的鼠标键, 例如只按住左键就输入left, 同时按住两个键就输入left right",
                 "§a[小沙雕] §e/skydiaofs exitedit §f- §b退出编辑节点编辑",
                 "§a[小沙雕] §e/skydiaofs togglerendernodes §f- §b切换节点渲染",
-                "§a[小沙雕] §e",
-                "§a[小沙雕] §a若要切换脚本开关, 请使用按键§e" + KeyBindsManager.toggleFarmingScript.getTranslatedKeyMessage().getString() + "§a切换 (可在控制设置里设置快捷键)"
-
+                "§a[小沙雕] §e/skydiaofs setnodeexecdelay <delay> §f- §b设置节点执行全局延迟, 即到达节点后不会立即执行, 而是经过该时间才会执行该节点的操作, 单位毫秒 (当前延迟为" + script.getNodeExecDelay() + "ms)",
+                "§a[小沙雕] §a",
+                "§a[小沙雕] §a若要切换脚本开关, 请使用按键§e" + KeyBindsManager.toggleFarmingScript.getTranslatedKeyMessage().getString() + "§a切换 (可在控制设置里设置快捷键)",
+                "§a[小沙雕] §a群内§e" + SkyDiaoModClient.CONST_QQGROUP_MAIN + "§a有教程awa"
         );
         for (String help : helps) {
             context.getSource().sendFeedback(Component.literal(help));

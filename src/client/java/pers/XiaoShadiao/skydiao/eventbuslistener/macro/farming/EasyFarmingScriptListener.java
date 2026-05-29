@@ -92,6 +92,12 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 
     private boolean renderNodes = true;
 
+    public long getNodeExecDelay() {
+        return nodeExecDelay;
+    }
+
+    private long nodeExecDelay = 100;
+
     @Override
     public String getListenerName() {
         return "EasyFarmingScriptListener";
@@ -198,20 +204,29 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                 if(BlockPos.containing(mc.player.position()).equals(node.pos)) {
                     if(currentWorking != node) {
                         currentWorking = node;
-                        InputSimulator.unpressAllKey();
                         ToolList.printChatMessage(Component.literal("§a[小沙雕] §e到达节点" + node.pos + ", 执行节点操作" + node.ops.stream().map(IOperation::toChatString).toList()));
                         activeThisMacro();
                         currentHandItemIndex = mc.player.getInventory().getSelectedSlot();
                         if(node.ops.isEmpty()) {
+                            InputSimulator.unpressAllKey();
                             XSDHUD.bigTitle.updateTitleMsg("§e已到达节点尽头!", 5000, SoundEvents.WITHER_SPAWN);
                             ended = true;
                         } else {
-                            for (IOperation<?> op : node.ops) {
-                                op.op();
-                                if(op instanceof OperationSendCommand) {
-                                    lastSendCommandTime = System.currentTimeMillis();
+                            ToolList.addThreadedTask(() -> {
+                                Thread.sleep(nodeExecDelay);
+                                InputSimulator.unpressAllKey();
+                                if(enabled) {
+                                    for (IOperation<?> op : node.ops) {
+                                        op.op();
+                                        if (op instanceof OperationSendCommand) {
+                                            lastSendCommandTime = System.currentTimeMillis();
+                                        }
+                                    }
+                                } else {
+                                    InputSimulator.unpressAllKey();
                                 }
-                            }
+                                return null;
+                            });
                         }
                         executeNodes.removeIf(n -> n.isTemp);
                     }
@@ -344,6 +359,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             }
             executeNodes = temp;
             renderNodes = jo5.get("renderNodes").getAsBoolean();
+            nodeExecDelay = jo5.get("nodeExecDelay").getAsLong();
         } catch (Throwable e) {
             e.printStackTrace();
         }
@@ -372,6 +388,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         }
         jo.add("ops", ja);
         jo.addProperty("renderNodes", renderNodes);
+        jo.addProperty("nodeExecDelay", nodeExecDelay);
 
         try {
             FileUtils.writeStringToFile(nodeConfigFile, jo.toString(), StandardCharsets.UTF_8);
@@ -386,6 +403,13 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 
     public void toggleRenderNode() {
         renderNodes = !renderNodes;
+        ToolList.printChatMessage(Component.literal("§a[小沙雕] §e已切换渲染节点为" + (renderNodes ? "§a开" : "§c关")));
+        save();
+    }
+
+    public void setNodeExecDelay(long delay) {
+        nodeExecDelay = delay;
+        ToolList.printChatMessage(Component.literal("§a[小沙雕] §e已设置节点执行全局延迟为" + delay + "ms!"));
         save();
     }
 }
