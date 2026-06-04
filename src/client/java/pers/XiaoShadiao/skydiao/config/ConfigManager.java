@@ -100,6 +100,11 @@ public class ConfigManager {
     public static final BooleanConfigOption lotusAtollAutofishKeep = new BooleanConfigOption("lotusatollautofishkeepjump", true);
     public static final TimeDelayOption autofishDelayRetraction = new TimeDelayOption("autofishdelayretraction", 0);
     public static final BooleanConfigOption fishingBigFishRender = new BooleanConfigOption("fishingbigfishrender", true);
+    public static final BooleanConfigOption blivemodetab = new BooleanConfigOption("blivemodetab", false);
+    public static final BooleanConfigOption blivemodeentityname = new BooleanConfigOption("blivemodeentityname", false);
+    public static final BooleanConfigOption blivemodechat = new BooleanConfigOption("blivemodechat", false);
+    public static final BooleanConfigOption blivemodehideserverid = new BooleanConfigOption("blivemodehideserverid", false);
+    public static final BooleanConfigOption carnivalAutoFruitDigger = new BooleanConfigOption("carnivalfruitdigger", false).flagAsMacroFeature();
 
     public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
@@ -119,6 +124,7 @@ public class ConfigManager {
     public static final StringConfigOption dungeonPhoenixTriggered = new StringConfigOption("dungeonphoenixtriggered", "复活甲爆炸了。(Phoenix)");
     public static final StringConfigOption dungeonBloodRoomTime = new StringConfigOption("dungeonbloodroomtime", "本次使用了[time]s肘击到血房! 咕咕嘎嘎!");
     public static final StringConfigOption dungeonDrinkPotion = new StringConfigOption("dungeondrinkpotion", "能量饮料真好喝! 我为Dungeon Potion代言!");
+    public static final StringConfigOption dungeonTrashTPS = new StringConfigOption("dungeontrashtps", "太强了喵, 我们服务器有很高的[tps] TPS喵!");
 
     public static final StringConfigOption[] dungeonf7msgbotsimonsays = {
             dungeonf7msgbotsimonsays1,
@@ -144,15 +150,15 @@ public class ConfigManager {
 
     public static final List<Map.Entry<String, List<ConfigOption<?>>>> categories = List.of(
             Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip, cooltitle, customTitleText)),
-            Map.entry("工具类", List.of(inventoryFilter, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode)),
+            Map.entry("工具类", List.of(inventoryFilter, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodehideserverid)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
-            Map.entry("自动类", List.of(autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, skyblockriftautodanceroom)),
+            Map.entry("自动类", List.of(autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, skyblockriftautodanceroom, carnivalAutoFruitDigger)),
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, skyblockSafeIsland)),
             Map.entry("combat", List.of(slayerTogether)),
             Map.entry("foraging", List.of(galateashulker)),
             Map.entry("farming", List.of(hubratesp)),
             Map.entry("fishing", List.of(hotspotrender, autogg, lotusAtollHelper, fishingBigFishRender)),
-            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered, dungeonDrinkPotion, dungeonBloodRoomTime)),
+            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered, dungeonDrinkPotion, dungeonBloodRoomTime, dungeonTrashTPS)),
             Map.entry("rift", List.of(rifttimegunhelper)),
             Map.entry("界面类", List.of(bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, dyingtip, noblind, nosuffoverlay, fireOverlay))
     );

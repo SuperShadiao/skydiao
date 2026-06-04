@@ -17,6 +17,8 @@ public interface IMacro {
 
     public String getMacroName();
 
+    public default void onMacroUnload() {};
+
     public record PositionInfo(Vec3 position, float yaw, float pitch, Vec3 velocity) {
 
         public @NotNull String toString() {

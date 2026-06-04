@@ -25,6 +25,9 @@ public class PathFinder {
         public long getTimeout();
         public boolean shouldPause();
         public boolean shouldStopWhenRecieveS08();
+        public default boolean minerChooseBetterTool() {
+            return true;
+        }
     }
 
     public PathProfiler profiler = new PathProfiler();

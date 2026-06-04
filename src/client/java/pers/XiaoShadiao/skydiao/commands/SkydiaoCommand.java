@@ -9,6 +9,7 @@ import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
 import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
@@ -30,8 +31,14 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                 getArgConstantInstance("editcape").executes(this::executeEditCape),
                 getArgConstantInstance("copyitemnbt").executes(this::executeCopyNBT),
                 getArgConstantInstance("getblivelistenercode").executes(this::executeGetCode),
+                getArgConstantInstance("afk").executes(this::executeAFK),
                 getArgConstantInstance("想看看盔甲架的世界").executes(this::executeArmorStandWorld)
         );
+    }
+
+    private int executeAFK(CommandContext<FabricClientCommandSource> context) {
+        AbstractListener.basicListener.flagAsAFK();
+        return 0;
     }
 
     private int executeArmorStandWorld(CommandContext<FabricClientCommandSource> context) {

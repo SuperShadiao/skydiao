@@ -350,7 +350,8 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
 
 
     private boolean isHoldingFishRod() {
-        return mc.player.getMainHandItem().getItem() == Items.FISHING_ROD;
+        if(mc.player == null) return false;
+        return mc.player.getMainHandItem().getItem() == Items.FISHING_ROD && !mc.player.getMainHandItem().getHoverName().getString().contains("Carnival");
     }
 
     @Override

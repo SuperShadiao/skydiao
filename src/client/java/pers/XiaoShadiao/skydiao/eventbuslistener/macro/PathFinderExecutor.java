@@ -147,6 +147,7 @@ public class PathFinderExecutor extends AbstractListener implements IMacro {
                     Thread.sleep(Long.MAX_VALUE);
                 } catch (Exception e) {
                     sleeping = false;
+                    activeThisMacro();
                     executeThread();
                     isRunning = false;
                 }
@@ -179,6 +180,8 @@ public class PathFinderExecutor extends AbstractListener implements IMacro {
 
     @Override
     public boolean onMacroCheck(PositionInfo beforeTP, PositionInfo afterTP) {
+        rotationYaw = afterTP.yaw();
+        rotationPitch = afterTP.pitch();
         PathFinder.ICustomPathfinderConfig config = PathFinder.getRegisteredConfig();
         if(isRunning) {
             if((config == null && ConfigManager.pfStopWhenTP.getValue()) || (config != null && config.shouldStopWhenRecieveS08())) {
@@ -464,6 +467,10 @@ public class PathFinderExecutor extends AbstractListener implements IMacro {
 
                             float speed = 0;
                             int index = 0;
+                            boolean shouldSwitchItem = true;
+                            if(PathFinder.getRegisteredConfig() != null && !PathFinder.getRegisteredConfig().minerChooseBetterTool()) {
+                                shouldSwitchItem = false;
+                            }
                             if (mc.hitResult instanceof BlockHitResult blockHitResult)  {
                                 for(int i = 0; i < 9; i++) {
                                     if(mc.player.getInventory().getItem(i) != null) {
@@ -477,7 +484,7 @@ public class PathFinderExecutor extends AbstractListener implements IMacro {
                                     }
                                 }
 
-                                InputSimulator.switchItem(index);
+                                if(shouldSwitchItem) InputSimulator.switchItem(index);
                                 backForwardFlag = 0;
                             }
                             // timeout = System.currentTimeMillis();

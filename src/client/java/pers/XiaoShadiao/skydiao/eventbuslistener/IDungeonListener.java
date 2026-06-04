@@ -26,6 +26,8 @@ public interface IDungeonListener {
     }
 
     public default void sendDungeonF7ChatMessage(String message) {
+        if(!StatusManager.get().isInDungeon()) return;
+
         if(ConfigManager.dungeonf7msgbot.getValue()) {
             if(ToolList.getInstance().isDevEnvironment()) {
                 ToolList.printChatMessage(Component.literal(message));

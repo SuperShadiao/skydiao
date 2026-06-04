@@ -23,6 +23,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
@@ -49,6 +50,7 @@ import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.irc.ChatPacket;
 import pers.XiaoShadiao.skydiao.screen.mircosoftaccount.AccountSelectScreen;
 import pers.XiaoShadiao.skydiao.utils.autoupdater.ExecuteOfflineThread;
+import pers.XiaoShadiao.skydiao.utils.blivesensitiveword.ServerIdSpoofer;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.PlayerThread;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
@@ -226,6 +228,14 @@ public class BasicListener extends AbstractListener {
             }
         } else if(screen instanceof JoinMultiplayerScreen mpscreen) {
             MinecraftLogin.checkSessionExpiredAndLogin();
+        } else if(screen instanceof DeathScreen deathScreen) {
+            List<AbstractWidget> buttons = Screens.getButtons(deathScreen);
+            int left = buttons.stream().min(Comparator.comparingInt(AbstractWidget::getX)).get().getX();
+
+            buttons.add(Button.builder(
+                    Component.literal("§a打开聊天栏"),
+                    (button) -> ToolList.mc.setScreen(new ChatScreen("/l", false))
+            ).bounds(scaledHeight < 270 ? 10 : scaledWidth / 2 - 50, scaledHeight - (scaledHeight < 270 ? 35 : 28), scaledHeight < 270 ? Math.min(100, left - 15) : 100, 20).build());
         }
     }
 
@@ -255,6 +265,7 @@ public class BasicListener extends AbstractListener {
         ChatClientManager.getChatClient();
         reloadCustomCape();
         InputSimulator.unpressAllKey();
+        ServerIdSpoofer.generateServerIds();
 
         ToolList.getInstance().updatePartyInfo();
         if (ConfigManager.blivelistener.getValue()) {
@@ -322,6 +333,10 @@ public class BasicListener extends AbstractListener {
         if (!ConfigManager.blivelistener.getValue() && BLiveListener.isListening()) {
             BLiveListener.stopListen();
         }
+    }
+
+    public void flagAsAFK() {
+        lastOperationTime = 0;
     }
 
     public boolean isAFK() {

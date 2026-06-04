@@ -22,6 +22,8 @@
     "MixinRealmStatusReset",
     "MixinTooltipScroll",
     "adapter.odinfix.MixinFireOverlaySettings",
+    "blivemode.MixinPlayerTabOverlay",
+    "blivemode.MixinScoreboardRender",
     "debug.MixinTest2",
     "debug.MixinTest3"
   ],
@@ -37,8 +39,9 @@
     "MixinUserDataSecurer",
     "adapter.chatpatches.MixinChatPatcherTranslateButton",
     "adapter.firmament.FirmamentGithubRepoProxy",
-//    "adapter.odinfix.MixinOdinPickColorTerminalFixer",
-//    "adapter.odinfix.MixinOdinStartWithTerminalFixer",
-    "adapter.skyhanni.FPSDropperFix"
+    "adapter.secretroute.FPSDropperFix",
+    "adapter.skyhanni.FPSDropperFix",
+    "blivemode.MixinEntity",
+    "blivemode.MixinEntityPlayer"
   ]
 }

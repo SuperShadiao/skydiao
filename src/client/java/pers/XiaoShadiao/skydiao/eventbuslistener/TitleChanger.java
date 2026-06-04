@@ -23,6 +23,7 @@ public class TitleChanger extends AbstractListener {
     private final List<Part> titleParts = List.of(
             new VersionTip(),
             new CustomTitle(),
+            new FPSTPS(),
             new MusicLyric(),
             new Time()
     );
@@ -156,6 +157,23 @@ public class TitleChanger extends AbstractListener {
         @Override
         public boolean shouldShow() {
             return !ConfigManager.customTitleText.getValue().isEmpty();
+        }
+    }
+
+    public static class FPSTPS implements Part {
+        @Override
+        public String getContent() {
+            return "FPS: " + mc.getFps() + ", TPS: " + (tpsListener.isTPSAvaliable() ? tpsListener.getCurrentFormattedTPS() : "--");
+        }
+
+        @Override
+        public void tick() {
+
+        }
+
+        @Override
+        public boolean shouldShow() {
+            return true;
         }
     }
 }

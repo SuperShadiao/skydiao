@@ -147,7 +147,11 @@ public class MacroManagerListener extends AbstractListener {
     private void onStartClientTick(Minecraft mc) {
         if(mc.player != null) {
             historyPoses.add(mc.player.position());
-            activeMacros.removeIf(m -> !m.isMacroActive());
+            activeMacros.removeIf(m -> {
+                boolean b = !m.isMacroActive();
+                if(b) m.onMacroUnload();
+                return b;
+            });
         } else {
             activeMacros.clear();
         }

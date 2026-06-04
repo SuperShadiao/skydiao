@@ -23,7 +23,7 @@ public class StatusManager extends Thread {
     private String loadBy;
     private int errtime = 3;
     private String gameType,gameMode;
-    private String serverID;
+    private String serverID, smallServerID;
 
     private final int tokenInstance;
     private static int token;
@@ -73,6 +73,7 @@ public class StatusManager extends Thread {
                 gameMode = hypLocation.getMode().orElse("");
                 gameType = hypLocation.getServerType().map(ServerType::getName).orElse("");
                 serverID = hypLocation.getServerName();
+                smallServerID = serverID.replace("mega", "M").replace("mini", "m");
 
                 online = true;
                 hasStatus = true;
@@ -130,6 +131,15 @@ public class StatusManager extends Thread {
     }
     public String getServerID() {
         return serverID;
+    }
+    public String getSmallServerID() {
+        return smallServerID;
+    }
+    public boolean isMiniServer() {
+        return serverID != null && serverID.startsWith("mini");
+    }
+    public boolean isMegaServer() {
+        return serverID != null && serverID.startsWith("mega");
     }
     public boolean isInDungeon() {
         return "DUNGEON".equalsIgnoreCase(gameMode);

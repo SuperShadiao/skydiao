@@ -136,7 +136,7 @@ public class ChatClient extends Thread {
             try { sender.interrupt(); } catch (Exception e) { }
             try { socket.close(); } catch (Exception e) { }
 
-            if(retryCount > 0) {
+            if(retryCount > 0 && doWhileToken == currentWhileToken) {
                 retryCount--;
                 try {
                     Thread.sleep(10000);

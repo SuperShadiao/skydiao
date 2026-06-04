@@ -68,4 +68,15 @@ public final class CustomFabricEvents {
     public interface PacketEvent<T extends PacketListener> {
         public boolean onPacket(Packet<T> packet, T packetListener, PacketProcessor packetProcessor);
     }
+
+    public static final Event<@NotNull TPSUpdate> ON_TPS_UPDATE = EventFactory.createArrayBacked(TPSUpdate.class, callbacks -> (tps, formattedTPS) -> {
+        for (TPSUpdate callback : callbacks) {
+            callback.update(tps, formattedTPS);
+        }
+    });
+
+    public interface TPSUpdate {
+        public void update(double tps, String formattedTPS);
+    }
+
 }

@@ -4,8 +4,8 @@ import net.minecraft.client.Minecraft;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon.*;
+import pers.XiaoShadiao.skydiao.eventbuslistener.macro.CarnivalFruitDigger;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
-import pers.XiaoShadiao.skydiao.eventbuslistener.macro.PathFinderExecutor;
 import pers.XiaoShadiao.skydiao.utils.Register;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
@@ -50,6 +50,10 @@ public abstract class AbstractListener extends Thread {
     public static final DungeonMiscMessageListener dungeonMiscMessageListener = new DungeonMiscMessageListener();
     public static final LotusAtollHelper lotusAtollHelper = new LotusAtollHelper();
     public static final FishingBigMobRenderListener fishingBigMobRenderListener = new FishingBigMobRenderListener();
+    public static final BliveModeChatHandler bliveModeChatHandler = new BliveModeChatHandler();
+    public static final TPSListener tpsListener = new TPSListener();
+    public static final DungeonTrashTPSListener dungeonTrashTPSListener = new DungeonTrashTPSListener();
+    public static final CarnivalFruitDigger carnvialFruitDigger = new CarnivalFruitDigger();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();

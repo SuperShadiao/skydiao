@@ -64,9 +64,10 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
         public File getLoadFile() {
             return loadFile;
         }
-        public CompletableFuture<Boolean> download() {
-            return CompletableFuture.runAsync(() -> {
+        public CompletableFuture<Throwable> download() {
+            return CompletableFuture.supplyAsync(() -> {
                 int tries = 0;
+                Throwable lastError = null;
                 while(tries++ < 3) {
                     try {
                         log.info("Downloading lib " + name);
@@ -76,14 +77,16 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
                     } catch (Throwable e) {
                         log.error("Failed to download lib " + name);
                         log.catching(e);
+                        lastError = e;
                         getPrepareFile().delete();
                     }
                 }
-            }).thenApply(a -> getPrepareFile().exists());
+                return lastError;
+            });// .thenApply(a -> getPrepareFile().exists());
         }
-        public CompletableFuture<Boolean> downloadSkipIfExist() {
+        public CompletableFuture<Throwable> downloadSkipIfExist() {
             if(isPrepareExist()) {
-                return CompletableFuture.completedFuture(true);
+                return CompletableFuture.completedFuture(null);
             } else return download();
         }
         public boolean isLoadExist() {;
@@ -161,7 +164,8 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
     public static final List<Lib> libs = List.of(
             new Lib("mrxiaom-bilibili-open-live-1.0.4.jar", "https://xiaoshadiao.club/3rd_lib/mrxiaom-bilibili-open-live-1.0.4.jar", "a8f72cfa9754d267f0b47703a96d519e"),
             new Lib("jlayer-1.0.1.jar", "https://xiaoshadiao.club/3rd_lib/jlayer-1.0.1.jar", "601db87031f231fbf7a61f9d8384dde6"),
-            new Lib("Java-WebSocket-1.5.6.jar", "https://xiaoshadiao.club/3rd_lib/Java-WebSocket-1.5.6.jar", "0c663cf078f779f5d03fa4d02e1647e3")
+            new Lib("Java-WebSocket-1.5.6.jar", "https://xiaoshadiao.club/3rd_lib/Java-WebSocket-1.5.6.jar", "0c663cf078f779f5d03fa4d02e1647e3"),
+            new Lib("blivemode.jar", "https://xiaoshadiao.club/3rd_lib/blivemode.jar", "3f40b7f8d8c4a14da4bc4171ec3b300f")
     );
 
     @Override
@@ -198,36 +202,38 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
     }
 
     private void moveOldLibToNewLib() {
-        List<CompletableFuture<Boolean>> downloadFutures = new ArrayList<>();
+        List<CompletableFuture<Throwable>> downloadFutures = new ArrayList<>();
         for (Lib lib : libs) {
             if(lib.isPrepareExist()) {
                 downloadFutures.add(CompletableFuture.completedFuture(null).thenCompose(o -> {
+                    Throwable error = null;
                     try {
                         moveFile(lib);
                     } catch (IOException e) {
-                        return CompletableFuture.failedFuture(e);
+                        error = e;
                     }
-                    return CompletableFuture.completedFuture(true);
+                    return CompletableFuture.completedFuture(error);
                 }));
             } else if(!lib.isLoadExist()) {
-                CompletableFuture<Boolean> download = lib.download().thenCompose(a -> {
-                    if(a) {
+                CompletableFuture<Throwable> download = lib.download().thenCompose(a -> {
+                    if(a == null) {
                         try {
                             moveFile(lib);
-                            return CompletableFuture.completedFuture(true);
+                            return CompletableFuture.completedFuture(null);
                         } catch (IOException e) {
-                            return CompletableFuture.failedFuture(e);
+                            return CompletableFuture.completedFuture(e);
                         }
                     }
-                    return CompletableFuture.completedFuture(false);
+                    return CompletableFuture.completedFuture(a);
                 });
                 downloadFutures.add(download);
             }
         }
         try {
-            for (CompletableFuture<Boolean> downloadFuture : downloadFutures) {
-                if (!downloadFuture.get()) {
-                    throw new RuntimeException("初次使用SkyDiao，lib库文件下载失败，SkyDiao感到非常生气。请检查网络状态并尝试重启游戏！");
+            for (CompletableFuture<Throwable> downloadFuture : downloadFutures) {
+                Throwable throwable = downloadFuture.get();
+                if (throwable != null) {
+                    throw new RuntimeException("初次使用SkyDiao，lib库文件下载失败，SkyDiao感到非常生气。请检查网络状态并尝试重启游戏！", throwable);
                 }
             }
         } catch (Throwable e) {

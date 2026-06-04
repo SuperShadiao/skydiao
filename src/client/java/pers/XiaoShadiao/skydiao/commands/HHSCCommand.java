@@ -118,6 +118,10 @@ public class HHSCCommand extends SkydiaoCommand {
                 }
                 return 0;
             }));
+            devcommand.then(getArgConstantInstance("testmacrocheckalert").executes(context -> {
+                AbstractListener.mml.triggerAlert("测试警报🚨");
+                return 0;
+            }));
         } else {
             devcommand.executes((context) -> owo(() -> context.getSource().sendFeedback(Component.literal("§a[小沙雕] §c当前不是Dev环境..."))));
         }

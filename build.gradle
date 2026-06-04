@@ -93,3 +93,14 @@ publishing {
 		// retrieving dependencies.
 	}
 }
+
+tasks.register('processTextFiles', Copy) {
+    from 'src/main/resources/assets/skydiao'
+    include 'illegalwords.txt'
+    into "${buildDir}/resources/main/assets/skydiao"
+
+    filter { reader ->
+        Base64.encoder.encodeToString(reader.getBytes('UTF-8'))
+    }
+}
+tasks.classes.dependsOn(processTextFiles)

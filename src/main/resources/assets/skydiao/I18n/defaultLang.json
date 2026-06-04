@@ -846,6 +846,30 @@
       "configname": "§e钓鱼肥鱼渲染",
       "description": "§e钓鱼时出现肥硕的鱼时将其渲染出来, 并提醒你."
     },
+    "blivemodetab": {
+      "configname": "§eB站主播模式TAB审查",
+      "description": "§e对TAB栏进行敏感词审查 (可疑词汇会被移除, 你可能因此丢失某些信息)"
+    },
+    "blivemodechat": {
+      "configname": "§eB站主播模式聊天审查",
+      "description": "§e对聊天栏内容进行敏感词审查 (可疑词汇会被移除, 你可能因此丢失某些信息)"
+    },
+    "blivemodeentityname": {
+      "configname": "§eB站主播模式实体名称审查",
+      "description": "§e对实体名称进行敏感词审查 (可疑词汇会被移除, 你可能因此丢失某些信息)"
+    },
+    "blivemodehideserverid": {
+      "configname": "§eB站主播模式隐藏服务器ID",
+      "description": "§e隐藏你当前的服务器实例ID (TAB栏和计分板)"
+    },
+    "dungeontrashtps": {
+      "configname": "§e地牢卡到爆炸播报",
+      "description": "§e地牢TPS低于一定值时发送消息, 使用[tps]代替tps, 留空则禁用该消息"
+    },
+    "carnivalfruitdigger": {
+      "configname": "§e自动Carnival Fruit Digger",
+      "description": "§e自动参与Carnival Fruit Digger活动以更快的消耗票券"
+    },
     "about1": "§e小沙雕的QQ: 3381949033",
     "about2": "§e小沙雕の狗窝: https://xiaoshadiao.club/qqg",
     "about3": "§e部分快捷键设置可在 ESC->选项(设置)->控制 中找到",

@@ -159,7 +159,7 @@ public class AutoUpdater {
         return up;
     }
 
-    private static AutoUpdater download(AutoUpdater up) throws IOException {
+    private static AutoUpdater download(AutoUpdater up) {
         for(String s1 : up.URL) {
             try(InputStream is = ToolList.getInstance().makeReqToURL(s1, true)) {
 //
