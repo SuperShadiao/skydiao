@@ -2,9 +2,13 @@ package pers.XiaoShadiao.skydiao.eventbuslistener.macro;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
-import net.minecraft.client.KeyMapping;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.hypixel.modapi.HypixelModAPI;
+import net.hypixel.modapi.packet.impl.serverbound.ServerboundPingPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.chat.Component;
@@ -12,22 +16,27 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.*;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.Vec3;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractFishingListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.E2AMappingListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
+import pers.XiaoShadiao.skydiao.mixin.client.MixinEntityCloneable;
+import pers.XiaoShadiao.skydiao.mixin.client.MixinEntityCloneableAccessor;
+import pers.XiaoShadiao.skydiao.mixin.client.MixinFishHookEntityHookedAccessor;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
+import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class AutoFishListener extends AbstractFishingListener implements IMacro {
@@ -364,6 +373,20 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
         ClientTickEvents.START_CLIENT_TICK.register(this::onStartClientTick);
         ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register(this::worldUnload);
+        WorldRenderEvents.END_MAIN.register(this::onLastRender);
+    }
+
+    private void onLastRender(WorldRenderContext context) {
+        if(mc.player == null || mc.player.fishing == null || mc.level == null || !ConfigManager.autoFish.getValue()) return;
+        if(fakeFishHook != null && !isHookInLiquid() && lockedHookedEntity == null) {
+            RenderUtils.WorldRender wr = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_LINE);
+            RenderUtils.renderESP(wr, fakeFishHook, 1, 0, 0, 1, false);
+            RenderUtils.renderESP(wr, mc.player.fishing, 0, 1, 1, 1, false);
+            RenderUtils.renderWorldLine(wr, fakeFishHook.position(), mc.player.fishing.position(),
+                    1, 0, 0, 1,
+                    0, 1, 1, 1);
+            wr.finishDraw();
+        }
     }
 
     private void worldUnload(Minecraft mc, ClientLevel level) {
@@ -372,11 +395,39 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
 
     private int lastHookEntityId;
 
+    private ArmorStand fishHookCarrier;
+    private Entity lockedHookedEntity;
+    private FishingHook fakeFishHook;
+    private int failedToSimulateTick;
+    private final List<Vec3> fakeFishHookPath = new ArrayList<>();
+
     private void onStartClientTick(Minecraft mc) {
         if(mc.player == null || mc.player.fishing == null || mc.level == null) {
+            if(fakeFishHook != null && mc.level != null) {
+                mc.level.removeEntity(fakeFishHook.getId(), Entity.RemovalReason.DISCARDED);
+            }
+            fakeFishHook = null;
+            failedToSimulateTick = 0;
+            lockedHookedEntity = null;
+            fishHookCarrier = null;
+            fakeFishHookPath.clear();
             return;
         }
 
+        if(fakeFishHook == null) {
+            fakeFishHook = ToolList.getInstance().cloneEntity(mc.player.fishing);
+            fakeFishHook.setId(-999);
+            fakeFishHook.setUUID(UUID.randomUUID());
+            fakeFishHook.setInvisible(true);
+            ((MixinFishHookEntityHookedAccessor) fakeFishHook).setHookedEntity0(null);
+        }
+        if(fakeFishHook != null) {
+            fakeFishHook.setOnGround(false);
+            fakeFishHook.setOldPosAndRot();
+            fakeFishHook.tick();
+            fakeFishHookPath.add(fakeFishHook.position());
+            if(fakeFishHookPath.size() > 20) fakeFishHookPath.removeFirst();
+        }
         for (Entity entity : mc.level.entitiesForRendering()) {
             if(!(entity instanceof ArmorStand armorStand)) continue;
 
@@ -392,11 +443,15 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
                 }
             }
         }
-        Entity hooked = mc.player.fishing.getHookedIn();
+
+        if(lockedHookedEntity != null && !ToolList.getInstance().isEntityOnWorld(lockedHookedEntity)) lockedHookedEntity = null;
+        Entity hooked = lockedHookedEntity != null ? lockedHookedEntity : mc.player.fishing.getHookedIn();
         if(hooked != null) {
             // class_1531['[Lv65] ⚓☮♃ gorF 33,000/40,000❤'/924037, l='ClientLevel', x=16.45, y=64.48, z=3.47]
+            if(hooked instanceof ArmorStand carrier) fishHookCarrier = carrier;
             E2AMappingListener.MobInfo mobInfo = e2AMappingListener.getMobInfo(hooked.asLivingEntity());
             if (mobInfo != null && mobInfo.armorStand.getName().getString().contains("❤") /* 包含❤符号证明是海怪, 自动重抛 */) {
+                lockedHookedEntity = hooked;
                 triggerFishHook();
             }
         }
@@ -414,8 +469,36 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
                 triggerFishHook();
             }
         }
+        if(fakeFishHook != null && !isHookInLiquid() && lockedHookedEntity == null) {
+            double distanceSqr = fakeFishHookPath.stream().mapToDouble(v -> mc.player.fishing.distanceToSqr(v)).min().orElse(mc.player.fishing.distanceToSqr(fakeFishHook));
+            if(distanceSqr > 1.5 * 1.5) {
+                failedToSimulateTick++;
+                if(failedToSimulateTick > 10) {
+                    if(isThisMacroEnabled()) AbstractListener.mml.triggerAlert("鱼钩脱离正常的轨迹, 疑似马口检查!");
+                    failedToSimulateTick = -30;
+                }
+            } else {
+                failedToSimulateTick = 0;
+            }
+        } else {
+            failedToSimulateTick = 0;
+        }
 
         isEmergencyStopped &= basicListener.isAFK();
+    }
+
+    private boolean isHookInLiquid() {
+        if (mc.level == null || mc.player == null || mc.player.fishing == null) {
+            return false;
+        }
+        if (!StatusManager.get().isInSkyblock()) {
+            return mc.player.fishing.isInLiquid();
+        }
+        Vec3 posB = mc.player.fishing.position();
+        Vec3 posA = posB.add(0, -0.3, 0);
+
+        return mc.level.getFluidState(BlockPos.containing(posA)).is(FluidTags.WATER) || mc.level.getFluidState(BlockPos.containing(posB)).is(FluidTags.WATER)
+        || mc.level.getFluidState(BlockPos.containing(posA)).is(FluidTags.LAVA) || mc.level.getFluidState(BlockPos.containing(posB)).is(FluidTags.LAVA);
     }
 
     private boolean isReady;
@@ -431,7 +514,7 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
             if (str.toLowerCase().matches("(.*)(mythical fish|神话鱼)(.*)")) {
                 mythicalFishModeFlag = true;
             }
-        } else if(packet instanceof ClientboundMoveEntityPacket movePacket) {
+        } else if(packet instanceof ClientboundMoveEntityPacket movePacket && !StatusManager.get().isInSkyblock()) {
             Entity entity = movePacket.getEntity(mc.level);
             if(entity != null && mc.player.fishing == entity) {
                 if(entity.isInLiquid()) {

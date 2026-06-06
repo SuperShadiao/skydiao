@@ -115,7 +115,7 @@ public class BasicListener extends AbstractListener {
 
     private Component onModifyChat(Component component, boolean b) {
         if(ToolList.getInstance().random.nextInt(10) == 5 && component.getString().contains("§aGalatea") && component instanceof MutableComponent m) {
-            MutableComponent component1 = Component.literal(m.getString().replace("§aGalatea", "§aGalagame"));
+            MutableComponent component1 = Component.literal(m.getString().replace("§aGalatea", "§aGalgame"));
             component1.getSiblings().forEach(m::append);
             component1.setStyle(m.getStyle());
             return component1;

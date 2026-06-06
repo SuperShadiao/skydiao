@@ -23,11 +23,11 @@ public class PathRenderer {
 
             // 如果方向发生变化（转弯），添加当前点
             if (i == 1 || isDirectionChange(getListIndex(positions, i - 2), current, getListIndex(positions, i - 1))) {
-                RenderUtils.renderWorldLine(wr, prev, current, r, g, b, 1.0F);
+                RenderUtils.renderWorldLine(wr, prev.add(0.5, 0.5, 0.5), current.add(0.5, 0.5, 0.5), r, g, b, 1.0F);
                 prev = current;
             }
         }
-        RenderUtils.renderWorldLine(wr, prev, current, r, g, b, 1.0F);
+        RenderUtils.renderWorldLine(wr, prev.add(0.5, 0.5, 0.5), current.add(0.5, 0.5, 0.5), r, g, b, 1.0F);
 
         if(drawEnd) {
             RenderUtils.renderESP(wr, current, r,g,b, 1, false);

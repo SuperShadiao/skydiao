@@ -15,6 +15,7 @@ import net.hypixel.modapi.packet.impl.serverbound.ServerboundPingPacket;
 import net.hypixel.modapi.packet.impl.serverbound.ServerboundPlayerInfoPacket;
 import net.hypixel.modapi.packet.impl.serverbound.ServerboundRegisterPacket;
 import net.hypixel.modapi.serializer.PacketSerializer;
+import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
@@ -184,6 +185,9 @@ public class HypixelModAPI {
      * @return whether the packet was sent successfully
      */
     public boolean sendPacket(HypixelPacket packet) {
+        if (Minecraft.getInstance().isSingleplayer()) {
+            return false;
+        }
         if (packetSender == null) {
             throw new IllegalStateException("Packet sender not set");
         }

@@ -32,6 +32,8 @@
   },
   "mixins": [
     "MixinAcviteProfilePathAccessor",
+    "MixinEntityCloneable",
+    "MixinEntityCloneableAccessor",
     "MixinPacketListener",
     "MixinRandomClassCrash",
     "MixinRemoveMaxHealthLimit",
@@ -42,6 +44,7 @@
     "adapter.secretroute.FPSDropperFix",
     "adapter.skyhanni.FPSDropperFix",
     "blivemode.MixinEntity",
-    "blivemode.MixinEntityPlayer"
+    "blivemode.MixinEntityPlayer",
+    "MixinFishHookEntityHookedAccessor"
   ]
 }

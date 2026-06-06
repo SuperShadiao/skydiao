@@ -1,19 +1,17 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener.macro;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetHeldSlotPacket;
-import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
@@ -25,6 +23,8 @@ import pers.XiaoShadiao.skydiao.irc.ChatPacket;
 import pers.XiaoShadiao.skydiao.utils.Register;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.*;
 
 public class MacroManagerListener extends AbstractListener {
@@ -40,6 +40,10 @@ public class MacroManagerListener extends AbstractListener {
 
     public long lastOpenChatTime = 0;
     public boolean isChatOpen = false;
+    private int smallTickFlag;
+    public boolean isScreenOpen = false;
+
+    public static final File recordDir = new File(new File(mc.gameDirectory, "screenshots"), "xsd_alert_macro_check");
 
     @Override
     public String getListenerName() {
@@ -60,6 +64,8 @@ public class MacroManagerListener extends AbstractListener {
             }
         });
         macros = Collections.unmodifiableList(macros);
+
+        recordDir.mkdirs();
     }
 
     private void onChat(Component component, boolean b) {
@@ -72,7 +78,7 @@ public class MacroManagerListener extends AbstractListener {
     private boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
         if(mc.player != null) {
             if(packet instanceof ClientboundPlayerPositionPacket tpPacket) {
-                if(System.currentTimeMillis() - lastOpenChatTime > 5000 && !activeMacros.isEmpty()) {
+                if(System.currentTimeMillis() - lastOpenChatTime > 5000 && !activeMacros.isEmpty() && tpsListener.getCurrentTPS() > 11) {
                     ToolList.TPInfo tpInfo = ToolList.getInstance().parseTPPacket(tpPacket);
                     IMacro.PositionInfo before = new IMacro.PositionInfo(tpInfo.from().position(), tpInfo.from().yRot() % 360, tpInfo.from().xRot(), tpInfo.from().deltaMovement());
                     IMacro.PositionInfo after = new IMacro.PositionInfo(tpInfo.to().position(), tpInfo.to().yRot() % 360, tpInfo.to().xRot(), tpInfo.to().deltaMovement());
@@ -81,12 +87,14 @@ public class MacroManagerListener extends AbstractListener {
 
                     double distance = historyPoses.stream().mapToDouble(vec3 -> vec3.distanceTo(after.position())).min().orElse(0.0);
                     float deltaYaw = Math.abs(before.yaw() - after.yaw());
-                    if (distance > 0.65 || deltaYaw > 0.05 && deltaYaw < 360 - 0.05 || Math.abs(before.pitch() - after.pitch()) > 0.05) {
+                    if (smallTickFlag > 200 || distance > 0.65 || (deltaYaw > 0.05 && deltaYaw < 360 - 0.05) || Math.abs(before.pitch() - after.pitch()) > 0.05) {
                         boolean flag = true;
                         for (IMacro macro : activeMacros) {
                             flag &= !macro.onMacroCheck(before, after);
                         }
                         if (flag) triggerAlert(before, after);
+                    } else {
+                        smallTickFlag += 100;
                     }
                 }
             } else if(packet instanceof ClientboundSetHeldSlotPacket(int slot)) {
@@ -134,7 +142,6 @@ public class MacroManagerListener extends AbstractListener {
             }, null));
         }
 
-
         if(ChatClientManager.serverAvailable()) {
             ChatPacket p = new ChatPacket();
             p.initSender();
@@ -162,10 +169,16 @@ public class MacroManagerListener extends AbstractListener {
             lastOpenChatTime = System.currentTimeMillis();
         }
         isChatOpen = temp;
+
+        if(smallTickFlag > 0) smallTickFlag--;
     }
 
     public void addActiveMacro(IMacro macro) {
         activeMacros.add(macro);
+    }
+
+    public boolean isMacroEnabled(IMacro macro) {
+        return activeMacros.contains(macro);
     }
 
 }

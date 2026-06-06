@@ -19,6 +19,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PositionMoveRotation;
+import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -33,9 +34,11 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.Platform;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
+import pers.XiaoShadiao.skydiao.mixin.client.MixinEntityCloneableAccessor;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
@@ -487,6 +490,10 @@ public class ToolList {
 
     public void updatePartyInfo() {
         HypixelModAPI.getInstance().sendPacket(new ServerboundPartyInfoPacket());
+    }
+
+    public @NotNull <T extends Entity> T cloneEntity(T entity) {
+        return (T) ((MixinEntityCloneableAccessor) entity).clone();
     }
 
     public record TPInfo(PositionMoveRotation from, PositionMoveRotation to) { }

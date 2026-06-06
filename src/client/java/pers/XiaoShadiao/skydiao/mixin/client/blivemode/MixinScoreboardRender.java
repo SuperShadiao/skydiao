@@ -22,22 +22,20 @@ import java.util.function.Consumer;
 public class MixinScoreboardRender {
 
     @WrapMethod(method = "formatNameForTeam")
-    private static MutableComponent format(Team team, Component component, Operation<MutableComponent> original) {
-        MutableComponent call = original.call(team, component);
+    private static MutableComponent format(Team team, Component component, Operation<MutableComponent> original2) {
+        MutableComponent call = original2.call(team, component);
 
         if(!ConfigManager.blivemodehideserverid.getValue()) return call;
         if(call.getSiblings().size() != 3 || call.getContents() != PlainTextContents.EMPTY) return call;
 
         MutableComponent empty = Component.empty();
         empty.setStyle(call.getStyle());
-        call.getSiblings().forEach(new Consumer<>() {
-
-            public final String smallServerId = String.valueOf(StatusManager.get().getSmallServerID());
-            public boolean replacedServerId = false;
-            public int i;
-
-            @Override
-            public void accept(Component ele) {
+        {
+            String smallServerId = String.valueOf(StatusManager.get().getSmallServerID());
+            boolean replacedServerId = false;
+            int i = 0;
+            for (Component ele : call.getSiblings()) {
+                if(!ele.getSiblings().isEmpty()) return call;
                 ComponentContents contents = replacedServerId ? PlainTextContents.EMPTY : ele.getContents();
                 ComponentContents original = contents;
                 if(i == 0) {
@@ -64,8 +62,7 @@ public class MixinScoreboardRender {
                 empty.append(component1);
                 i++;
             }
-
-        });
+        }
 
         return empty;
     }

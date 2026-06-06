@@ -32,4 +32,8 @@ public interface IMacro {
         AbstractListener.mml.addActiveMacro(this);
     }
 
+    public default boolean isThisMacroEnabled() {
+        return AbstractListener.mml.isMacroEnabled(this);
+    }
+
 }

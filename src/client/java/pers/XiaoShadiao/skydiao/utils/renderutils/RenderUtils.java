@@ -229,7 +229,7 @@ public class RenderUtils {
     }
 
     public static void renderWorldLine(WorldRender worldRender, Vec3 pos1, Vec3 pos2, float r1, float g1, float b1, float a1, float r2, float g2, float b2, float a2) {
-        renderWorldLine(worldRender, pos1.x() + 0.5, pos1.y() + 0.5, pos1.z() + 0.5, pos2.x() + 0.5, pos2.y() + 0.5, pos2.z() + 0.5, r1, g1, b1, a1, r2, g2, b2, a2);
+        renderWorldLine(worldRender, pos1.x(), pos1.y(), pos1.z(), pos2.x(), pos2.y(), pos2.z(), r1, g1, b1, a1, r2, g2, b2, a2);
     }
 
     public static void renderWorldLine(WorldRender worldRender, Vec3 pos1, Vec3 pos2, float r1, float g1, float b1, float a1) {
