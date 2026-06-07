@@ -84,7 +84,7 @@ public class GhostEntityFixer extends AbstractListener {
             while (it.hasNext()) {
                 Int2ObjectMap.Entry<UpdateCounter> next = it.next();
                 UpdateCounter value = next.getValue();
-                if (System.currentTimeMillis() - value.startTime > 10000) {
+                if (value != null && System.currentTimeMillis() - value.startTime > 10000) {
                     int entityId = next.getIntKey();
                     Entity entity = mc.level.getEntity(entityId);
                     if (entity == null) {

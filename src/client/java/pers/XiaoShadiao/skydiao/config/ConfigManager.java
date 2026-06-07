@@ -41,7 +41,7 @@ public class ConfigManager {
     public static final BooleanConfigOption cooltitle = new BooleanConfigOption("cooltitle", true) {
         @Override
         public void setValue(Boolean value) {
-            if(!value) ToolList.mc.updateTitle();
+            if(!value && ToolList.mc.getWindow() != null) ToolList.mc.updateTitle();
             super.setValue(value);
         }
     };

@@ -8,6 +8,7 @@
     "MixinAbstractContainerScreenPosGetter",
     "MixinBossbarEventGetter",
     "MixinBossBarRemoveAnimation",
+    "MixinChatScreen",
     "MixinClientLanguage",
     "MixinCustomCape",
     "MixinDeleteWallEffect",
@@ -34,6 +35,7 @@
     "MixinAcviteProfilePathAccessor",
     "MixinEntityCloneable",
     "MixinEntityCloneableAccessor",
+    "MixinFishHookEntityHookedAccessor",
     "MixinPacketListener",
     "MixinRandomClassCrash",
     "MixinRemoveMaxHealthLimit",
@@ -44,7 +46,6 @@
     "adapter.secretroute.FPSDropperFix",
     "adapter.skyhanni.FPSDropperFix",
     "blivemode.MixinEntity",
-    "blivemode.MixinEntityPlayer",
-    "MixinFishHookEntityHookedAccessor"
+    "blivemode.MixinEntityPlayer"
   ]
 }

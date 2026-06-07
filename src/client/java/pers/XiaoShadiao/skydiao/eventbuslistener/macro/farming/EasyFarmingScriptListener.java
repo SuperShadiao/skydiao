@@ -85,6 +85,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
     private boolean ended;
 
     private long lastSendCommandTime;
+    private long lastGetCheckedTime;
 
     private int currentHandItemIndex;
 
@@ -169,6 +170,9 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         } else if(!isInGarden() && enabled && toggled) {
             enabled = false;
             ToolList.printChatMessage(Component.literal("§a[小沙雕] §c请在Garden开启农业脚本!"));
+        } else if(System.currentTimeMillis() - lastGetCheckedTime < 2000 && enabled && toggled) {
+            enabled = false;
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c检测到刚才疑似被Check, 请稍等片刻再启用!"));
         } if(toggled) {
             if(enabled) {
                 ToolList.printChatMessage(Component.literal("§a[小沙雕] §e农业脚本已§a开启§e, 前往任意一个节点以开始执行"));
@@ -244,8 +248,9 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
     public boolean onMacroCheck(PositionInfo beforeTP, PositionInfo afterTP) {
         if(System.currentTimeMillis() - lastSendCommandTime < 5000) return true;
         ToolList.addThreadedTask(() -> {
-            Thread.sleep(5000);
+            Thread.sleep(1500);
             ended = true;
+            lastGetCheckedTime = System.currentTimeMillis();
             return null;
         });
         return false;
@@ -254,8 +259,9 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
     @Override
     public boolean onMacroCheck(int beforeSlot, int afterSlot) {
         ToolList.addThreadedTask(() -> {
-            Thread.sleep(5000);
+            Thread.sleep(1500);
             ended = true;
+            lastGetCheckedTime = System.currentTimeMillis();
             return null;
         });
         return false;

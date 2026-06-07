@@ -41,6 +41,7 @@ import java.util.function.Consumer;
 
 public class AutoFishListener extends AbstractFishingListener implements IMacro {
 
+    private static final double MAX_SIMULATE_OFFSET = 1.7;
     public boolean mythicalFishModeFlag;
     public boolean mythicalFishMode;
 
@@ -424,9 +425,11 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
         if(fakeFishHook != null) {
             fakeFishHook.setOnGround(false);
             fakeFishHook.setOldPosAndRot();
-            fakeFishHook.tick();
+            for (int i = 0; i < (mc.player.fishing.distanceTo(fakeFishHook) > MAX_SIMULATE_OFFSET && fakeFishHook.getY() > mc.player.fishing.getY() == fakeFishHook.getDeltaMovement().y() < 0 ? 2 : 1); i++) {
+                fakeFishHook.tick();
+            }
             fakeFishHookPath.add(fakeFishHook.position());
-            if(fakeFishHookPath.size() > 20) fakeFishHookPath.removeFirst();
+            if(fakeFishHookPath.size() > 40) fakeFishHookPath.removeFirst();
         }
         for (Entity entity : mc.level.entitiesForRendering()) {
             if(!(entity instanceof ArmorStand armorStand)) continue;
@@ -471,10 +474,15 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
         }
         if(fakeFishHook != null && !isHookInLiquid() && lockedHookedEntity == null) {
             double distanceSqr = fakeFishHookPath.stream().mapToDouble(v -> mc.player.fishing.distanceToSqr(v)).min().orElse(mc.player.fishing.distanceToSqr(fakeFishHook));
-            if(distanceSqr > 1.5 * 1.5) {
+            if(distanceSqr > MAX_SIMULATE_OFFSET * MAX_SIMULATE_OFFSET) {
                 failedToSimulateTick++;
                 if(failedToSimulateTick > 10) {
-                    if(isThisMacroEnabled()) AbstractListener.mml.triggerAlert("鱼钩脱离正常的轨迹, 疑似马口检查!");
+                    if(isThisMacroEnabled()) {
+                        AbstractListener.mml.triggerAlert("鱼钩脱离正常的轨迹, 疑似马口检查!");
+                    } else {
+                        ToolList.printChatMessage(Component.literal("§a[小沙雕] §e注意: 请保证§c红色 (预测位置)§e 和§b青色 (鱼钩位置)§e 靠在一起, 防止Macro警报误触发."));
+                        ToolList.printChatMessage(Component.literal("§a[小沙雕] §e若成功靠在一起, 该消息不会弹出"));
+                    }
                     failedToSimulateTick = -30;
                 }
             } else {

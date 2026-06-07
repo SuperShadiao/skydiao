@@ -53,6 +53,8 @@ public class DungeonMiscMessageListener extends AbstractListener implements IDun
             sendDungeonF7ChatMessage(ConfigManager.dungeonBloodRoomTime.getValue().replace("[time]", String.valueOf((System.currentTimeMillis() - dungeonStartTime) / 1000f)));
         } else if(msg.equals("You can no longer consume or splash any potions during the remainder of this Dungeon run!")) {
             sendDungeonF7ChatMessage(ConfigManager.dungeonDrinkPotion.getValue());
+        } else if(msg.startsWith("PUZZLE FAIL!") || msg.equals("[STATUE] Oruo the Omniscient: Yikes")) {
+            addStarRailNotification("好像有人PUZZLE FAIL了呢, Yikes!", StarRailNotification.Type.warning);
         }
         // sendDungeonF7ChatMessage(ConfigManager.dungeonBloodRoomTime.getValue());;
     }
