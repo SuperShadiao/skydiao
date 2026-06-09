@@ -39,15 +39,17 @@ public class ClientReceiveHandler {
                 sender.flagHeartbeat();
                 break;
             case "afk":
-                ToolList.printChatMessage(Component.literal("§a[XSDChat] " + packet.getRank(true) + "§d" + packet.sender + (Boolean.parseBoolean(packet.message) ? " §7" + CrowdinI18nManager.translate("xsdchat.afk.in") : " §e" + CrowdinI18nManager.translate("xsdchat.afk.out"))));
+                if(ConfigManager.enableircafktip.getValue()) ToolList.printChatMessage(Component.literal("§a[XSDChat] " + packet.getRank(true) + "§d" + packet.sender + (Boolean.parseBoolean(packet.message) ? " §7" + CrowdinI18nManager.translate("xsdchat.afk.in") : " §e" + CrowdinI18nManager.translate("xsdchat.afk.out"))));
                 break;
             case "glacite_mineshaft_share":
                 AbstractListener.mineshaftShareListener.onIRCMineshaftSharePacket(packet);
                 break;
             case "macro_check":
-                MutableComponent component = Component.literal("§a[XSDChat] " + packet.getRank(true) + "§d" + packet.sender + " §c触发了Macro Check警报! §e[HOVER]");
-                Style style = Style.EMPTY.withHoverEvent(new HoverEvent.ShowText(Component.literal(packet.message)));
-                ToolList.printChatMessage(component.setStyle(style));
+                if(ConfigManager.enableircmacrochecktip.getValue()) {
+                    MutableComponent component = Component.literal("§a[XSDChat] " + packet.getRank(true) + "§d" + packet.sender + " §c触发了Macro Check警报! §e[HOVER]");
+                    Style style = Style.EMPTY.withHoverEvent(new HoverEvent.ShowText(Component.literal(packet.message)));
+                    ToolList.printChatMessage(component.setStyle(style));
+                }
                 break;
             case "hyp_party":
                 ToolList.getInstance().updatePartyInfo();

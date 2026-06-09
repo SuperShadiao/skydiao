@@ -4,8 +4,6 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
-import net.hypixel.modapi.HypixelModAPI;
-import net.hypixel.modapi.packet.impl.serverbound.ServerboundPingPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -27,8 +25,6 @@ import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractFishingListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.E2AMappingListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
-import pers.XiaoShadiao.skydiao.mixin.client.MixinEntityCloneable;
-import pers.XiaoShadiao.skydiao.mixin.client.MixinEntityCloneableAccessor;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinFishHookEntityHookedAccessor;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
@@ -41,7 +37,7 @@ import java.util.function.Consumer;
 
 public class AutoFishListener extends AbstractFishingListener implements IMacro {
 
-    private static final double MAX_SIMULATE_OFFSET = 1.7;
+    private static final double MAX_SIMULATE_OFFSET = 1.2;
     public boolean mythicalFishModeFlag;
     public boolean mythicalFishMode;
 
@@ -379,7 +375,7 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
 
     private void onLastRender(WorldRenderContext context) {
         if(mc.player == null || mc.player.fishing == null || mc.level == null || !ConfigManager.autoFish.getValue()) return;
-        if(fakeFishHook != null && !isHookInLiquid() && lockedHookedEntity == null) {
+        if(fakeFishHook != null && !isHookInLiquid() && lockedHookedEntity == null && mc.player.fishing.getHookedIn() != null) {
             RenderUtils.WorldRender wr = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_LINE);
             RenderUtils.renderESP(wr, fakeFishHook, 1, 0, 0, 1, false);
             RenderUtils.renderESP(wr, mc.player.fishing, 0, 1, 1, 1, false);
@@ -400,6 +396,9 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
     private Entity lockedHookedEntity;
     private FishingHook fakeFishHook;
     private int failedToSimulateTick;
+    private int failedToSimulateCounter;
+    private Vec3 lastRecordFishHookMotion;
+
     private final List<Vec3> fakeFishHookPath = new ArrayList<>();
 
     private void onStartClientTick(Minecraft mc) {
@@ -411,6 +410,7 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
             failedToSimulateTick = 0;
             lockedHookedEntity = null;
             fishHookCarrier = null;
+            failedToSimulateCounter = 0;
             fakeFishHookPath.clear();
             return;
         }
@@ -429,7 +429,7 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
                 fakeFishHook.tick();
             }
             fakeFishHookPath.add(fakeFishHook.position());
-            if(fakeFishHookPath.size() > 40) fakeFishHookPath.removeFirst();
+            if(fakeFishHookPath.size() > 60) fakeFishHookPath.removeFirst();
         }
         for (Entity entity : mc.level.entitiesForRendering()) {
             if(!(entity instanceof ArmorStand armorStand)) continue;
@@ -472,16 +472,24 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
                 triggerFishHook();
             }
         }
-        if(fakeFishHook != null && !isHookInLiquid() && lockedHookedEntity == null) {
+        if(fakeFishHook != null && !isHookInLiquid() && lockedHookedEntity == null && hooked != null) {
             double distanceSqr = fakeFishHookPath.stream().mapToDouble(v -> mc.player.fishing.distanceToSqr(v)).min().orElse(mc.player.fishing.distanceToSqr(fakeFishHook));
             if(distanceSqr > MAX_SIMULATE_OFFSET * MAX_SIMULATE_OFFSET) {
                 failedToSimulateTick++;
-                if(failedToSimulateTick > 10) {
-                    if(isThisMacroEnabled()) {
-                        AbstractListener.mml.triggerAlert("鱼钩脱离正常的轨迹, 疑似马口检查!");
-                    } else {
-                        ToolList.printChatMessage(Component.literal("§a[小沙雕] §e注意: 请保证§c红色 (预测位置)§e 和§b青色 (鱼钩位置)§e 靠在一起, 防止Macro警报误触发."));
-                        ToolList.printChatMessage(Component.literal("§a[小沙雕] §e若成功靠在一起, 该消息不会弹出"));
+                if(failedToSimulateTick > 5) {
+                    failedToSimulateCounter++;
+                    if(ToolList.getInstance().isXiaoShadiao()) ToolList.printChatMessage(Component.literal("§a[小沙雕] §e鱼钩脱离正常的轨迹, 尝试第" + failedToSimulateCounter + "次校正..."));
+                    if(failedToSimulateCounter > 1) {
+                        if (isThisMacroEnabled()) {
+                            AbstractListener.mml.triggerAlert("鱼钩脱离正常的轨迹, 疑似马口检查!");
+                        } else {
+                            ToolList.printChatMessage(Component.literal("§a[小沙雕] §e注意: 请保证§c红色 (预测位置)§e 和§b青色 (鱼钩位置)§e 靠在一起, 防止Macro警报误触发."));
+                            ToolList.printChatMessage(Component.literal("§a[小沙雕] §e若成功靠在一起, 该消息不会弹出"));
+                        }
+                    }
+                    if(fakeFishHook != null && lastRecordFishHookMotion != null && !lastRecordFishHookMotion.equals(Vec3.ZERO)) {
+                        fakeFishHook.setPos(mc.player.fishing.position());
+                        fakeFishHook.setDeltaMovement(lastRecordFishHookMotion);
                     }
                     failedToSimulateTick = -30;
                 }
@@ -533,6 +541,14 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
                         fishHookOnGroundCount = 0;
                         triggerFishHook();
                     }
+                }
+            }
+        } else if(packet instanceof ClientboundSetEntityMotionPacket motionPacket) {
+            Entity entity = mc.level.getEntity(motionPacket.getId());
+            if(entity != null) {
+                if(mc.player.fishing == entity) {
+                    // logger.info("Hook: " + motionPacket.getMovement());
+                    lastRecordFishHookMotion = motionPacket.getMovement();
                 }
             }
         }

@@ -48,7 +48,7 @@ public class XSDSafeSession extends User {
         boolean isFullySafe = opt.isPresent();
         if (isFullySafe) flag = true;
         if (stack.startsWith("gg.essential")) {
-            return new Object[] {false, stack, null};
+            return new Object[] {false, stack, null}; // 艾斯比 mod。
         }
 
         if (!flag) {

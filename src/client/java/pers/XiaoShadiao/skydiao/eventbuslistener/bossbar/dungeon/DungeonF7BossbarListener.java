@@ -58,11 +58,16 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     private int stopTick = 0;
     private Vec3 stage2LastPosition;
 
+    private boolean stage3LeapTip;
+
     private boolean stage4PlatformHasBlock;
     private boolean stage4PlatformTip;
     //  53 64 113 56 64 116
     private final BlockPos stage4PlatformCorn1 = new BlockPos(53, 64, 113);
     private final BlockPos stage4PlatformCorn2 = new BlockPos(56 - 1, 64 - 1, 116 - 1);
+
+    private final BlockPos stage3LeapPositionCorn1 = new BlockPos(110, 125, 88);
+    private final BlockPos stage3LeapPositionCorn2 = new BlockPos(102, 120, 99);
 
     private boolean isNecronUsingUltimateSkill;
 
@@ -333,6 +338,14 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                         }
                     }
                 }
+                if(getHealth() == 0 && !stage3LeapTip) {
+                    if(mc.player.onGround() && ToolList.getInstance().isEntityInArea(mc.player, stage3LeapPositionCorn1, stage3LeapPositionCorn2)) {
+                        stage3LeapTip = true;
+                        sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotssleap.getValue() + " (SS Leap)");
+                    }
+                }
+            } else {
+                stage3LeapTip = false;
             }
             if(currentStage == 3) {
                 if(getHealth() == 0 && !stage4PlatformTip) {
@@ -425,6 +438,9 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                 isNecronUsingUltimateSkill = false;
             }
         }
+        if(message.contains(">") && message.contains("[SkyDiao]") && message.contains("(SS Leap)")) {
+            stage3LeapTip = true;
+        }
     }
 
     private long stormThunderFlagTime = 0;
@@ -445,6 +461,13 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                         message.contains("activated a terminal") || message.contains("activated a lever") || message.contains("completed a device") || message.contains("The gate") || message.contains("The Core entrance")
         ) {
             turnItToStarRailMsg = new AbstractMap.SimpleEntry<>(message, StarRailNotification.Type.success);
+        }
+        if(message.contains("The Core entrance")) {
+            ToolList.addThreadedTask(() -> {
+                Thread.sleep(100);
+                remainTerminal = 0;
+                return null;
+            });
         }
         if(currentStage == 2) {
             if(message.trim().matches("[2-7]")) {
