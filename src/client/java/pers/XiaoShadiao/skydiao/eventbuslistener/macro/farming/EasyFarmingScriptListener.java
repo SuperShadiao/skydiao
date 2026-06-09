@@ -93,6 +93,9 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 
     private boolean renderNodes = true;
 
+    private BlockPos groupStartPos = null;
+    private BlockPos groupEndPos = null;
+
     public long getNodeExecDelay() {
         return nodeExecDelay;
     }
@@ -341,6 +344,91 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             i++;
             ToolList.printChatMessage(Component.literal("§a[小沙雕] §f" + i + " - §e" + op.toChatString()));
         }
+    }
+
+    public void groupStart() {
+        if(mc.player == null) return;
+        BlockPos position = BlockPos.containing(mc.player.position());
+        ToolList.printChatMessage(Component.literal(
+                "§a[小沙雕] 标记" + position + "为组开始坐标"));
+        this.groupStartPos = position;
+    }
+
+    public void groupEnd() {
+        if(mc.player == null) return;
+        BlockPos position = BlockPos.containing(mc.player.position());
+        ToolList.printChatMessage(Component.literal(
+                "§a[小沙雕] 标记" + position + "为组结束坐标"));
+        this.groupEndPos = position;
+    }
+
+    private boolean checkGroupPosValid() {
+        if (groupStartPos == null || groupEndPos == null) {
+            ToolList.printChatMessage(Component.literal(
+                    "§a[小沙雕] 未指定" + (groupStartPos == null ? "开始" : "终止") + "坐标"));
+            return false;
+        }
+        return true;
+    }
+
+    private record BlockRange(int minX, int minY, int minZ,
+                              int maxX, int maxY, int maxZ) {}
+
+    private BlockRange getBlockRange(BlockPos a, BlockPos b) {
+        return new BlockRange(
+                Math.min(a.getX(), b.getX()),
+                Math.min(a.getY(), b.getY()),
+                Math.min(a.getZ(), b.getZ()),
+                Math.max(a.getX(), b.getX()),
+                Math.max(a.getY(), b.getY()),
+                Math.max(a.getZ(), b.getZ())
+        );
+    }
+
+    private boolean isNodeInRange(ExecuteNode node, BlockRange range) {
+        return node.pos.getX() >= range.minX && node.pos.getX() <= range.maxX
+                && node.pos.getY() >= range.minY && node.pos.getY() <= range.maxY
+                && node.pos.getZ() >= range.minZ && node.pos.getZ() <= range.maxZ;
+    }
+
+    public void groupDelete() {
+        if (!this.checkGroupPosValid()) return;
+        BlockRange blockRange = getBlockRange(this.groupStartPos, this.groupEndPos);
+
+        int nodeCountOld = this.executeNodes.size();
+        this.executeNodes.removeIf(node -> isNodeInRange(node, blockRange) && !node.isTemp);
+        ToolList.printChatMessage(Component.literal(
+                "§a[小沙雕] 移除共" + (nodeCountOld - this.executeNodes.size()) + "个节点"));
+        save();
+    }
+
+    public void groupClone() {
+        if (!this.checkGroupPosValid()) return;
+        BlockRange blockRange = getBlockRange(this.groupStartPos, this.groupEndPos);
+
+        if(mc.player == null) return;
+        BlockPos pos = BlockPos.containing(mc.player.position());
+
+        ToolList.printChatMessage(Component.literal("======="));
+        for (ExecuteNode node : this.executeNodes) {
+            ToolList.printChatMessage(Component.literal(node.pos.toString()));
+        }
+        ToolList.printChatMessage(Component.literal("======="));
+
+        List<ExecuteNode> tempContainer = new ArrayList<>();
+        for (ExecuteNode node : this.executeNodes) {
+            if (node.isTemp || !isNodeInRange(node, blockRange)) continue;
+            BlockPos subtract = node.pos.subtract(this.groupStartPos);
+
+            ExecuteNode newNode = node.clone();
+            newNode.pos = pos.offset(subtract);
+            tempContainer.add(newNode);
+        }
+        this.executeNodes.addAll(tempContainer);
+
+        ToolList.printChatMessage(Component.literal(
+                "§a[小沙雕] 添加共" + tempContainer.size() + "个节点"));
+        save();
     }
 
     public void load() {
