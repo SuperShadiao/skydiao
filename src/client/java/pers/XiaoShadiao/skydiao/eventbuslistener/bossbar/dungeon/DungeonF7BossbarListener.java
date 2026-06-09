@@ -338,14 +338,6 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                         }
                     }
                 }
-                if(getHealth() == 0 && !stage3LeapTip) {
-                    if(mc.player.onGround() && ToolList.getInstance().isEntityInArea(mc.player, stage3LeapPositionCorn1, stage3LeapPositionCorn2)) {
-                        stage3LeapTip = true;
-                        sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotssleap.getValue() + " (SS Leap)");
-                    }
-                }
-            } else {
-                stage3LeapTip = false;
             }
             if(currentStage == 3) {
                 if(getHealth() == 0 && !stage4PlatformTip) {
@@ -362,6 +354,16 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             }
         }
 
+        if(currentStage == 2) {
+            if(getHealth() == 0 && !stage3LeapTip) {
+                if(mc.player.onGround() && ToolList.getInstance().isEntityInArea(mc.player, stage3LeapPositionCorn1, stage3LeapPositionCorn2)) {
+                    stage3LeapTip = true;
+                    if(!ConfigManager.dungeonf7msgbotssleap.getValue().isEmpty()) sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotssleap.getValue() + " (SS Leap)");
+                }
+            }
+        } else {
+            stage3LeapTip = false;
+        }
         if(currentStage == 3) {
             lastSimonSaysButtonCount = simonSaysButtonCount;
             int temp = 0;

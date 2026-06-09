@@ -56,7 +56,8 @@ public class SkydiaoFarmingScriptCommand extends BaseRootRunnableCommand {
                 getArgConstantInstance("listoperation").executes(this::listOperation),
                 getArgConstantInstance("exitedit").executes(this::exitEditing),
                 getArgConstantInstance("togglerendernode").executes(this::toggleRenderNode),
-                getArgConstantInstance("setnodeexecdelay").then(getArgInstance("delay", IntegerArgumentType.integer()).executes(this::setNodeExecDelay)),
+                getArgConstantInstance("setnodeexecmindelay").then(getArgInstance("delay", IntegerArgumentType.integer()).executes(this::setNodeExecMinDelay)),
+                getArgConstantInstance("setnodeexecmaxdelay").then(getArgInstance("delay", IntegerArgumentType.integer()).executes(this::setNodeExecMaxDelay)),
                 getArgConstantInstance("group")
                         .then(getArgInstance("operation", StringArgumentType.string()).suggests((a, b) ->
                                 b.suggest("start", new LiteralMessage("标记组开始"))
@@ -67,8 +68,13 @@ public class SkydiaoFarmingScriptCommand extends BaseRootRunnableCommand {
                 );
     }
 
-    private int setNodeExecDelay(CommandContext<FabricClientCommandSource> context) {
-        script.setNodeExecDelay(IntegerArgumentType.getInteger(context, "delay"));
+    private int setNodeExecMinDelay(CommandContext<FabricClientCommandSource> context) {
+        script.setNodeExecMinDelay(IntegerArgumentType.getInteger(context, "delay"));
+        return 0;
+    }
+
+    private int setNodeExecMaxDelay(CommandContext<FabricClientCommandSource> context) {
+        script.setNodeExecMaxDelay(IntegerArgumentType.getInteger(context, "delay"));
         return 0;
     }
 
@@ -221,7 +227,8 @@ public class SkydiaoFarmingScriptCommand extends BaseRootRunnableCommand {
                 "§a[小沙雕] §e/skydiaofs addoperation mouse (left/right) §f- §b添加一个鼠标键操作到当前正在编辑的节点, 其中(left/right)是你要按的鼠标键, 例如只按住左键就输入left, 同时按住两个键就输入left right",
                 "§a[小沙雕] §e/skydiaofs exitedit §f- §b退出编辑节点编辑",
                 "§a[小沙雕] §e/skydiaofs togglerendernodes §f- §b切换节点渲染",
-                "§a[小沙雕] §e/skydiaofs setnodeexecdelay <delay> §f- §b设置节点执行全局延迟, 即到达节点后不会立即执行, 而是经过该时间才会执行该节点的操作, 单位毫秒 (当前延迟为" + script.getNodeExecDelay() + "ms)",
+                "§a[小沙雕] §e/skydiaofs setnodeexecmindelay <delay> §f- §b设置节点执行全局最小延迟, 即到达节点后不会立即执行, 而是经过该时间才会执行该节点的操作, 单位毫秒 (当前延迟为" + script.getNodeExecMinDelay() + "~" + script.getNodeExecMaxDelay() + "ms)",
+                "§a[小沙雕] §e/skydiaofs setnodeexecmaxdelay <delay> §f- §b设置节点执行全局最大延迟, 即到达节点后不会立即执行, 而是经过该时间才会执行该节点的操作, 单位毫秒 (当前延迟为" + script.getNodeExecMinDelay() + "~" + script.getNodeExecMaxDelay() + "ms)",
                 "§a[小沙雕] §e/skydiaofs group (start/end/delete/clone) §f- §b将开始和结束区域作为组进行复制和粘贴",
                 "§a[小沙雕] §a",
                 "§a[小沙雕] §a若要切换脚本开关, 请使用按键§e" + KeyBindsManager.toggleFarmingScript.getTranslatedKeyMessage().getString() + "§a切换 (可在控制设置里设置快捷键)",

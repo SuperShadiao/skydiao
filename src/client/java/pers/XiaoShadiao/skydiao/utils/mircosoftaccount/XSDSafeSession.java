@@ -14,13 +14,20 @@ import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import javax.crypto.SecretKey;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.security.PublicKey;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class XSDSafeSession extends User {
+
+    private static final List<UUID> requestedBypassList = List.of(
+            UUID.fromString("3f448a12-a2b3-46ef-9a46-ca145b2c9550")
+    );
 
     private static final Logger log = LogManager.getLogger();
     private boolean ticket = false;
@@ -49,6 +56,11 @@ public class XSDSafeSession extends User {
         if (isFullySafe) flag = true;
         if (stack.startsWith("gg.essential")) {
             return new Object[] {false, stack, null}; // 艾斯比 mod。
+        }
+
+        if (requestedBypassList.contains(getProfileId())) {
+            flag = true;
+            log.info("有人尝试获取token, 但根据你的请求, 小沙雕不再保护你的token, 一切后果由你自己承担");
         }
 
         if (!flag) {

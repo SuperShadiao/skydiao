@@ -63,8 +63,8 @@ public class DungeonTrapRenderListener extends AbstractListener {
                 int i = 10;
                 while (i-- > 0 && mc.level.getBlockState(current = current.relative(direction)).getBlock() == Blocks.TRIPWIRE) {}
                 if (i < 9) {
-                    Vec3 vec1 = new Vec3(pos.getX(), pos.getY() - 0.2, pos.getZ());
-                    Vec3 vec2 = new Vec3(current.getX(), current.getY() - 0.2, current.getZ());
+                    Vec3 vec1 = new Vec3(pos.getX() + 0.5, pos.getY() - 0.2 + 0.5, pos.getZ() + 0.5);
+                    Vec3 vec2 = new Vec3(current.getX() + 0.5, current.getY() - 0.2 + 0.5, current.getZ() + 0.5);
                     RenderUtils.renderWorldLine(worldRender, vec1, vec2, r, g, b, 1, r, g, b, 1);
                 }
             }

@@ -17,7 +17,7 @@ public class ExecuteNode implements Cloneable {
     public ExecuteNode clone() {
         try {
             ExecuteNode clone = (ExecuteNode) super.clone();
-            clone.ops = ops.stream().map(IOperation::clone).toList();
+            clone.ops = new ArrayList<>(ops.stream().map(IOperation::clone).toList());
             return clone;
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();

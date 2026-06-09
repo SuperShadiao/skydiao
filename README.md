@@ -25,6 +25,8 @@
 注明方式: https://5ixsd.top/qqg 和 https://5ixsd.top/skydiao 两个链接二选一备注即可
 
 # 使用的组件或第三方库
+- [ModMenu](https://modrinth.com/mod/modmenu)
 - [Hypixel Fabric Mod API](https://5ixsd.top/hmfapi)
 - jlayer
 - [MrXiaoM Bilibili Open Live](https://5ixsd.top/mxmbol)
+- 内置的[Firm Packet Fixer](https://modrinth.com/mod/firmament-packet-fix)用于移除Firmament的告状行为
