@@ -56,8 +56,15 @@ public class SkydiaoFarmingScriptCommand extends BaseRootRunnableCommand {
                 getArgConstantInstance("listoperation").executes(this::listOperation),
                 getArgConstantInstance("exitedit").executes(this::exitEditing),
                 getArgConstantInstance("togglerendernode").executes(this::toggleRenderNode),
-                getArgConstantInstance("setnodeexecdelay").then(getArgInstance("delay", IntegerArgumentType.integer()).executes(this::setNodeExecDelay))
-        );
+                getArgConstantInstance("setnodeexecdelay").then(getArgInstance("delay", IntegerArgumentType.integer()).executes(this::setNodeExecDelay)),
+                getArgConstantInstance("group")
+                        .then(getArgInstance("operation", StringArgumentType.string()).suggests((a, b) ->
+                                b.suggest("start", new LiteralMessage("标记组开始"))
+                                        .suggest("end", new LiteralMessage("标记组结束"))
+                                        .suggest("delete", new LiteralMessage("删除区域内所有节点"))
+                                        .suggest("clone", new LiteralMessage("复制组，将当前位置作为组start")).buildFuture()
+                        ).executes(this::group))
+                );
     }
 
     private int setNodeExecDelay(CommandContext<FabricClientCommandSource> context) {
@@ -177,6 +184,17 @@ public class SkydiaoFarmingScriptCommand extends BaseRootRunnableCommand {
         return 0;
     }
 
+    private int group(CommandContext<FabricClientCommandSource> context) {
+        switch(StringArgumentType.getString(context, "operation")) {
+            case "start" -> { script.groupStart(); }
+            case "end" -> { script.groupEnd(); }
+            case "delete" -> { script.groupDelete(); }
+            case "clone" -> { script.groupClone(); }
+            default -> context.getSource().sendError(Component.literal("§a[小沙雕] §c无效的操作指令: " + StringArgumentType.getString(context, "operation")));
+        }
+        return 0;
+    }
+
     @Override
     public int executeCommand(CommandContext<FabricClientCommandSource> context) {
         return 0;
@@ -204,6 +222,7 @@ public class SkydiaoFarmingScriptCommand extends BaseRootRunnableCommand {
                 "§a[小沙雕] §e/skydiaofs exitedit §f- §b退出编辑节点编辑",
                 "§a[小沙雕] §e/skydiaofs togglerendernodes §f- §b切换节点渲染",
                 "§a[小沙雕] §e/skydiaofs setnodeexecdelay <delay> §f- §b设置节点执行全局延迟, 即到达节点后不会立即执行, 而是经过该时间才会执行该节点的操作, 单位毫秒 (当前延迟为" + script.getNodeExecDelay() + "ms)",
+                "§a[小沙雕] §e/skydiaofs group (start/end/delete/clone) §f- §b将开始和结束区域作为组进行复制和粘贴",
                 "§a[小沙雕] §a",
                 "§a[小沙雕] §a若要切换脚本开关, 请使用按键§e" + KeyBindsManager.toggleFarmingScript.getTranslatedKeyMessage().getString() + "§a切换 (可在控制设置里设置快捷键)",
                 "§a[小沙雕] §a群内§e" + SkyDiaoModClient.CONST_QQGROUP_MAIN + "§a有教程awa"
