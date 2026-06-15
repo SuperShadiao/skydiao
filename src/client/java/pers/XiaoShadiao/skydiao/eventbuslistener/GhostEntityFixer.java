@@ -3,7 +3,7 @@ package pers.XiaoShadiao.skydiao.eventbuslistener;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.RemotePlayer;
@@ -42,7 +42,7 @@ public class GhostEntityFixer extends AbstractListener {
     @Override
     public void registerListeners() {
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
-        ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register(this::worldUnload);
+        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register(this::worldUnload);
         ClientTickEvents.START_CLIENT_TICK.register(this::onStartClientTick);
     }
 

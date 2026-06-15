@@ -5,8 +5,8 @@ import com.google.gson.JsonParser;
 import it.unimi.dsi.fastutil.objects.Object2LongArrayMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -36,10 +36,10 @@ public class SlayerTogetherListener extends AbstractListener {
         ClientReceiveMessageEvents.GAME.register(this::onChat);
         ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
         ClientTickEvents.START_CLIENT_TICK.register(this::onStartClientTick);
-        WorldRenderEvents.END_MAIN.register(this::onLastRender);
+        LevelRenderEvents.END_MAIN.register(this::onLastRender);
     }
 
-    private void onLastRender(WorldRenderContext context) {
+    private void onLastRender(LevelRenderContext context) {
         if(!ConfigManager.slayerTogether.getValue()) return;
         RenderUtils.WorldRender wr = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_LINE);
         for (BlockPos pos : bossPosition.keySet()) {

@@ -4,8 +4,8 @@ import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.frog.Frog;
@@ -25,7 +25,7 @@ public class LotusAtollHelper extends AbstractFishingListener {
 
     @Override
     public void registerListeners() {
-        WorldRenderEvents.END_MAIN.register(this::onLastRender);
+        LevelRenderEvents.END_MAIN.register(this::onLastRender);
         ClientTickEvents.START_CLIENT_TICK.register(this::onStartTick);
     }
 
@@ -42,7 +42,7 @@ public class LotusAtollHelper extends AbstractFishingListener {
         }
     }
 
-    private void onLastRender(WorldRenderContext context) {
+    private void onLastRender(LevelRenderContext context) {
         if(mc.level == null || !isInLotusAtoll() || !ConfigManager.lotusAtollHelper.getValue()) return;
 
         RenderUtils.WorldRender wr = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_LINE);

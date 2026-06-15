@@ -1,16 +1,14 @@
 package pers.XiaoShadiao.skydiao.utils.renderutils;
 
 import java.awt.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
+import java.util.*;
 
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.ColorTargetState;
+import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.DepthTestFunction;
 import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -27,11 +25,10 @@ import org.lwjgl.system.MemoryUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MappableRingBuffer;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 
 public class CustomRenderPipeline {
 
@@ -42,13 +39,13 @@ public class CustomRenderPipeline {
     public static final RenderPipeline THROUGH_WALLS_FILL = RenderPipelines.register(RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
             .withLocation(Identifier.fromNamespaceAndPath("skydiao", "pipeline/THROUGH_WALLS_FILL".toLowerCase()))
             .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLE_STRIP)
-            .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+            .withDepthStencilState(Optional.empty())
             .build()
     );
     public static final RenderPipeline NO_THROUGH_WALLS_FILL = RenderPipelines.register(RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
             .withLocation(Identifier.fromNamespaceAndPath("skydiao", "pipeline/NO_THROUGH_WALLS_FILL".toLowerCase()))
             .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLE_STRIP)
-            .withDepthTestFunction(DepthTestFunction.LESS_DEPTH_TEST)
+            .withDepthStencilState(DepthStencilState.DEFAULT)
             .build()
     );
 
@@ -56,8 +53,8 @@ public class CustomRenderPipeline {
             RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
                     .withLocation(Identifier.fromNamespaceAndPath("skydiao", "pipeline/THROUGH_WALLS_LINE".toLowerCase()))
                     .withVertexFormat(DefaultVertexFormat.POSITION_COLOR_NORMAL_LINE_WIDTH, VertexFormat.Mode.LINES)
-                    .withBlend(BlendFunction.TRANSLUCENT)
-                    .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+                    .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
+                    .withDepthStencilState(Optional.empty())
                     .build()
     );
 
@@ -65,8 +62,8 @@ public class CustomRenderPipeline {
             RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
                     .withLocation(Identifier.fromNamespaceAndPath("skydiao", "pipeline/NO_THROUGH_WALLS_LINE".toLowerCase()))
                     .withVertexFormat(DefaultVertexFormat.POSITION_COLOR_NORMAL_LINE_WIDTH, VertexFormat.Mode.LINES)
-                    .withBlend(BlendFunction.TRANSLUCENT)
-                    .withDepthTestFunction(DepthTestFunction.LESS_DEPTH_TEST)
+                    .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
+                    .withDepthStencilState(DepthStencilState.DEFAULT)
                     .build()
     );
 
@@ -93,9 +90,9 @@ public class CustomRenderPipeline {
     }
 
     // :::custom-pipelines:extraction-phase
-    public void renderESP(WorldRenderContext context, RenderPipeline pipeline, float x1, float y1, float z1, float x2, float y2, float z2, float r, float g, float b, float a, boolean fillBox) {
-        PoseStack matrices = context.matrices();
-        Vec3 camera = context.worldState().cameraRenderState.pos;
+    public void renderESP(LevelRenderContext context, RenderPipeline pipeline, float x1, float y1, float z1, float x2, float y2, float z2, float r, float g, float b, float a, boolean fillBox) {
+        PoseStack matrices = context.poseStack();
+        Vec3 camera = context.levelState().cameraRenderState.pos;
 
         assert matrices != null;
         matrices.pushPose();
@@ -118,9 +115,9 @@ public class CustomRenderPipeline {
         // draw(ToolList.mc, pipeline);
     }
 
-    public void renderTrace(WorldRenderContext context, RenderPipeline pipeline, float x1, float y1, float z1, float x2, float y2, float z2, float r, float g, float b, float a) {
-        PoseStack matrices = context.matrices();
-        Vec3 camera = context.worldState().cameraRenderState.pos;
+    public void renderTrace(LevelRenderContext context, RenderPipeline pipeline, float x1, float y1, float z1, float x2, float y2, float z2, float r, float g, float b, float a) {
+        PoseStack matrices = context.poseStack();
+        Vec3 camera = context.levelState().cameraRenderState.pos;
 
         assert matrices != null;
         matrices.pushPose();
@@ -139,9 +136,9 @@ public class CustomRenderPipeline {
         matrices.popPose();
     }
 
-    public void renderWorldLine(WorldRenderContext context, RenderPipeline pipeline, float x1, float y1, float z1, float x2, float y2, float z2, float r1, float g1, float b1, float a1, float r2, float g2, float b2, float a2) {
-        PoseStack matrices = context.matrices();
-        Vec3 camera = context.worldState().cameraRenderState.pos;
+    public void renderWorldLine(LevelRenderContext context, RenderPipeline pipeline, float x1, float y1, float z1, float x2, float y2, float z2, float r1, float g1, float b1, float a1, float r2, float g2, float b2, float a2) {
+        PoseStack matrices = context.poseStack();
+        Vec3 camera = context.levelState().cameraRenderState.pos;
 
         assert matrices != null;
         matrices.pushPose();

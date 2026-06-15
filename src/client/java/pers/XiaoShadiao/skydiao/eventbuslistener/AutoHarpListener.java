@@ -3,13 +3,13 @@ package pers.XiaoShadiao.skydiao.eventbuslistener;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.ChestMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -90,16 +90,16 @@ public class AutoHarpListener extends AbstractListener {
                 clickLogger = 0;
                 nextClick = null;
                 keys = new Map.Entry[9][6];
-                ScreenEvents.afterRender(screen).register(this::onGuiDraw);
+                ScreenEvents.afterExtract(screen).register(this::onGuiDraw);
             }
         }
     }
 
-    public void onGuiDraw(Screen screen, GuiGraphics drawContext, int mouseX, int mouseY, float tickDelta) {
+    public void onGuiDraw(Screen screen, GuiGraphicsExtractor drawContext, int mouseX, int mouseY, float tickDelta) {
         if(nextClick != null) {
             Integer slotId = nextClick;
 
-            mc.gameMode.handleInventoryMouseClick(containerId, slotId, 0, ClickType.PICKUP, mc.player);
+            mc.gameMode.handleContainerInput(containerId, slotId, 0, ContainerInput.PICKUP, mc.player);
             clickLogger++;
             System.out.println("Click! " + clickLogger + " " + slotId);
             nextClick = null;

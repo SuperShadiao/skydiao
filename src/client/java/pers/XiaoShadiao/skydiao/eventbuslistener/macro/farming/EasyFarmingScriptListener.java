@@ -5,9 +5,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -115,8 +116,8 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
     public void registerListeners() {
         load();
         ClientTickEvents.START_CLIENT_TICK.register(this::onStartClientTick);
-        ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register(this::onUnload);
-        WorldRenderEvents.END_MAIN.register(this::onLastRender);
+        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register(this::onUnload);
+        LevelRenderEvents.END_MAIN.register(this::onLastRender);
         CustomFabricEvents.MOUSE_BUTTON_EVENT.register(this::onMouseButton);
     }
 
@@ -127,7 +128,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         return false;
     }
 
-    private void onLastRender(WorldRenderContext context) {
+    private void onLastRender(LevelRenderContext context) {
         if (!isInGarden() || (!renderNodes && currentEditing == null && groupStartPos == null && groupEndPos == null)) return;
         RenderUtils.WorldRender wr = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_LINE);
         RenderUtils.WorldRender wr2 = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_FILL);

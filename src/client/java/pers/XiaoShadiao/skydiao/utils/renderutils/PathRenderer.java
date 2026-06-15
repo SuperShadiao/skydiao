@@ -1,7 +1,7 @@
 package pers.XiaoShadiao.skydiao.utils.renderutils;
 
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
-import net.minecraft.client.gui.GuiGraphics;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
 
@@ -9,7 +9,7 @@ import java.util.List;
 
 public class PathRenderer {
 
-    public static void renderPath(WorldRenderContext context, List<?> positions, float r, float g, float b, boolean xray, boolean drawEnd) {
+    public static void renderPath(LevelRenderContext context, List<?> positions, float r, float g, float b, boolean xray, boolean drawEnd) {
         if (positions == null || positions.size() < 2) {
             return; // 如果路径点少于2个，直接返回
         }
@@ -55,7 +55,7 @@ public class PathRenderer {
         return dx1 != dx2 || dy1 != dy2 || dz1 != dz2;
     }
 
-    public static void renderPath(WorldRenderContext context, List<?> positions, int r, int g, int b, boolean xray, boolean drawEnd) {
+    public static void renderPath(LevelRenderContext context, List<?> positions, int r, int g, int b, boolean xray, boolean drawEnd) {
         // 将 int 类型的 RGB 转换为 float 类型
         float fr = r / 255.0F;
         float fg = g / 255.0F;
@@ -65,7 +65,7 @@ public class PathRenderer {
        renderPath(context, positions, fr, fg, fb, xray, drawEnd);
     }
 
-    public static void renderPath(WorldRenderContext context, double fromX, double fromY, double fromZ, double toX, double toY, double toZ, int r, int g, int b, boolean xray) {
+    public static void renderPath(LevelRenderContext context, double fromX, double fromY, double fromZ, double toX, double toY, double toZ, int r, int g, int b, boolean xray) {
         float fr = r / 255.0F;
         float fg = g / 255.0F;
         float fb = b / 255.0F;

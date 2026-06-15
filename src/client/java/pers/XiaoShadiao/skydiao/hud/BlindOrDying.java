@@ -2,15 +2,14 @@ package pers.XiaoShadiao.skydiao.hud;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.TextureSetup;
-import net.minecraft.client.gui.render.state.ColoredRectangleRenderState;
-import net.minecraft.client.gui.render.state.GuiElementRenderState;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.state.gui.ColoredRectangleRenderState;
+import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
@@ -31,7 +30,7 @@ public class BlindOrDying extends XSDHUD {
     }
 
     @Override
-    public void render(GuiGraphics context, DeltaTracker tickCounter) {
+    public void render(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
         effectAnimation += tickCounter.getGameTimeDeltaTicks() / 7.5f;
         if(mc.player == null) return;
         if(ConfigManager.dyingtip.getValue() && mc.player.getHealth() / mc.player.getMaxHealth() < 0.25) {
@@ -41,17 +40,17 @@ public class BlindOrDying extends XSDHUD {
         }
     }
 
-    private void draw(GuiGraphics context, int rgb) {
+    private void draw(GuiGraphicsExtractor context, int rgb) {
         rgb &= (0x00FFFFFF | (Mth.lerpInt(Mth.sin(effectAnimation), 45, 60) << 24));
         // context.fillGradient(0, 0, context.guiWidth(), context.guiHeight() / 4, rgb, 0);
         // context.fillGradient(0, context.guiHeight(),context.guiWidth() / 4, 0, rgb, 0);
         // context.fillGradient(context.guiWidth(), context.guiHeight(), 0, context.guiHeight() * 3 / 4,rgb, 0);
         // context.fillGradient(context.guiWidth(), 0, context.guiWidth() * 3 / 4, context.guiHeight() / 4, rgb, 0);
         Matrix3x2fStack pose = context.pose();
-        context.guiRenderState.submitGuiElement(new ColoredRectangleRenderState2(RenderPipelines.GUI, TextureSetup.noTexture(), new Matrix3x2f(pose), 0, 0,context.guiWidth() / 4, context.guiHeight(), rgb, 0, context.scissorStack.peek()));
-        context.guiRenderState.submitGuiElement(new ColoredRectangleRenderState2(RenderPipelines.GUI, TextureSetup.noTexture(), new Matrix3x2f(pose), context.guiWidth(), context.guiHeight(), context.guiWidth() * 3 / 4, 0, rgb, 0, context.scissorStack.peek()));
-        context.guiRenderState.submitGuiElement(new ColoredRectangleRenderState (RenderPipelines.GUI, TextureSetup.noTexture(), new Matrix3x2f(pose), context.guiWidth(), context.guiHeight(), 0, context.guiHeight() * 3 / 4, rgb, 0, context.scissorStack.peek()));
-        context.guiRenderState.submitGuiElement(new ColoredRectangleRenderState (RenderPipelines.GUI, TextureSetup.noTexture(), new Matrix3x2f(pose), 0, 0, context.guiWidth(), context.guiHeight() / 4, rgb, 0, context.scissorStack.peek()));
+        context.guiRenderState.addGuiElement(new ColoredRectangleRenderState2(RenderPipelines.GUI, TextureSetup.noTexture(), new Matrix3x2f(pose), 0, 0,context.guiWidth() / 4, context.guiHeight(), rgb, 0, context.scissorStack.peek()));
+        context.guiRenderState.addGuiElement(new ColoredRectangleRenderState2(RenderPipelines.GUI, TextureSetup.noTexture(), new Matrix3x2f(pose), context.guiWidth(), context.guiHeight(), context.guiWidth() * 3 / 4, 0, rgb, 0, context.scissorStack.peek()));
+        context.guiRenderState.addGuiElement(new ColoredRectangleRenderState (RenderPipelines.GUI, TextureSetup.noTexture(), new Matrix3x2f(pose), context.guiWidth(), context.guiHeight(), 0, context.guiHeight() * 3 / 4, rgb, 0, context.scissorStack.peek()));
+        context.guiRenderState.addGuiElement(new ColoredRectangleRenderState (RenderPipelines.GUI, TextureSetup.noTexture(), new Matrix3x2f(pose), 0, 0, context.guiWidth(), context.guiHeight() / 4, rgb, 0, context.scissorStack.peek()));
     }
 
     public record ColoredRectangleRenderState2(

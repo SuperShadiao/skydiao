@@ -8,6 +8,7 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Base64;
 
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
@@ -18,6 +19,7 @@ public class ChatClient extends Thread {
     protected static boolean chatServerAvailable = false;
     private static volatile long heartbeatTime;
     static int retryCount = 0;
+    private static Throwable lastIRCError;
 
     protected static final Logger log = LogManager.getLogger("XSDChat");
     protected static final byte[] HEADER = new byte[] {0x00, (byte) 0xFF, 0x02, (byte) 0xFF, 0x00};
@@ -25,6 +27,21 @@ public class ChatClient extends Thread {
     public static Socket socket;
     public ClientListener listener;
     public ClientSender sender;
+
+    private Throwable threadThrowable;
+
+    public ChatClient() {
+        setUncaughtExceptionHandler((t, e) -> {
+            threadThrowable = e;
+
+            log.info("IRC线程" + t.getName() + "发送错误");
+            e.printStackTrace();
+        });
+    }
+
+    public Throwable getThreadThrowable() {
+        return threadThrowable;
+    }
 
     private static int doWhileToken = 0;
     private int currentWhileToken = 0;
@@ -96,12 +113,6 @@ public class ChatClient extends Thread {
             sender.setName("HHOnlineChatSender");
             listener.start();
             sender.start();
-            UncaughtExceptionHandler handler = (t, e) -> {
-                log.info("IRC线程" + t.getName() + "发送错误");
-                e.printStackTrace();
-            };
-            listener.setUncaughtExceptionHandler(handler);
-            sender.setUncaughtExceptionHandler(handler);
 
             log.info("已完成, 用时" + ((System.currentTimeMillis() - time) / 1000d) + "s, 开始进入循环!");
 
@@ -117,10 +128,10 @@ public class ChatClient extends Thread {
                 } catch (InterruptedException e) {
                 }
                 if(!listener.isAlive()) {
-                    throw new RuntimeException("Chat Listener Thread crashed");
+                    throw new RuntimeException("Chat Listener Thread crashed", listener.getThreadThrowable());
                 }
                 if(!sender.isAlive()) {
-                    throw new RuntimeException("Chat Sender Thread crashed");
+                    throw new RuntimeException("Chat Sender Thread crashed", sender.getThreadThrowable());
                 }
                 if(System.currentTimeMillis() - heartbeatTime > 120000) {
                     throw new IOException("Heartbeat Timeout");
@@ -131,6 +142,7 @@ public class ChatClient extends Thread {
         } catch (Exception e) {
             log.info("在线聊天线程发生错误, 停止中", e);
             chatServerAvailable = false;
+            lastIRCError = e;
         } finally {
             try { listener.interrupt(); } catch (Exception e) { }
             try { sender.interrupt(); } catch (Exception e) { }
@@ -158,6 +170,18 @@ public class ChatClient extends Thread {
         if(AbstractListener.basicListener.isAFK()) sender.sendAFK(true);
 
         sender.sendOnlineInfo();
+
+        if(lastIRCError != null) {
+            p = new ChatPacket();
+            p.initSender();
+            p.packetType = "last_error";
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            lastIRCError.printStackTrace(new PrintStream(baos));
+            p.message = Base64.getEncoder().encodeToString(baos.toByteArray());
+            sender.send(p);
+        }
+
         ToolList.getInstance().updatePartyInfo();
     }
 

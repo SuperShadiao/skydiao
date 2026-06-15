@@ -128,6 +128,7 @@ public class MacroManagerListener extends AbstractListener {
 
     public void triggerAlert(String message) {
         ToolList.printChatMessage(Component.literal("§a[小沙雕] §cAlert! Macro check!"));
+        ToolList.printChatMessage(Component.literal("§a[小沙雕] §c请不要慌张, 如果你在当前状态第一次被check, 立即切换为手动并返回继续当前操作 (比如继续钓鱼), 发生第二次check再进行响应!"));
         alertTasks.removeIf(t -> t.future.isDone());
         if(alertTasks.size() < 3) {
             alertTasks.add(ToolList.addThreadedTask(() -> {

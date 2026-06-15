@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(FogRenderer.class)
-public class MixinFogRendererRemoveBlindness_1_21_11 {
+public class MixinFogRendererRemoveBlindness {
 
     @Mutable
     @Final

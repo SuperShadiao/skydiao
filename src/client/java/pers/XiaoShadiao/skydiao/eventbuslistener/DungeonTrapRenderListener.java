@@ -1,10 +1,9 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.state.BlockOutlineRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.*;
@@ -31,10 +30,10 @@ public class DungeonTrapRenderListener extends AbstractListener {
     @Override
     public void registerListeners() {
         ClientTickEvents.START_CLIENT_TICK.register(this::onTick);
-        WorldRenderEvents.END_MAIN.register(this::onRender);
+        LevelRenderEvents.END_MAIN.register(this::onRender);
     }
 
-    private void onRender(WorldRenderContext context) {
+    private void onRender(LevelRenderContext context) {
         RenderUtils.WorldRender worldRender = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.NO_THROUGH_WALLS_LINE);
 
         float r = 1;

@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -68,8 +68,8 @@ public class InventoryRegexSearcherConfigScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-        super.render(guiGraphics, i, j, f);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        super.extractRenderState(graphics, mouseX, mouseY, a);
     }
 
     @Override
@@ -132,20 +132,20 @@ public class InventoryRegexSearcherConfigScreen extends Screen {
             }
 
             @Override
-            public void renderContent(GuiGraphics guiGraphics, int left, int top, boolean bl, float f) {
+            public void extractContent(GuiGraphicsExtractor guiGraphics, int left, int top, boolean bl, float f) {
                 apply.setX(getContentRight() - apply.getWidth() - 50);
                 apply.setY(getContentY());
-                apply.render(guiGraphics, left, top, f);
+                apply.extractRenderState(guiGraphics, left, top, f);
 
                 delete.setX(getContentRight() - delete.getWidth());
                 delete.setY(getContentY());
-                delete.render(guiGraphics, left, top, f);
+                delete.extractRenderState(guiGraphics, left, top, f);
 
                 editBox.setX(getContentX());
                 editBox.setY(getContentY());
                 editBox.setWidth(getContentRight() - getContentX() - 110);
                 editBox.setHeight(20);
-                editBox.render(guiGraphics, left, top, f);
+                editBox.extractRenderState(guiGraphics, left, top, f);
             }
 
             @Override
@@ -175,10 +175,10 @@ public class InventoryRegexSearcherConfigScreen extends Screen {
             }
 
             @Override
-            public void renderContent(GuiGraphics guiGraphics, int left, int top, boolean bl, float f) {
+            public void extractContent(GuiGraphicsExtractor guiGraphics, int left, int top, boolean bl, float f) {
                 add.setX(getContentX() + (getContentRight() - getContentX() - add.getWidth()) / 2);
                 add.setY(getContentY());
-                add.render(guiGraphics, left, top, f);
+                add.extractRenderState(guiGraphics, left, top, f);
             }
 
             @Override

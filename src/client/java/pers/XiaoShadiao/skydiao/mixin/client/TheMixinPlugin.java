@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Set;
 
 public class TheMixinPlugin implements IMixinConfigPlugin {
-    private static WorldVersion CURRENT_VERSION;
 
     @Override
     public void onLoad(String mixinPackage) {
@@ -28,14 +27,15 @@ public class TheMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return switch (mixinClassName) {
-            case "pers.XiaoShadiao.skydiao.mixin.client.MixinFogRendererRemoveBlindness_1_21_10"
-                    -> getVersion().equals("1.21.10");
-            case "pers.XiaoShadiao.skydiao.mixin.client.MixinFogRendererRemoveBlindness_1_21_11"
-                    -> getVersion().equals("1.21.11");
-
-            default -> true;
-        };
+//        return switch (mixinClassName) {
+//            case "pers.XiaoShadiao.skydiao.mixin.client.MixinFogRendererRemoveBlindness_1_21_10"
+//                    -> getVersion().equals("1.21.10");
+//            case "pers.XiaoShadiao.skydiao.mixin.client.MixinFogRendererRemoveBlindness_1_21_11"
+//                    -> getVersion().equals("1.21.11");
+//
+//            default -> true;
+//        };
+        return true;
     }
 
     @Override

@@ -1,7 +1,7 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener.macro;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.MouseButtonInfo;
@@ -72,7 +72,7 @@ public class AutoDojo extends AbstractListener implements IMacro {
         ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
         ClientTickEvents.START_CLIENT_TICK.register(this::onStartTick);
-        ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register(this::onWorldUnload);
+        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register(this::onWorldUnload);
         CustomFabricEvents.MOUSE_BUTTON_EVENT.register(this::onMouseEvent);
     }
 

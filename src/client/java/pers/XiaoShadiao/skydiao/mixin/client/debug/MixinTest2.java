@@ -1,6 +1,5 @@
 package pers.XiaoShadiao.skydiao.mixin.client.debug;
 
-import com.mojang.blaze3d.opengl.GlCommandEncoder;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.textures.GpuTexture;
 import net.minecraft.CrashReport;
@@ -12,7 +11,7 @@ import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 // issue from 19minutes
 
-@Mixin(GlCommandEncoder.class)
+@Mixin(targets = "com.mojang.blaze3d.opengl.GlCommandEncoder")
 public class MixinTest2 {
 
     @Inject(method = "writeToTexture(Lcom/mojang/blaze3d/textures/GpuTexture;Lcom/mojang/blaze3d/platform/NativeImage;IIIIIIII)V", at = @At("HEAD"))

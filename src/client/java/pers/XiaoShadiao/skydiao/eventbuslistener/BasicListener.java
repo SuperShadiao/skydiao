@@ -4,11 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
@@ -48,7 +48,9 @@ import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.irc.ChatPacket;
+import pers.XiaoShadiao.skydiao.keybinds.KeyBindsManager;
 import pers.XiaoShadiao.skydiao.screen.mircosoftaccount.AccountSelectScreen;
+import pers.XiaoShadiao.skydiao.utils.SkyblockBlacklistManager;
 import pers.XiaoShadiao.skydiao.utils.autoupdater.ExecuteOfflineThread;
 import pers.XiaoShadiao.skydiao.utils.blivesensitiveword.ServerIdSpoofer;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
@@ -94,7 +96,7 @@ public class BasicListener extends AbstractListener {
     @Override
     public void registerListeners() {
         ClientTickEvents.START_CLIENT_TICK.register(this::onStartClientTick);
-        ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register(this::onWorldChange);
+        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register(this::onWorldChange);
         CustomFabricEvents.HYPIXEL_PACKET_EVENT.register(this::onHypixelPacket);
         ScreenEvents.AFTER_INIT.register(this::onGuiFinishedInit);
         ClientPlayConnectionEvents.JOIN.register(this::onJoinServer);
@@ -102,7 +104,7 @@ public class BasicListener extends AbstractListener {
         ClientReceiveMessageEvents.GAME.register(this::onChat);
         ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
         ClientReceiveMessageEvents.MODIFY_GAME.register(this::onModifyChat);
-        WorldRenderEvents.END_MAIN.register(this::onLastRender);
+        LevelRenderEvents.END_MAIN.register(this::onLastRender);
         ClientLifecycleEvents.CLIENT_STARTED.register((mc) -> {
             PlayerThread.createThread();
             MinecraftLogin.checkSessionExpiredAndLogin();
@@ -123,7 +125,7 @@ public class BasicListener extends AbstractListener {
         return component;
     }
 
-    private void onLastRender(WorldRenderContext context) {
+    private void onLastRender(LevelRenderContext context) {
 //        RenderUtils.WorldRender wr = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_LINE);
 //        if(mc.level != null) {
 //            for (Entity entity : mc.level.entitiesForRendering()) {
@@ -180,6 +182,7 @@ public class BasicListener extends AbstractListener {
     private void onJoinServer(ClientPacketListener clientPacketListener, PacketSender packetSender, Minecraft minecraft) {
         if(!isConnectedToServer) {
             isConnectedToServer = true;
+            SkyblockBlacklistManager.updateBlacklist();
             reloadCustomCape();
             logger.info("已连接到服务器: " + clientPacketListener.getConnection().getRemoteAddress());
             ToolList.addThreadedTask(() -> {
@@ -218,7 +221,7 @@ public class BasicListener extends AbstractListener {
 
     private void onGuiFinishedInit(Minecraft client, Screen screen, int scaledWidth, int scaledHeight) {
         if(screen instanceof TitleScreen titleScreen) {
-            List<AbstractWidget> buttons = Screens.getButtons(titleScreen);
+            List<AbstractWidget> buttons = Screens.getWidgets(titleScreen);
             int left = buttons.stream().min(Comparator.comparingInt(AbstractWidget::getX)).get().getX();
             if(Util.getPlatform() == Util.OS.WINDOWS) {
                 buttons.add(Button.builder(
@@ -229,7 +232,7 @@ public class BasicListener extends AbstractListener {
         } else if(screen instanceof JoinMultiplayerScreen mpscreen) {
             MinecraftLogin.checkSessionExpiredAndLogin();
         } else if(screen instanceof DeathScreen deathScreen) {
-            List<AbstractWidget> buttons = Screens.getButtons(deathScreen);
+            List<AbstractWidget> buttons = Screens.getWidgets(deathScreen);
             int left = buttons.stream().min(Comparator.comparingInt(AbstractWidget::getX)).get().getX();
 
             buttons.add(Button.builder(
@@ -272,6 +275,8 @@ public class BasicListener extends AbstractListener {
             BLiveListener.launch();
         }
         MacroManagerListener.pathFinderExecutor.stopExecution();
+
+        if(SkyblockBlacklistManager.getInstance().isDone() && !SkyblockBlacklistManager.getInstance().isAvaliable()) SkyblockBlacklistManager.updateBlacklist();
     }
 
     private int afkHoldTick;
@@ -288,6 +293,12 @@ public class BasicListener extends AbstractListener {
                 mc.player.input = new XSDSimulatorInput(mc.options);
             }
             Optional.ofNullable(mc.getConnection()).map(c -> c.getPlayerInfo(mc.player.getUUID())).map(PlayerInfo::getSkin).ifPresent(skin -> selfPlayerSkin = skin);
+        }
+        if(ConfigManager.keepSprint.getValue()) {
+            InputSimulator.setSprint(true);
+        }
+        while(KeyBindsManager.toggleKeepSprint.consumeClick()) {
+            ConfigManager.keepSprint.setValue(!ConfigManager.keepSprint.getValue());
         }
         if((!(mc.screen instanceof ChatScreen) || mc.screen.getClass().getName().startsWith("pers.XiaoShadiao")) && Arrays.stream(mc.options.keyMappings).anyMatch(KeyMapping::isDown))  {
             if(afkHoldTick++ > 20) {

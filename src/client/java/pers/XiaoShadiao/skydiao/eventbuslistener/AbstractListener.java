@@ -54,6 +54,7 @@ public abstract class AbstractListener extends Thread {
     public static final TPSListener tpsListener = new TPSListener();
     public static final DungeonTrashTPSListener dungeonTrashTPSListener = new DungeonTrashTPSListener();
     public static final CarnivalFruitDigger carnvialFruitDigger = new CarnivalFruitDigger();
+    public static final BlacklistRenderer blacklistRenderer = new BlacklistRenderer();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();

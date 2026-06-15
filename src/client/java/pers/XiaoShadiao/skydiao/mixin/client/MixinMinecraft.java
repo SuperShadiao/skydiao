@@ -62,8 +62,6 @@ public class MixinMinecraft {
     @Final
     @Shadow
     public File gameDirectory;
-    @Shadow
-    private Supplier<CrashReport> delayedCrash;
     @Mutable
     @Final
     @Shadow
@@ -149,7 +147,6 @@ public class MixinMinecraft {
                 dumperThread.flagAlive();
             }
             original.call(instance, bl);
-            this.handleDelayedCrash();
             if(exceptionCounter > 0) exceptionCounter--;
         } catch (ReportedException var11) {
             exceptionCounter++;
@@ -201,16 +198,6 @@ public class MixinMinecraft {
                 LOGGER.error(LogUtils.FATAL_MARKER, "啊, 可莉炸客户端又被你发现了, 可莉又闯祸了...");
                 LOGGER.error(LogUtils.FATAL_MARKER, "趁琴团长不在, 我帮你把客户端修好吧, 别告可莉状, 求求了qwq");
             }
-        }
-    }
-
-    @Overwrite
-    private void handleDelayedCrash() {
-        if (this.delayedCrash != null) {
-            LOGGER.error("在延迟崩溃中发现报告实例! " + delayedCrash.get());
-            CrashReport crashReport = delayedCrash.get();
-            delayedCrash = null;
-            throw new ReportedException(crashReport);
         }
     }
 

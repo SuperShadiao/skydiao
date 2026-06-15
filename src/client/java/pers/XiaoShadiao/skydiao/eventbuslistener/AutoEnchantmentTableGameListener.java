@@ -3,13 +3,13 @@ package pers.XiaoShadiao.skydiao.eventbuslistener;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.ChestMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -57,13 +57,13 @@ public class AutoEnchantmentTableGameListener extends AbstractListener {
             } else if (chestName.startsWith("Superpairs (")) {
                 currentExperiment = ExperimentType.SUPERPAIRS;
             }
-            if(currentExperiment != ExperimentType.NONE) ScreenEvents.afterRender(screen).register(this::onGuiDraw);
+            if(currentExperiment != ExperimentType.NONE) ScreenEvents.afterExtract(screen).register(this::onGuiDraw);
         }
     }
 
     private long pickupItemTestTime = System.currentTimeMillis();
 
-    public void onGuiDraw(Screen screen, GuiGraphics drawContext, int mouseX, int mouseY, float tickDelta) {
+    public void onGuiDraw(Screen screen, GuiGraphicsExtractor drawContext, int mouseX, int mouseY, float tickDelta) {
         // log.info("BackgroundDrawnEvent");
         // log.info("=============[C]==============");
         // log.info(!工具列表.getInstance().事件触发器.skyblock());
@@ -79,7 +79,7 @@ public class AutoEnchantmentTableGameListener extends AbstractListener {
                 if(System.currentTimeMillis() - pickupItemTestTime > 1000) {
                     pickupItemTestTime = System.currentTimeMillis();
                     Optional<Slot> slot = menu.slots.stream().filter(i -> !i.getItem().isEmpty()).findAny();
-                    slot.ifPresent(slot1 -> mc.gameMode.handleInventoryMouseClick(menu.containerId, slot1.index, 0, ClickType.PICKUP, mc.player));
+                    slot.ifPresent(slot1 -> mc.gameMode.handleContainerInput(menu.containerId, slot1.index, 0, ContainerInput.PICKUP, mc.player));
                 }
                 return;
             }
@@ -127,7 +127,7 @@ public class AutoEnchantmentTableGameListener extends AbstractListener {
 //                                0,
 //                                mc.thePlayer
 //                        );
-                        mc.gameMode.handleInventoryMouseClick(menu.containerId, chronomatronOrder.get(clicks).getKey(), 0, ClickType.PICKUP, mc.player);
+                        mc.gameMode.handleContainerInput(menu.containerId, chronomatronOrder.get(clicks).getKey(), 0, ContainerInput.PICKUP, mc.player);
                         lastClickTime = System.currentTimeMillis();
                         clicks++;
                     }
@@ -155,7 +155,7 @@ public class AutoEnchantmentTableGameListener extends AbstractListener {
 //                                    mc.thePlayer.openContainer.windowId,
 //                                    slot, 0, 0, mc.thePlayer
 //                            );
-                            mc.gameMode.handleInventoryMouseClick(menu.containerId, slot, 0, ClickType.PICKUP, mc.player);
+                            mc.gameMode.handleContainerInput(menu.containerId, slot, 0, ContainerInput.PICKUP, mc.player);
                         }
                         lastClickTime = System.currentTimeMillis();
                         clicks++;

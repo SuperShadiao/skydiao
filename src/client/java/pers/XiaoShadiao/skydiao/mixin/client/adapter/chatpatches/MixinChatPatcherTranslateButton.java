@@ -1,6 +1,6 @@
 package pers.XiaoShadiao.skydiao.mixin.client.adapter.chatpatches;
 
-import net.minecraft.client.GuiMessage;
+import net.minecraft.client.multiplayer.chat.GuiMessage;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;

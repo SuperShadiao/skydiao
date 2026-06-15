@@ -2,7 +2,7 @@ package pers.XiaoShadiao.skydiao.screen;
 
 import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.components.tabs.GridLayoutTab;
@@ -10,16 +10,11 @@ import net.minecraft.client.gui.components.tabs.Tab;
 import net.minecraft.client.gui.components.tabs.TabManager;
 import net.minecraft.client.gui.components.tabs.TabNavigationBar;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
-import net.minecraft.client.gui.layouts.LayoutElement;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
-import net.minecraft.client.gui.screens.worldselection.EditGameRulesScreen;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.NotNull;
@@ -114,7 +109,7 @@ public class ConfigScreen extends Screen {
     @Override
     public void repositionElements() {
         if (this.tabNavigationBar != null) {
-            this.tabNavigationBar.setWidth(this.width);
+            this.tabNavigationBar.updateWidth(this.width);
             this.tabNavigationBar.arrangeElements();
             int i = this.tabNavigationBar.getRectangle().bottom();
             ScreenRectangle screenRectangle = new ScreenRectangle(0, i, this.width, this.height - this.layout.getFooterHeight() - i);
@@ -212,10 +207,10 @@ public class ConfigScreen extends Screen {
                 }
 
                 @Override
-                public void renderContent(GuiGraphics guiGraphics, int left, int top, boolean bl, float f) {
+                public void extractContent(GuiGraphicsExtractor guiGraphics, int left, int top, boolean bl, float f) {
                     searchBox.setX(getContentRight() - (getContentWidth() + searchBox.getWidth()) / 2);
                     searchBox.setY(getContentY());
-                    searchBox.render(guiGraphics, left, top, f);
+                    searchBox.extractRenderState(guiGraphics, left, top, f);
                 }
 
                 @Override
@@ -249,13 +244,13 @@ public class ConfigScreen extends Screen {
                 }
 
                 @Override
-                public void renderContent(GuiGraphics guiGraphics, int left, int top, boolean bl, float f) {
+                public void extractContent(GuiGraphicsExtractor guiGraphics, int left, int top, boolean bl, float f) {
                     String name = configEntry.option.getI18nName();
                     // guiGraphics.drawString(Minecraft.getInstance().font, name, getContentX() - 5, getContentY() + 5, 0xFFFFFFFF);
                     RenderUtils.renderScrollingString(guiGraphics, ToolList.mc.font, Component.literal(name), getContentX(), getContentX(), getContentY() - 25, getContentX() + 100, getContentY() + 44, 0xFFFFFFFF);
                     widget.setX(getContentRight() - widget.getWidth() + 5);
                     widget.setY(getContentY());
-                    widget.render(guiGraphics, left, top, f);
+                    widget.extractRenderState(guiGraphics, left, top, f);
                 }
 
                 @Override
@@ -381,13 +376,13 @@ public class ConfigScreen extends Screen {
                 }
 
                 @Override
-                public void renderContent(GuiGraphics guiGraphics, int left, int top, boolean bl, float f) {
+                public void extractContent(GuiGraphicsExtractor guiGraphics, int left, int top, boolean bl, float f) {
                     String name = option.getI18nName();
                     // guiGraphics.drawString(Minecraft.getInstance().font, name, getContentX() - 5, getContentY() + 5, 0xFFFFFFFF);
                     RenderUtils.renderScrollingString(guiGraphics, ToolList.mc.font, Component.literal(name), getContentX(), getContentX(), getContentY() - 25, getContentX() + 100, getContentY() + 44, 0xFFFFFFFF);
                     widget.setX(getContentRight() - widget.getWidth() + 5);
                     widget.setY(getContentY());
-                    widget.render(guiGraphics, left, top, f);
+                    widget.extractRenderState(guiGraphics, left, top, f);
                 }
 
                 @Override

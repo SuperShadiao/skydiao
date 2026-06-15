@@ -2,11 +2,11 @@ package pers.XiaoShadiao.skydiao.utils.renderutils;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.*;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
@@ -27,7 +27,7 @@ import java.util.List;
 public class RenderUtils {
 
     public static void renderScrollingString(
-            GuiGraphics guiGraphics,
+            GuiGraphicsExtractor guiGraphics,
             Font font,
             Component text,
             int centerX,      // 基准 X，用于居中绘制时的中心点
@@ -49,20 +49,20 @@ public class RenderUtils {
             double offset = Mth.lerp(oscillation, 0.0, overflow);
 
             guiGraphics.enableScissor(left, top, right, bottom);
-            guiGraphics.drawString(font, text, left - (int) offset, textY, color);
+            guiGraphics.text(font, text, left - (int) offset, textY, color);
             guiGraphics.disableScissor();
         } else {
             int drawX = Mth.clamp(centerX, left + textWidth / 2, right - textWidth / 2);
-            guiGraphics.drawCenteredString(font, text, drawX, textY, color);
+            guiGraphics.centeredText(font, text, drawX, textY, color);
         }
     }
 
-    public static WorldRender createWorldRenderInstance(WorldRenderContext context, RenderPipeline pipeline) {
+    public static WorldRender createWorldRenderInstance(LevelRenderContext context, RenderPipeline pipeline) {
         return new WorldRender(context, pipeline);
     }
 
     // 绘制圆形
-    public static void drawCircle(GuiGraphics context, float x, float y, int start, int end, float r, int rgb) {
+    public static void drawCircle(GuiGraphicsExtractor context, float x, float y, int start, int end, float r, int rgb) {
         Matrix3x2fStack pose = context.pose();
         for(int i = start; i <= end; i++) {
             pose.pushMatrix();
@@ -77,7 +77,7 @@ public class RenderUtils {
     }
 
     // 绘制带厚度的圆形
-    public static void drawRoundedCircle(GuiGraphics context, float x, float y, int start, int end, float r, int thick, int rgb) {
+    public static void drawRoundedCircle(GuiGraphicsExtractor context, float x, float y, int start, int end, float r, int thick, int rgb) {
         Matrix3x2fStack pose = context.pose();
         for(int i = start; i <= end; i++) {
             pose.pushMatrix();
@@ -92,7 +92,7 @@ public class RenderUtils {
     }
 
     // 绘制渐变透明圆形
-    public static void drawRoundedCircleFadeToNoAlpha(GuiGraphics context, float x, float y, int start, int end, float r, int thick, int rgb, boolean fadeOutward) {
+    public static void drawRoundedCircleFadeToNoAlpha(GuiGraphicsExtractor context, float x, float y, int start, int end, float r, int thick, int rgb, boolean fadeOutward) {
         Matrix3x2fStack pose = context.pose();
         int delta = end - start;
         for(int i = start; i <= end; i++) {
@@ -113,7 +113,7 @@ public class RenderUtils {
     }
 
     // 使用纹理绘制圆形
-    public static void drawCircleWithTexture(GuiGraphics context, Identifier texture, float x, float y, float r) {
+    public static void drawCircleWithTexture(GuiGraphicsExtractor context, Identifier texture, float x, float y, float r) {
 
         for (int i = 0; i <= 180; i++) {
             float angle = (float) (i * Math.PI / 180);
@@ -128,25 +128,25 @@ public class RenderUtils {
 
     }
 
-    public static void drawOutlineRect(GuiGraphics context, int x1, int y1, int x2, int y2, int rgb) {
+    public static void drawOutlineRect(GuiGraphicsExtractor context, int x1, int y1, int x2, int y2, int rgb) {
         context.fill(x1, y1 - 1, x2, y1, rgb);
         context.fill(x1, y1, x1 - 1, y2, rgb);
         context.fill(x1, y2 + 1, x2, y2, rgb);
         context.fill(x2, y1, x2 + 1, y2, rgb);
     }
 
-    public static void renderSlot(GuiGraphics guiGraphics, AbstractContainerScreen<?> abstractContainerScreen, Slot slot, int rgb) {
+    public static void renderSlot(GuiGraphicsExtractor guiGraphics, AbstractContainerScreen<?> abstractContainerScreen, Slot slot, int rgb) {
         MixinAbstractContainerScreenPosGetter getter = (MixinAbstractContainerScreenPosGetter) abstractContainerScreen;
         guiGraphics.fill(getter.getLeftPos() + slot.x, getter.getTopPos() + slot.y, getter.getLeftPos() + slot.x + 16, getter.getTopPos() + slot.y + 16, rgb);
     }
 
     public static class WorldRender {
 
-        private final WorldRenderContext context;
+        private final LevelRenderContext context;
         private final RenderPipeline pipeline;
         private final CustomRenderPipeline crpl;
 
-        public WorldRender(WorldRenderContext context, RenderPipeline pipeline) {
+        public WorldRender(LevelRenderContext context, RenderPipeline pipeline) {
             this.context = context;
             this.pipeline = pipeline;
             this.crpl = CustomRenderPipeline.getInstance(pipeline);

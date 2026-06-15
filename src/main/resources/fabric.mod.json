@@ -38,12 +38,12 @@
   ],
   "depends": {
     "fabricloader": ">=0.18.2",
-    "minecraft": "~1.21.11",
+    "minecraft": ">=1.21.11",
     "java": ">=21",
     "fabric-api": "*"
   },
   "suggests": {
-    "chatpatches": "8.0-alpha.8"
+    "chatpatches": "8.0-alpha.9"
   },
   "breaks": {
     "chatpatches": "<8.0-alpha.8",
@@ -57,10 +57,5 @@
       },
       "update_checker": true
     }
-  },
-  "jars": [
-    {
-      "file": "lib/firmamentpacketfix-1.3.0.jar"
-    }
-  ]
+  }
 }

@@ -1,7 +1,7 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -27,7 +27,7 @@ public class DungeonMiscMessageListener extends AbstractListener implements IDun
         ClientReceiveMessageEvents.GAME.register(this::onChat);
         ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
         ClientTickEvents.START_CLIENT_TICK.register(this::onClientStartTick);
-        ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register(this::onUnload);
+        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register(this::onUnload);
     }
 
     private void onClientStartTick(Minecraft mc) {

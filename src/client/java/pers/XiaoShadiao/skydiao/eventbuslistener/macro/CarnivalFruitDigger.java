@@ -3,10 +3,10 @@ package pers.XiaoShadiao.skydiao.eventbuslistener.macro;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayPriorityQueue;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -71,9 +71,9 @@ public class CarnivalFruitDigger extends AbstractListener implements IMacro, Pat
     @Override
     public void registerListeners() {
         ClientReceiveMessageEvents.GAME.register(this::onChat);
-        WorldRenderEvents.END_MAIN.register(this::onLastRender);
+        LevelRenderEvents.END_MAIN.register(this::onLastRender);
         ClientTickEvents.START_CLIENT_TICK.register(this::onClientStartTick);
-        ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register(this::onUnload);
+        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register(this::onUnload);
     }
 
     private void onUnload(Minecraft mc, ClientLevel level) {
@@ -132,7 +132,7 @@ public class CarnivalFruitDigger extends AbstractListener implements IMacro, Pat
         }
     }
 
-    private void onLastRender(WorldRenderContext context) {
+    private void onLastRender(LevelRenderContext context) {
         if(currentSlot != null && mc.level != null) {
             RenderUtils.WorldRender wr1 = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.NO_THROUGH_WALLS_FILL);
             RenderUtils.WorldRender wr2 = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.NO_THROUGH_WALLS_LINE);

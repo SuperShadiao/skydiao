@@ -1,7 +1,7 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener;
 
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.monster.zombie.Zombie;
@@ -18,10 +18,10 @@ public class HubRatESPListener extends AbstractListener {
 
     @Override
     public void registerListeners() {
-        WorldRenderEvents.END_MAIN.register(this::onLastRender);
+        LevelRenderEvents.END_MAIN.register(this::onLastRender);
     }
 
-    private void onLastRender(WorldRenderContext context) {
+    private void onLastRender(LevelRenderContext context) {
         if(!ConfigManager.hubratesp.getValue() || mc.level == null || !"hub".equals(StatusManager.get().getMode())) return;
 
         RenderUtils.WorldRender wr = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_LINE);

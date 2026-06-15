@@ -2,7 +2,7 @@ package pers.XiaoShadiao.skydiao.hud;
 
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
@@ -27,7 +27,7 @@ public class StarRailNotification extends XSDHUD {
     private long updateTime;
 
     @Override
-    public void render(GuiGraphics context, DeltaTracker tickCounter) {
+    public void render(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
 
         boolean flag = System.currentTimeMillis() - updateTime > 3000 + message.length() * 100L;
 
@@ -50,14 +50,14 @@ public class StarRailNotification extends XSDHUD {
                 context.blit(RenderPipelines.GUI_TEXTURED, type.resource, width / 2 - 16, (int) (height * 0.22 + (1-Math.cos(animationFadeIn / 800 * Math.PI)) * 20), 0, 0, 32, 32, 32, 32, ((int) (alpha * 255) << 24) | 0xFFFFFF);
                 int color = new Color(1, 72 / 255f, 72 / 225f, alpha).getRGB();
                 context.fill((int) (width / 2f - 20 - (25 * (Math.cos(Math.min(animationFadeIn / 600, 0.5) * Math.PI))) - strLength / 2), (int) (height * 0.22f + 55 + (1-Math.cos(animationFadeIn / 800 * Math.PI) * 20)), (int) (width / 2f + 20 + (25 * (Math.cos(Math.min(animationFadeIn / 600, 0.5) * Math.PI))) + strLength / 2), (int) (height * 0.22f + 75 + (1-Math.cos(animationFadeIn / 800 * Math.PI) * 20)), color);
-                context.drawCenteredString(mc.font, message, width / 2, (int) (height * 0.22f + 61 + (1-Math.cos(animationFadeIn / 800 * Math.PI) * 20)), new Color(1, 1f, 1f, alpha).getRGB());
+                context.centeredText(mc.font, message, width / 2, (int) (height * 0.22f + 61 + (1-Math.cos(animationFadeIn / 800 * Math.PI) * 20)), new Color(1, 1f, 1f, alpha).getRGB());
                 break;
             case success:
                 strLength = mc.font.width(message);
                 context.blit(RenderPipelines.GUI_TEXTURED, type.resource, width / 2 - 16, (int) (height * 0.22 + (1-Math.cos(animationFadeIn / 800 * Math.PI)) * 20), 0, 0, 32, 32, 32, 32, ((int) (alpha * 255) << 24) | 0xFFFFFF);
                 color = 0x4EBFFE | new Color(0, 0, 0, alpha).getRGB();
                 context.fill((int) (width / 2f - 20 - (25 * (Math.cos(Math.min(animationFadeIn / 600, 0.5) * Math.PI))) - strLength / 2), (int) (height * 0.22f + 55 + (1-Math.cos(animationFadeIn / 800 * Math.PI) * 20)), (int) (width / 2f + 20 + (25 * (Math.cos(Math.min(animationFadeIn / 600, 0.5) * Math.PI))) + strLength / 2), (int) (height * 0.22f + 75 + (1-Math.cos(animationFadeIn / 800 * Math.PI) * 20)), color);
-                context.drawCenteredString(mc.font, message, width / 2, (int) (height * 0.22f + 61 + (1-Math.cos(animationFadeIn / 800 * Math.PI) * 20)), new Color(1, 1f, 1f, alpha).getRGB());
+                context.centeredText(mc.font, message, width / 2, (int) (height * 0.22f + 61 + (1-Math.cos(animationFadeIn / 800 * Math.PI) * 20)), new Color(1, 1f, 1f, alpha).getRGB());
                 break;
         }
 

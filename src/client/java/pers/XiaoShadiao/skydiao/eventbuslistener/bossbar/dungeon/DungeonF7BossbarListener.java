@@ -1,10 +1,10 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -240,19 +240,19 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     @Override
     public void registerListeners() {
         ClientTickEvents.START_CLIENT_TICK.register(this::onClientTick);
-        ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register(this::onWorldUnload);
+        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register(this::onWorldUnload);
         ClientReceiveMessageEvents.GAME.register(this::onChat);
         ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
         CustomFabricEvents.MOUSE_BUTTON_EVENT.register(this::onMouseClick);
-        ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register((a,b) -> {
+        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register((a,b) -> {
             passWatcherFlag = false;
             masterFloorFlag = false;
         });
-        WorldRenderEvents.END_MAIN.register(this::onLastRender);
+        LevelRenderEvents.END_MAIN.register(this::onLastRender);
     }
 
-    private void onLastRender(WorldRenderContext context) {
+    private void onLastRender(LevelRenderContext context) {
         if(mc.level == null || !isInCorrectDungeon()) return;
 
         RenderUtils.WorldRender wr1 = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.NO_THROUGH_WALLS_LINE);
@@ -331,7 +331,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                 stage2LastPosition = f7BossTarget.position();
 
                 if(stopTick >= 5) {
-                    if(f7BossTarget.distanceToSqr(73, 178, 54) <= 4 * 4) {
+                    if(f7BossTarget.distanceToSqr(72, 179, 53) <= 5 * 5) {
                         if(System.currentTimeMillis() - stormThunderFlagTime >= 1000) {
                             stormThunderFlagTime = System.currentTimeMillis();
                             addStarRailNotification("Storm正在准备释放致命攻击, 站在完整的柱子下以避免死亡!", StarRailNotification.Type.warning);

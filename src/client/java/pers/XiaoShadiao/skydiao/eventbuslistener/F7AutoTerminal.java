@@ -6,13 +6,13 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.ChestMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
@@ -257,7 +257,7 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                     }
                     currentTerminal = value;
                     pendingClick = null;
-                    ScreenEvents.afterRender(screen).register(this::afterScreenRender);
+                    ScreenEvents.afterExtract(screen).register(this::afterScreenRender);
                     break a;
                 }
             }
@@ -265,14 +265,14 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
         }
     }
 
-    private void afterScreenRender(Screen screen, GuiGraphics guiGraphics, int width, int height, float deltaTick) {
+    private void afterScreenRender(Screen screen, GuiGraphicsExtractor guiGraphics, int width, int height, float deltaTick) {
         if (!ConfigManager.dungeonf7autoterm.getValue()) return;
         if (System.currentTimeMillis() - lastClickTime > ToolList.getInstance().random.nextInt(31) + ConfigManager.dungeonf7autotermclickdelay.getValue() && pendingClick != null) {
             Click temp = lastClick = pendingClick;
             pendingClick = null;
             lastClickTime = System.currentTimeMillis();
 
-            mc.gameMode.handleInventoryMouseClick(temp.containerId, temp.slot.index, temp.rightClick ? 1 : 0, ClickType.PICKUP, mc.player);
+            mc.gameMode.handleContainerInput(temp.containerId, temp.slot.index, temp.rightClick ? 1 : 0, ContainerInput.PICKUP, mc.player);
         }
     }
 

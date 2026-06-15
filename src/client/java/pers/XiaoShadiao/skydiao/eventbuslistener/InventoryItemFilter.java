@@ -6,7 +6,7 @@ import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.fabricmc.fabric.impl.client.screen.ScreenExtensions;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -57,7 +57,7 @@ public class InventoryItemFilter extends AbstractListener {
         if(!(screen instanceof AbstractContainerScreen)) return;
         if(screen instanceof CreativeModeInventoryScreen) return;
 
-        // ScreenEvents.afterRender(screen).register(this::postRender);
+        // ScreenEvents.afterExtract(screen).register(this::postRender);
         ScreenKeyboardEvents.allowKeyPress(screen).register(this::allowKeyPress);
         ScreenMouseEvents.afterMouseClick(screen).register(this::postMouseClick);
         ScreenEvents.remove(screen).register((screen2) -> {
@@ -65,7 +65,7 @@ public class InventoryItemFilter extends AbstractListener {
             ConfigManager.saveConfig();
         });
 
-        List<AbstractWidget> buttons = Screens.getButtons(screen);
+        List<AbstractWidget> buttons = Screens.getWidgets(screen);
         filterTextBox = new EditBox(mc.font, 0, 0, Component.literal("搜索框"));
         filterTextBox.setWidth(100);
         filterTextBox.setHeight(20);
@@ -100,7 +100,7 @@ public class InventoryItemFilter extends AbstractListener {
         return true;
     }
 
-    public void postRender(Screen screen, GuiGraphics guiGraphics, int mouseX, int mouseY, float tickDelta) {
+    public void postRender(Screen screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float tickDelta) {
         if(!enabled || !(screen instanceof AbstractContainerScreen<?> abstractContainerScreen)) return;
 
         AbstractContainerMenu menu = abstractContainerScreen.getMenu();

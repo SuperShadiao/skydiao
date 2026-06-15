@@ -527,7 +527,7 @@ public class PathFinder {
                     || b instanceof BedBlock
                     || b instanceof WebBlock
                     || b instanceof BarrierBlock
-                    || b instanceof WaterlilyBlock
+                    || b instanceof LilyPadBlock
                     || b instanceof IceBlock
                     || b instanceof SlimeBlock
                     || b instanceof CauldronBlock

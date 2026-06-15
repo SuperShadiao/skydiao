@@ -245,12 +245,7 @@ public class InputSimulator {
                                     return;
                                 }
 
-                                InteractionResult interactionResult = mc.gameMode.interactAt(mc.player, entity, entityHitResult, interactionHand);
-                                if (!interactionResult.consumesAction()) {
-                                    interactionResult = mc.gameMode.interact(mc.player, entity, interactionHand);
-                                }
-
-                                if (interactionResult instanceof InteractionResult.Success success) {
+                                if (mc.player.isWithinEntityInteractionRange(entity, 0.0) && mc.gameMode.interact(mc.player, entity, entityHitResult, interactionHand) instanceof InteractionResult.Success success) {
                                     if (success.swingSource() == InteractionResult.SwingSource.CLIENT) {
                                         mc.player.swing(interactionHand);
                                     }

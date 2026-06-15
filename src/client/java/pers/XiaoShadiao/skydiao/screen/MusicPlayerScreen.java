@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
@@ -121,8 +121,8 @@ public class MusicPlayerScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-        super.render(guiGraphics, i, j, f);
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int i, int j, float f) {
+        super.extractRenderState(guiGraphics, i, j, f);
     }
 
     @Override
@@ -161,12 +161,12 @@ public class MusicPlayerScreen extends Screen {
             }
 
             @Override
-            public void renderContent(GuiGraphics guiGraphics, int left, int top, boolean bl, float f) {
+            public void extractContent(GuiGraphicsExtractor guiGraphics, int left, int top, boolean bl, float f) {
                 RenderUtils.renderScrollingString(guiGraphics, ToolList.mc.font, Component.literal((musicInfo.equals(PlayerThread.currentMusic) ? "§a" : "") + musicInfo.name + " - " + musicInfo.singer), getContentX(), getContentX(), getContentY() - 25, getContentX() + 180, getContentY() + 44, 0xFFFFFFFF);
 
                 playButton.setX(getContentRight() - playButton.getWidth());
                 playButton.setY(getContentY());
-                playButton.render(guiGraphics, left, top, f);
+                playButton.extractRenderState(guiGraphics, left, top, f);
             }
 
             @Override

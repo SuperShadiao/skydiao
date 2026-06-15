@@ -583,7 +583,7 @@ public class ToolList {
     @SuppressWarnings("ConstantConditions")
     public static void printChatMessage(Component msg) {
         if (ToolList.mc != null && ToolList.mc.gui != null && ToolList.mc.gui.getChat() != null) {
-            ToolList.mc.execute(() -> ToolList.mc.gui.getChat().addMessage(msg));
+            ToolList.mc.execute(() -> ToolList.mc.gui.getChat().addClientSystemMessage(msg));
         }
     }
 
@@ -639,7 +639,7 @@ public class ToolList {
     }
 
     public static boolean hasGlint(ItemStack stack) {
-        return Optional.ofNullable(stack.getComponentsPatch().get(DataComponents.ENCHANTMENT_GLINT_OVERRIDE)).map(Optional::isPresent).isPresent();
+        return Optional.ofNullable(stack.getComponentsPatch().get(stack.getComponents(), DataComponents.ENCHANTMENT_GLINT_OVERRIDE)).isPresent();
     }
 
     private static final Comparator<PlayerScoreEntry> scoreEntryComparator = Comparator.comparing(PlayerScoreEntry::value)

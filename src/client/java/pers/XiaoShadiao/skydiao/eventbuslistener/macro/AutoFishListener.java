@@ -1,9 +1,9 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener.macro;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -369,13 +369,13 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
     public void registerListeners() {
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
         ClientTickEvents.START_CLIENT_TICK.register(this::onStartClientTick);
-        ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register(this::worldUnload);
-        WorldRenderEvents.END_MAIN.register(this::onLastRender);
+        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register(this::worldUnload);
+        LevelRenderEvents.END_MAIN.register(this::onLastRender);
     }
 
-    private void onLastRender(WorldRenderContext context) {
+    private void onLastRender(LevelRenderContext context) {
         if(mc.player == null || mc.player.fishing == null || mc.level == null || !ConfigManager.autoFish.getValue()) return;
-        if(fakeFishHook != null && !isHookInLiquid() && lockedHookedEntity == null && mc.player.fishing.getHookedIn() != null) {
+        if(fakeFishHook != null && !isHookInLiquid() && lockedHookedEntity == null && mc.player.fishing.getHookedIn() instanceof ArmorStand) {
             RenderUtils.WorldRender wr = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_LINE);
             RenderUtils.renderESP(wr, fakeFishHook, 1, 0, 0, 1, false);
             RenderUtils.renderESP(wr, mc.player.fishing, 0, 1, 1, 1, false);
@@ -472,7 +472,8 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
                 triggerFishHook();
             }
         }
-        if(fakeFishHook != null && !isHookInLiquid() && lockedHookedEntity == null && hooked != null) {
+
+        if(fakeFishHook != null && !isHookInLiquid() && lockedHookedEntity == null && hooked instanceof ArmorStand) {
             double distanceSqr = fakeFishHookPath.stream().mapToDouble(v -> mc.player.fishing.distanceToSqr(v)).min().orElse(mc.player.fishing.distanceToSqr(fakeFishHook));
             if(distanceSqr > MAX_SIMULATE_OFFSET * MAX_SIMULATE_OFFSET) {
                 failedToSimulateTick++;
@@ -543,12 +544,12 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
                     }
                 }
             }
-        } else if(packet instanceof ClientboundSetEntityMotionPacket motionPacket) {
-            Entity entity = mc.level.getEntity(motionPacket.getId());
+        } else if(packet instanceof ClientboundSetEntityMotionPacket(int id, Vec3 movement)) {
+            Entity entity = mc.level.getEntity(id);
             if(entity != null) {
                 if(mc.player.fishing == entity) {
                     // logger.info("Hook: " + motionPacket.getMovement());
-                    lastRecordFishHookMotion = motionPacket.getMovement();
+                    lastRecordFishHookMotion = movement;
                 }
             }
         }

@@ -28,6 +28,8 @@ import java.util.zip.ZipInputStream;
 
 public class AutoUpdater {
 
+    public static final String FILE_VERSION = "26_1_2";
+
     public static final AutoUpdater emptyInstance = new AutoUpdater(new String[0], SkyDiaoModClient.VERSION, false);
     public static final File modsFolder;
 
@@ -118,7 +120,10 @@ public class AutoUpdater {
         AutoUpdater up = null;
         JsonObject jo = null;
         try {
-            String[] urls = {"https://www.gitlink.org.cn/api/SuperShadiao/hypixelhelper/raw/skydiao_1_21_11_update.json?ref=main","https://xiaoshadiao.club/skydiao_1_21_11_update.json","https://github.com/SuperShadiao/hypixelhelper/raw/main/skydiao_1_21_11_update.json"};
+            String[] urls = {
+                    "https://www.gitlink.org.cn/api/SuperShadiao/hypixelhelper/raw/skydiao_" + FILE_VERSION + "_update.json?ref=main",
+                    "https://xiaoshadiao.club/skydiao_" + FILE_VERSION + "_update.json",
+                    "https://github.com/SuperShadiao/hypixelhelper/raw/main/skydiao_" + FILE_VERSION + "_update.json"};
             for(String url : urls) {
                 log.info("尝试从GITHUB获取: " + url);
                 try(InputStream is = ToolList.getInstance().makeReqToURL(url)) {

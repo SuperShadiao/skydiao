@@ -1,6 +1,6 @@
 package pers.XiaoShadiao.skydiao.mixin.client;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -17,8 +17,8 @@ public class MixinAbstractContainerScreenHook extends Screen {
         super(component);
     }
 
-    @Inject(method = "renderContents", at = @At("TAIL"))
-    public void renderContents(GuiGraphics guiGraphics, int i, int j, float f, CallbackInfo ci) {
+    @Inject(method = "extractContents", at = @At("TAIL"))
+    public void /*renderContents*/extractContents(GuiGraphicsExtractor guiGraphics, int i, int j, float f, CallbackInfo ci) {
         AbstractListener.inventoryItemFilter.postRender(this, guiGraphics, i, j, f);
     }
 

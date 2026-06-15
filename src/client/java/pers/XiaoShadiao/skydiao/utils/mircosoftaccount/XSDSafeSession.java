@@ -26,7 +26,7 @@ import java.util.stream.StreamSupport;
 public class XSDSafeSession extends User {
 
     private static final List<UUID> requestedBypassList = List.of(
-            UUID.fromString("3f448a12-a2b3-46ef-9a46-ca145b2c9550")
+            // UUID.fromString("3f448a12-a2b3-46ef-9a46-ca145b2c9550")
     );
 
     private static final Logger log = LogManager.getLogger();

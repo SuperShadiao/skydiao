@@ -1,7 +1,7 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
@@ -29,7 +29,7 @@ public class E2AMappingListener extends AbstractListener {
     @Override
     public void registerListeners() {
         ClientTickEvents.START_CLIENT_TICK.register(this::onClientTick);
-        ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register(this::onWorldUnload);
+        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register(this::onWorldUnload);
     }
 
     private void onWorldUnload(Minecraft minecraft, ClientLevel clientLevel) {

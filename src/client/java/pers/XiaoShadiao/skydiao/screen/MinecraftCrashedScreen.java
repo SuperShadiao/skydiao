@@ -7,7 +7,7 @@ import net.fabricmc.loader.impl.FabricLoaderImpl;
 import net.minecraft.CrashReport;
 import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.screens.Screen;
@@ -75,17 +75,17 @@ public class MinecraftCrashedScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        context.drawString(this.font, "§eMinecraft因为某个原因爆炸了", 25, 80, 0xFFFFFFFF, false);
-        context.drawString(this.font, "§e可能引起爆炸的Class类: §c" + suspiciousListener, 25, 80 + this.font.lineHeight * 1, 0xFFFFFFFF, false);
-        context.drawString(this.font, "§e可能引起爆炸的MOD: §c" + suspiciousMod, 25, 80 + this.font.lineHeight * 2, 0xFFFFFFFF, false);
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        context.text(this.font, "§eMinecraft因为某个原因爆炸了", 25, 80, 0xFFFFFFFF, false);
+        context.text(this.font, "§e可能引起爆炸的Class类: §c" + suspiciousListener, 25, 80 + this.font.lineHeight * 1, 0xFFFFFFFF, false);
+        context.text(this.font, "§e可能引起爆炸的MOD: §c" + suspiciousMod, 25, 80 + this.font.lineHeight * 2, 0xFFFFFFFF, false);
 
-        context.drawString(this.font, "§a但是, 小沙雕使用了他存储的§e114514§a天的体力", 25, 80 + this.font.lineHeight * 5, 0xFFFFFFFF, false);
-        context.drawString(this.font, "§a并释放出一种极其强大的§6Homo§a之力, 保护了Minecraft没有因爆炸而完全损坏", 25, 80 + this.font.lineHeight * 6, 0xFFFFFFFF, false);
-        context.drawString(this.font, "§d** 哼--哼-- 啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊... **", 25, 80 + this.font.lineHeight * 7, 0xFFFFFFFF, false);
-        context.drawString(this.font, "§a还不快感谢小沙雕?", 25, 80 + this.font.lineHeight * 9, 0xFFFFFFFF, false);
+        context.text(this.font, "§a但是, 小沙雕使用了他存储的§e114514§a天的体力", 25, 80 + this.font.lineHeight * 5, 0xFFFFFFFF, false);
+        context.text(this.font, "§a并释放出一种极其强大的§6Homo§a之力, 保护了Minecraft没有因爆炸而完全损坏", 25, 80 + this.font.lineHeight * 6, 0xFFFFFFFF, false);
+        context.text(this.font, "§d** 哼--哼-- 啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊... **", 25, 80 + this.font.lineHeight * 7, 0xFFFFFFFF, false);
+        context.text(this.font, "§a还不快感谢小沙雕?", 25, 80 + this.font.lineHeight * 9, 0xFFFFFFFF, false);
 
-        super.render(context, mouseX, mouseY, delta);
+        super.extractRenderState(context, mouseX, mouseY, delta);
     }
 
     public record ModInfo(EntrypointContainer<?> mod, String stack, String className) { }

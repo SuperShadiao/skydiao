@@ -32,6 +32,7 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                 getArgConstantInstance("copyitemnbt").executes(this::executeCopyNBT),
                 getArgConstantInstance("getblivelistenercode").executes(this::executeGetCode),
                 getArgConstantInstance("afk").executes(this::executeAFK),
+                getArgConstantInstance("viewblp").executes((_) -> AbstractListener.blacklistRenderer.printBLP()),
                 getArgConstantInstance("想看看盔甲架的世界").executes(this::executeArmorStandWorld)
         );
     }

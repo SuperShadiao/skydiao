@@ -11,6 +11,7 @@ import pers.XiaoShadiao.skydiao.config.option.*;
 import pers.XiaoShadiao.skydiao.eventbuslistener.bilibili.BLiveListener;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
+import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
 import java.io.File;
 import java.io.IOException;
@@ -107,6 +108,13 @@ public class ConfigManager {
     public static final BooleanConfigOption blivemodechat = new BooleanConfigOption("blivemodechat", false);
     public static final BooleanConfigOption blivemodehideserverid = new BooleanConfigOption("blivemodehideserverid", false);
     public static final BooleanConfigOption carnivalAutoFruitDigger = new BooleanConfigOption("carnivalfruitdigger", false).flagAsMacroFeature();
+    public static final BooleanConfigOption keepSprint = new BooleanConfigOption("sprint", true) {
+        @Override
+        public void setValue(Boolean value) {
+            if(!value) InputSimulator.setSprint(false);
+            super.setValue(value);
+        }
+    };
 
     public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
@@ -153,7 +161,7 @@ public class ConfigManager {
 
     public static final List<Map.Entry<String, List<ConfigOption<?>>>> categories = List.of(
             Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip, enableircafktip, enableircmacrochecktip, cooltitle, customTitleText)),
-            Map.entry("工具类", List.of(inventoryFilter, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodehideserverid)),
+            Map.entry("工具类", List.of(inventoryFilter, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodehideserverid, keepSprint)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
             Map.entry("自动类", List.of(autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, skyblockriftautodanceroom, carnivalAutoFruitDigger)),
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, skyblockSafeIsland)),

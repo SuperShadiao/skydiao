@@ -4,7 +4,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
@@ -26,21 +26,21 @@ public class BigTitle extends XSDHUD {
     }
 
     private void afterScreenInit(Minecraft mc, Screen screen, int scaledWidth, int scaledHeight) {
-        ScreenEvents.afterRender(screen).register(this::render);
+        ScreenEvents.afterExtract(screen).register(this::render);
     }
 
-    private void render(Screen screen, GuiGraphics guiGraphics, int i, int i1, float v) {
+    private void render(Screen screen, GuiGraphicsExtractor guiGraphics, int i, int i1, float v) {
         render(guiGraphics, mc.getDeltaTracker());
     }
 
     @Override
-    public void render(GuiGraphics context, DeltaTracker tickCounter) {
+    public void render(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
         if(title != null && System.currentTimeMillis() < displayTime && mc.player != null && mc.level != null) {
             Matrix3x2fStack pose = context.pose();
             pose.pushMatrix();
             pose.scale(2.0f);
             pose.translate(-context.guiWidth() / 4f, -context.guiHeight() / 4f);
-            context.drawCenteredString(mc.font, title, context.guiWidth() / 2, context.guiHeight() / 2, 0xFFFFFFFF);
+            context.centeredText(mc.font, title, context.guiWidth() / 2, context.guiHeight() / 2, 0xFFFFFFFF);
             pose.popMatrix();
         }
     }

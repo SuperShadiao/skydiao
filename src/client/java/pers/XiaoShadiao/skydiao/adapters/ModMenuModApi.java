@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 public class ModMenuModApi implements ModMenuApi {
 
     private AutoUpdater updater;
+    private Thread updaterThread;
 
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
@@ -64,6 +65,14 @@ public class ModMenuModApi implements ModMenuApi {
 
     private AutoUpdater u() {
         if(updater == null) updater = AutoUpdater.checkUpdate();
+        if(updater == AutoUpdater.emptyInstance) {
+            updaterThread = new Thread(() -> {
+                while(updater == null || updater == AutoUpdater.emptyInstance) {
+                    updater = AutoUpdater.checkUpdate();
+                }
+            });
+        }
+        if(updater == null) updater = AutoUpdater.emptyInstance;
         return updater == null ? AutoUpdater.emptyInstance : updater;
     }
 }

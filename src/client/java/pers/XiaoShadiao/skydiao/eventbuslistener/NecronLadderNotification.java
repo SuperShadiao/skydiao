@@ -2,7 +2,7 @@ package pers.XiaoShadiao.skydiao.eventbuslistener;
 
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.world.inventory.ChestMenu;
@@ -28,16 +28,16 @@ public class NecronLadderNotification extends AbstractListener {
     private void afterScreenInit(Minecraft mc, Screen screen, int scaledWidth, int scaledHeight) {
         if(!ConfigManager.necronLadderNotification.getValue()) return;
         if(screen instanceof ContainerScreen cs) {
-            ScreenEvents.afterRender(cs).register(new Listener());
+            ScreenEvents.afterExtract(cs).register(new Listener());
         }
     }
 
-    static class Listener implements ScreenEvents.AfterRender {
+    static class Listener implements ScreenEvents.AfterExtract {
 
         private boolean triggered = false;
 
         @Override
-        public void afterRender(Screen screen, GuiGraphics drawContext, int mouseX, int mouseY, float tickDelta) {
+        public void afterExtract(Screen screen, GuiGraphicsExtractor drawContext, int mouseX, int mouseY, float tickDelta) {
             if(triggered) return;
             if(screen instanceof ContainerScreen cs) {
                 ChestMenu menu = cs.getMenu();
@@ -60,6 +60,5 @@ public class NecronLadderNotification extends AbstractListener {
                 }
             }
         }
-
     }
 }

@@ -1,7 +1,7 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.minecraft.client.Minecraft;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
@@ -36,7 +36,7 @@ public class TitleChanger extends AbstractListener {
     @Override
     public void registerListeners() {
         ClientTickEvents.START_CLIENT_TICK.register(this::onStartTick);
-        ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register((mc, level) -> titleParts.forEach(Part::resetTick));
+        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register((mc, level) -> titleParts.forEach(Part::resetTick));
     }
 
     private void onStartTick(Minecraft mc) {

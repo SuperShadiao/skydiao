@@ -1,15 +1,15 @@
 package pers.XiaoShadiao.skydiao.hud;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.LerpingBossEvent;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -63,11 +63,11 @@ public class CustomBossbar extends XSDHUD {
         HudElementRegistry.replaceElement(VanillaHudElements.BOSS_BAR, (bossBar) -> ConfigManager.bossbar.getValue() ? this : bossBar);
         ClientTickEvents.START_CLIENT_TICK.register(this::onClientTick);
         AttackEntityCallback.EVENT.register(this::onAttackEntity);
-        ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register(this::onWorldUnload);
-        WorldRenderEvents.END_MAIN.register(this::onLastRender);
+        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register(this::onWorldUnload);
+        LevelRenderEvents.END_MAIN.register(this::onLastRender);
     }
 
-    private void onLastRender(WorldRenderContext context) {
+    private void onLastRender(LevelRenderContext context) {
         if(starRailBossBar != null) {
             LivingEntity entity = starRailBossBar.getTargetEntity();
             RenderUtils.WorldRender worldRender = RenderUtils.createWorldRenderInstance(context, starRailBossBar.shouldXRayBoss() ? CustomRenderPipeline.THROUGH_WALLS_LINE : CustomRenderPipeline.NO_THROUGH_WALLS_LINE);
@@ -124,7 +124,7 @@ public class CustomBossbar extends XSDHUD {
     }
 
     @Override
-    public void render(@NotNull GuiGraphics context, @NotNull DeltaTracker tickCounter) {
+    public void render(@NotNull GuiGraphicsExtractor context, @NotNull DeltaTracker tickCounter) {
         if(mc.level == null) return;
         MixinBossbarEventGetter bossbarEventGetter = (MixinBossbarEventGetter) mc.gui.getBossOverlay();
         List<UUID> temp = new ArrayList<>(bossbarEventGetter.getEvents().size());
@@ -215,7 +215,7 @@ public class CustomBossbar extends XSDHUD {
                 }
                 if (am.mobInfo != null && am.mobInfo.armorStandForBoss != null)
                     s.append(" §f| ").append(am.mobInfo.armorStandForBoss.getName());
-                context.drawString(mc.font, s.copy().append(shealth.toString()), (int) (width / 2 - mc.font.width(s) / 2), (int) (12 - 10 + yOffset), 0xFFFFFFFF, true);
+                context.text(mc.font, s.copy().append(shealth.toString()), (int) (width / 2 - mc.font.width(s) / 2), (int) (12 - 10 + yOffset), 0xFFFFFFFF, true);
 
                 context.fill(x, 12 + yOffset, x + length, 15 + yOffset, AnimationManager.healthBgColor.getRGB());
                 context.fill(x - 1, 13 + yOffset, x + length + 1, 14 + yOffset, AnimationManager.healthBgColor.getRGB());
@@ -646,7 +646,7 @@ public class CustomBossbar extends XSDHUD {
     private int lastRecordWeakness = 0;
     private double bossbarBobbing = 0;
 
-    private void drawStarRailBossBar(GuiGraphics context, IStarRailBossBar bossBar, float partialTick) {
+    private void drawStarRailBossBar(GuiGraphicsExtractor context, IStarRailBossBar bossBar, float partialTick) {
         if(bossBar == null) return;
 
         partialTick *= 3;
@@ -756,12 +756,12 @@ public class CustomBossbar extends XSDHUD {
             }
 
             text: {
-                context.drawString(mc.font, bossBar.getDisplayName().getString(), x + (length - mc.font.width(bossBar.getDisplayName())) / 2, -17 - mc.font.lineHeight + (hasWeakness ? 0 : 4), 0xFFFFFFFF, true);
+                context.text(mc.font, bossBar.getDisplayName().getString(), x + (length - mc.font.width(bossBar.getDisplayName())) / 2, -17 - mc.font.lineHeight + (hasWeakness ? 0 : 4), 0xFFFFFFFF, true);
                 String text1 = (int)(Math.floor((bossBar.getHealth() / bossBar.getMaxHealth() * 100 + 0.05) * 10) / 10) + "%";
-                context.drawString(mc.font, text1, x + (length - mc.font.width(text1)) / 2, -8 - mc.font.lineHeight / 2, 0xFFFFFFFF, true);
+                context.text(mc.font, text1, x + (length - mc.font.width(text1)) / 2, -8 - mc.font.lineHeight / 2, 0xFFFFFFFF, true);
 
                 String text = "§a" + ToolList.getInstance().numberToEZString(bossBar.getHealth()) + "§c❤";
-                context.drawString(mc.font, text, x + 50 + (length + mc.font.width(bossBar.getDisplayName())) / 2, -17 - mc.font.lineHeight + (hasWeakness ? 0 : 4), 0xFFFFFFFF, true);
+                context.text(mc.font, text, x + 50 + (length + mc.font.width(bossBar.getDisplayName())) / 2, -17 - mc.font.lineHeight + (hasWeakness ? 0 : 4), 0xFFFFFFFF, true);
             }
         }
 
@@ -807,7 +807,7 @@ public class CustomBossbar extends XSDHUD {
                         default:
                             return;
                     }
-                    context.drawString(mc.font, text, (int) (x1 - (float) mc.font.width(text) / 2), (int) (y1 + radius + 3), 0xFFFFFFFF, true);
+                    context.text(mc.font, text, (int) (x1 - (float) mc.font.width(text) / 2), (int) (y1 + radius + 3), 0xFFFFFFFF, true);
                 };
                 if(bossBar.isPowerUp()) {
                     powerupAnimation -= 6 * partialTick;

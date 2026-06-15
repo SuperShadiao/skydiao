@@ -1,10 +1,10 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener.macro;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -119,10 +119,10 @@ public class PathFinderExecutor extends AbstractListener implements IMacro {
 
     @Override
     public void registerListeners() {
-        ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register(this::onWorldUnload);
+        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register(this::onWorldUnload);
         ClientPlayConnectionEvents.DISCONNECT.register(this::onDisconnect);
         ClientTickEvents.START_CLIENT_TICK.register(this::onTickStart);
-        WorldRenderEvents.END_MAIN.register(this::onRender);
+        LevelRenderEvents.END_MAIN.register(this::onRender);
     }
 
     public PathFinderExecutor() {
@@ -856,7 +856,7 @@ public class PathFinderExecutor extends AbstractListener implements IMacro {
     private int token;
     private Thread pathHubGetter;
 
-    private void onRender(WorldRenderContext context) {
+    private void onRender(LevelRenderContext context) {
         RenderUtils.WorldRender wrLine = RenderUtils.createWorldRenderInstance(context, xray ? CustomRenderPipeline.THROUGH_WALLS_LINE : CustomRenderPipeline.NO_THROUGH_WALLS_LINE);
         RenderUtils.WorldRender wrFill = RenderUtils.createWorldRenderInstance(context, xray ? CustomRenderPipeline.THROUGH_WALLS_FILL : CustomRenderPipeline.NO_THROUGH_WALLS_FILL);
 

@@ -6,7 +6,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandBuildContext;
@@ -38,19 +38,19 @@ public abstract class BaseCommand implements CommandManager {
     public abstract int executeCommand(CommandContext<FabricClientCommandSource> context);
 
     public final <T> RequiredArgumentBuilder<FabricClientCommandSource, T> getArgInstance(String name, ArgumentType<T> type) {
-        return ClientCommandManager.argument(name, type);
+        return ClientCommands.argument(name, type);
     }
 
     public final <T> RequiredArgumentBuilder<FabricClientCommandSource, T> getArgInstanceAndRunNode(String name, ArgumentType<T> type) {
-        return ClientCommandManager.argument(name, type).executes(this::executeCommand0);
+        return ClientCommands.argument(name, type).executes(this::executeCommand0);
     }
 
     public final LiteralArgumentBuilder<FabricClientCommandSource> getArgConstantInstance(String name) {
-        return ClientCommandManager.literal(name);
+        return ClientCommands.literal(name);
     }
 
     public final LiteralArgumentBuilder<FabricClientCommandSource> getArgConstantInstanceAndRunNode(String name) {
-        return ClientCommandManager.literal(name).executes(this::executeCommand0);
+        return ClientCommands.literal(name).executes(this::executeCommand0);
     }
 
     public void lastCallRootCmdNode(LiteralArgumentBuilder<FabricClientCommandSource> rootCmdNode) {}

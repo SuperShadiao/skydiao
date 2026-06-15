@@ -1,7 +1,7 @@
 package pers.XiaoShadiao.skydiao.keybinds;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
@@ -15,9 +15,10 @@ public class KeyBindsManager {
     public static final KeyMapping rightAutoClickerSwap = new KeyMapping("key.category.skydiao.rightautoclicker", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
 
     public static final KeyMapping toggleFarmingScript = new KeyMapping("key.category.skydiao.togglefarmingscript", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
+    public static final KeyMapping toggleKeepSprint = new KeyMapping("key.category.skydiao.toggleSprint", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
 
     public static void registerKeyBinds() {
-        Register.execRegister(KeyBindsManager.class, KeyMapping.class, KeyBindingHelper::registerKeyBinding);
+        Register.execRegister(KeyBindsManager.class, KeyMapping.class, KeyMappingHelper::registerKeyMapping);
     }
 
 }

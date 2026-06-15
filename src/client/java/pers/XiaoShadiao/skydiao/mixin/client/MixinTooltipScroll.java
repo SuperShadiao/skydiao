@@ -4,7 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.resources.Identifier;
@@ -18,14 +18,14 @@ import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 
 import java.util.List;
 
-@Mixin(GuiGraphics.class)
+@Mixin(GuiGraphicsExtractor.class)
 public class MixinTooltipScroll {
 
     @Final
     @Shadow
     private Matrix3x2fStack pose;
 
-    @WrapMethod(method = "renderTooltip")
+    @WrapMethod(method = "tooltip")
     public void drawTooltip(Font font, List<ClientTooltipComponent> list, int i, int j, ClientTooltipPositioner clientTooltipPositioner, @Nullable Identifier identifier, Operation<Void> original) {
         int scroll = AbstractListener.tooltipScrollController.getOffsetScroll(font, list);
         pose.pushMatrix();

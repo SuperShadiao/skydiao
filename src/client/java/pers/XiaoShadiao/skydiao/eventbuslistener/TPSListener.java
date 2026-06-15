@@ -2,7 +2,7 @@ package pers.XiaoShadiao.skydiao.eventbuslistener;
 
 import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
@@ -66,7 +66,7 @@ public class TPSListener extends AbstractListener {
     @Override
     public void registerListeners() {
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
-        ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register((mc, level) -> {
+        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register((mc, level) -> {
             tps.forEach(e -> e.setValue(0));
             lastWorldChange = System.currentTimeMillis();
         });
@@ -105,10 +105,7 @@ public class TPSListener extends AbstractListener {
     private long lastReceivedPacketTime;
 
     private boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
-        if(packet instanceof ClientboundSetTimePacket(long gameTime, long dayTime, boolean tickDayTime)) {
-//            System.out.println(dayTime);
-//            System.out.println(gameTime);
-//            System.out.println(tickDayTime);
+        if(packet instanceof ClientboundSetTimePacket) {
             queue.enqueue(Math.min(System.currentTimeMillis() - lastReceivedPacketTime, 1050));
             lastReceivedPacketTime = System.currentTimeMillis();
         }

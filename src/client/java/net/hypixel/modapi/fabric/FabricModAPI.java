@@ -82,8 +82,8 @@ public class FabricModAPI implements ClientModInitializer {
         try {
             CustomPacketPayload.Type<ClientboundHypixelPayload> clientboundId = new CustomPacketPayload.Type<>(Identifier.parse(identifier));
             StreamCodec<ByteBuf, ClientboundHypixelPayload> codec = ClientboundHypixelPayload.buildCodec(clientboundId);
-            PayloadTypeRegistry.playS2C().register(clientboundId, codec);
-            PayloadTypeRegistry.configurationS2C().register(clientboundId, codec);
+            PayloadTypeRegistry.clientboundPlay().register(clientboundId, codec);
+            PayloadTypeRegistry.clientboundConfiguration().register(clientboundId, codec);
 
             // Also register the global receiver for handling incoming packets during PLAY and CONFIGURATION
             ClientPlayNetworking.registerGlobalReceiver(clientboundId, (payload, context) -> {
@@ -134,8 +134,8 @@ public class FabricModAPI implements ClientModInitializer {
         try {
             CustomPacketPayload.Type<ServerboundHypixelPayload> serverboundId = new CustomPacketPayload.Type<>(Identifier.parse(identifier));
             StreamCodec<ByteBuf, ServerboundHypixelPayload> codec = ServerboundHypixelPayload.buildCodec(serverboundId);
-            PayloadTypeRegistry.playC2S().register(serverboundId, codec);
-            PayloadTypeRegistry.configurationC2S().register(serverboundId, codec);
+            PayloadTypeRegistry.serverboundPlay().register(serverboundId, codec);
+            PayloadTypeRegistry.serverboundConfiguration().register(serverboundId, codec);
         } catch (IllegalArgumentException ignored) {
             // Ignored as this is fired when we reload the registrations and the packet is already registered
         }

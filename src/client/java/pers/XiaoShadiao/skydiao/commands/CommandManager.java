@@ -2,7 +2,7 @@ package pers.XiaoShadiao.skydiao.commands;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import pers.XiaoShadiao.skydiao.utils.Register;
@@ -31,7 +31,7 @@ public interface CommandManager {
             Register.execRegister(CommandManager.class, BaseCommand.class, cmd -> {
                 cmd.setCommandBuildContext(registryAccess);
                 try {
-                    LiteralArgumentBuilder<FabricClientCommandSource> register = ClientCommandManager.literal(cmd.getCommandName());
+                    LiteralArgumentBuilder<FabricClientCommandSource> register = ClientCommands.literal(cmd.getCommandName());
                     for(ArgumentBuilder<FabricClientCommandSource, ?> arg : cmd.getArgs()) {
                         register = register.then(arg);
                     }

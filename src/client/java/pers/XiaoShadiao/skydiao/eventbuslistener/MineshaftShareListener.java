@@ -1,7 +1,7 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -44,7 +44,7 @@ public class MineshaftShareListener extends AbstractListener {
 
     @Override
     public void registerListeners() {
-        ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register(this::worldUnload);
+        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register(this::worldUnload);
         ClientReceiveMessageEvents.GAME.register(this::onChat);
         ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
         ClientTickEvents.START_CLIENT_TICK.register(this::onTick);
@@ -91,7 +91,7 @@ public class MineshaftShareListener extends AbstractListener {
                 if(!inviteThreadRunning) runCommand("/p leave");
                 new Thread(() -> {
                     synchronized (inviteLock) {
-                        try { Thread.sleep(1000); } catch (InterruptedException e) {}
+                        try { Thread.sleep(1000 + ToolList.getInstance().random.nextInt(500)); } catch (InterruptedException e) {}
                         runCommand("/p join " + p.sender);
                         try { Thread.sleep(1500); } catch (InterruptedException e) {}
                     }
@@ -186,7 +186,7 @@ public class MineshaftShareListener extends AbstractListener {
                                     inviteList.clear();
 
                                     if(player != null) {
-                                        try { Thread.sleep(600); } catch (InterruptedException e) {}
+                                        try { Thread.sleep(1600); } catch (InterruptedException e) {}
                                     } else {
                                         break;
                                     }

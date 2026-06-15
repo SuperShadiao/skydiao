@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -475,8 +475,8 @@ public class AccountSelectScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-        super.render(guiGraphics, i, j, f);
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int i, int j, float f) {
+        super.extractRenderState(guiGraphics, i, j, f);
         if(ToolList.getInstance().stringHasContext(tipMessage)) {
             if(footerButtonLayout != null) RenderUtils.renderScrollingString(guiGraphics, font, Component.literal(tipMessage), 10, 10, footerButtonLayout.getRectangle().top(), footerButtonLayout.getRectangle().left() - 5, footerButtonLayout.getRectangle().bottom(), 0xFFFFFFFF);
         }
@@ -535,7 +535,7 @@ public class AccountSelectScreen extends Screen {
             }
 
             @Override
-            public void renderContent(GuiGraphics guiGraphics, int left, int top, boolean bl, float f) {
+            public void extractContent(GuiGraphicsExtractor guiGraphics, int left, int top, boolean bl, float f) {
                 String name = account.name;
                 if (ToolList.mc.getUser().getName().equals(name)) {
                     name = "§a" + name;
@@ -546,13 +546,13 @@ public class AccountSelectScreen extends Screen {
                 RenderUtils.renderScrollingString(guiGraphics, ToolList.mc.font, Component.literal(name), getContentX(), getContentX(), getContentY() - 25, getContentX() + 100, getContentY() + 44, 0xFFFFFFFF);
                 login.setX(getContentRight() - login.getWidth() - 50);
                 login.setY(getContentY());
-                login.render(guiGraphics, left, top, f);
+                login.extractRenderState(guiGraphics, left, top, f);
 
                 delete.setX(getContentRight() - delete.getWidth());
                 delete.setY(getContentY());
-                delete.render(guiGraphics, left, top, f);
+                delete.extractRenderState(guiGraphics, left, top, f);
 
-                PlayerFaceRenderer.draw(guiGraphics, account.getSkinRL(), getContentX() - 25, getContentY(), 20, true, false, -1);
+                PlayerFaceExtractor.extractRenderState(guiGraphics, account.getSkinRL(), getContentX() - 25, getContentY(), 20, true, false, -1);
             }
 
             @Override

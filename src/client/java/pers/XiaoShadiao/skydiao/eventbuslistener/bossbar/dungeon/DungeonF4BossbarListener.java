@@ -2,8 +2,8 @@ package pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon;
 
 import com.odtheking.odin.utils.render.CustomRenderPipelines;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.player.RemotePlayer;
@@ -58,10 +58,10 @@ public class DungeonF4BossbarListener extends AbstractDungeonBossbar {
     public void registerListeners() {
         ClientTickEvents.START_CLIENT_TICK.register(this::onClientTick);
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
-        WorldRenderEvents.END_MAIN.register(this::onLastRender);
+        LevelRenderEvents.END_MAIN.register(this::onLastRender);
     }
 
-    private void onLastRender(WorldRenderContext context) {
+    private void onLastRender(LevelRenderContext context) {
         if (mc.level == null || !isInCorrectDungeon()) return;
         RenderUtils.WorldRender wr = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_LINE);
 
