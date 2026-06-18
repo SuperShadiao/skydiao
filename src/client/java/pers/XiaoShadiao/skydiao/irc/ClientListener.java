@@ -71,10 +71,8 @@ public class ClientListener extends ChatClient {
 
                                 switch(String.valueOf(packet.packetType)) {
                                     case "heartbeat":
-                                        // if(Config管理.getConfigKeyValue("xsdchatheartbeatdebug") == 1) log.info("Received XSDChat heartbeat packet");
-                                        break;
                                     case "lps":
-                                        // log.info("Sending hypixel stats lookup back to " + ownerMap.get(socket));
+                                    case "showitem":
                                         break;
                                     default:
                                         log.info("Received packet: " + packet.getJson());

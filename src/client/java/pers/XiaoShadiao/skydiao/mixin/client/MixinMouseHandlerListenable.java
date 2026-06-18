@@ -13,8 +13,8 @@ import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 public class MixinMouseHandlerListenable {
 
     @Inject(method = "onButton", at = @At("HEAD"), cancellable = true)
-    private void onButton(long l, MouseButtonInfo mouseButtonInfo, int i, CallbackInfo ci) {
-        if (CustomFabricEvents.MOUSE_BUTTON_EVENT.invoker().onMouseButton(l, mouseButtonInfo, i)) {
+    private void onButton(long handle, MouseButtonInfo rawButtonInfo, int action, CallbackInfo ci) {
+        if (CustomFabricEvents.MOUSE_BUTTON_EVENT.invoker().onMouseButton(handle, rawButtonInfo, action)) {
             ci.cancel();
         }
     }
@@ -25,8 +25,8 @@ public class MixinMouseHandlerListenable {
     }
 
     @Inject(method = "onScroll", at = @At("HEAD"), cancellable = true)
-    private void onScroll(long l, double d, double d1, CallbackInfo ci) {
-        if (CustomFabricEvents.MOUSE_SCROLL_EVENT.invoker().onMouseScroll(l,d,d1)) {
+    private void onScroll(long handle, double xoffset, double yoffset, CallbackInfo ci) {
+        if (CustomFabricEvents.MOUSE_SCROLL_EVENT.invoker().onMouseScroll(handle, xoffset, yoffset)) {
             ci.cancel();
         }
     }

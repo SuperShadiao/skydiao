@@ -1,6 +1,7 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener;
 
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.util.Mth;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
@@ -11,6 +12,7 @@ public class TooltipScrollController extends AbstractListener {
 
     private int currentOffset = 0;
     private int currentTooltipHeight = 0;
+    private long lastUpdateHeightTime;
 
     @Override
     public String getListenerName() {
@@ -23,13 +25,19 @@ public class TooltipScrollController extends AbstractListener {
     }
 
     private boolean mouseButtonScroll(long l, double idk, double scrollCount) {
-        updateScroll(scrollCount);
+        if (updateScroll(scrollCount) && System.currentTimeMillis() - lastUpdateHeightTime < 100) {
+            if (mc.screen instanceof ChatScreen screen) {
+                return true;
+            }
+        }
         return false;
     }
 
-    private void updateScroll(double scrollCount) {
+    private boolean updateScroll(double scrollCount) {
+        int lastOffset = currentOffset;
         int maxOffset = Math.max(0, currentTooltipHeight - mc.getWindow().getGuiScaledHeight()) + 10;
         currentOffset = (int) Mth.clamp(currentOffset + scrollCount * 10, 0, maxOffset);
+        return lastOffset != currentOffset;
     }
 
     public int getOffsetScroll(Font font, List<ClientTooltipComponent> list) {
@@ -43,6 +51,7 @@ public class TooltipScrollController extends AbstractListener {
         if(l < mc.getWindow().getGuiScaledHeight()) currentOffset = 0;
         updateScroll(0);
 
+        lastUpdateHeightTime = System.currentTimeMillis();
         return currentOffset;
     }
 }

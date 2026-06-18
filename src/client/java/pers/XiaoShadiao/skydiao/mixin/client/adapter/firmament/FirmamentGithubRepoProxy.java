@@ -17,15 +17,16 @@ public class FirmamentGithubRepoProxy {
     @WrapMethod(method = "request(Ljava/net/URI;)Lmoe/nea/firmament/util/net/HttpUtil$Request;")
     public HttpUtil.Request request(URI url, Operation<HttpUtil.Request> original) {
         if (url.getHost().contains("github.com")) {
-            try(InputStream is = ToolList.getInstance().makeReqToURL("https://xiaoshadiao.club")) {
-                is.readAllBytes();
-
-                String proxy = "https://xiaoshadiao.club/datagetter?url=" + URLEncoder.encode(url.toString(), StandardCharsets.UTF_8);
-                ToolList.getInstance().log.info(proxy);
-                url = URI.create(proxy);
-            } catch (Throwable e) {
-                e.printStackTrace();
-            }
+//            try(InputStream is = ToolList.getInstance().makeReqToURL("https://xiaoshadiao.club")) {
+//                is.readAllBytes();
+//
+//                String proxy = "https://xiaoshadiao.club/datagetter?url=" + URLEncoder.encode(url.toString(), StandardCharsets.UTF_8);
+//                ToolList.getInstance().log.info(proxy);
+//                url = URI.create(proxy);
+//            } catch (Throwable e) {
+//                e.printStackTrace();
+//            }
+            url = ToolList.getInstance().wrapAsGithubProxy(url);
         }
         return original.call(url);
     }

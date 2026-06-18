@@ -44,7 +44,10 @@
     "adapter.chatpatches.MixinChatPatcherTranslateButton",
     "adapter.firmament.FirmamentGithubRepoProxy",
     "adapter.secretroute.FPSDropperFix",
+    "adapter.skyblocker.GithubRepoProxy",
     "adapter.skyhanni.FPSDropperFix",
+    "adapter.skyhanni.GithubRepoProxy",
+    "adapter.skyhanni.RepoLoaderStuckFix",
     "blivemode.MixinEntity",
     "blivemode.MixinEntityPlayer"
   ]

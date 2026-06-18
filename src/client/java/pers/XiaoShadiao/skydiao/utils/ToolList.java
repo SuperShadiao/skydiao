@@ -43,10 +43,7 @@ import pers.XiaoShadiao.skydiao.mixin.client.MixinEntityCloneableAccessor;
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
 import java.lang.reflect.Method;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
@@ -727,4 +724,46 @@ public class ToolList {
             System.out.println(m.getString());
         }
     }
+
+    public volatile boolean isProxyAccessible = false;
+    private final Object proxyAccessibleLock = new Object();
+
+    public String wrapAsGithubProxy(String url) {
+        try {
+            return wrapAsGithubProxy(new URL(url)).toString();
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public URL wrapAsGithubProxy(URL url) {
+        try {
+            return wrapAsGithubProxy(url.toURI()).toURL();
+        } catch (MalformedURLException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public URI wrapAsGithubProxy(URI url) {
+        if (url.getHost().contains("github.com")) {
+            if(!isProxyAccessible) {
+                synchronized (proxyAccessibleLock) {
+                    if(!isProxyAccessible) {
+                        try(InputStream is = ToolList.getInstance().makeReqToURL("https://xiaoshadiao.club")) {
+                            is.readAllBytes();
+                            isProxyAccessible = true;
+                        } catch (Throwable e) {
+                            e.printStackTrace();
+                            return url;
+                        }
+                    }
+                }
+            }
+            String proxy = "https://xiaoshadiao.club/datagetter?url=" + URLEncoder.encode(url.toString(), StandardCharsets.UTF_8);
+            ToolList.getInstance().log.info("成功包装Github Proxy链接: " + proxy);
+            url = URI.create(proxy);
+        }
+        return url;
+    }
+
 }

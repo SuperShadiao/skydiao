@@ -1,11 +1,19 @@
 package pers.XiaoShadiao.skydiao.irc;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.JsonOps;
 import net.hypixel.modapi.HypixelModAPI;
 import net.hypixel.modapi.packet.impl.serverbound.ServerboundPartyInfoPacket;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
@@ -20,7 +28,6 @@ public class ClientReceiveHandler {
             case "chat":
                 ToolList.printChatMessage(Component.literal("§a[XSDChat] " + packet.getRank(true) + "§d" + packet.sender + "§7: §f" + packet.message));
                 if(ConfigManager.enablexsdccommandtip.getValue()) ToolList.printChatMessage(Component.literal("§a[XSDChat] 请使用/xsdc message聊天!"));
-
                 break;
             case "system":
                 ToolList.printChatMessage(Component.literal("§a[XSDChat] §c[SYSTEM] §f" + packet.message));
@@ -56,6 +63,18 @@ public class ClientReceiveHandler {
                 break;
             case "slayer_together":
                 AbstractListener.slayerTogetherListener.onSlayerTogetherPacket(packet);
+                break;
+            case "showitem":
+                if(ToolList.mc.level != null) {
+                    try {
+                        ItemStack is = ItemStack.CODEC.parse(RegistryOps.create(JsonOps.INSTANCE, ToolList.mc.level.registryAccess()), JsonParser.parseString(packet.message)).getOrThrow(JsonSyntaxException::new);
+                        MutableComponent component = Component.literal("§a[XSDChat] " + packet.getRank(true) + "§d" + packet.sender + " §a展示容错 §e[HOVER]")
+                                .withStyle(Style.EMPTY.withHoverEvent(new HoverEvent.ShowItem(ItemStackTemplate.fromNonEmptyStack(is))));
+                        ToolList.printChatMessage(component);
+                    } catch (JsonSyntaxException e) {
+                        e.printStackTrace();
+                    }
+                }
                 break;
         }
     }

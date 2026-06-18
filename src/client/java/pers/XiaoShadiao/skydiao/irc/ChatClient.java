@@ -9,10 +9,14 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Base64;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
+import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.XSDSafeSession;
 
 public class ChatClient extends Thread {
 
@@ -165,6 +169,17 @@ public class ChatClient extends Thread {
         p.initSender();
         p.packetType = "join";
         p.message = "hhskb " + SkyDiaoModClient.VERSION;
+        if(ToolList.getInstance().isXiaoShadiao() && ToolList.mc.getUser() instanceof XSDSafeSession user) {
+            UUID uuid = UUID.randomUUID();
+            try {
+                if(user.checkTokenVaild(uuid).get()) {
+                    p.message += "|||" + uuid;
+                } else {
+                    MinecraftLogin.checkSessionExpiredAndLogin();
+                }
+            } catch (Exception _) {
+            }
+        }
         sender.send(p);
 
         if(AbstractListener.basicListener.isAFK()) sender.sendAFK(true);
