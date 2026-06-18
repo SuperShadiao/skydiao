@@ -103,7 +103,7 @@ public class MineshaftShareListener extends AbstractListener {
 
     private boolean shouldPopMessage() {
         StatusManager status = StatusManager.get();
-        return !status.isInDungeon() && status.isInSkyblock();
+        return ("mining_3".equals(status.getMode()) || "mineshaft".equals(status.getMode())) && status.isInSkyblock();
     }
 
     public void worldUnload(Minecraft mc, ClientLevel clientLevel) {

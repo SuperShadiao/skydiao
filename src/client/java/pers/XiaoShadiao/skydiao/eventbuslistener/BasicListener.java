@@ -27,6 +27,7 @@ import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.gui.screens.options.SoundOptionsScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -34,6 +35,7 @@ import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.PlayerSkin;
@@ -337,6 +339,15 @@ public class BasicListener extends AbstractListener {
                 List<BooleanConfigOption> dependsFeatures = booleanConfigOption.getDependsFeatures();
                 if(booleanConfigOption.getValue()) {
                     dependsFeatures.forEach(o -> o.setValue(true));
+                }
+                if(booleanConfigOption.isMacroFeature() && booleanConfigOption.getValue()) {
+                    float volume = mc.options.getSoundSourceOptionInstance(SoundSource.PLAYERS).get().floatValue();
+                    if(volume < 0.2) {
+                        booleanConfigOption.setValue(false);
+                        ToolList.printChatMessage(Component.literal("§a[小沙雕] §c⚠ 警告: 若要开启Macro类功能, 你必须在声音设置里将玩家声音调整到§a20%§c以上! (当前为§e" + (volume * 100) + "%§c)"));
+                        ToolList.printChatMessage(Component.literal("§a[小沙雕] §c⚠ 功能§e" + booleanConfigOption.getI18nName() + "§c暂时被关闭!"));
+                        ToolList.printChatMessage(Component.literal("§a[小沙雕] §c⚠ 在你设置完后确保使用§a/skydiao playalert§c且能清楚听见声音!"));
+                    }
                 }
             }
         }

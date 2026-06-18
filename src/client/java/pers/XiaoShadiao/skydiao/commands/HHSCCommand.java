@@ -119,7 +119,11 @@ public class HHSCCommand extends SkydiaoCommand {
                 return 0;
             }));
             devcommand.then(getArgConstantInstance("testmacrocheckalert").executes(context -> {
-                AbstractListener.mml.triggerAlert("测试警报🚨");
+                ToolList.addThreadedTask(() -> {
+                    Thread.sleep(2500);
+                    AbstractListener.mml.triggerAlert("测试警报🚨");
+                    return null;
+                });
                 return 0;
             }));
         } else {

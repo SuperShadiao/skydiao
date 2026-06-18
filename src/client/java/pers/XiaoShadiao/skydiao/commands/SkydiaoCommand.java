@@ -9,6 +9,7 @@ import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
 import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
@@ -27,6 +28,7 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
     public List<ArgumentBuilder<FabricClientCommandSource, ?>> getArgs() {
         return List.of(
                 getArgConstantInstance("translate").redirect(HHT_COMMAND.getCommandNode()),
+                getArgConstantInstance("playalert").executes(this::playAlertSound),
                 getArgConstantInstance("claimreward").then(getArgInstance("index", IntegerArgumentType.integer(0, 2)).executes(this::executeClaimReward)),
                 getArgConstantInstance("editcape").executes(this::executeEditCape),
                 getArgConstantInstance("copyitemnbt").executes(this::executeCopyNBT),
@@ -35,6 +37,11 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                 getArgConstantInstance("viewblp").executes((_) -> AbstractListener.blacklistRenderer.printBLP()),
                 getArgConstantInstance("想看看盔甲架的世界").executes(this::executeArmorStandWorld)
         );
+    }
+
+    private int playAlertSound(CommandContext<FabricClientCommandSource> context) {
+        ToolList.getInstance().playSound(CustomSounds.ALERT_MACRO_CHECK);
+        return 0;
     }
 
     private int executeAFK(CommandContext<FabricClientCommandSource> context) {

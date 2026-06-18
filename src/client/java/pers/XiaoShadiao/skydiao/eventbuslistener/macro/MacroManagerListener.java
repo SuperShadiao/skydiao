@@ -1,10 +1,8 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener.macro;
 
-import com.mojang.blaze3d.platform.NativeImage;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
@@ -14,6 +12,7 @@ import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetHeldSlotPacket;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import org.lwjgl.glfw.GLFW;
 import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.EasyFarmingScriptListener;
@@ -22,9 +21,9 @@ import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.irc.ChatPacket;
 import pers.XiaoShadiao.skydiao.utils.Register;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.WindowsUtils;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.*;
 
 public class MacroManagerListener extends AbstractListener {
@@ -129,6 +128,7 @@ public class MacroManagerListener extends AbstractListener {
     public void triggerAlert(String message) {
         ToolList.printChatMessage(Component.literal("§a[小沙雕] §cAlert! Macro check!"));
         ToolList.printChatMessage(Component.literal("§a[小沙雕] §c请不要慌张, 如果你在当前状态第一次被check, 立即切换为手动并返回继续当前操作 (比如继续钓鱼), 发生第二次check再进行响应!"));
+        WindowsUtils.focusWindows();
         alertTasks.removeIf(t -> t.future.isDone());
         if(alertTasks.size() < 3) {
             alertTasks.add(ToolList.addThreadedTask(() -> {
@@ -172,6 +172,13 @@ public class MacroManagerListener extends AbstractListener {
         isChatOpen = temp;
 
         if(smallTickFlag > 0) smallTickFlag--;
+
+        if(!activeMacros.isEmpty()) {
+            if(WindowsUtils.isWindowsIconfied() && !WindowsUtils.isWindowsFocused()) {
+                WindowsUtils.focusWindows();
+                ToolList.printChatMessage(Component.literal("§a[小沙雕] §c⚠ 警告: 你不能在Macro工作的时候最小化窗口!"));
+            }
+        }
     }
 
     public void addActiveMacro(IMacro macro) {
