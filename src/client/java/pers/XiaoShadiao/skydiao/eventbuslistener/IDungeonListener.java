@@ -16,6 +16,7 @@ public interface IDungeonListener {
     }
 
     public default boolean isInCorrectDungeon() {
+        if(ToolList.getInstance().isDevEnvironment()) return true;
         return (StatusManager.get().isInDungeon() && ToolList.getInstance().fetchScoreboardLinesNoColor().stream()
                 .anyMatch(line -> line.contains("The Catacombs (M" + getFloor()) || line.contains("The Catacombs (F" + getFloor())));
     }

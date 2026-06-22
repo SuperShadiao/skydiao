@@ -1,10 +1,13 @@
 package pers.XiaoShadiao.skydiao.utils;
 
+import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
 import net.hypixel.modapi.HypixelModAPI;
 import net.hypixel.modapi.fabric.FabricModAPI;
 import net.hypixel.modapi.packet.impl.serverbound.ServerboundPartyInfoPacket;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientChunkCache;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -24,9 +27,13 @@ import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -583,6 +590,38 @@ public class ToolList {
             ToolList.mc.execute(() -> ToolList.mc.gui.getChat().addClientSystemMessage(msg));
         }
     }
+
+    private final Long2LongOpenHashMap timeToLoad = new Long2LongOpenHashMap();
+
+    public boolean isChunkLoaded(ClientLevel level, BlockPos pos) {
+        if (level == null) return false;
+
+        int cx = pos.getX() >> 4;
+        int cz = pos.getZ() >> 4;
+
+        if (level.getBlockState(pos).getBlock() == Blocks.VOID_AIR) {
+            return false;
+        }
+
+        LevelChunk chunk = level.getChunkSource().getChunk(cx, cz, false);
+        long packedChunkPos = ChunkPos.pack(cx, cz);
+
+        if(true) return chunk != null && !chunk.isEmpty(); else return false;
+
+//        if(chunk != null && !chunk.isEmpty()) {
+//            if(timeToLoad.containsKey(packedChunkPos)) {
+//                if (System.currentTimeMillis() - timeToLoad.get(packedChunkPos) > 1000) {
+//                    timeToLoad.remove(packedChunkPos);
+//                    return true;
+//                } else return false;
+//            }
+//            return true;
+//        } else {
+//            timeToLoad.put(packedChunkPos, System.currentTimeMillis());
+//        }
+//        return false;
+    }
+
 
     public static void sendChatMessage(String msg) {
         if (mc.player != null) {

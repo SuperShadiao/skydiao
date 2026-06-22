@@ -38,12 +38,20 @@ public class AutoClickerListener extends AbstractListener {
                 if (mouseButtonInfo.button() == 1) {
                     isRightAutoClicking = state == 1;
                     flag = true;
+                    if(isRightAutoClicking) {
+                        rightClickDelay = ToolList.getInstance().random.nextInt(3) + 1;
+                        InputSimulator.singleRightClick();
+                    }
                 }
             }
             if (leftAutoClickingEnabled) {
                 if (mouseButtonInfo.button() == 0) {
                     isLeftAutoClicking = state == 1;
                     flag = true;
+                    if(isLeftAutoClicking) {
+                        leftClickDelay = ToolList.getInstance().random.nextInt(3) + 1;
+                        InputSimulator.singleLeftClick();
+                    }
                 }
             }
             return flag;

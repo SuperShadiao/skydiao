@@ -28,7 +28,7 @@ public class ChatClient extends Thread {
     protected static final Logger log = LogManager.getLogger("XSDChat");
     protected static final byte[] HEADER = new byte[] {0x00, (byte) 0xFF, 0x02, (byte) 0xFF, 0x00};
     protected static final byte[] END = new byte[] {0x01, (byte) 0xFF, 0x00, (byte) 0xFF, 0x01};
-    public static Socket socket;
+    public Socket socket;
     public ClientListener listener;
     public ClientSender sender;
 
@@ -107,12 +107,14 @@ public class ChatClient extends Thread {
                 String[] hostPort = url.replace("https://", "").replace("http://", "").replace("tcp://", "").split(":");
                 // String[] hostPort = {"localhost", "831"};
                 socket = new Socket(hostPort[0], Integer.parseInt(hostPort[1]));
+                socket.setSoTimeout(150_000);
+                socket.setKeepAlive(false);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
-            listener = new ClientListener();
-            sender = new ClientSender();
+            listener = new ClientListener(socket.getInputStream());
+            sender = new ClientSender(socket.getOutputStream());
             listener.setName("HHOnlineChatListener");
             sender.setName("HHOnlineChatSender");
             listener.start();

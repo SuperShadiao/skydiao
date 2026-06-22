@@ -126,6 +126,10 @@ public class HHSCCommand extends SkydiaoCommand {
                 });
                 return 0;
             }));
+            devcommand.then(getArgConstantInstance("restartcnscanner").executes(context -> {
+                AbstractListener.crystalHollowHelperListener.inCN = false;
+                return 0;
+            }));
         } else {
             devcommand.executes((context) -> owo(() -> context.getSource().sendFeedback(Component.literal("§a[小沙雕] §c当前不是Dev环境..."))));
         }

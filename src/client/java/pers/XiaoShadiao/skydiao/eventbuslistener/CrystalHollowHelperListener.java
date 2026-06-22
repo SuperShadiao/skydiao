@@ -1,0 +1,636 @@
+package pers.XiaoShadiao.skydiao.eventbuslistener;
+
+import it.unimi.dsi.fastutil.objects.Object2LongArrayMap;
+import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
+import it.unimi.dsi.fastutil.objects.ObjectHeaps;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.PacketListener;
+import net.minecraft.network.PacketProcessor;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import org.jetbrains.annotations.NotNull;
+import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
+import pers.XiaoShadiao.skydiao.hud.XSDHUD;
+import pers.XiaoShadiao.skydiao.utils.StatusManager;
+import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
+import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
+
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.function.BiPredicate;
+
+public class CrystalHollowHelperListener extends AbstractListener {
+
+    public boolean inCN;
+    public static final Object2LongArrayMap<String> visitedServer = new Object2LongArrayMap<>();
+
+    // =====================NotEnoughUpdate========================
+
+    // There is a small set of breakable blocks above the nucleus at Y > 181. While this zone is reported
+    // as the Crystal Nucleus by Hypixel, for wishing compass purposes it is in the appropriate quadrant.
+    private static final BoundingBox NUCLEUS_BB = new BoundingBox(462, 63, 461, 564, 181, 565);
+    // Bounding box around all breakable blocks in the crystal hollows, appears as bedrock in-game
+    private static final BoundingBox HOLLOWS_BB = new BoundingBox(201, 30, 201, 824, 189, 824);
+
+    // Zone bounding boxes
+    private static final BoundingBox PRECURSOR_REMNANTS_BB = new BoundingBox(512, 64, 512, 824, 189, 824);
+    private static final BoundingBox MITHRIL_DEPOSITS_BB = new BoundingBox(512, 64, 201, 824, 189, 513);
+    private static final BoundingBox GOBLIN_HOLDOUT_BB = new BoundingBox(201, 64, 512, 513, 189, 824);
+    private static final BoundingBox JUNGLE_BB = new BoundingBox(201, 64, 201, 513, 189, 513);
+    private static final BoundingBox MAGMA_FIELDS_BB = new BoundingBox(201, 30, 201, 824, 63, 824);
+
+    // =====================NotEnoughUpdate========================
+
+
+
+    @Override
+    public String getListenerName() {
+        return "CrystalHollowHelperListener";
+    }
+
+    @Override
+    public void registerListeners() {
+        ClientTickEvents.START_CLIENT_TICK.register(this::onStartTick);
+        LevelRenderEvents.END_MAIN.register(this::onLastRender);
+        CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
+    }
+
+    private boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
+        return false;
+    }
+
+    private void onLastRender(LevelRenderContext context) {
+        if(ConfigManager.crystalHollowHelperDebug.getValue() && inCN) {
+            RenderUtils.WorldRender wr = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_LINE);
+            for (ScannerInfo info : activeCrystalScanners) {
+                RenderUtils.renderESP(wr, info.currentScanning, 1, 1, 1, 1, false);
+            }
+            for (ScannerInfo info : activeWormFishSpotScanners) {
+                RenderUtils.renderESP(wr, info.currentScanning, 1, 1, 1, 1, false);
+            }
+            wr.finishDraw();
+        }
+    }
+
+    private final List<CrystalScannerInfo> activeCrystalScanners = new ArrayList<>();
+    private final List<ScannerInfo> activeWormFishSpotScanners = new ArrayList<>();
+    // private boolean flag;
+
+    private void onStartTick(Minecraft mc) {
+        boolean tempInCN = "crystal_hollows".equals(StatusManager.get().getMode());
+        if(!inCN && tempInCN) {
+            inCN = true;
+            long time = visitedServer.getOrDefault(StatusManager.get().getServerID(), -1);
+            if(time != -1 && ConfigManager.crystalHollowDupServerTipper.getValue()) {
+                XSDHUD.bigTitle.updateTitleMsg("§a你在§e" + ToolList.getInstance().timeToString(System.currentTimeMillis() - time) + "§a之前拜访过这个服务器!", 3000);
+            }
+            if(ConfigManager.crystalHollowHelper.getValue()) {
+                activeCrystalScanners.clear();
+                activeWormFishSpotScanners.clear();
+                activeCrystalScanners.add(startScanCrystal(CrystalType.BLUE, PRECURSOR_REMNANTS_BB));
+                activeCrystalScanners.add(startScanCrystal(CrystalType.PURPLE, JUNGLE_BB));
+                activeCrystalScanners.add(startScanCrystal(CrystalType.YELLOW, MAGMA_FIELDS_BB));
+                activeCrystalScanners.add(startScanCrystal(CrystalType.ORANGE, GOBLIN_HOLDOUT_BB));
+                activeCrystalScanners.add(startScanCrystal(CrystalType.GREEN, MITHRIL_DEPOSITS_BB));
+                activeCrystalScanners.add(startScanGoblinKing(CrystalType.GOBLIN_KING, GOBLIN_HOLDOUT_BB));
+                activeCrystalScanners.add(startScanDragonLair(CrystalType.DRAGON_LAIR, MITHRIL_DEPOSITS_BB));
+                activeWormFishSpotScanners.add(startScanWormFishSpot(PRECURSOR_REMNANTS_BB));
+            }
+        } else if(inCN && !tempInCN) {
+            inCN = false;
+        }
+
+//        if(!flag) {
+//            flag = true;
+//            activeCrystalScanners.add(startScanGoblinKing(CrystalType.GOBLIN_KING, GOBLIN_HOLDOUT_BB));
+//        }
+
+        // if(mc.hitResult instanceof BlockHitResult hit) System.out.println(mc.level.getBlockState(hit.getBlockPos().below(2)).getBlock());
+
+        if(inCN) {
+            visitedServer.put(StatusManager.get().getServerID(), System.currentTimeMillis());
+        }
+        if(!activeCrystalScanners.isEmpty()) {
+            Iterator<CrystalScannerInfo> it1 = activeCrystalScanners.iterator();
+            while (it1.hasNext()) {
+                CrystalScannerInfo info = it1.next();
+                if (info.result != null) {
+                    String crystalName = info.crystalType.displayName;
+                    String structureName = info.crystalType.internalName;
+
+                    ToolList.printChatMessage(Component.literal("§a[小沙雕] 在这个服务器发现了一个" + crystalName + "§a! §e(" + info.result + ")"));
+                    if (FabricLoader.getInstance().isModLoaded("skyblocker")) {
+                        // /skyblocker crystalWaypoints add 92 226 -88 Xalx
+                        ToolList.sendChatMessage(String.format("/skyblocker crystalWaypoints add %d %d %d %s", info.result.getX(), info.result.getY(), info.result.getZ(), structureName));
+                    }
+                    it1.remove();
+                } else if (info.task.isDone()) {
+                    String crystalName = info.crystalType.displayName;
+                    ToolList.printChatMessage(Component.literal("§a[小沙雕] §c没有在这个服务器找到" + crystalName + " §c:("));
+                    it1.remove();
+                }
+            }
+        }
+        if(!activeWormFishSpotScanners.isEmpty()) {
+            Iterator<ScannerInfo> it1 = activeWormFishSpotScanners.iterator();
+            while (it1.hasNext()) {
+                ScannerInfo info = it1.next();
+                if (info.result != null) {
+                    ToolList.printChatMessage(Component.literal("§a[小沙雕] 在这个服务器发现了一个§c可以烤鱼钩的地方! §e(" + info.result + ")"));
+                    if (FabricLoader.getInstance().isModLoaded("skyblocker")) {
+                        // /skyblocker crystalWaypoints add 92 226 -88 Xalx
+                        ToolList.sendChatMessage(String.format("/skyblocker crystalWaypoints add %d %d %d %s", info.result.getX(), info.result.getY(), info.result.getZ(), "Unknown"));
+                    }
+                    it1.remove();
+                } else if (info.task.isDone()) {
+                    it1.remove();
+                }
+            }
+        }
+    }
+
+    private final ExecutorService structureScannerExecutor = Executors.newWorkStealingPool(Math.min(8, Runtime.getRuntime().availableProcessors()));
+    private final BiPredicate<ClientLevel, BlockPos> barrierFinder = (level, bp) -> level.getBlockState(bp).getBlock() == Blocks.BARRIER;
+    private final BiPredicate<ClientLevel, BlockPos> lavaFinder = (level, bp) -> level.getBlockState(bp).getBlock() == Blocks.LAVA;
+
+    private CrystalScannerInfo startScanCrystal(CrystalType crystalType, BoundingBox area) {
+        CrystalScannerInfo info = new CrystalScannerInfo(crystalType);
+        info.scannerName = crystalType.displayName;
+        info.area = area;
+        info.task = structureScannerExecutor.submit(() -> {
+            int minX = area.minX() - 32;
+            int minY = area.minY() - 32;
+            int minZ = area.minZ() - 32;
+            int maxX = area.maxX() + 32;
+            int maxY = area.maxY() + 32;
+            int maxZ = area.maxZ() + 32;
+
+            int barrierStep = 2;
+            ObjectHeapPriorityQueue<BlockPos> unloadedQueue = genUnloadedQueue();
+
+            ClientLevel currentLevel = ToolList.mc.level;
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+
+            }
+
+            for(int x = minX; x <= maxX; x += barrierStep) {
+                for(int y = minY; y <= maxY; y += barrierStep) {
+                    if(!crystalType.isInRange(y)) continue;
+                    for(int z = minZ; z <= maxZ; z += barrierStep) {
+                        info.currentScanning.set(x, y, z);
+                        if(currentLevel != ToolList.mc.level) return;
+                        if(!ToolList.getInstance().isChunkLoaded(currentLevel, info.currentScanning)) {
+                            unloadedQueue.enqueue(info.currentScanning.immutable());
+                            continue;
+                        }
+
+                        if(NUCLEUS_BB.isInside(info.currentScanning)) continue;
+                        if(barrierFinder.test(currentLevel, info.currentScanning)) {
+                            info.result = info.currentScanning.immutable();
+                            return;
+                        }
+                    }
+                }
+            }
+            while(!unloadedQueue.isEmpty()) {
+                if(currentLevel != ToolList.mc.level) return;
+                BlockPos pos = unloadedQueue.dequeue();
+                info.currentScanning.set(pos);
+                if(ToolList.getInstance().isChunkLoaded(currentLevel, info.currentScanning)) {
+                    if(NUCLEUS_BB.isInside(info.currentScanning)) continue;
+                    if(barrierFinder.test(currentLevel, info.currentScanning)) {
+                        info.result = pos.immutable();
+                        return;
+                    }
+                    if(!ToolList.getInstance().isChunkLoaded(currentLevel, info.currentScanning)) {
+                        unloadedQueue.enqueue(info.currentScanning.immutable());
+                        queueWait();
+                        continue;
+                    }
+                } else {
+                    unloadedQueue.enqueue(pos);
+                    queueWait();
+                }
+            }
+            info.result = null;
+        });
+        return info;
+    }
+
+    private @NotNull ObjectHeapPriorityQueue<BlockPos> genUnloadedQueue() {
+        return new ObjectHeapPriorityQueue<>(Comparator.comparingDouble((pos) -> {
+            if (mc.player == null) return 0;
+            return pos.distToCenterSqr(mc.player.position());
+        })) {
+            boolean dequeued = false;
+            int counter = 0;
+
+            @Override
+            public BlockPos dequeue() {
+                dequeued = true;
+                return super.dequeue();
+            }
+
+            @Override
+            public void enqueue(BlockPos pos) {
+                super.enqueue(pos);
+                if (dequeued && counter++ % 2 == 0) {
+                    ObjectHeaps.makeHeap(heap, size, c);
+                }
+            }
+        };
+    }
+
+    private void queueWait() {
+        try {
+            Thread.sleep(751);
+        } catch (InterruptedException e) {
+
+        }
+    }
+
+    private CrystalScannerInfo startScanGoblinKing(CrystalType crystalType, BoundingBox area) {
+        if(crystalType != CrystalType.GOBLIN_KING) throw new AssertionError("咕咕嘎嘎!!!!!");
+
+        CrystalScannerInfo info = new CrystalScannerInfo(crystalType);
+        info.scannerName = crystalType.displayName;
+        info.area = area;
+        info.task = structureScannerExecutor.submit(() -> {
+            int minX = area.minX() - 32;
+            int minY = area.minY() - 32;
+            int minZ = area.minZ() - 32;
+            int maxX = area.maxX() + 32;
+            int maxY = area.maxY() + 32;
+            int maxZ = area.maxZ() + 32;
+
+            ObjectHeapPriorityQueue<BlockPos> unloadedQueue = genUnloadedQueue();
+
+            ClientLevel currentLevel = ToolList.mc.level;
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+
+            }
+            BlockPos.MutableBlockPos temp = new BlockPos.MutableBlockPos();
+            for(int x = minX; x <= maxX; x += 3) {
+                for(int y = minY; y <= maxY; y += 2) {
+                    if(!crystalType.isInRange(y)) continue;
+                    label_z:for(int z = minZ; z <= maxZ; z += 3) {
+                        info.currentScanning.set(x, y, z);
+                        if(currentLevel != ToolList.mc.level) return;
+                        if(!ToolList.getInstance().isChunkLoaded(currentLevel, info.currentScanning)) {
+                            unloadedQueue.enqueue(info.currentScanning.immutable());
+                            continue label_z;
+                        }
+
+                        if(NUCLEUS_BB.isInside(info.currentScanning)) continue;
+
+                        Block block = currentLevel.getBlockState(info.currentScanning).getBlock();
+                        if(block == Blocks.RED_WOOL) {
+                            block = currentLevel.getBlockState(info.currentScanning.move(0, -1, 0)).getBlock();
+                        }
+                        if(block == Blocks.STONE_BRICKS) {
+                            for (int xOff = -2; xOff <= 2; xOff++) {
+                                for (int zOff = -2; zOff <= 2; zOff++) {
+                                    temp.set(info.currentScanning).move(xOff, 0, zOff);
+                                    if(!ToolList.getInstance().isChunkLoaded(currentLevel, temp)) {
+                                        unloadedQueue.enqueue(info.currentScanning.immutable());
+                                        continue label_z;
+                                    }
+                                    if(currentLevel.getBlockState(temp).getBlock() != Blocks.STONE_BRICKS) continue label_z;
+                                }
+                            }
+                            temp.set(info.currentScanning).move(0, 1, 0);
+                            int redWoolCount = 0;
+                            for (int xOff = -2; xOff <= 2; xOff++) {
+                                for (int zOff = -2; zOff <= 2; zOff++) {
+                                    temp.set(info.currentScanning).move(xOff, 1, zOff);
+                                    if(!ToolList.getInstance().isChunkLoaded(currentLevel, temp)) {
+                                        unloadedQueue.enqueue(info.currentScanning.immutable());
+                                        continue label_z;
+                                    }
+                                    if(currentLevel.getBlockState(temp).getBlock() == Blocks.RED_WOOL) redWoolCount++;
+                                }
+                            }
+                            if(redWoolCount == 6) {
+                                info.result = info.currentScanning.immutable();
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+            label:while(!unloadedQueue.isEmpty()) {
+                if(currentLevel != ToolList.mc.level) return;
+                BlockPos pos = unloadedQueue.dequeue();
+                info.currentScanning.set(pos);
+                if(ToolList.getInstance().isChunkLoaded(currentLevel, info.currentScanning)) {
+                    if(NUCLEUS_BB.isInside(info.currentScanning)) continue;
+                    Block block = currentLevel.getBlockState(info.currentScanning).getBlock();
+                    if(block == Blocks.RED_WOOL) {
+                        block = currentLevel.getBlockState(info.currentScanning.move(0, -1, 0)).getBlock();
+                    }
+                    if(block == Blocks.STONE_BRICKS) {
+                        for (int xOff = -2; xOff <= 2; xOff++) {
+                            for (int zOff = -2; zOff <= 2; zOff++) {
+                                temp.set(info.currentScanning).move(xOff, 0, zOff);
+                                if(!ToolList.getInstance().isChunkLoaded(currentLevel, temp)) {
+                                    unloadedQueue.enqueue(info.currentScanning.immutable());
+                                    queueWait();
+                                    continue label;
+                                }
+                                if(currentLevel.getBlockState(temp).getBlock() != Blocks.STONE_BRICKS) continue label;
+                            }
+                        }
+                        temp.set(info.currentScanning).move(0, 1, 0);
+                        int redWoolCount = 0;
+                        for (int xOff = -2; xOff <= 2; xOff++) {
+                            for (int zOff = -2; zOff <= 2; zOff++) {
+                                temp.set(info.currentScanning).move(xOff, 1, zOff);
+                                if(!ToolList.getInstance().isChunkLoaded(currentLevel, temp)) {
+                                    unloadedQueue.enqueue(info.currentScanning.immutable());
+                                    queueWait();
+                                    continue label;
+                                }
+                                if(currentLevel.getBlockState(temp).getBlock() == Blocks.RED_WOOL) redWoolCount++;
+                            }
+                        }
+                        if(redWoolCount == 6) {
+                            info.result = info.currentScanning.immutable();
+                            return;
+                        }
+                    }
+                    if(!ToolList.getInstance().isChunkLoaded(currentLevel, info.currentScanning)) {
+                        unloadedQueue.enqueue(info.currentScanning.immutable());
+                        queueWait();
+                        continue;
+                    }
+                } else {
+                    unloadedQueue.enqueue(pos);
+                    queueWait();
+                }
+            }
+            info.result = null;
+        });
+        return info;
+    }
+
+    private CrystalScannerInfo startScanDragonLair(CrystalType crystalType, BoundingBox area) {
+        if(crystalType != CrystalType.DRAGON_LAIR) throw new AssertionError("咕咕嘎嘎!!!!!");
+
+        CrystalScannerInfo info = new CrystalScannerInfo(crystalType);
+        info.scannerName = crystalType.displayName;
+        info.area = area;
+        info.task = structureScannerExecutor.submit(() -> {
+            int minX = area.minX() - 32;
+            int minY = area.minY() - 32;
+            int minZ = area.minZ() - 32;
+            int maxX = area.maxX() + 32;
+            int maxY = area.maxY() + 32;
+            int maxZ = area.maxZ() + 32;
+
+            ObjectHeapPriorityQueue<BlockPos> unloadedQueue = genUnloadedQueue();
+
+            ClientLevel currentLevel = ToolList.mc.level;
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+
+            }
+            BlockPos.MutableBlockPos temp = new BlockPos.MutableBlockPos();
+            for(int x = minX; x <= maxX; x += 3) {
+                for(int y = minY; y <= maxY; y += 2) {
+                    if(!crystalType.isInRange(y)) continue;
+                    label_z:for(int z = minZ; z <= maxZ; z += 3) {
+                        info.currentScanning.set(x, y, z);
+                        if(currentLevel != ToolList.mc.level) return;
+                        if(!ToolList.getInstance().isChunkLoaded(currentLevel, info.currentScanning)) {
+                            unloadedQueue.enqueue(info.currentScanning.immutable());
+                            continue label_z;
+                        }
+
+                        if(NUCLEUS_BB.isInside(info.currentScanning)) continue;
+
+                        Block block = currentLevel.getBlockState(info.currentScanning).getBlock();
+                        if(block == Blocks.RED_TERRACOTTA) {
+                            block = currentLevel.getBlockState(info.currentScanning.move(0, -1, 0)).getBlock();
+                        }
+                        if(block == Blocks.SMOOTH_SANDSTONE) {
+                            int sandstoneCount = 0;
+                            for (int xOff = -2; xOff <= 2; xOff++) {
+                                for (int zOff = -2; zOff <= 2; zOff++) {
+                                    temp.set(info.currentScanning).move(xOff, 0, zOff);
+                                    if(!ToolList.getInstance().isChunkLoaded(currentLevel, temp)) {
+                                        unloadedQueue.enqueue(info.currentScanning.immutable());
+                                        continue label_z;
+                                    }
+                                    if(currentLevel.getBlockState(temp).getBlock() == Blocks.SMOOTH_SANDSTONE) sandstoneCount++;
+                                }
+                            }
+                            if(sandstoneCount < 8) continue label_z;
+                            temp.set(info.currentScanning).move(0, 1, 0);
+                            int redClayCount = 0;
+                            for (int xOff = -2; xOff <= 2; xOff++) {
+                                for (int zOff = -2; zOff <= 2; zOff++) {
+                                    temp.set(info.currentScanning).move(xOff, 1, zOff);
+                                    if(!ToolList.getInstance().isChunkLoaded(currentLevel, temp)) {
+                                        unloadedQueue.enqueue(info.currentScanning.immutable());
+                                        continue label_z;
+                                    }
+                                    if(currentLevel.getBlockState(temp).getBlock() == Blocks.RED_TERRACOTTA) redClayCount++;
+                                }
+                            }
+                            if(redClayCount >= 8) {
+                                info.result = info.currentScanning.immutable();
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+            label:while(!unloadedQueue.isEmpty()) {
+                if(currentLevel != ToolList.mc.level) return;
+                BlockPos pos = unloadedQueue.dequeue();
+                info.currentScanning.set(pos);
+                if(ToolList.getInstance().isChunkLoaded(currentLevel, info.currentScanning)) {
+                    if(NUCLEUS_BB.isInside(info.currentScanning)) continue;
+                    Block block = currentLevel.getBlockState(info.currentScanning).getBlock();
+                    if(block == Blocks.RED_TERRACOTTA) {
+                        block = currentLevel.getBlockState(info.currentScanning.move(0, -1, 0)).getBlock();
+                    }
+                    if(block == Blocks.SMOOTH_SANDSTONE) {
+                        int sandstoneCount = 0;
+                        for (int xOff = -2; xOff <= 2; xOff++) {
+                            for (int zOff = -2; zOff <= 2; zOff++) {
+                                temp.set(info.currentScanning).move(xOff, 0, zOff);
+                                if(!ToolList.getInstance().isChunkLoaded(currentLevel, temp)) {
+                                    unloadedQueue.enqueue(info.currentScanning.immutable());
+                                    queueWait();
+                                    continue label;
+                                }
+                                if(currentLevel.getBlockState(temp).getBlock() == Blocks.SMOOTH_SANDSTONE) sandstoneCount++;
+                            }
+                        }
+                        if(sandstoneCount < 8) continue label;
+                        temp.set(info.currentScanning).move(0, 1, 0);
+                        int redClayCount = 0;
+                        for (int xOff = -2; xOff <= 2; xOff++) {
+                            for (int zOff = -2; zOff <= 2; zOff++) {
+                                temp.set(info.currentScanning).move(xOff, 1, zOff);
+                                if(!ToolList.getInstance().isChunkLoaded(currentLevel, temp)) {
+                                    unloadedQueue.enqueue(info.currentScanning.immutable());
+                                    queueWait();
+                                    continue label;
+                                }
+                                if(currentLevel.getBlockState(temp).getBlock() == Blocks.RED_TERRACOTTA) redClayCount++;
+                            }
+                        }
+                        if(redClayCount >= 8) {
+                            info.result = info.currentScanning.immutable();
+                            return;
+                        }
+                    }
+                    if(!ToolList.getInstance().isChunkLoaded(currentLevel, info.currentScanning)) {
+                        unloadedQueue.enqueue(info.currentScanning.immutable());
+                        queueWait();
+                        continue;
+                    }
+                } else {
+                    unloadedQueue.enqueue(pos);
+                    queueWait();
+                }
+            }
+            info.result = null;
+        });
+        return info;
+    }
+
+    private ScannerInfo startScanWormFishSpot(BoundingBox area) {
+        ScannerInfo info = new ScannerInfo();
+        info.scannerName = "worm_fish_spot";
+        info.area = area;
+        info.task = structureScannerExecutor.submit(() -> {
+            int minX = area.minX();
+            int minY = area.minY();
+            int minZ = area.minZ();
+            int maxX = area.maxX();
+            int maxY = area.maxY();
+            int maxZ = area.maxZ();
+
+            ObjectHeapPriorityQueue<BlockPos> unloadedQueue = genUnloadedQueue();
+
+            ClientLevel currentLevel = ToolList.mc.level;
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+
+            }
+
+            for(int x = minX; x <= maxX; x += 2) {
+                for(int y = minY; y <= maxY; y += 1) {
+                    for(int z = minZ; z <= maxZ; z += 2) {
+                        info.currentScanning.set(x, y, z);
+                        if(currentLevel != ToolList.mc.level) return;
+                        if(!ToolList.getInstance().isChunkLoaded(currentLevel, info.currentScanning)) {
+                            unloadedQueue.enqueue(info.currentScanning.immutable());
+                            continue;
+                        }
+
+                        if(NUCLEUS_BB.isInside(info.currentScanning)) continue;
+                        if(lavaFinder.test(currentLevel, info.currentScanning)) {
+                            info.result = info.currentScanning.immutable();
+                            return;
+                        }
+
+                        if(!ToolList.getInstance().isChunkLoaded(currentLevel, info.currentScanning)) {
+                            unloadedQueue.enqueue(info.currentScanning.immutable());
+                            continue;
+                        }
+                    }
+                }
+            }
+            while(!unloadedQueue.isEmpty()) {
+                if(currentLevel != ToolList.mc.level) return;
+                BlockPos pos = unloadedQueue.dequeue();
+                info.currentScanning.set(pos);
+                if(ToolList.getInstance().isChunkLoaded(currentLevel, info.currentScanning)) {
+                    if(NUCLEUS_BB.isInside(info.currentScanning)) continue;
+                    if(lavaFinder.test(currentLevel, info.currentScanning)) {
+                        info.result = pos.immutable();
+                        return;
+                    }
+                    if(!ToolList.getInstance().isChunkLoaded(currentLevel, info.currentScanning)) {
+                        unloadedQueue.enqueue(info.currentScanning.immutable());
+                        unloadedQueue.changed();
+                        queueWait();
+                        continue;
+                    }
+                } else {
+                    unloadedQueue.enqueue(pos);
+                    queueWait();
+                }
+            }
+            info.result = null;
+        });
+        return info;
+    }
+
+    static class ScannerInfo {
+        public BlockPos.MutableBlockPos currentScanning = new BlockPos.MutableBlockPos(0, 0, 0);
+        public BlockPos result = null;
+        public Future<?> task;
+        public String scannerName;
+        public BoundingBox area;
+    }
+
+    static final class CrystalScannerInfo extends ScannerInfo {
+        public CrystalType crystalType;
+
+        CrystalScannerInfo(CrystalType crystalType) {
+            this.crystalType = crystalType;
+        }
+    }
+
+    enum CrystalType {
+        BLUE("§b蓝色水晶", "Lost Precursor City", 121, 130),
+        PURPLE("§5紫色水晶", "Jungle Temple", 72, 81),
+        YELLOW("§e黄色水晶", "Khazad-dûm", 0, 63),
+        ORANGE("§6橙色水晶", "Goblin Queen's Den", 125, 140),
+        GREEN("§a绿色水晶", "Mines of Divan", 97, 102),
+        GOBLIN_KING("§6王下一桶", "King Yolkar", 82, 168),
+        DRAGON_LAIR("§c那位来客", "Dragon's Lair", 64, 189),
+        UNKNOWN("§c未知水晶", "Unknown", 0, 0);
+
+        private final String displayName;
+        private final String internalName;
+        private final int minY;
+        private final int maxY;
+
+        CrystalType(String displayName, String internalName, int minY, int maxY) {
+            this.displayName = displayName;
+            this.internalName = internalName;
+            this.minY = minY;
+            this.maxY = maxY;
+        }
+
+        public boolean isInRange(int y) {
+            return y >= minY && y <= maxY;
+        }
+    }
+
+}

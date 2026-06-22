@@ -717,11 +717,11 @@ public class CustomBossbar extends XSDHUD {
             // 弹性效果：频率逐渐降低
             long time = System.currentTimeMillis();
             double frequency = 1.0f + bossbarBobbing;  // 频率随振幅减小
-            double offsetX = (Math.sin(time / (80f * frequency)) * bossbarBobbing);
-            double offsetY = (Math.cos(time / (100f * frequency)) * bossbarBobbing);
+            double offsetX = (Mth.sin(time / (80f * frequency)) * bossbarBobbing);
+            double offsetY = (Mth.cos(time / (100f * frequency)) * bossbarBobbing);
 
             // 使用缓动函数使效果更自然
-            double easeFactor = Math.sin(bossbarBobbing * Math.PI);
+            double easeFactor = Mth.sin(bossbarBobbing * Math.PI);
             // GL11.glTranslated(offsetX * easeFactor, offsetY * easeFactor, 0);
             pose.translate((float) (offsetX * easeFactor), (float) (offsetY * easeFactor));
             bossbarBobbing *= 0.94;
@@ -746,6 +746,7 @@ public class CustomBossbar extends XSDHUD {
                 context.fill(x, -10, x + length, -6, new Color(8, 8, 8, 255).getRGB());
                 context.fill(x, -10, (int) (x + length * currentHealScale), -6, new Color(0x0E, 0xA7, 0x39, 255).getRGB());
                 context.fill(x, -10, (int) (x + length * currentDamagedScale), -6, new Color(0xF9, 0xCE, 0xCE, 255).getRGB());
+                RenderUtils.drawOutlineRect(context, (int) (x + length * currentHealthScale), -10, (int) (x + length * justDamagedEndScale) - 1, -6, new Color(0xC1, 0x48, 0x30, (int) (255f * animationGetDamaged / 20f)).getRGB());
                 context.fill((int) (x + length * currentHealthScale), -10, (int) (x + length * justDamagedEndScale), -6, new Color(255, 255, 255, (int) (255f * animationGetDamaged / 20f)).getRGB());
                 context.fill(x, -10, (int) (x + length * currentHealthScale), -6, new Color(0xC1, 0x48, 0x30, 255).getRGB());
                 if(hasWeakness) {

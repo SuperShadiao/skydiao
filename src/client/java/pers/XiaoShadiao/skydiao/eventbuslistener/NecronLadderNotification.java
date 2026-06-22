@@ -35,29 +35,35 @@ public class NecronLadderNotification extends AbstractListener {
     static class Listener implements ScreenEvents.AfterExtract {
 
         private boolean triggered = false;
+        private int counter = 0;
 
         @Override
         public void afterExtract(Screen screen, GuiGraphicsExtractor drawContext, int mouseX, int mouseY, float tickDelta) {
             if(triggered) return;
-            if(screen instanceof ContainerScreen cs) {
-                ChestMenu menu = cs.getMenu();
-                String chestName = ToolList.getInstance().deleteColorCode(cs.getTitle().getString());
-                boolean chooseScreenFlag = chestName.matches("(Master )? ?Catacombs - Floor VII");
-                boolean claimScreenFlag = chestName.equals("Bedrock");
-                for (Slot slot : menu.slots) {
-                    boolean hasNecronHandleLore = slot.getItem().getTooltipLines(Item.TooltipContext.of(mc.level), mc.player, TooltipFlag.Default.NORMAL).stream().anyMatch(c -> ToolList.getInstance().deleteColorCode(c.getString()).contains("Necron's Handle"));
-                    if(ToolList.getInstance().isDevEnvironment()) {
-                        hasNecronHandleLore |= slot.getItem().getTooltipLines(Item.TooltipContext.of(mc.level), mc.player, TooltipFlag.Default.NORMAL).stream().anyMatch(c -> ToolList.getInstance().deleteColorCode(c.getString()).contains("Storm the Fish"));
-                    }
-                    boolean conditionOnChooseScreen = chooseScreenFlag && Items.PLAYER_HEAD.equals(slot.getItem().getItem()) && hasNecronHandleLore;
-                    boolean conditionOnClaimScreen = (claimScreenFlag || (ToolList.getInstance().isDevEnvironment() && chestName.equals("Obsidian"))) && (Items.STICK.equals(slot.getItem().getItem()) || ToolList.getInstance().isDevEnvironment()) && hasNecronHandleLore;
+            if(counter++ % 60 != 0 && counter > 100) return;
+            try {
+                if(screen instanceof ContainerScreen cs) {
+                    ChestMenu menu = cs.getMenu();
+                    String chestName = ToolList.getInstance().deleteColorCode(cs.getTitle().getString());
+                    boolean chooseScreenFlag = chestName.matches("(Master )? ?Catacombs - Floor VII");
+                    boolean claimScreenFlag = chestName.equals("Bedrock");
+                    for (Slot slot : menu.slots) {
+                        boolean hasNecronHandleLore = slot.getItem().getTooltipLines(Item.TooltipContext.of(mc.level), mc.player, TooltipFlag.Default.NORMAL).stream().anyMatch(c -> ToolList.getInstance().deleteColorCode(c.getString()).contains("Necron's Handle"));
+                        if(ToolList.getInstance().isDevEnvironment()) {
+                            hasNecronHandleLore |= slot.getItem().getTooltipLines(Item.TooltipContext.of(mc.level), mc.player, TooltipFlag.Default.NORMAL).stream().anyMatch(c -> ToolList.getInstance().deleteColorCode(c.getString()).contains("Storm the Fish"));
+                        }
+                        boolean conditionOnChooseScreen = chooseScreenFlag && Items.PLAYER_HEAD.equals(slot.getItem().getItem()) && hasNecronHandleLore;
+                        boolean conditionOnClaimScreen = (claimScreenFlag || (ToolList.getInstance().isDevEnvironment() && chestName.equals("Obsidian"))) && (Items.STICK.equals(slot.getItem().getItem()) || ToolList.getInstance().isDevEnvironment()) && hasNecronHandleLore;
 
-                    if (conditionOnChooseScreen || conditionOnClaimScreen) {
-                        triggered = true;
-                        XSDHUD.bigTitle.updateTitleMsg("§aNecron Ladder!", 5000);
-                        return;
+                        if (conditionOnChooseScreen || conditionOnClaimScreen) {
+                            triggered = true;
+                            XSDHUD.bigTitle.updateTitleMsg("§aNecron Ladder!", 5000);
+                            return;
+                        }
                     }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

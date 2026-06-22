@@ -18,6 +18,12 @@ public class ClientListener extends ChatClient {
 
     private boolean announcedAuthors;
 
+    private final InputStream is;
+
+    public ClientListener(InputStream is) {
+        this.is = is;
+    }
+
     public void announceAuthors() {
         if(!announcedAuthors) {
             announcedAuthors = true;
@@ -39,7 +45,6 @@ public class ClientListener extends ChatClient {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         ByteArrayOutputStream data = new ByteArrayOutputStream();
         try {
-            InputStream is = socket.getInputStream();
             int i;
             boolean startRecordFlag = false;
 

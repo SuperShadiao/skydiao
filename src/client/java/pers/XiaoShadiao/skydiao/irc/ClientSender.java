@@ -5,23 +5,28 @@ import pers.XiaoShadiao.skydiao.utils.StatusManager;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.concurrent.ArrayBlockingQueue;
 
 public class ClientSender extends ChatClient {
     private final byte[] something = new byte[] {81};
     private final ArrayBlockingQueue<ChatPacket> queue = new ArrayBlockingQueue<>(100);
+
+    private final OutputStream out;
+
+    public ClientSender(OutputStream out) {
+        this.out = out;
+    }
+
     @Override
     public void run() {
         try {
             while(true) {
                 ChatPacket packet = queue.take();
-                // ByteBuffer buffer = ByteBuffer.allocate(16384);
-                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                buffer.write(HEADER);
-                buffer.write(packet.getBuffer());
-                buffer.write(END);
 
-                socket.getOutputStream().write(buffer.toByteArray());
+                out.write(HEADER);
+                out.write(packet.getBuffer());
+                out.write(END);
 
                 if(!"heartbeat".equals(packet.packetType) && !"last_error".equals(packet.packetType)) log.info("Send packet: " + packet.getJson());
             }

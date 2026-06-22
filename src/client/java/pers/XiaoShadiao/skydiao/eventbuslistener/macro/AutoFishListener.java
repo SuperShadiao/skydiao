@@ -374,7 +374,7 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
     }
 
     private void onLastRender(LevelRenderContext context) {
-        if(mc.player == null || mc.player.fishing == null || mc.level == null || !ConfigManager.autoFish.getValue()) return;
+        if(mc.player == null || mc.player.fishing == null || mc.level == null || !ConfigManager.autoFish.getValue() || "kuudra".equals(StatusManager.get().getMode())) return;
         if(fakeFishHook != null && !isHookInLiquid() && lockedHookedEntity == null && mc.player.fishing.getHookedIn() instanceof ArmorStand) {
             RenderUtils.WorldRender wr = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_LINE);
             RenderUtils.renderESP(wr, fakeFishHook, 1, 0, 0, 1, false);
@@ -402,7 +402,7 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
     private final List<Vec3> fakeFishHookPath = new ArrayList<>();
 
     private void onStartClientTick(Minecraft mc) {
-        if(mc.player == null || mc.player.fishing == null || mc.level == null) {
+        if(mc.player == null || mc.player.fishing == null || mc.level == null || "kuudra".equals(StatusManager.get().getMode())) {
             if(fakeFishHook != null && mc.level != null) {
                 mc.level.removeEntity(fakeFishHook.getId(), Entity.RemovalReason.DISCARDED);
             }
