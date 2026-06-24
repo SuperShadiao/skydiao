@@ -604,7 +604,7 @@ public class ToolList {
         }
 
         LevelChunk chunk = level.getChunkSource().getChunk(cx, cz, false);
-        long packedChunkPos = ChunkPos.pack(cx, cz);
+        // long packedChunkPos = ChunkPos.pack(cx, cz);
 
         if(true) return chunk != null && !chunk.isEmpty(); else return false;
 

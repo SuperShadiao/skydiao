@@ -67,7 +67,11 @@ public class MineshaftShareListener extends AbstractListener {
                 ToolList.printChatMessage(Component.literal("§b=====================================").withStyle(cs));
                 ToolList.printChatMessage(Component.literal("§b").withStyle(cs));
             } else {
-                ToolList.printChatMessage(Component.literal("§a[XSD§bMS§a] §e" + p.sender + "§a的§bGlacite Mineshaft§a可以加入, 但你可能不在对应的环境, 为了防止误触, 你可以输入§e/skydiaojoinmineshaft " + p.sender + "§a加入."));
+                Style cs = Style.EMPTY
+                        .withClickEvent(new ClickEvent.SuggestCommand("/hhjoinmineshaft " + p.sender))
+                        .withHoverEvent(new HoverEvent.ShowText(Component.literal("§a点击这条消息快速填充指令")));
+
+                ToolList.printChatMessage(Component.literal("§a[XSD§bMS§a] §e" + p.sender + "§a的§bGlacite Mineshaft§a可以加入, 但你可能不在对应的环境, 为了防止误触, 你可以输入§e/skydiaojoinmineshaft " + p.sender + "§a加入.").withStyle(cs));
             }
 
             availableShaftPlayerNames.put(System.currentTimeMillis(), p.sender);
@@ -196,7 +200,14 @@ public class MineshaftShareListener extends AbstractListener {
                         }
                         try { Thread.sleep(3300); } catch (InterruptedException e) {}
                         runCommand("/p warp");
-                        try { Thread.sleep(5500);  } catch (InterruptedException e) {}
+                        String announceMsg = ConfigManager.mineshaftShareAnnounce.getValue().trim();
+                        if(announceMsg.isEmpty()) {
+                            try { Thread.sleep(5500);  } catch (InterruptedException e) {}
+                        } else {
+                            try { Thread.sleep(4500);  } catch (InterruptedException e) {}
+                            runCommand("/pc [SkyDiao] " + announceMsg);
+                            try { Thread.sleep(1000);  } catch (InterruptedException e) {}
+                        }
                         runCommand("/p warp");
                         try { Thread.sleep(1500);  } catch (InterruptedException e) {}
 

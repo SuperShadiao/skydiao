@@ -118,6 +118,7 @@ public class ConfigManager {
     public static final BooleanConfigOption crystalHollowHelper = new BooleanConfigOption("crystalhollowhelper", true);
     public static final BooleanConfigOption crystalHollowHelperDebug = new BooleanConfigOption("crystalhollowhelperdebug", false);
     public static final BooleanConfigOption crystalHollowDupServerTipper = new BooleanConfigOption("crystalhollowdupservertipper", true);
+    public static final StringConfigOption mineshaftShareAnnounce = new StringConfigOption("mineshaftshareannounce", "");
 
 
     public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
@@ -168,7 +169,7 @@ public class ConfigManager {
             Map.entry("工具类", List.of(inventoryFilter, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodehideserverid, keepSprint)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
             Map.entry("自动类", List.of(autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, skyblockriftautodanceroom, carnivalAutoFruitDigger)),
-            Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, skyblockSafeIsland, crystalHollowHelper, crystalHollowHelperDebug, crystalHollowDupServerTipper)),
+            Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareAnnounce, skyblockSafeIsland, crystalHollowHelper, crystalHollowHelperDebug, crystalHollowDupServerTipper)),
             Map.entry("combat", List.of(slayerTogether)),
             Map.entry("foraging", List.of(galateashulker)),
             Map.entry("farming", List.of(hubratesp)),

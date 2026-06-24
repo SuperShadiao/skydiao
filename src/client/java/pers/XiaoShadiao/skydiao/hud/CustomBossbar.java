@@ -715,7 +715,7 @@ public class CustomBossbar extends XSDHUD {
         boolean bobbingFlag = bossbarBobbing > 0;
         if(bobbingFlag) {
             // 弹性效果：频率逐渐降低
-            long time = System.currentTimeMillis();
+            long time = System.currentTimeMillis() % 100_000L;
             double frequency = 1.0f + bossbarBobbing;  // 频率随振幅减小
             double offsetX = (Mth.sin(time / (80f * frequency)) * bossbarBobbing);
             double offsetY = (Mth.cos(time / (100f * frequency)) * bossbarBobbing);
