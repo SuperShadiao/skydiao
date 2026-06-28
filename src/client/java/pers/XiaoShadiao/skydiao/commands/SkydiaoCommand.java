@@ -1,6 +1,7 @@
 package pers.XiaoShadiao.skydiao.commands;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -12,9 +13,11 @@ import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
+import pers.XiaoShadiao.skydiao.utils.Banned;
 import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class SkydiaoCommand extends BaseRootRunnableCommand {
@@ -35,8 +38,31 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                 getArgConstantInstance("getblivelistenercode").executes(this::executeGetCode),
                 getArgConstantInstance("afk").executes(this::executeAFK),
                 getArgConstantInstance("viewblp").executes((_) -> AbstractListener.blacklistRenderer.printBLP()),
+                getArgConstantInstance("ban").then(getArgInstance("type", StringArgumentType.string()).suggests(((commandContext, builder) -> {
+                    Arrays.stream(Banned.BanReason.values()).map(v -> v.name().toLowerCase()).forEach(builder::suggest);
+                    return builder.buildFuture();
+                })).then(getArgInstance("time", StringArgumentType.string()).suggests(((commandContext, builder) -> {
+                    Arrays.stream(Banned.BanTime.values()).map(v -> v.day).forEach(builder::suggest);
+                    return builder.buildFuture();
+                })).executes(this::executeBan))),
                 getArgConstantInstance("想看看盔甲架的世界").executes(this::executeArmorStandWorld)
         );
+    }
+
+    private int executeBan(CommandContext<FabricClientCommandSource> context) {
+        String type = StringArgumentType.getString(context, "type");
+        String time = StringArgumentType.getString(context, "time");
+        try {
+            Banned.BanReason b = Banned.BanReason.valueOf(type.toUpperCase());
+            for (Banned.BanTime t : Banned.BanTime.values()) {
+                if(String.valueOf(t.day).equals(time)) {
+                    Banned.ban(b, t, 0);
+                }
+            }
+        } catch (IllegalArgumentException e) {
+
+        }
+        return 0;
     }
 
     private int playAlertSound(CommandContext<FabricClientCommandSource> context) {

@@ -57,6 +57,7 @@ public abstract class AbstractListener extends Thread {
     public static final BlacklistRenderer blacklistRenderer = new BlacklistRenderer();
     public static final CrystalHollowHelperListener crystalHollowHelperListener = new CrystalHollowHelperListener();
     public static final FoxModuleLoaderAdapter foxModuleLoaderAdapter = new FoxModuleLoaderAdapter();
+    public static final DungeonTTTFailListener dungeonTTTFailListener = new DungeonTTTFailListener();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();
