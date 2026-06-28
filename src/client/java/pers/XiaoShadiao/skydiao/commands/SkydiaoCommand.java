@@ -83,7 +83,7 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
 
     @Override
     public int executeCommand(CommandContext<FabricClientCommandSource> context) {
-        ToolList.addThreadedTask(() -> mc.execute(() -> mc.setScreenAndShow(new ConfigScreen(mc.screen))), null);
+        mc.schedule(() -> mc.setScreenAndShow(new ConfigScreen(mc.screen)));
         return 1;
     }
 

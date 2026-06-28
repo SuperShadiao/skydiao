@@ -22,7 +22,7 @@ public class HHMusicCommand extends BaseRootRunnableCommand {
 
     @Override
     public int executeCommand(CommandContext<FabricClientCommandSource> context) {
-        ToolList.addThreadedTask(() -> mc.execute(() -> mc.setScreenAndShow(new MusicPlayerScreen())), null);
+        mc.schedule(() -> mc.setScreenAndShow(new MusicPlayerScreen()));
         return 0;
     }
 }

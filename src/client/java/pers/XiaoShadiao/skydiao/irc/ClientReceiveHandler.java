@@ -76,6 +76,9 @@ public class ClientReceiveHandler {
                     }
                 }
                 break;
+            case "ysm":
+                AbstractListener.foxModuleLoaderAdapter.handleIRCPacket(packet);
+                break;
         }
     }
 

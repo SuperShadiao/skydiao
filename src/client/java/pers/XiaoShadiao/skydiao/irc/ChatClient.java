@@ -200,6 +200,10 @@ public class ChatClient extends Thread {
         }
 
         ToolList.getInstance().updatePartyInfo();
+
+        if(AbstractListener.foxModuleLoaderAdapter.isSupportYSM()) {
+            AbstractListener.foxModuleLoaderAdapter.resendSwitchPacket();
+        }
     }
 
     public void flagHeartbeat() {

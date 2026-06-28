@@ -28,7 +28,14 @@ public class ClientSender extends ChatClient {
                 out.write(packet.getBuffer());
                 out.write(END);
 
-                if(!"heartbeat".equals(packet.packetType) && !"last_error".equals(packet.packetType)) log.info("Send packet: " + packet.getJson());
+                if(!"heartbeat".equals(packet.packetType) && !"last_error".equals(packet.packetType)) {
+                    String json = packet.getJson().toString();
+                    if(json.length() < 500) {
+                        log.info("Send packet: " + json);
+                    } else {
+                        log.info("Send packet " + packet.packetType + " (" + json.length() + ")");
+                    }
+                }
             }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);

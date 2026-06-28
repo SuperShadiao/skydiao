@@ -69,6 +69,16 @@ public final class CustomFabricEvents {
         public boolean onPacket(Packet<T> packet, T packetListener, PacketProcessor packetProcessor);
     }
 
+    public static final Event<@NotNull SendPacketEvent> CLIENT_SEND_PACKET_EVENT = EventFactory.createArrayBacked(SendPacketEvent.class, callbacks -> (packet) -> {
+        for (SendPacketEvent callback : callbacks) {
+            callback.onSendPacket(packet);
+        }
+    });
+
+    public interface SendPacketEvent {
+        public void onSendPacket(Packet<?> packet);
+    }
+
     public static final Event<@NotNull TPSUpdate> ON_TPS_UPDATE = EventFactory.createArrayBacked(TPSUpdate.class, callbacks -> (tps, formattedTPS) -> {
         for (TPSUpdate callback : callbacks) {
             callback.update(tps, formattedTPS);

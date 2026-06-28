@@ -58,6 +58,7 @@ public class StatusManager extends Thread {
     
     public static void cleanHypixelPacket() {
         hypLocation = null;
+        updateStatus();
         ToolList.getInstance().log.info("Cleaned Hypixel Packet Instance");
     }
 

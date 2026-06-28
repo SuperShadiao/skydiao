@@ -902,6 +902,10 @@
       "configname": "§eMineshaft分享公告",
       "description": "§eMineshaft分享功能完成warp之后, 发送公告消息来保证秩序, 留空则禁用该消息. (如果有人反复破坏你的规则, 请加入小沙雕的群反馈此人)"
     },
+    "fishingbigfishtip": {
+      "configname": "§e钓鱼肥鱼提示",
+      "description": "§e自定义钓到大鱼时的提示消息"
+    },
     "about1": "§e小沙雕的QQ: 3381949033",
     "about2": "§e小沙雕の狗窝: https://xiaoshadiao.club/qqg",
     "about3": "§e部分快捷键设置可在 ESC->选项(设置)->控制 中找到",
@@ -1090,6 +1094,11 @@
       "notification": {
         "detected": "检测到"
       }
+    },
+    "antiscammer": {
+      "notification": "请不要相信任何以免费rank, 语音 (vc) 为由邀请你加入Discord服务器的老外, 更不要相信Discord服务器内的\"微软账号验证\"。如果你信了, 相信小沙雕, 你会后悔终身!",
+      "click": "[点击这里查看为什么]",
+      "click2": "点击查看骗子诈骗账号的方式"
     }
   },
   "xsdchat": {

@@ -32,12 +32,19 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.KeyboardInput;
+import net.minecraft.network.PacketListener;
+import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.contents.PlainTextContents;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.animal.wolf.Wolf;
+import net.minecraft.world.entity.monster.warden.Warden;
+import net.minecraft.world.entity.monster.warden.WardenAi;
 import net.minecraft.world.entity.player.PlayerSkin;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
@@ -100,6 +107,7 @@ public class BasicListener extends AbstractListener {
         ClientTickEvents.START_CLIENT_TICK.register(this::onStartClientTick);
         ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register(this::onWorldChange);
         CustomFabricEvents.HYPIXEL_PACKET_EVENT.register(this::onHypixelPacket);
+        CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
         ScreenEvents.AFTER_INIT.register(this::onGuiFinishedInit);
         ClientPlayConnectionEvents.JOIN.register(this::onJoinServer);
         ClientPlayConnectionEvents.DISCONNECT.register(this::onDisconnect);
@@ -115,6 +123,15 @@ public class BasicListener extends AbstractListener {
                 BLiveListener.launch();
             }
         });
+    }
+
+    private boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
+//        if(packet instanceof ClientboundResourcePackPushPacket) {
+//            System.out.println(((ClientboundResourcePackPushPacket) packet).url());
+//            return StatusManager.get().isInSkyblock();
+//        }
+//
+        return false;
     }
 
     private Component onModifyChat(Component component, boolean b) {
@@ -159,12 +176,11 @@ public class BasicListener extends AbstractListener {
         while(m.find()) {
             String words = m.group();
             if(words.toLowerCase().contains("discord") || words.toLowerCase().endsWith("dc") || (words.toLowerCase().contains("dc") && words.length() <= 3)) {
-                MutableComponent ic = Component.literal("§a[小沙雕] §c请不要相信任何以免费rank, 语音 (vc) 为由邀请你加入Discord服务器的老外, 更不要相信Discord服务器内的\"微软账号验证\"。" +
-                        "如果你信了, 相信小沙雕, 你会后悔终身!");
+                MutableComponent ic = Component.literal("§a[小沙雕] §c" + translate("features.antiscammer.notification"));
                 Style cs = Style.EMPTY
                         .withClickEvent(new ClickEvent.OpenUrl(URI.create("https://xiaoshadiao.club/antiscamming")))
-                        .withHoverEvent(new HoverEvent.ShowText(Component.literal("点击查看骗子诈骗账号的方式")));
-                MutableComponent ic2 = Component.literal(" §e[点击这里查看为什么]").setStyle(cs);
+                        .withHoverEvent(new HoverEvent.ShowText(Component.literal(translate("features.antiscammer.click2"))));
+                MutableComponent ic2 = Component.literal(" §e" + translate("features.antiscammer.click")).setStyle(cs);
 
                 ToolList.printChatMessage(ic.append(ic2));
                 break;

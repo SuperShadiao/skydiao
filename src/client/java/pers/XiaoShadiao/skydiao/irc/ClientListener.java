@@ -80,7 +80,12 @@ public class ClientListener extends ChatClient {
                                     case "showitem":
                                         break;
                                     default:
-                                        log.info("Received packet: " + packet.getJson());
+                                        String json = packet.getJson().toString();
+                                        if(json.length() < 500) {
+                                            log.info("Received packet: " + json);
+                                        } else {
+                                            log.info("Received packet " + packet.packetType + " (" + json.length() + ")");
+                                        }
                                         break;
                                 }
 

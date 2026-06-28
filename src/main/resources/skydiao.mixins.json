@@ -1,14 +1,16 @@
 {
-	"required": true,
-	"package": "pers.XiaoShadiao.skydiao.mixin",
-	"compatibilityLevel": "JAVA_21",
-	"mixins": [
-      "MixinMinecraftServer"
-	],
-	"injectors": {
-		"defaultRequire": 1
-	},
-	"overwrites": {
-		"requireAnnotations": true
+  "required": true,
+  "package": "pers.XiaoShadiao.skydiao.server.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "MixinMinecraftServer",
+    "fun.MixinHurtEntityServer",
+    "fun.MixinWarden"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
 	}
 }

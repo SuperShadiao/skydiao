@@ -1,4 +1,4 @@
-package pers.XiaoShadiao.skydiao.mixin;
+package pers.XiaoShadiao.skydiao.server.mixin;
 
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Mixin;

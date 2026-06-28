@@ -8,24 +8,16 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.phys.Vec3;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
-import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 
-import java.util.Comparator;
-import java.util.Objects;
-import java.util.Optional;
-
 public class FishingBigMobRenderListener extends AbstractFishingListener {
 
-    public IntSet bigMobEntites = new IntOpenHashSet();
+    public IntSet bigMobEntities = new IntOpenHashSet();
 
     @Override
     public String getListenerName() {
@@ -43,7 +35,7 @@ public class FishingBigMobRenderListener extends AbstractFishingListener {
 
         RenderUtils.WorldRender wr1 = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_LINE);
 
-        IntIterator it = bigMobEntites.intIterator();
+        IntIterator it = bigMobEntities.intIterator();
         while (it.hasNext()) {
             int id = it.nextInt();
             Entity entity = mc.level.getEntity(id);
@@ -57,17 +49,18 @@ public class FishingBigMobRenderListener extends AbstractFishingListener {
     }
 
     private void onStartTick(Minecraft mc) {
-        if(!ConfigManager.hotspotrender.getValue() || mc.level == null || mc.player == null || !isInWaterFishingArea()) return;
+        if(!ConfigManager.fishingBigFishRender.getValue() || mc.level == null || mc.player == null || !isInWaterFishingArea()) return;
 
         for (Entity entity : mc.level.entitiesForRendering()) {
             if(isBigMob(entity)) {
-                if (!bigMobEntites.contains(entity.getId())) {
-                    XSDHUD.bigTitle.updateTitleMsg("§e一只肥大的鱼出现了!", 3000, SoundEvents.ANVIL_USE);
-                    bigMobEntites.add(entity.getId());
+                if (!bigMobEntities.contains(entity.getId())) {
+                    String value = ConfigManager.fishingBigFishTip.getValue().trim();
+                    if(!value.isEmpty()) XSDHUD.bigTitle.updateTitleMsg(value.replace("&", "§"), 3000, SoundEvents.ANVIL_USE);
+                    bigMobEntities.add(entity.getId());
                 }
             }
         }
-        bigMobEntites.removeIf(this::isNotBigMob);
+        bigMobEntities.removeIf(this::isNotBigMob);
     }
 
     private boolean isNotBigMob(int entityId) {

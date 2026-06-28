@@ -43,7 +43,7 @@ public class XSDChatCommand extends BaseRootRunnableCommand {
             context.getSource().sendError(Component.literal(
                     inXSDChatChannel ?
                             "§a[小沙雕] §a你已进入小沙雕聊天频道, 现在直接发送的消息会发送到小沙雕聊天室." :
-                            "§a[小沙雕] §e你已退出小沙雕聊天频道, 现在直接发送的消息会不会被发送到小沙雕聊天室."
+                            "§a[小沙雕] §e你已退出小沙雕聊天频道."
             ));
             return 1;
         });

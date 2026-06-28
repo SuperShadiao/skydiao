@@ -18,7 +18,6 @@ import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.keybinds.KeyBindsManager;
-import pers.XiaoShadiao.skydiao.screen.MusicPlayerScreen;
 import pers.XiaoShadiao.skydiao.screen.mircosoftaccount.AccountSelectScreen;
 import pers.XiaoShadiao.skydiao.utils.autoupdater.AutoUpdater;
 import pers.XiaoShadiao.skydiao.utils.autoupdater.ExecuteOfflineThread;
@@ -32,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 public class SkyDiaoModClient implements ClientModInitializer {
 
     public static final String MOD_ID = "skydiao";
-    public static final String VERSION = "0.4.5";
+    public static final String VERSION = "0.4.6";
 
     public static final String CONST_QQGROUP_MAIN = "728972740";
     public static final String CONST_QQGROUP_OTHER1 = "1103539591";
@@ -64,7 +63,6 @@ public class SkyDiaoModClient implements ClientModInitializer {
             e.printStackTrace();
         }
         CrowdinI18nManager.initI18nFromConfig();
-
         User currentInstance = ToolList.mc.getUser();
         if(!(currentInstance instanceof XSDSafeSession)) throw new AssertionError("你的账号可能被老鼠 (盗号) 了。检查一下Mod看看。 (" + currentInstance + ")");
         MinecraftLogin.replaceSession(currentInstance);

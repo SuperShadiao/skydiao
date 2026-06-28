@@ -124,6 +124,7 @@ public class CrystalHollowHelperListener extends AbstractListener {
                 activeCrystalScanners.add(startScanFairyGrotto(CrystalType.FAIRY_GROTTO, JUNGLE_BB));
                 activeCrystalScanners.add(startScanFairyGrotto(CrystalType.FAIRY_GROTTO, PRECURSOR_REMNANTS_BB));
                 activeCrystalScanners.add(startScanFairyGrotto(CrystalType.FAIRY_GROTTO, GOBLIN_HOLDOUT_BB));
+                activeCrystalScanners.add(startScanBear3(CrystalType.BEAR3, GOBLIN_HOLDOUT_BB));
             }
         } else if(inCN && !tempInCN) {
             inCN = false;
@@ -331,13 +332,6 @@ public class CrystalHollowHelperListener extends AbstractListener {
 
                         if(NUCLEUS_BB.isInside(info.currentScanning) || !HOLLOWS_BB.isInside(info.currentScanning)) continue;
 
-//                        if(info.currentScanning.distToCenterSqr(mc.player.position()) < 20 * 20) {
-//                            try {
-//                                Thread.sleep(1000);
-//                            } catch (InterruptedException e) {
-//
-//                            }
-//                        }
                         Block block = currentLevel.getBlockState(info.currentScanning).getBlock();
                         if(block == Blocks.RED_WOOL) {
                             block = currentLevel.getBlockState(info.currentScanning.move(0, -1, 0)).getBlock();
@@ -410,6 +404,136 @@ public class CrystalHollowHelperListener extends AbstractListener {
                             }
                         }
                         if(redWoolCount == 6) {
+                            info.result = pos;
+                            return;
+                        }
+                    }
+                    if(!ToolList.getInstance().isChunkLoaded(currentLevel, info.currentScanning)) {
+                        unloadedQueue.enqueue(pos);
+                        queueWait();
+                        continue;
+                    }
+                } else {
+                    unloadedQueue.enqueue(pos);
+                    queueWait();
+                }
+            }
+            info.result = null;
+        });
+        return info;
+    }
+
+    private CrystalScannerInfo startScanBear3(CrystalType crystalType, BoundingBox area) {
+        if(crystalType != CrystalType.BEAR3) throw new AssertionError("咕咕嘎嘎!!!!!");
+
+        CrystalScannerInfo info = new CrystalScannerInfo(crystalType);
+        info.scannerName = crystalType.displayName;
+        info.area = area;
+        info.task = structureScannerExecutor.submit(() -> {
+            int minX = area.minX() - 32;
+            int minY = area.minY() - 32;
+            int minZ = area.minZ() - 32;
+            int maxX = area.maxX() + 32;
+            int maxY = area.maxY() + 32;
+            int maxZ = area.maxZ() + 32;
+
+            ObjectHeapPriorityQueue<BlockPos> unloadedQueue = genUnloadedQueue();
+
+            ClientLevel currentLevel = ToolList.mc.level;
+            int currentToken = scannerToken;
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+
+            }
+            BlockPos.MutableBlockPos temp = new BlockPos.MutableBlockPos();
+            for(int x = minX; x <= maxX; x += 2) {
+                for(int y = minY; y <= maxY; y++) {
+                    if(!crystalType.isInRange(y)) continue;
+                    label_z:for(int z = minZ; z <= maxZ; z += 2) {
+                        info.currentScanning.set(x, y, z);
+                        if(currentLevel != ToolList.mc.level || currentToken != scannerToken) return;
+                        if(!ToolList.getInstance().isChunkLoaded(currentLevel, info.currentScanning)) {
+                            unloadedQueue.enqueue(info.currentScanning.immutable());
+                            continue label_z;
+                        }
+
+                        if(NUCLEUS_BB.isInside(info.currentScanning) || !HOLLOWS_BB.isInside(info.currentScanning)) continue;
+
+                        Block block = currentLevel.getBlockState(info.currentScanning).getBlock();
+                        int blockCount = 0;
+                        if(block == Blocks.OAK_PLANKS) {
+                            for (int xOff = -2; xOff <= 2; xOff++) {
+                                for (int zOff = -2; zOff <= 2; zOff++) {
+                                    temp.set(info.currentScanning).move(xOff, 0, zOff);
+                                    if(!ToolList.getInstance().isChunkLoaded(currentLevel, temp)) {
+                                        unloadedQueue.enqueue(info.currentScanning.immutable());
+                                        continue label_z;
+                                    }
+                                    if(currentLevel.getBlockState(temp).getBlock() == Blocks.OAK_PLANKS) blockCount++;
+                                }
+                            }
+                            if(blockCount < 15) continue label_z;
+                            temp.set(info.currentScanning).move(0, 1, 0);
+                            int fireCount = 0;
+                            int wallCount = 0;
+                            for (int xOff = -3; xOff <= 3; xOff++) {
+                                for (int zOff = -3; zOff <= 3; zOff++) {
+                                    temp.set(info.currentScanning).move(xOff, 1, zOff);
+                                    if(!ToolList.getInstance().isChunkLoaded(currentLevel, temp)) {
+                                        unloadedQueue.enqueue(info.currentScanning.immutable());
+                                        continue label_z;
+                                    }
+                                    if(currentLevel.getBlockState(temp).getBlock() == Blocks.FIRE) fireCount++;
+                                    if(currentLevel.getBlockState(temp).getBlock() == Blocks.COBBLESTONE_WALL) wallCount++;
+                                }
+                            }
+                            if(fireCount == 2 && wallCount == 2) {
+                                info.result = info.currentScanning.immutable();
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+            if(ConfigManager.crystalHollowHelperDebug.getValue()) ToolList.printChatMessage(Component.literal("§a[小沙雕] §e已完成" + crystalType.displayName + "§e区域扫描, 开始轮询未加载区块..."));
+            label:while(!unloadedQueue.isEmpty()) {
+                if(currentLevel != ToolList.mc.level || currentToken != scannerToken) return;
+                BlockPos pos = unloadedQueue.dequeue();
+                info.currentScanning.set(pos);
+                if(ToolList.getInstance().isChunkLoaded(currentLevel, info.currentScanning)) {
+                    if(NUCLEUS_BB.isInside(info.currentScanning) || !HOLLOWS_BB.isInside(info.currentScanning)) continue;
+                    int blockCount = 0;
+                    Block block = currentLevel.getBlockState(info.currentScanning).getBlock();
+                    if(block == Blocks.OAK_PLANKS) {
+                        for (int xOff = -2; xOff <= 2; xOff++) {
+                            for (int zOff = -2; zOff <= 2; zOff++) {
+                                temp.set(info.currentScanning).move(xOff, 0, zOff);
+                                if(!ToolList.getInstance().isChunkLoaded(currentLevel, temp)) {
+                                    unloadedQueue.enqueue(pos);
+                                    queueWait();
+                                    continue label;
+                                }
+                                if(currentLevel.getBlockState(temp).getBlock() == Blocks.OAK_PLANKS) blockCount++;
+                            }
+                        }
+                        if(blockCount < 15) continue label;
+                        temp.set(info.currentScanning).move(0, 1, 0);
+                        int fireCount = 0;
+                        int wallCount = 0;
+                        for (int xOff = -3; xOff <= 3; xOff++) {
+                            for (int zOff = -3; zOff <= 3; zOff++) {
+                                temp.set(info.currentScanning).move(xOff, 1, zOff);
+                                if(!ToolList.getInstance().isChunkLoaded(currentLevel, temp)) {
+                                    unloadedQueue.enqueue(pos);
+                                    queueWait();
+                                    continue label;
+                                }
+                                if(currentLevel.getBlockState(temp).getBlock() == Blocks.FIRE) fireCount++;
+                                if(currentLevel.getBlockState(temp).getBlock() == Blocks.COBBLESTONE_WALL) wallCount++;
+                            }
+                        }
+                        if(fireCount == 2 && wallCount == 2) {
                             info.result = pos;
                             return;
                         }
@@ -697,12 +821,14 @@ public class CrystalHollowHelperListener extends AbstractListener {
                                 temp.set(info.currentScanning).move(i, 0, 0);
                                 if(!ToolList.getInstance().isChunkLoaded(currentLevel, temp)) {
                                     unloadedQueue.enqueue(pos);
+                                    queueWait();
                                     continue label;
                                 }
                                 if(currentLevel.getBlockState(temp).getBlock() == Blocks.STONE_BRICKS) brickCount += 100;
                                 temp.set(info.currentScanning).move(-i, 0, 0);
                                 if(!ToolList.getInstance().isChunkLoaded(currentLevel, temp)) {
                                     unloadedQueue.enqueue(pos);
+                                    queueWait();
                                     continue label;
                                 }
                                 if(currentLevel.getBlockState(temp).getBlock() == Blocks.STONE_BRICKS) brickCount -= 1;
@@ -896,6 +1022,7 @@ public class CrystalHollowHelperListener extends AbstractListener {
         DRAGON_LAIR("§c那位来客", "Dragon's Lair", 64, 189),
         CORLEONE("§a卡农", "Corleone", 64, 189),
         FAIRY_GROTTO("§d粉色小狗", "Fairy Grotto", 64, 189),
+        BEAR3("§e熊出没", "Unknown", 64, 189),
         UNKNOWN("§c未知水晶", "Unknown", 0, 0);
 
         private final String displayName;
