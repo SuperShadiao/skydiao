@@ -52,6 +52,9 @@
     "adapter.skyhanni.FPSDropperFix",
     "adapter.skyhanni.GithubRepoProxy",
     "adapter.skyhanni.RepoLoaderStuckFix",
+    "adapter.spmloader.EnableConnectionVaild",
+    "adapter.spmloader.FlyingStateChange",
+    "adapter.spmloader.FlyingStateChangeParent",
     "blivemode.MixinEntity",
     "blivemode.MixinEntityPlayer"
   ]

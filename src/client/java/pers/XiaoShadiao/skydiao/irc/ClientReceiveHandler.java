@@ -1,12 +1,8 @@
 package pers.XiaoShadiao.skydiao.irc;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.JsonOps;
-import net.hypixel.modapi.HypixelModAPI;
-import net.hypixel.modapi.packet.impl.serverbound.ServerboundPartyInfoPacket;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
@@ -16,10 +12,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.ICustomSkinModelLoader;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
-
-import java.util.Optional;
 
 public class ClientReceiveHandler {
 
@@ -77,7 +72,9 @@ public class ClientReceiveHandler {
                 }
                 break;
             case "ysm":
-                AbstractListener.foxModuleLoaderAdapter.handleIRCPacket(packet);
+                for (ICustomSkinModelLoader modelLoaderAdapter : AbstractListener.modelLoaderAdapters) {
+                    if(modelLoaderAdapter.isSupportYSM()) modelLoaderAdapter.handleIRCPacket(packet);
+                }
                 break;
         }
     }

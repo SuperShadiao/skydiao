@@ -56,7 +56,6 @@ public abstract class AbstractListener extends Thread {
     public static final CarnivalFruitDigger carnvialFruitDigger = new CarnivalFruitDigger();
     public static final BlacklistRenderer blacklistRenderer = new BlacklistRenderer();
     public static final CrystalHollowHelperListener crystalHollowHelperListener = new CrystalHollowHelperListener();
-    public static final FoxModuleLoaderAdapter foxModuleLoaderAdapter = new FoxModuleLoaderAdapter();
     public static final DungeonTTTFailListener dungeonTTTFailListener = new DungeonTTTFailListener();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
@@ -66,6 +65,14 @@ public abstract class AbstractListener extends Thread {
     public static final DungeonF5BossbarListener dungeonF5Bossbar = new DungeonF5BossbarListener();
     public static final DungeonF6BossbarListener dungeonF6Bossbar = new DungeonF6BossbarListener();
     public static final DungeonF7BossbarListener dungeonF7Bossbar = new DungeonF7BossbarListener();
+
+    public static final FoxModelLoaderAdapter foxModelLoaderAdapter = new FoxModelLoaderAdapter();
+    public static final SPMLoaderAdapter spmlLoaderAdapter = new SPMLoaderAdapter();
+
+    public static final List<ICustomSkinModelLoader> modelLoaderAdapters = List.of(
+            foxModelLoaderAdapter,
+            spmlLoaderAdapter
+    );
 
     public AbstractListener() {
         setName("LT_" + getListenerName());

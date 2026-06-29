@@ -10,10 +10,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Base64;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.ICustomSkinModelLoader;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.XSDSafeSession;
@@ -201,8 +201,10 @@ public class ChatClient extends Thread {
 
         ToolList.getInstance().updatePartyInfo();
 
-        if(AbstractListener.foxModuleLoaderAdapter.isSupportYSM()) {
-            AbstractListener.foxModuleLoaderAdapter.resendSwitchPacket();
+        for (ICustomSkinModelLoader modelLoaderAdapter : AbstractListener.modelLoaderAdapters) {
+            if(modelLoaderAdapter.isSupportYSM()) {
+                modelLoaderAdapter.resendSwitchPacket();
+            }
         }
     }
 
