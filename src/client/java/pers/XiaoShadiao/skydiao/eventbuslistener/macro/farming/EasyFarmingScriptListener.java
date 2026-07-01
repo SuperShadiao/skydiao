@@ -243,9 +243,6 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 
 
         if (enabled) {
-            // 自动喷诱虫剂
-            autoSpray();
-            autoChangePet();
             getNearestNode().ifPresent(node -> {
                 if (BlockPos.containing(mc.player.position()).equals(node.pos)) {
                     if (currentWorking != node) {
@@ -264,6 +261,8 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                     }
                 }
             });
+            autoSpray();
+            autoChangePet();
         }
     }
 
@@ -285,30 +284,38 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         });
     }
 
+    private void changeAndRight(int index) {
+        try {
+            Thread.sleep(2000);
+            InputSimulator.unpressAllKey();
+            Thread.sleep(1000);
+            int lastSelectedSlot = mc.player.getInventory().getSelectedSlot();
+            InputSimulator.switchItem(index);
+
+            Thread.sleep(1000);
+            InputSimulator.pressRightClick();
+            Thread.sleep(200);
+            InputSimulator.unpressAllKey();
+
+            Thread.sleep(800);
+            InputSimulator.switchItem(lastSelectedSlot);
+            Thread.sleep(2000);
+            startCurrentActions();
+
+            spraying = false;
+        } catch (InterruptedException e) {
+
+        }
+    }
+
     private void autoSpray() {
         if (!ConfigManager.autoSprayonator.getValue() ||
                 spraying ||
                 TabReader.findLineWith("Spray: None") == null) return;
 
         spraying = true;
-
         ToolList.addThreadedTask(() -> {
-            InputSimulator.unpressAllKey();
-            Thread.sleep(3000);
-            int lastSelectedSlot = mc.player.getInventory().getSelectedSlot();
-            InputSimulator.switchItem(4);
-
-            Thread.sleep(1000);
-            InputSimulator.pressRightClick();
-            Thread.sleep(500);
-            InputSimulator.unpressAllKey();
-
-            Thread.sleep(800);
-            InputSimulator.switchItem(lastSelectedSlot);
-            Thread.sleep(2000);
-
-            startCurrentActions();
-            spraying = false;
+            changeAndRight(4);
             return null;
         });
     }
@@ -316,37 +323,21 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
     private void autoChangePet() {
         if (!ConfigManager.autoChangePet.getValue() || spraying) return;
 
+        String target = null;
         if (TabReader.findLineWith("Cooldown: READY") != null &&
-                TabReader.findLineWith("Mooshroom Cow") != null) {
-            // to Slug
-        } else if (TabReader.findLineWith("Alive: 0") == null &&
-                TabReader.findLineWith("Slug") != null) {
-            // to Hedgehog
-        } else if (TabReader.findLineWith("Alive: 0") != null &&
-                TabReader.findLineWith("Hedgehog") != null) {
-            // to Mooshroom Cow
-        } else
-            return;
+                TabReader.findLineWith("Slug") == null)
+            target = "Slug";
+        else if (TabReader.findLineWith("Alive: 0") == null &&
+                TabReader.findLineWith("Hedgehog") == null)
+            target = "Hedgehog";
+        else if (TabReader.findLineWith("Alive: 0") != null &&
+                TabReader.findLineWith("Mooshroom Cow") == null)
+            target = "Mooshroom Cow";
+        if (target == null) return;
 
         spraying = true;
-
         ToolList.addThreadedTask(() -> {
-            InputSimulator.unpressAllKey();
-            Thread.sleep(5000);
-            int lastSelectedSlot = mc.player.getInventory().getSelectedSlot();
-            InputSimulator.switchItem(3);
-
-            Thread.sleep(1000);
-            InputSimulator.pressRightClick();
-            Thread.sleep(500);
-            InputSimulator.unpressAllKey();
-
-            Thread.sleep(800);
-            InputSimulator.switchItem(lastSelectedSlot);
-            Thread.sleep(2000);
-
-            startCurrentActions();
-            spraying = false;
+            changeAndRight(3);
             return null;
         });
     }
