@@ -286,13 +286,13 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 
     private void changeAndRight(int index) {
         try {
-            Thread.sleep(2000);
-            InputSimulator.unpressAllKey();
             Thread.sleep(1000);
+            InputSimulator.unpressAllKey();
+            Thread.sleep(800);
             int lastSelectedSlot = mc.player.getInventory().getSelectedSlot();
             InputSimulator.switchItem(index);
 
-            Thread.sleep(1000);
+            Thread.sleep(800);
             InputSimulator.pressRightClick();
             Thread.sleep(200);
             InputSimulator.unpressAllKey();
