@@ -3,11 +3,9 @@ package pers.XiaoShadiao.skydiao.irc;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.serialization.JsonOps;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.*;
 import net.minecraft.resources.RegistryOps;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
@@ -21,7 +19,12 @@ public class ClientReceiveHandler {
     public void handle(ChatPacket packet, ClientListener sender) {
         switch(packet.packetType) {
             case "chat":
-                ToolList.printChatMessage(Component.literal("§a[XSDChat] " + packet.getRank(true) + "§d" + packet.sender + "§7: §f" + packet.message));
+                Style style = Style.EMPTY.withHoverEvent(new HoverEvent.ShowText(Component.literal("点击来@" + packet.sender))).withClickEvent(new ClickEvent.SuggestCommand("/xsdc @" + packet.sender));
+                ToolList.printChatMessage(Component.literal("§a[XSDChat] " + packet.getRank(true) + "§d" + packet.sender + "§7: §f" + packet.message).withStyle(style));
+                if(packet.message.contains("@" + ToolList.mc.getUser().getName()) && !packet.getRank(false).contains("[离线]")) {
+                    ToolList.getInstance().playSound(SoundEvents.EXPERIENCE_ORB_PICKUP);
+                    ToolList.printChatMessage(Component.literal("§a[XSDChat] §e有人@了你, 快看一眼吧!"));
+                }
                 if(ConfigManager.enablexsdccommandtip.getValue()) ToolList.printChatMessage(Component.literal("§a[XSDChat] 请使用/xsdc message聊天!"));
                 break;
             case "system":
@@ -49,7 +52,7 @@ public class ClientReceiveHandler {
             case "macro_check":
                 if(ConfigManager.enableircmacrochecktip.getValue()) {
                     MutableComponent component = Component.literal("§a[XSDChat] " + packet.getRank(true) + "§d" + packet.sender + " §c触发了Macro Check警报! §e[HOVER]");
-                    Style style = Style.EMPTY.withHoverEvent(new HoverEvent.ShowText(Component.literal(packet.message)));
+                    style = Style.EMPTY.withHoverEvent(new HoverEvent.ShowText(Component.literal(packet.message)));
                     ToolList.printChatMessage(component.setStyle(style));
                 }
                 break;

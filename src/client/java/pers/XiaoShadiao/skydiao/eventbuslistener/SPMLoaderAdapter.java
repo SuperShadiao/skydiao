@@ -1,6 +1,5 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener;
 
-import com.elfmcys.yesstevemodel.model.ServerModelManager;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.micaftic.morpher.capability.ModelInfoCapability;
@@ -9,14 +8,13 @@ import com.micaftic.morpher.capability.ProjectileCapability;
 import com.micaftic.morpher.capability.ProjectileModelCapability;
 import com.micaftic.morpher.client.ClientModelManager;
 import com.micaftic.morpher.client.model.ModelAssembly;
-import com.micaftic.morpher.core.security.YSMClientCache;
+import com.micaftic.morpher.core.api.network.fabric.YSMPayload;
 import com.micaftic.morpher.geckolib3.core.molang.util.StringPool;
 import com.micaftic.morpher.network.NetworkHandler;
 import com.micaftic.morpher.resource.models.ModelProperties;
 import com.micaftic.morpher.resource.pojo.RawYsmModel;
 import com.micaftic.morpher.util.LocalModelSelectionStore;
 import com.micaftic.morpher.util.data.OrderedStringMap;
-import com.micaftic.morpher.core.api.network.fabric.YSMPayload;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.Int2FloatOpenHashMap;
@@ -33,7 +31,6 @@ import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.Entity;
@@ -45,12 +42,12 @@ import pers.XiaoShadiao.skydiao.irc.ChatPacket;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
-import java.io.File;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinModelLoader {
 
@@ -117,8 +114,8 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
 
         if (mc.player == null) return;
         PlayerCapability.get(mc.player).ifPresent(cap -> {
-            String modelId = cap.getModelId();
-            String currentTextureName = cap.getCurrentTextureName();
+            String modelId = cap.getModelId().toLowerCase();
+            String currentTextureName = cap.getCurrentTextureName().toLowerCase();
             if (!modelId.equals(currentModelId) || !currentTextureName.equals(currentTextureId)) {
                 currentModelId = modelId;
                 currentTextureId = currentTextureName;
