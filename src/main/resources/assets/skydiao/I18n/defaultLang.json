@@ -802,18 +802,6 @@
       "configname": "§eHub老鼠显示",
       "description": "§e显示Hub的老鼠"
     },
-    "autoKillPests": {
-      "configname": "§e农业脚本自动传送到害虫房杀虫",
-      "description": "§e请确保吸虫器位于快捷栏，务必确保拥有害虫音乐盒，传送时可快速杀死"
-    },
-    "autoChangePet": {
-      "configname": "§e农业脚本自动切换宠物",
-      "description": "§e请确钓鱼竿位于快捷栏，收集、等待害虫、杀虫时会自动切换宠物"
-    },
-    "autoSprayonator": {
-      "configname": "§e农业脚本自动喷洒诱虫剂",
-      "description": "§e请确保Sprayonator位于快捷栏。自动农业时，将会自动使用Sprayonator"
-    },
     "dungeonautoclosechest": {
       "configname": "§e地牢自动关闭箱子",
       "description": "§e找秘密时如果箱子内是Decoy, Trap等常见物品, 则自动关闭箱子页面"
@@ -917,6 +905,18 @@
     "fishingbigfishtip": {
       "configname": "§e钓鱼肥鱼提示",
       "description": "§e自定义钓到大鱼时的提示消息"
+    },
+    "fsautokillpests": {
+      "configname": "§e农业脚本自动传送到害虫房杀虫",
+      "description": "§e请确保吸虫器位于快捷栏，务必确保拥有害虫音乐盒，传送时可快速杀死"
+    },
+    "fsautochangeppet": {
+      "configname": "§e农业脚本自动切换宠物",
+      "description": "§e请确钓鱼竿位于快捷栏，收集、等待害虫、杀虫时会自动切换宠物"
+    },
+    "fsautosprayonator": {
+      "configname": "§e农业脚本自动喷洒诱虫剂",
+      "description": "§e请确保Sprayonator位于快捷栏。自动农业时，将会自动使用Sprayonator"
     },
     "about1": "§e小沙雕的QQ: 3381949033",
     "about2": "§e小沙雕の狗窝: https://xiaoshadiao.club/qqg",

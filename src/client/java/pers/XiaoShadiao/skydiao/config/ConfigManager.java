@@ -96,9 +96,9 @@ public class ConfigManager {
     public static final BooleanConfigOption slayerTogether = new BooleanConfigOption("slayertogether", true);
     public static final BooleanConfigOption resurrectionItemTriggeredTitle = new BooleanConfigOption("resurrectionitemtriggeredtitle", true);
     public static final BooleanConfigOption hubratesp = new BooleanConfigOption("hubratesp", true);
-    public static final BooleanConfigOption autoSprayonator = new BooleanConfigOption("autoSprayonator", false).flagAsMacroFeature();
-    public static final BooleanConfigOption autoKillPests = new BooleanConfigOption("autoKillPests", false).flagAsMacroFeature();
-    public static final BooleanConfigOption autoChangePet = new BooleanConfigOption("autoChangePet", false);
+    public static final BooleanConfigOption autoSprayonator = new BooleanConfigOption("fsautosprayonator", false).flagAsMacroFeature();
+    public static final BooleanConfigOption autoKillPests = new BooleanConfigOption("fsautokillpests", false).flagAsMacroFeature();
+    public static final BooleanConfigOption autoChangePet = new BooleanConfigOption("fsautochangeppet", false);
     public static final BooleanConfigOption hotspotrender = new BooleanConfigOption("hotspotrender", true);
     public static final BooleanConfigOption dungeonAutoCloseChest = new BooleanConfigOption("dungeonautoclosechest", false);
     public static final BooleanConfigOption dungeonPuzzleHelper = new BooleanConfigOption("dungeonpuzzlehelper", true);
