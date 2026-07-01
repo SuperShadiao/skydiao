@@ -15,6 +15,8 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
@@ -201,6 +203,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             enabled = !enabled;
             ended = false;
             toggled = true;
+            getFarmingToolIndex();
         }
         if (enabled && currentEditing != null) {
             enabled = false;
@@ -263,7 +266,29 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             });
             autoSpray();
             autoChangePet();
+            autoKillPest();
         }
+    }
+
+    private final Map<String, Integer> farmingToolIndex = new HashMap<>();
+
+    private void getFarmingToolIndex() {
+        farmingToolIndex.clear();
+        Inventory inventory = mc.player.getInventory();
+        for (int hotbarSlot = 0; hotbarSlot < 9; hotbarSlot++) {
+            ItemStack stack = inventory.getItem(hotbarSlot);
+            if (stack.isEmpty()) continue;
+            String itemName = stack.getHoverName().getString().toLowerCase();
+            if (itemName.contains("vacuum")) farmingToolIndex.put("vacuum", hotbarSlot);
+            else if (itemName.contains(" rod")) farmingToolIndex.put("rod", hotbarSlot);
+            else if (itemName.contains("sprayonator")) farmingToolIndex.put("sprayonator", hotbarSlot);
+        }
+        if (!farmingToolIndex.containsKey("vacuum"))
+            ToolList.printChatMessage(Component.literal("没有在快捷栏找到vacuum，不会自动杀虫"));
+        if (!farmingToolIndex.containsKey("rod"))
+            ToolList.printChatMessage(Component.literal("没有在快捷栏找到钓鱼竿，不会自动切换宠物"));
+        if (!farmingToolIndex.containsKey("sprayonator"))
+            ToolList.printChatMessage(Component.literal("没有在快捷栏找到sprayonator，不会自动喷药"));
     }
 
     private void startCurrentActions() {
@@ -284,64 +309,111 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         });
     }
 
-    private void changeAndRight(int index) {
-        try {
-            Thread.sleep(1000);
+    private void changeAndRight(String item) {
+        int index = farmingToolIndex.getOrDefault(item, -1);
+        if (index == -1) return;
+
+        spraying = true;
+
+        ToolList.addThreadedTask(() -> {
+            Thread.sleep(1000 + ToolList.getInstance().random.nextInt(600));
             InputSimulator.unpressAllKey();
-            Thread.sleep(800);
+            Thread.sleep(500 + ToolList.getInstance().random.nextInt(600));
             int lastSelectedSlot = mc.player.getInventory().getSelectedSlot();
             InputSimulator.switchItem(index);
 
-            Thread.sleep(800);
+            Thread.sleep(500 + ToolList.getInstance().random.nextInt(600));
             InputSimulator.pressRightClick();
             Thread.sleep(200);
             InputSimulator.unpressAllKey();
 
-            Thread.sleep(800);
+            Thread.sleep(500 + ToolList.getInstance().random.nextInt(600));
             InputSimulator.switchItem(lastSelectedSlot);
-            Thread.sleep(2000);
+            Thread.sleep(500 + ToolList.getInstance().random.nextInt(600));
             startCurrentActions();
+            Thread.sleep(3000 + ToolList.getInstance().random.nextInt(600));
 
             spraying = false;
-        } catch (InterruptedException e) {
-
-        }
+            return null;
+        });
     }
 
     private void autoSpray() {
         if (!ConfigManager.autoSprayonator.getValue() ||
                 spraying ||
                 TabReader.findLineWith("Spray: None") == null) return;
+        changeAndRight("sprayonator");
+    }
 
-        spraying = true;
-        ToolList.addThreadedTask(() -> {
-            changeAndRight(4);
-            return null;
-        });
+    private boolean cooldownReady() {
+        return (TabReader.findLineWith("Cooldown: 5s") != null) ||
+                (TabReader.findLineWith("Cooldown: 4s") != null) ||
+                (TabReader.findLineWith("Cooldown: 3s") != null) ||
+                (TabReader.findLineWith("Cooldown: 2s") != null) ||
+                (TabReader.findLineWith("Cooldown: 1s") != null) ||
+                (TabReader.findLineWith("Cooldown: READY") != null);
+    }
+
+    private boolean hasPests() {
+        return TabReader.findLineWith("Alive: 0") == null;
+    }
+
+    private boolean withPet(String petName) {
+        return TabReader.findLineWith("\\[Lvl \\d+\\] " + petName) != null;
     }
 
     private void autoChangePet() {
         if (!ConfigManager.autoChangePet.getValue() || spraying) return;
 
         String target = null;
-        if (TabReader.findLineWith("Cooldown: READY") != null &&
-                TabReader.findLineWith("Slug") == null)
+        if (cooldownReady() && !withPet("Slug"))
             target = "Slug";
-        else if (TabReader.findLineWith("Alive: 0") == null &&
-                TabReader.findLineWith("Hedgehog") == null)
-            target = "Hedgehog";
-        else if (TabReader.findLineWith("Alive: 0") != null &&
-                TabReader.findLineWith("Mooshroom Cow") == null)
-            target = "Mooshroom Cow";
+        else if (hasPests() && !(withPet("Hedgehog") || withPet("Rose Dragon")))
+            target = "Hedgehog | RD";
+        else if (!cooldownReady() && !hasPests() && !(withPet("Mooshroom Cow") || withPet("Rose Dragon")))
+            target = "Mooshroom Cow | RD";
         if (target == null) return;
+
+        changeAndRight("rod");
+    }
+
+    private void autoKillPest() {
+        if (!ConfigManager.autoKillPests.getValue() || spraying) return;
+        if (!hasPests() || !(withPet("Hedgehog") || withPet("Rose Dragon"))) return;
+
+        int index = farmingToolIndex.getOrDefault("vacuum", -1);
+        if (index == -1) return;
 
         spraying = true;
         ToolList.addThreadedTask(() -> {
-            changeAndRight(3);
+            Thread.sleep(1000 + ToolList.getInstance().random.nextInt(200));
+            InputSimulator.unpressAllKey();
+            Thread.sleep(500 + ToolList.getInstance().random.nextInt(200));
+            ToolList.sendChatMessage("/setspawn");
+            String line = TabReader.findLineStartsWith("Plots:").substring(7);
+            String[] split = line.split(",");
+            System.out.println(split[0]);
+            Thread.sleep(500 + ToolList.getInstance().random.nextInt(200));
+            ToolList.sendChatMessage("/tptoplot " + split[0]);
+            Thread.sleep(500 + ToolList.getInstance().random.nextInt(200));
+            int lastSelectedSlot = mc.player.getInventory().getSelectedSlot();
+            InputSimulator.switchItem(index);
+            Thread.sleep(500 + ToolList.getInstance().random.nextInt(200));
+            InputSimulator.pressRightClick();
+            InputSimulator.setForward(true);
+            Thread.sleep(4000);
+            InputSimulator.unpressAllKey();
+            Thread.sleep(500 + ToolList.getInstance().random.nextInt(200));
+            InputSimulator.switchItem(lastSelectedSlot);
+            Thread.sleep(1000 + ToolList.getInstance().random.nextInt(200));
+            ToolList.sendChatMessage("/warp garden");
+            Thread.sleep(500 + ToolList.getInstance().random.nextInt(200));
+            startCurrentActions();
+            Thread.sleep(3000);
+            spraying = false;
             return null;
         });
     }
-
 
     @Override
     public boolean isMacroActive() {

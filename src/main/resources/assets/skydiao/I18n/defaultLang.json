@@ -803,16 +803,16 @@
       "description": "§e显示Hub的老鼠"
     },
     "autoKillPests": {
-      "configname": "§e农业脚本自动杀虫",
-      "description": "§e（占位未开发，等我什么时候有音乐盒再说）请确保吸虫器位于第三格，务必确保拥有害虫音乐盒，传送到时可快速杀死，数字代表音乐盒田数，-1代表关闭"
+      "configname": "§e农业脚本自动传送到害虫房杀虫",
+      "description": "§e请确保吸虫器位于快捷栏，务必确保拥有害虫音乐盒，传送时可快速杀死"
     },
     "autoChangePet": {
       "configname": "§e农业脚本自动切换宠物",
-      "description": "§e请确钓鱼竿位于第四格，ready时切换为slug，有害虫时切换为刺猬，无害虫时切换蘑菇牛，收集、等待害虫、杀虫时会自动切换宠物"
+      "description": "§e请确钓鱼竿位于快捷栏，收集、等待害虫、杀虫时会自动切换宠物"
     },
     "autoSprayonator": {
       "configname": "§e农业脚本自动喷洒诱虫剂",
-      "description": "§e请确保Sprayonator位于物品栏第五格。自动农业时，将会自动使用Sprayonator"
+      "description": "§e请确保Sprayonator位于快捷栏。自动农业时，将会自动使用Sprayonator"
     },
     "dungeonautoclosechest": {
       "configname": "§e地牢自动关闭箱子",
