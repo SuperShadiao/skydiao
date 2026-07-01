@@ -32,7 +32,7 @@ public class ConfigManager {
     public static final BooleanConfigOption blivelistener = new BooleanConfigOption("blivelistener", false) {
         @Override
         public void setValue(Boolean value) {
-            if(value) {
+            if (value) {
                 BLiveListener.launch();
             }
             super.setValue(value);
@@ -42,7 +42,7 @@ public class ConfigManager {
     public static final BooleanConfigOption cooltitle = new BooleanConfigOption("cooltitle", true) {
         @Override
         public void setValue(Boolean value) {
-            if(!value && ToolList.mc.getWindow() != null) ToolList.mc.updateTitle();
+            if (!value && ToolList.mc.getWindow() != null) ToolList.mc.updateTitle();
             super.setValue(value);
         }
     };
@@ -96,6 +96,9 @@ public class ConfigManager {
     public static final BooleanConfigOption slayerTogether = new BooleanConfigOption("slayertogether", true);
     public static final BooleanConfigOption resurrectionItemTriggeredTitle = new BooleanConfigOption("resurrectionitemtriggeredtitle", true);
     public static final BooleanConfigOption hubratesp = new BooleanConfigOption("hubratesp", true);
+    public static final BooleanConfigOption autoSprayonator = new BooleanConfigOption("autoSprayonator", false);
+    public static final IntConfigOption autoKillPests = new IntConfigOption("autoKillPests", -1);
+    public static final BooleanConfigOption autoChangePet = new BooleanConfigOption("autoChangePet", false);
     public static final BooleanConfigOption hotspotrender = new BooleanConfigOption("hotspotrender", true);
     public static final BooleanConfigOption dungeonAutoCloseChest = new BooleanConfigOption("dungeonautoclosechest", false);
     public static final BooleanConfigOption dungeonPuzzleHelper = new BooleanConfigOption("dungeonpuzzlehelper", true);
@@ -112,7 +115,7 @@ public class ConfigManager {
     public static final BooleanConfigOption keepSprint = new BooleanConfigOption("sprint", true) {
         @Override
         public void setValue(Boolean value) {
-            if(!value) InputSimulator.setSprint(false);
+            if (!value) InputSimulator.setSprint(false);
             super.setValue(value);
         }
     };
@@ -173,7 +176,7 @@ public class ConfigManager {
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareAnnounce, skyblockSafeIsland, crystalHollowHelper, crystalHollowHelperDebug, crystalHollowDupServerTipper)),
             Map.entry("combat", List.of(slayerTogether)),
             Map.entry("foraging", List.of(galateashulker)),
-            Map.entry("farming", List.of(hubratesp)),
+            Map.entry("farming", List.of(hubratesp, autoSprayonator, autoKillPests, autoChangePet)),
             Map.entry("fishing", List.of(hotspotrender, autogg, lotusAtollHelper, fishingBigFishRender, fishingBigFishTip)),
             Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered, dungeonDrinkPotion, dungeonBloodRoomTime, dungeonTrashTPS, dungeonf7msgbotssleap)),
             Map.entry("rift", List.of(rifttimegunhelper)),
@@ -225,13 +228,13 @@ public class ConfigManager {
             for (ConfigOption<?> option : optionList) {
                 if (jo.has(option.getName())) {
                     try {
-                        if(option instanceof BooleanConfigOption booleanOption) {
+                        if (option instanceof BooleanConfigOption booleanOption) {
                             booleanOption.setValue(jo.get(option.getName()).getAsBoolean());
-                        } else if(option instanceof SelectConfigOption selectOption) {
+                        } else if (option instanceof SelectConfigOption selectOption) {
                             selectOption.setValue(jo.get(option.getName()).getAsInt());
-                        } else if(option instanceof StringConfigOption stringOption) {
+                        } else if (option instanceof StringConfigOption stringOption) {
                             stringOption.setValue(jo.get(option.getName()).getAsString());
-                        } else if(option instanceof IntConfigOption intgOption) {
+                        } else if (option instanceof IntConfigOption intgOption) {
                             intgOption.setValue(jo.get(option.getName()).getAsInt());
                         }
                     } catch (Exception e) {
@@ -239,7 +242,7 @@ public class ConfigManager {
                     }
                 }
             }
-            if(resetToDefault()) {
+            if (resetToDefault()) {
                 saveConfig();
             }
         } catch (Exception e) {
@@ -259,7 +262,7 @@ public class ConfigManager {
     private static boolean resetToDefault() {
         JsonArray ja;
         try {
-            if(!configResetFlag.exists()) {
+            if (!configResetFlag.exists()) {
                 configResetFlag.createNewFile();
                 ja = new JsonArray();
             } else {
