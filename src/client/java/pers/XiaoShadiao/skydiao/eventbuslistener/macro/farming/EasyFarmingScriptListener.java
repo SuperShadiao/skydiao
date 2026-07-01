@@ -15,6 +15,8 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
@@ -201,6 +203,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             enabled = !enabled;
             ended = false;
             toggled = true;
+            getFarmingToolIndex();
         }
         if (enabled && currentEditing != null) {
             enabled = false;
@@ -266,6 +269,28 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         }
     }
 
+    private final Map<String, Integer> farmingToolIndex = new HashMap<>();
+
+    private void getFarmingToolIndex() {
+        farmingToolIndex.clear();
+        Inventory inventory = mc.player.getInventory();
+        for (int hotbarSlot = 0; hotbarSlot < 9; hotbarSlot++) {
+            ItemStack stack = inventory.getItem(hotbarSlot);
+            if (stack.isEmpty()) continue;
+            String itemName = stack.getHoverName().getString().toLowerCase();
+            if (itemName.contains("vacuum")) farmingToolIndex.put("vacuum", hotbarSlot);
+            else if (itemName.contains(" rod")) farmingToolIndex.put("rod", hotbarSlot);
+            else if (itemName.contains("sprayonator")) farmingToolIndex.put("sprayonator", hotbarSlot);
+        }
+        if (!farmingToolIndex.containsKey("vacuum"))
+            ToolList.printChatMessage(Component.literal("没有在快捷栏找到vacuum，不会自动杀虫"));
+        if (!farmingToolIndex.containsKey("rod"))
+            ToolList.printChatMessage(Component.literal("没有在快捷栏找到钓鱼竿，不会自动切换宠物"));
+        if (!farmingToolIndex.containsKey("sprayonator"))
+            ToolList.printChatMessage(Component.literal("没有在快捷栏找到sprayonator，不会自动喷药"));
+
+    }
+
     private void startCurrentActions() {
         ToolList.addThreadedTask(() -> {
             Thread.sleep(ToolList.getInstance().random.nextLong(nodeExecMaxDelay - nodeExecMinDelay) + nodeExecMinDelay);
@@ -284,8 +309,13 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         });
     }
 
-    private void changeAndRight(int index) {
-        try {
+    private void changeAndRight(String item) {
+        int index = farmingToolIndex.getOrDefault(item, -1);
+        if (index == -1) return;
+
+        spraying = true;
+
+        ToolList.addThreadedTask(() -> {
             Thread.sleep(1000);
             InputSimulator.unpressAllKey();
             Thread.sleep(500);
@@ -304,21 +334,15 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             Thread.sleep(3000);
 
             spraying = false;
-        } catch (InterruptedException e) {
-
-        }
+            return null;
+        });
     }
 
     private void autoSpray() {
         if (!ConfigManager.autoSprayonator.getValue() ||
                 spraying ||
                 TabReader.findLineWith("Spray: None") == null) return;
-
-        spraying = true;
-        ToolList.addThreadedTask(() -> {
-            changeAndRight(4);
-            return null;
-        });
+        changeAndRight("sprayonator");
     }
 
     private boolean cooldownReady() {
@@ -348,13 +372,12 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             target = "Hedgehog | RD";
         else if (!cooldownReady() && !hasPests() && !(withPet("Mooshroom Cow") || withPet("Rose Dragon")))
             target = "Mooshroom Cow | RD";
+        if (target != null) {
+            System.out.println(target + cooldownReady() + withPet("Slug"));
+        }
         if (target == null) return;
 
-        spraying = true;
-        ToolList.addThreadedTask(() -> {
-            changeAndRight(3);
-            return null;
-        });
+        changeAndRight("rod");
     }
 
 
