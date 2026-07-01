@@ -288,19 +288,20 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         try {
             Thread.sleep(1000);
             InputSimulator.unpressAllKey();
-            Thread.sleep(800);
+            Thread.sleep(500);
             int lastSelectedSlot = mc.player.getInventory().getSelectedSlot();
             InputSimulator.switchItem(index);
 
-            Thread.sleep(800);
+            Thread.sleep(500);
             InputSimulator.pressRightClick();
             Thread.sleep(200);
             InputSimulator.unpressAllKey();
 
-            Thread.sleep(800);
+            Thread.sleep(500);
             InputSimulator.switchItem(lastSelectedSlot);
-            Thread.sleep(2000);
+            Thread.sleep(500);
             startCurrentActions();
+            Thread.sleep(3000);
 
             spraying = false;
         } catch (InterruptedException e) {
@@ -320,19 +321,33 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         });
     }
 
+    private boolean cooldownReady() {
+        return (TabReader.findLineWith("Cooldown: 5s") != null) ||
+                (TabReader.findLineWith("Cooldown: 4s") != null) ||
+                (TabReader.findLineWith("Cooldown: 3s") != null) ||
+                (TabReader.findLineWith("Cooldown: 2s") != null) ||
+                (TabReader.findLineWith("Cooldown: 1s") != null) ||
+                (TabReader.findLineWith("Cooldown: READY") != null);
+    }
+
+    private boolean hasPests() {
+        return TabReader.findLineWith("Alive: 0") == null;
+    }
+
+    private boolean withPet(String petName) {
+        return TabReader.findLineWith("\\[Lvl \\d+\\] " + petName) != null;
+    }
+
     private void autoChangePet() {
         if (!ConfigManager.autoChangePet.getValue() || spraying) return;
 
         String target = null;
-        if (TabReader.findLineWith("Cooldown: READY") != null &&
-                TabReader.findLineWith("Slug") == null)
+        if (cooldownReady() && !withPet("Slug"))
             target = "Slug";
-        else if (TabReader.findLineWith("Alive: 0") == null &&
-                TabReader.findLineWith("Hedgehog") == null)
-            target = "Hedgehog";
-        else if (TabReader.findLineWith("Alive: 0") != null &&
-                TabReader.findLineWith("Mooshroom Cow") == null)
-            target = "Mooshroom Cow";
+        else if (hasPests() && !(withPet("Hedgehog") || withPet("Rose Dragon")))
+            target = "Hedgehog | RD";
+        else if (!cooldownReady() && !hasPests() && !(withPet("Mooshroom Cow") || withPet("Rose Dragon")))
+            target = "Mooshroom Cow | RD";
         if (target == null) return;
 
         spraying = true;

@@ -8,6 +8,7 @@ import net.minecraft.network.chat.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 public class TabReader {
 
@@ -47,10 +48,11 @@ public class TabReader {
         return null;
     }
 
-    public static String findLineWith(String sub) {
+    public static String findLineWith(String regex) {
         refreshTab();
+        Pattern pattern = Pattern.compile(regex);
         for (String line : tabLines) {
-            if (line.contains(sub)) {
+            if (pattern.matcher(line).find()) {
                 return line;
             }
         }
