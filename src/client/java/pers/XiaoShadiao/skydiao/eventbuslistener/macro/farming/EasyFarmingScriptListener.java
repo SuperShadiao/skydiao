@@ -266,6 +266,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             });
             autoSpray();
             autoChangePet();
+            autoKillPest();
         }
     }
 
@@ -288,7 +289,6 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             ToolList.printChatMessage(Component.literal("没有在快捷栏找到钓鱼竿，不会自动切换宠物"));
         if (!farmingToolIndex.containsKey("sprayonator"))
             ToolList.printChatMessage(Component.literal("没有在快捷栏找到sprayonator，不会自动喷药"));
-
     }
 
     private void startCurrentActions() {
@@ -316,22 +316,22 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         spraying = true;
 
         ToolList.addThreadedTask(() -> {
-            Thread.sleep(1000);
+            Thread.sleep(1000 + ToolList.getInstance().random.nextInt(600));
             InputSimulator.unpressAllKey();
-            Thread.sleep(500);
+            Thread.sleep(500 + ToolList.getInstance().random.nextInt(600));
             int lastSelectedSlot = mc.player.getInventory().getSelectedSlot();
             InputSimulator.switchItem(index);
 
-            Thread.sleep(500);
+            Thread.sleep(500 + ToolList.getInstance().random.nextInt(600));
             InputSimulator.pressRightClick();
             Thread.sleep(200);
             InputSimulator.unpressAllKey();
 
-            Thread.sleep(500);
+            Thread.sleep(500 + ToolList.getInstance().random.nextInt(600));
             InputSimulator.switchItem(lastSelectedSlot);
-            Thread.sleep(500);
+            Thread.sleep(500 + ToolList.getInstance().random.nextInt(600));
             startCurrentActions();
-            Thread.sleep(3000);
+            Thread.sleep(3000 + ToolList.getInstance().random.nextInt(600));
 
             spraying = false;
             return null;
@@ -372,14 +372,48 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             target = "Hedgehog | RD";
         else if (!cooldownReady() && !hasPests() && !(withPet("Mooshroom Cow") || withPet("Rose Dragon")))
             target = "Mooshroom Cow | RD";
-        if (target != null) {
-            System.out.println(target + cooldownReady() + withPet("Slug"));
-        }
         if (target == null) return;
 
         changeAndRight("rod");
     }
 
+    private void autoKillPest() {
+        if (!ConfigManager.autoKillPests.getValue() || spraying) return;
+        if (!hasPests() || !(withPet("Hedgehog") || withPet("Rose Dragon"))) return;
+
+        int index = farmingToolIndex.getOrDefault("vacuum", -1);
+        if (index == -1) return;
+
+        spraying = true;
+        ToolList.addThreadedTask(() -> {
+            Thread.sleep(1000 + ToolList.getInstance().random.nextInt(200));
+            InputSimulator.unpressAllKey();
+            Thread.sleep(500 + ToolList.getInstance().random.nextInt(200));
+            ToolList.sendChatMessage("/setspawn");
+            String line = TabReader.findLineStartsWith("Plots:").substring(7);
+            String[] split = line.split(",");
+            System.out.println(split[0]);
+            Thread.sleep(500 + ToolList.getInstance().random.nextInt(200));
+            ToolList.sendChatMessage("/tptoplot " + split[0]);
+            Thread.sleep(500 + ToolList.getInstance().random.nextInt(200));
+            int lastSelectedSlot = mc.player.getInventory().getSelectedSlot();
+            InputSimulator.switchItem(index);
+            Thread.sleep(500 + ToolList.getInstance().random.nextInt(200));
+            InputSimulator.pressRightClick();
+            InputSimulator.setForward(true);
+            Thread.sleep(4000);
+            InputSimulator.unpressAllKey();
+            Thread.sleep(500 + ToolList.getInstance().random.nextInt(200));
+            InputSimulator.switchItem(lastSelectedSlot);
+            Thread.sleep(1000 + ToolList.getInstance().random.nextInt(200));
+            ToolList.sendChatMessage("/warp garden");
+            Thread.sleep(500 + ToolList.getInstance().random.nextInt(200));
+            startCurrentActions();
+            Thread.sleep(3000);
+            spraying = false;
+            return null;
+        });
+    }
 
     @Override
     public boolean isMacroActive() {

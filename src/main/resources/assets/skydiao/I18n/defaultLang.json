@@ -804,7 +804,7 @@
     },
     "autoKillPests": {
       "configname": "§e自动传送到害虫房杀虫",
-      "description": "§e（占位未开发，等我什么时候有音乐盒再说）请确保吸虫器位于快捷栏，务必确保拥有害虫音乐盒，传送时可快速杀死"
+      "description": "§e请确保吸虫器位于快捷栏，务必确保拥有害虫音乐盒，传送时可快速杀死"
     },
     "autoChangePet": {
       "configname": "§e自动切换宠物",
