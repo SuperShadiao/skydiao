@@ -126,6 +126,12 @@ public class ChatClient extends Thread {
 
             chatServerAvailable = true;
 
+            for (ICustomSkinModelLoader modelLoaderAdapter : AbstractListener.modelLoaderAdapters) {
+                if(modelLoaderAdapter.isSupportYSM()) {
+                    modelLoaderAdapter.resendSwitchPacket();
+                }
+            }
+
             int ijjjjj = 0;
             flagHeartbeat();
             while(doWhileToken == currentWhileToken) {
@@ -200,12 +206,6 @@ public class ChatClient extends Thread {
         }
 
         ToolList.getInstance().updatePartyInfo();
-
-        for (ICustomSkinModelLoader modelLoaderAdapter : AbstractListener.modelLoaderAdapters) {
-            if(modelLoaderAdapter.isSupportYSM()) {
-                modelLoaderAdapter.resendSwitchPacket();
-            }
-        }
     }
 
     public void flagHeartbeat() {
