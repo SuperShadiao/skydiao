@@ -267,6 +267,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             autoSpray();
             autoChangePet();
             autoKillPest();
+            bonusListener();
         }
     }
 
@@ -284,11 +285,11 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             else if (itemName.contains("sprayonator")) farmingToolIndex.put("sprayonator", hotbarSlot);
         }
         if (!farmingToolIndex.containsKey("vacuum"))
-            ToolList.printChatMessage(Component.literal("没有在快捷栏找到vacuum，不会自动杀虫"));
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c没有在快捷栏找到vacuum，不会自动杀虫"));
         if (!farmingToolIndex.containsKey("rod"))
-            ToolList.printChatMessage(Component.literal("没有在快捷栏找到钓鱼竿，不会自动切换宠物"));
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c没有在快捷栏找到钓鱼竿，不会自动切换宠物"));
         if (!farmingToolIndex.containsKey("sprayonator"))
-            ToolList.printChatMessage(Component.literal("没有在快捷栏找到sprayonator，不会自动喷药"));
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c没有在快捷栏找到sprayonator，不会自动喷药"));
     }
 
     private void startCurrentActions() {
@@ -413,6 +414,18 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             spraying = false;
             return null;
         });
+    }
+
+    private long lastShowTime = System.currentTimeMillis();
+
+    private void bonusListener() {
+        if (!ConfigManager.bonusPrompt.getValue()) return;
+        long now = System.currentTimeMillis();
+        if (now - lastShowTime < 11000) return;
+        String bonus = TabReader.findLineStartsWith("Bonus:");
+        lastShowTime = now;
+        if ("Bonus: INACTIVE".equals(bonus))
+            XSDHUD.bigTitle.updateTitleMsg("Bonus过期了", 5000, SoundEvents.WITHER_SPAWN);
     }
 
     @Override
