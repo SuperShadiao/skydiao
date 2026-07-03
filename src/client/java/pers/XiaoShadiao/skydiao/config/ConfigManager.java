@@ -99,8 +99,8 @@ public class ConfigManager {
     public static final BooleanConfigOption autoSprayonator = new BooleanConfigOption("fsautosprayonator", false).flagAsMacroFeature();
     public static final BooleanConfigOption autoKillPests = new BooleanConfigOption("fsautokillpests", false).flagAsMacroFeature();
     public static final BooleanConfigOption autoChangePet = new BooleanConfigOption("fsautochangeppet", false).flagAsMacroFeature();
-    public static final BooleanConfigOption trapPrompt = new BooleanConfigOption("trapPrompt", true);
-    public static final BooleanConfigOption bonusPrompt = new BooleanConfigOption("fsbonusPrompt", true);
+    public static final BooleanConfigOption trapPrompt = new BooleanConfigOption("trapprompt", true);
+    public static final BooleanConfigOption bonusPrompt = new BooleanConfigOption("fsbonusprompt", true);
     public static final BooleanConfigOption hotspotrender = new BooleanConfigOption("hotspotrender", true);
     public static final BooleanConfigOption dungeonAutoCloseChest = new BooleanConfigOption("dungeonautoclosechest", false);
     public static final BooleanConfigOption dungeonPuzzleHelper = new BooleanConfigOption("dungeonpuzzlehelper", true);
