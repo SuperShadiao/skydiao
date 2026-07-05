@@ -382,7 +382,10 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 
     private void getAutoPestsConfig() {
         String config = ConfigManager.autoKillPests.getValue();
-        if (config == null || config.isEmpty()) return;
+        if (config == null || config.isEmpty()) {
+            autoPestsConfig = null;
+            return;
+        }
         try {
             ArrayList<Integer> collect = Arrays.stream(config.split("[,，]"))
                     .map(String::trim)
@@ -393,6 +396,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             autoPestsConfig = collect;
         } catch (Exception e) {
             ToolList.printChatMessage(Component.literal("§a[小沙雕] §c无法开启自动害虫，自动害虫配置错误，请按照指引配置"));
+            autoPestsConfig = null;
         }
     }
 
