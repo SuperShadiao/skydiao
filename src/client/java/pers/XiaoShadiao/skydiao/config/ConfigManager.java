@@ -97,7 +97,7 @@ public class ConfigManager {
     public static final BooleanConfigOption resurrectionItemTriggeredTitle = new BooleanConfigOption("resurrectionitemtriggeredtitle", true);
     public static final BooleanConfigOption hubratesp = new BooleanConfigOption("hubratesp", true);
     public static final BooleanConfigOption autoSprayonator = new BooleanConfigOption("fsautosprayonator", false).flagAsMacroFeature();
-    public static final BooleanConfigOption autoKillPests = new BooleanConfigOption("fsautokillpests", false).flagAsMacroFeature();
+    public static final StringConfigOption autoKillPests = new StringConfigOption("fsautokillpests", "").flagAsMacroFeature();
     public static final BooleanConfigOption autoChangePet = new BooleanConfigOption("fsautochangeppet", false).flagAsMacroFeature();
     public static final BooleanConfigOption trapPrompt = new BooleanConfigOption("trapprompt", true);
     public static final BooleanConfigOption bonusPrompt = new BooleanConfigOption("fsbonusprompt", true);

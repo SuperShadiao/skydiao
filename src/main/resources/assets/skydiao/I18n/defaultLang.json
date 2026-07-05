@@ -908,7 +908,7 @@
     },
     "fsautokillpests": {
       "configname": "§e农业脚本自动传送到害虫房杀虫",
-      "description": "§e请确保吸虫器位于快捷栏，务必确保拥有害虫音乐盒，传送时可快速杀死"
+      "description": "§e请确保吸虫器位于快捷栏，务必确保拥有害虫音乐盒，空代表不开启。格式为§a循环次数,向前走时间,原地吸虫时间§e单位为ms，必须用英文逗号！！"
     },
     "fsautochangeppet": {
       "configname": "§e农业脚本自动切换宠物",
