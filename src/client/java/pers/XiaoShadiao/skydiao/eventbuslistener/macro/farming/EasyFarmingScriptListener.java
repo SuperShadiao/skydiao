@@ -369,12 +369,12 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         if (!ConfigManager.autoChangePet.getValue() || spraying) return;
 
         String target = null;
-        if (cooldownReady() && !withPet("Slug"))
-            target = "Slug";
+        if (cooldownReady() && !(withPet("Slug") || withPet("Mosquito")))
+            target = "Slug | Mosquito";
         else if (hasPests() && !(withPet("Hedgehog") || withPet("Rose Dragon")))
             target = "Hedgehog | RD";
         else if (!cooldownReady() && !hasPests() && !(withPet("Mooshroom Cow") || withPet("Rose Dragon")))
-            target = "Mooshroom Cow | RD";
+            target = "MC | RD";
         if (target == null) return;
 
         changeAndRight("rod");
