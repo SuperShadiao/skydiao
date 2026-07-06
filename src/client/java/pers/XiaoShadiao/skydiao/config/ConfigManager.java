@@ -97,8 +97,10 @@ public class ConfigManager {
     public static final BooleanConfigOption resurrectionItemTriggeredTitle = new BooleanConfigOption("resurrectionitemtriggeredtitle", true);
     public static final BooleanConfigOption hubratesp = new BooleanConfigOption("hubratesp", true);
     public static final BooleanConfigOption autoSprayonator = new BooleanConfigOption("fsautosprayonator", false).flagAsMacroFeature();
-    public static final BooleanConfigOption autoKillPests = new BooleanConfigOption("fsautokillpests", false).flagAsMacroFeature();
+    public static final StringConfigOption autoKillPests = new StringConfigOption("fsautokillpests", "").flagAsMacroFeature();
     public static final BooleanConfigOption autoChangePet = new BooleanConfigOption("fsautochangeppet", false).flagAsMacroFeature();
+    public static final BooleanConfigOption trapPrompt = new BooleanConfigOption("trapprompt", true);
+    public static final BooleanConfigOption bonusPrompt = new BooleanConfigOption("fsbonusprompt", true);
     public static final BooleanConfigOption hotspotrender = new BooleanConfigOption("hotspotrender", true);
     public static final BooleanConfigOption dungeonAutoCloseChest = new BooleanConfigOption("dungeonautoclosechest", false);
     public static final BooleanConfigOption dungeonPuzzleHelper = new BooleanConfigOption("dungeonpuzzlehelper", true);
@@ -176,7 +178,7 @@ public class ConfigManager {
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareAnnounce, skyblockSafeIsland, crystalHollowHelper, crystalHollowHelperDebug, crystalHollowDupServerTipper)),
             Map.entry("combat", List.of(slayerTogether)),
             Map.entry("foraging", List.of(galateashulker)),
-            Map.entry("farming", List.of(hubratesp, autoSprayonator, autoChangePet, autoKillPests)),
+            Map.entry("farming", List.of(hubratesp, autoSprayonator, autoChangePet, autoKillPests, trapPrompt, bonusPrompt)),
             Map.entry("fishing", List.of(hotspotrender, autogg, lotusAtollHelper, fishingBigFishRender, fishingBigFishTip)),
             Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered, dungeonDrinkPotion, dungeonBloodRoomTime, dungeonTrashTPS, dungeonf7msgbotssleap)),
             Map.entry("rift", List.of(rifttimegunhelper)),

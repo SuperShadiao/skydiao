@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class EasyFarmingScriptListener extends AbstractListener implements IMacro {
 
@@ -204,6 +205,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             ended = false;
             toggled = true;
             getFarmingToolIndex();
+            getAutoPestsConfig();
         }
         if (enabled && currentEditing != null) {
             enabled = false;
@@ -267,6 +269,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             autoSpray();
             autoChangePet();
             autoKillPest();
+            bonusListener();
         }
     }
 
@@ -284,11 +287,11 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             else if (itemName.contains("sprayonator")) farmingToolIndex.put("sprayonator", hotbarSlot);
         }
         if (!farmingToolIndex.containsKey("vacuum"))
-            ToolList.printChatMessage(Component.literal("没有在快捷栏找到vacuum，不会自动杀虫"));
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c没有在快捷栏找到vacuum，不会自动杀虫"));
         if (!farmingToolIndex.containsKey("rod"))
-            ToolList.printChatMessage(Component.literal("没有在快捷栏找到钓鱼竿，不会自动切换宠物"));
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c没有在快捷栏找到钓鱼竿，不会自动切换宠物"));
         if (!farmingToolIndex.containsKey("sprayonator"))
-            ToolList.printChatMessage(Component.literal("没有在快捷栏找到sprayonator，不会自动喷药"));
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c没有在快捷栏找到sprayonator，不会自动喷药"));
     }
 
     private void startCurrentActions() {
@@ -359,26 +362,48 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
     }
 
     private boolean withPet(String petName) {
-        return TabReader.findLineWith("\\[Lvl \\d+\\] " + petName) != null;
+        return TabReader.findLineWith("\\[Lvl \\d+\\] .*?" + petName) != null;
     }
 
     private void autoChangePet() {
         if (!ConfigManager.autoChangePet.getValue() || spraying) return;
 
         String target = null;
-        if (cooldownReady() && !withPet("Slug"))
-            target = "Slug";
+        if (cooldownReady() && !(withPet("Slug") || withPet("Mosquito")))
+            target = "Slug | Mosquito";
         else if (hasPests() && !(withPet("Hedgehog") || withPet("Rose Dragon")))
             target = "Hedgehog | RD";
         else if (!cooldownReady() && !hasPests() && !(withPet("Mooshroom Cow") || withPet("Rose Dragon")))
-            target = "Mooshroom Cow | RD";
+            target = "MC | RD";
         if (target == null) return;
 
         changeAndRight("rod");
     }
 
+    private void getAutoPestsConfig() {
+        String config = ConfigManager.autoKillPests.getValue();
+        if (config == null || config.isEmpty()) {
+            autoPestsConfig = null;
+            return;
+        }
+        try {
+            ArrayList<Integer> collect = Arrays.stream(config.split("[,，]"))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .map(Integer::valueOf)
+                    .collect(Collectors.toCollection(ArrayList::new));
+            if (collect.size() != 3) throw new Exception();
+            autoPestsConfig = collect;
+        } catch (Exception e) {
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c无法开启自动害虫，自动害虫配置错误，请按照指引配置"));
+            autoPestsConfig = null;
+        }
+    }
+
+    private ArrayList<Integer> autoPestsConfig = null;
+
     private void autoKillPest() {
-        if (!ConfigManager.autoKillPests.getValue() || spraying) return;
+        if (autoPestsConfig == null || spraying) return;
         if (!hasPests() || !(withPet("Hedgehog") || withPet("Rose Dragon"))) return;
 
         int index = farmingToolIndex.getOrDefault("vacuum", -1);
@@ -398,21 +423,39 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             Thread.sleep(500 + ToolList.getInstance().random.nextInt(200));
             int lastSelectedSlot = mc.player.getInventory().getSelectedSlot();
             InputSimulator.switchItem(index);
-            Thread.sleep(500 + ToolList.getInstance().random.nextInt(200));
-            InputSimulator.pressRightClick();
-            InputSimulator.setForward(true);
-            Thread.sleep(4000);
-            InputSimulator.unpressAllKey();
-            Thread.sleep(500 + ToolList.getInstance().random.nextInt(200));
+            Thread.sleep(1000 + ToolList.getInstance().random.nextInt(200));
+
+            for (int i = 0; i < autoPestsConfig.get(0); i++) {
+                InputSimulator.pressRightClick();
+                InputSimulator.setForward(true);
+                Thread.sleep(autoPestsConfig.get(1) + ToolList.getInstance().random.nextInt(200));
+                InputSimulator.setForward(false);
+                Thread.sleep(autoPestsConfig.get(2) + ToolList.getInstance().random.nextInt(200));
+                InputSimulator.unpressAllKey();
+            }
+
+            Thread.sleep(1000 + ToolList.getInstance().random.nextInt(200));
             InputSimulator.switchItem(lastSelectedSlot);
             Thread.sleep(1000 + ToolList.getInstance().random.nextInt(200));
             ToolList.sendChatMessage("/warp garden");
-            Thread.sleep(500 + ToolList.getInstance().random.nextInt(200));
+            Thread.sleep(1000 + ToolList.getInstance().random.nextInt(200));
             startCurrentActions();
             Thread.sleep(3000);
             spraying = false;
             return null;
         });
+    }
+
+    private long lastShowTime = System.currentTimeMillis();
+
+    private void bonusListener() {
+        if (!ConfigManager.bonusPrompt.getValue()) return;
+        long now = System.currentTimeMillis();
+        if (now - lastShowTime < 11000) return;
+        String bonus = TabReader.findLineStartsWith("Bonus:");
+        lastShowTime = now;
+        if ("Bonus: INACTIVE".equals(bonus))
+            XSDHUD.bigTitle.updateTitleMsg("Bonus过期了", 5000, SoundEvents.WITHER_SPAWN);
     }
 
     @Override
