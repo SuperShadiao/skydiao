@@ -25,9 +25,13 @@ import java.util.stream.Collectors;
 
 public class ConfigManager {
     public static final File config_folder = Paths.get(ToolList.mc.gameDirectory.getPath(), "config", "小沙雕_config", "skydiao").toFile();
-    public static final File configFile = new File(config_folder, "config.json");
+    public static final File configFile = getCustomConfigFileName("config.json");
 
-    public static final File configResetFlag = new File(config_folder, "configResetFlag.json");
+    public static final File configResetFlag = getCustomConfigFileName("configResetFlag.json");
+
+    public static File getCustomConfigFileName(String fileName) {
+        return new File(ConfigManager.config_folder, fileName);
+    }
 
     public static final BooleanConfigOption blivelistener = new BooleanConfigOption("blivelistener", false) {
         @Override
@@ -99,8 +103,8 @@ public class ConfigManager {
     public static final BooleanConfigOption autoSprayonator = new BooleanConfigOption("fsautosprayonator", false).flagAsMacroFeature();
     public static final StringConfigOption autoKillPests = new StringConfigOption("fsautokillpests", "").flagAsMacroFeature();
     public static final BooleanConfigOption autoChangePet = new BooleanConfigOption("fsautochangeppet", false).flagAsMacroFeature();
-    public static final BooleanConfigOption trapPrompt = new BooleanConfigOption("trapprompt", true);
-    public static final BooleanConfigOption bonusPrompt = new BooleanConfigOption("fsbonusprompt", true);
+    public static final BooleanConfigOption gardenTrapPrompt = new BooleanConfigOption("gardentrapprompt", true);
+    public static final BooleanConfigOption gardenBonusPrompt = new BooleanConfigOption("gardenbonusprompt", true);
     public static final BooleanConfigOption hotspotrender = new BooleanConfigOption("hotspotrender", true);
     public static final BooleanConfigOption dungeonAutoCloseChest = new BooleanConfigOption("dungeonautoclosechest", false);
     public static final BooleanConfigOption dungeonPuzzleHelper = new BooleanConfigOption("dungeonpuzzlehelper", true);
@@ -178,7 +182,7 @@ public class ConfigManager {
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareAnnounce, skyblockSafeIsland, crystalHollowHelper, crystalHollowHelperDebug, crystalHollowDupServerTipper)),
             Map.entry("combat", List.of(slayerTogether)),
             Map.entry("foraging", List.of(galateashulker)),
-            Map.entry("farming", List.of(hubratesp, autoSprayonator, autoChangePet, autoKillPests, trapPrompt, bonusPrompt)),
+            Map.entry("farming", List.of(hubratesp, autoSprayonator, autoChangePet, autoKillPests, gardenTrapPrompt, gardenBonusPrompt)),
             Map.entry("fishing", List.of(hotspotrender, autogg, lotusAtollHelper, fishingBigFishRender, fishingBigFishTip)),
             Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered, dungeonDrinkPotion, dungeonBloodRoomTime, dungeonTrashTPS, dungeonf7msgbotssleap)),
             Map.entry("rift", List.of(rifttimegunhelper)),
@@ -256,7 +260,7 @@ public class ConfigManager {
     public static final File capeFile;
 
     static {
-        capeFolder = new File(config_folder, "customcape");
+        capeFolder = getCustomConfigFileName("customcape");
         capeFolder.mkdirs();
         capeFile = new File(capeFolder, "cape.png");
     }

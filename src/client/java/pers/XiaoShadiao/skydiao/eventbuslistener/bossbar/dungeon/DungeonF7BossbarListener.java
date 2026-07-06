@@ -39,6 +39,7 @@ import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
@@ -223,7 +224,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     private final BlockPos simonSaysStartButton = new BlockPos(110, 121, 91);
     private int lastSimonSaysButtonCount;
     private int simonSaysButtonCount;
-    private final Set<BlockPos> targetsimonSaysButton = new HashSet<>();
+    private final List<BlockPos> targetsimonSaysButton = new ArrayList<>();
     private boolean isDoingSimonSays = false;
 
     private boolean enteredGoldorCoreTunnel;
@@ -373,7 +374,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             boolean hasLantern = false;
             for (BlockPos pos : BlockPos.betweenClosed(new BlockPos(111, 123, 92), new BlockPos(111, 120, 95))) {
                 if (mc.level.getBlockState(pos).getBlock().equals(Blocks.SEA_LANTERN)) {
-                    targetsimonSaysButton.add(pos.immutable());
+                    if(!targetsimonSaysButton.contains(pos)) targetsimonSaysButton.add(pos.immutable());
                     hasLantern = true;
                 }
             }
@@ -384,6 +385,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                 if(targetsimonSaysButton.size() == 5) {
                     isDoingSimonSays = false;
                 }
+                targetsimonSaysButton.clear();
             }
             boolean inArea = ToolList.getInstance().isEntityInArea(mc.player, new BlockPos(50, 115, 54), new BlockPos(58, 122, 57));
             if (inArea && !enteredGoldorCoreTunnel) {

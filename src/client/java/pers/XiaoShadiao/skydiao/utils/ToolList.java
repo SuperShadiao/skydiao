@@ -493,6 +493,10 @@ public class ToolList {
         return itemStack.getComponents().getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getStringOr("id", "");
     }
 
+    public String tryGetSkyblockItemUUID(ItemStack itemStack) {
+        return itemStack.getComponents().getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getStringOr("uuid", "");
+    }
+
     public void updatePartyInfo() {
         HypixelModAPI.getInstance().sendPacket(new ServerboundPartyInfoPacket());
     }

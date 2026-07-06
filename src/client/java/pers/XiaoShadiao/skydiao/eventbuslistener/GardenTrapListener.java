@@ -10,10 +10,10 @@ import pers.XiaoShadiao.skydiao.utils.tab.TabReader;
 
 import java.util.LinkedList;
 
-public class TrapListener extends AbstractListener {
+public class GardenTrapListener extends AbstractListener {
     @Override
     public String getListenerName() {
-        return "TrapListener";
+        return "GardenTrapListener";
     }
 
     @Override
@@ -24,7 +24,7 @@ public class TrapListener extends AbstractListener {
     private long lastShowTime = System.currentTimeMillis();
 
     private void onLastRender(LevelRenderContext context) {
-        if (!ConfigManager.trapPrompt.getValue() || mc.level == null || !"garden".equals(StatusManager.get().getMode()))
+        if (!ConfigManager.gardenTrapPrompt.getValue() || mc.level == null || !"garden".equals(StatusManager.get().getMode()))
             return;
 
         long now = System.currentTimeMillis();

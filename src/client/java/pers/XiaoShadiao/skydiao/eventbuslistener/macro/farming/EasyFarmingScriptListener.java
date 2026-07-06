@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 
 public class EasyFarmingScriptListener extends AbstractListener implements IMacro {
 
-    private static final File nodeConfigFile = new File(ConfigManager.config_folder, "farmingNode.json");
+    private static final File nodeConfigFile = ConfigManager.getCustomConfigFileName("farmingNode.json");
 
     private static String notEditing() {
         return "§a[小沙雕] §c你没有正在编辑的节点! 使用§e/skydiaofarmingscript editnearestnode§c来选择你最近的一个节点来编辑!";
@@ -449,7 +449,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
     private long lastShowTime = System.currentTimeMillis();
 
     private void bonusListener() {
-        if (!ConfigManager.bonusPrompt.getValue()) return;
+        if (!ConfigManager.gardenBonusPrompt.getValue()) return;
         long now = System.currentTimeMillis();
         if (now - lastShowTime < 11000) return;
         String bonus = TabReader.findLineStartsWith("Bonus:");

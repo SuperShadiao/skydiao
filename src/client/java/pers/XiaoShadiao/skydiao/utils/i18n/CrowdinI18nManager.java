@@ -199,7 +199,7 @@ public class CrowdinI18nManager {
 
     private static File getCacheFile(LangCode langCode) {
         if(i18nCacheDir == null) {
-            i18nCacheDir = new File(ConfigManager.config_folder, "i18n");
+            i18nCacheDir = ConfigManager.getCustomConfigFileName("i18n");
             if(!i18nCacheDir.exists()) i18nCacheDir.mkdirs();
         }
         return new File(i18nCacheDir, langCode.code + ".json");

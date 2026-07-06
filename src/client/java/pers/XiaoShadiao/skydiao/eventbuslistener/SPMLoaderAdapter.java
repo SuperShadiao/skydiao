@@ -119,6 +119,7 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
             if (!modelId.equals(currentModelId) || !currentTextureName.equals(currentTextureId)) {
                 currentModelId = modelId;
                 currentTextureId = currentTextureName;
+                logger.info("Switched Model to {} | {}", currentModelId, currentTextureId);
                 switchToModel(modelId, currentTextureName);
             }
         });
@@ -358,6 +359,8 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
             cap.initModelWithTexture(modelId, textureId);
             currentModelId = modelId;
             currentTextureId = textureId;
+            logger.info("Switched Model to {} | {}", currentModelId, currentTextureId);
+            switchToModel(modelId, textureId);
         });
     }
 

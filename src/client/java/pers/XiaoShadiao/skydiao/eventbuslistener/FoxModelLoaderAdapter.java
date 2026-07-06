@@ -121,6 +121,7 @@ public class FoxModelLoaderAdapter extends AbstractListener implements ICustomSk
             if (!modelId.equals(currentModelId) || !currentTextureName.equals(currentTextureId)) {
                 currentModelId = modelId;
                 currentTextureId = currentTextureName;
+                logger.info("Switched Model to {} | {}", currentModelId, currentTextureId);
                 switchToModel(modelId, currentTextureName);
             }
         });
@@ -357,6 +358,8 @@ public class FoxModelLoaderAdapter extends AbstractListener implements ICustomSk
             cap.initModelWithTexture(modelId, textureId);
             currentModelId = modelId;
             currentTextureId = textureId;
+            logger.info("Switched Model to {} | {}", currentModelId, currentTextureId);
+            switchToModel(modelId, textureId);
         });
     }
 

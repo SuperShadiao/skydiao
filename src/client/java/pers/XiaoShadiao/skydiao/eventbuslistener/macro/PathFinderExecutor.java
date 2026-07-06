@@ -147,7 +147,6 @@ public class PathFinderExecutor extends AbstractListener implements IMacro {
                     Thread.sleep(Long.MAX_VALUE);
                 } catch (Exception e) {
                     sleeping = false;
-                    activeThisMacro();
                     executeThread();
                     isRunning = false;
                 }
@@ -217,6 +216,7 @@ public class PathFinderExecutor extends AbstractListener implements IMacro {
         paused = false;
         xray = ConfigManager.pfXRay.getValue();
         playerLastPos = BlockPos.ZERO;
+        activeThisMacro();
 
         RePather reRather = (goal, blacklistedBlocks) -> {
             InputSimulator.unpressAllKey();
@@ -711,17 +711,15 @@ public class PathFinderExecutor extends AbstractListener implements IMacro {
                                     } else follower.isAimingToEntity = false;
                                 }
 
-                                // if(!ffllaagg) if(yaw > 179 || yaw < -179) yaw = 180f;
-                                // mc.player.rotationYaw = yaw;
                                 if (aimBreakTime <= 0) {
                                     rorateYaw(yaw);
                                     if (backForwardFlag <= 0) {
                                         if (pitch != -9999) {
                                             roratePitch(pitch);
-                                        } else if (InputSimulator.getPlayerPitch() > 15) {
-                                            roratePitch(InputSimulator.getPlayerPitch() - 0.5f - ToolList.getInstance().random.nextFloat() / 100);
-                                        } else if (InputSimulator.getPlayerPitch() < 10) {
-                                            roratePitch(InputSimulator.getPlayerPitch() + 0.5f + ToolList.getInstance().random.nextFloat() / 100);
+                                        } else if (rotationPitch > 15) {
+                                            roratePitch(rotationPitch - 0.5f - ToolList.getInstance().random.nextFloat() / 100);
+                                        } else if (rotationPitch < 10) {
+                                            roratePitch(rotationPitch + 0.5f + ToolList.getInstance().random.nextFloat() / 100);
                                         }
                                     }
                                 }

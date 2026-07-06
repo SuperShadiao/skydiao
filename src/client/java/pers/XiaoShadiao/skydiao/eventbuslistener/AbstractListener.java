@@ -41,7 +41,7 @@ public abstract class AbstractListener extends Thread {
     public static final ResurrectionItemListener resurrectionItemListener = new ResurrectionItemListener();
     public static final SlayerTogetherListener slayerTogetherListener = new SlayerTogetherListener();
     public static final HubRatESPListener hubRatESPListener = new HubRatESPListener();
-    public static final TrapListener trapListener = new TrapListener();
+    public static final GardenTrapListener gardenTrapListener = new GardenTrapListener();
     public static final DungeonAutoCloseChest dungeonAutoCloseChest = new DungeonAutoCloseChest();
     public static final DungeonSomePuzzleSolverListener dungeonSomePuzzleSolverListener = new DungeonSomePuzzleSolverListener();
     public static final FishingHotSpotListener fishingHotSpotListener = new FishingHotSpotListener();
@@ -58,6 +58,7 @@ public abstract class AbstractListener extends Thread {
     public static final BlacklistRenderer blacklistRenderer = new BlacklistRenderer();
     public static final CrystalHollowHelperListener crystalHollowHelperListener = new CrystalHollowHelperListener();
     public static final DungeonTTTFailListener dungeonTTTFailListener = new DungeonTTTFailListener();
+    public static final XiaoShadiaoCommandListener xiaoShadiaoCommandListenerListener = new XiaoShadiaoCommandListener();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();

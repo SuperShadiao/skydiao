@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.awt.*;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -42,7 +43,7 @@ public class SkyblockBlacklistManager extends Thread {
     @Override
     public void run() {
         try(InputStream is = ToolList.getInstance().makeReqToURL("https://xiaoshadiao.club/skyblock_blp.json")) {
-            JsonObject jo = JsonParser.parseReader(new JsonReader(new InputStreamReader(is))).getAsJsonObject();
+            JsonObject jo = JsonParser.parseReader(new JsonReader(new InputStreamReader(is, StandardCharsets.UTF_8))).getAsJsonObject();
             List<CompletableFuture<SkyblockBlacklistEntry>> tasks = new ArrayList<>();
             for (Map.Entry<String, JsonElement> entry : jo.entrySet()) {
                 String type = entry.getKey();

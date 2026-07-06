@@ -77,7 +77,6 @@ public class ClientListener extends ChatClient {
                                 switch(String.valueOf(packet.packetType)) {
                                     case "heartbeat":
                                     case "lps":
-                                    case "showitem":
                                         break;
                                     default:
                                         String json = packet.getJson().toString();

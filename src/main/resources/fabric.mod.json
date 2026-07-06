@@ -43,7 +43,8 @@
     "fabric-api": "*"
   },
   "suggests": {
-    "chatpatches": "8.0-alpha.9"
+    "chatpatches": "8.0-alpha.9",
+    "sparkle_morpher": "*"
   },
   "breaks": {
     "chatpatches": "<8.0-alpha.8",
@@ -53,8 +54,8 @@
   "custom": {
     "modmenu": {
       "links": {
-        "QQ群": "https://xiaoshadiao.club/qqg",
-        "modmenu.discord": "https://xiaoshadiao.club/dc"
+        "QQ群": "https://5ixsd.top/qqg",
+        "modmenu.discord": "https://5ixsd.top/dc"
       },
       "update_checker": true
     }

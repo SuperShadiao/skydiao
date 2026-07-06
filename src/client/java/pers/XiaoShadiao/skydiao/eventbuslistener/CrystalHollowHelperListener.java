@@ -1020,7 +1020,7 @@ public class CrystalHollowHelperListener extends AbstractListener {
         GREEN("§a绿色水晶", "Mines of Divan", 97, 102),
         GOBLIN_KING("§6王下一桶", "King Yolkar", 82, 168),
         DRAGON_LAIR("§c那位来客", "Dragon's Lair", 64, 189),
-        CORLEONE("§a卡农", "Corleone", 64, 189),
+        CORLEONE("§a骷髅王", "Corleone", 64, 189),
         FAIRY_GROTTO("§d粉色小狗", "Fairy Grotto", 64, 189),
         BEAR3("§e熊出没", "Unknown", 64, 189),
         UNKNOWN("§c未知水晶", "Unknown", 0, 0);

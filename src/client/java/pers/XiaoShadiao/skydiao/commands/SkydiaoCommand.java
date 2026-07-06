@@ -45,8 +45,27 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                     Arrays.stream(Banned.BanTime.values()).map(v -> v.day).forEach(builder::suggest);
                     return builder.buildFuture();
                 })).executes(this::executeBan))),
-                getArgConstantInstance("想看看盔甲架的世界").executes(this::executeArmorStandWorld)
+                getArgConstantInstance("想看看盔甲架的世界").executes(this::executeArmorStandWorld),
+                getArgConstantInstance("autoclick").then(getArgInstance("action", StringArgumentType.string()).suggests((c, b) -> b.suggest("addleft").suggest("addright").suggest("addleftright").suggest("remove").buildFuture()).executes(this::executeAutoClicker))
         );
+    }
+
+    private int executeAutoClicker(CommandContext<FabricClientCommandSource> context) {
+        switch (StringArgumentType.getString(context, "action")) {
+            case "addleft":
+                AbstractListener.autoClickerListener.add(true, false);
+                break;
+            case "addright":
+                AbstractListener.autoClickerListener.add(false, true);
+                break;
+            case "addleftright":
+                AbstractListener.autoClickerListener.add(true, true);
+                break;
+            case "remove":
+                AbstractListener.autoClickerListener.remove();
+                break;
+        }
+        return 0;
     }
 
     private int executeBan(CommandContext<FabricClientCommandSource> context) {

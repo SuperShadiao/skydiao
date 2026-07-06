@@ -13,9 +13,14 @@ import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 @Mixin(Connection.class)
 public class MixinSendPacket {
 
-    @Inject(method = "sendPacket", at = @At("HEAD"))
+    @Inject(method = "sendPacket", at = @At("HEAD"), cancellable = true)
     public void sendPacket(Packet<?> packet, @Nullable ChannelFutureListener listener, boolean flush, CallbackInfo ci) {
-        CustomFabricEvents.CLIENT_SEND_PACKET_EVENT.invoker().onSendPacket(packet);
+        boolean cancelled = CustomFabricEvents.CLIENT_SEND_CANCELLABLE_PACKET_EVENT.invoker().onSendPacket(packet);
+        if (cancelled) {
+            ci.cancel();
+        } else {
+            CustomFabricEvents.CLIENT_SEND_PACKET_EVENT.invoker().onSendPacket(packet);
+        }
     }
 
 }

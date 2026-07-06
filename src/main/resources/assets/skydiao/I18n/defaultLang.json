@@ -918,11 +918,11 @@
       "configname": "§e农业脚本自动喷洒诱虫剂",
       "description": "§e请确保Sprayonator位于快捷栏。自动农业时，将会自动使用Sprayonator"
     },
-    "trapprompt": {
+    "gardentrapprompt": {
       "configname": "§etrap已满和无诱饵时提醒",
       "description": "§etrap已满和无诱饵时提醒"
     },
-    "fsbonusprompt": {
+    "gardenbonusprompt": {
       "configname": "§ebonus过期时提醒",
       "description": "§e自动农业时bonus过期提醒"
     },

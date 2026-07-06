@@ -121,7 +121,7 @@ public class CarnivalFruitDigger extends AbstractListener implements IMacro, Pat
             if(isSlotInited) isSlotInited = false;
         }
 
-        if(currentSlot != null) {
+        if(currentSlot != null && !mc.isSingleplayer()) {
             if(!currentSlot.isDigged() && !MacroManagerListener.pathFinderExecutor.isRunning()) {
                 PathFinder.registerConfig(this);
                 MacroManagerListener.pathFinderExecutor.startExecution(new Vec3(currentSlot.pos), false);
@@ -270,12 +270,13 @@ public class CarnivalFruitDigger extends AbstractListener implements IMacro, Pat
                     continue;
                 }
                 
-                int priority = 0;
+                // 基础雷概率为10%
+                double mineProbability = 0.10;
                 
                 // 获取周围的格子
                 List<SlotInfo> aroundSlots = getSlotsAround(slot);
                 
-                // 1. 检查是否可以确定安全：如果周围任意一个已知数字格子表明该格子安全
+                // 检查是否可以确定安全或危险
                 boolean isDefinitelySafe = false;
                 boolean isDefinitelyDangerous = false;
                 
@@ -308,87 +309,81 @@ public class CarnivalFruitDigger extends AbstractListener implements IMacro, Pat
                 
                 // 根据确定性判断设置优先级
                 if (isDefinitelySafe) {
-                    priority = Integer.MAX_VALUE - 100000; // 极高优先级，但保留一个比它更高的值给特殊情况
+                    slot.priority = Integer.MAX_VALUE - 100000;
+                    continue;
                 } else if (isDefinitelyDangerous) {
-                    priority = Integer.MIN_VALUE + 1; // 极低优先级，但不是最低，因为已挖掘的是最低
-                } else {
-                    // 2. 对于不确定的格子，使用推断逻辑
-                    
-                    // 计算潜在威胁
-                    int minPossibleBombs = 0; // 周围提示的最小雷数
-                    int maxPossibleBombs = 0; // 周围提示的最大雷数
-                    int safeClues = 0; // 提示安全的线索数
-                    int dangerClues = 0; // 提示危险的线索数
-                    
-                    for (SlotInfo aroundSlot : aroundSlots) {
-                        if (aroundSlot.isKnownBombCount && aroundSlot.isDigged()) {
-                            // 检查这个格子对当前slot的潜在影响
-                            List<SlotInfo> aroundAroundSlots = getSlotsAround(aroundSlot);
-                            int hiddenAroundCount = 0;
+                    slot.priority = Integer.MIN_VALUE + 1;
+                    continue;
+                }
+                
+                // 根据周围数字调整雷的概率
+                for (SlotInfo aroundSlot : aroundSlots) {
+                    if (aroundSlot.isKnownBombCount && aroundSlot.isDigged()) {
+                        // 检查这个格子对当前slot的潜在影响
+                        List<SlotInfo> aroundAroundSlots = getSlotsAround(aroundSlot);
+                        
+                        // 如果当前格子在aroundSlot的邻域内
+                        if (aroundAroundSlots.contains(slot)) {
+                            // 计算aroundSlot周围未挖掘格子数量（不包括当前slot）
+                            int otherHiddenCount = 0;
                             for (SlotInfo aroundAroundSlot : aroundAroundSlots) {
                                 if (!aroundAroundSlot.isDigged() && !aroundAroundSlot.pos.equals(slot.pos)) {
-                                    hiddenAroundCount++;
+                                    otherHiddenCount++;
                                 }
                             }
                             
-                            // 如果当前格子在aroundSlot的邻域内
-                            if (aroundAroundSlots.contains(slot)) {
-                                int otherHiddenCount = hiddenAroundCount; // aroundSlot周围除当前slot外的隐藏格子数
-                                
+                            // 如果aroundSlot周围除了当前slot外没有其他未挖掘格子
+                            if (otherHiddenCount == 0 && aroundSlot.bombs > 0) {
+                                // 当前slot必为雷
+                                mineProbability = 1.0;
+                                break;
+                            }
+                            // 如果aroundSlot.bombs为0，当前slot安全
+                            else if (aroundSlot.bombs == 0) {
+                                mineProbability = Math.min(mineProbability, 0.0);
+                            }
+                            // 根据aroundSlot的数字调整概率
+                            else {
                                 // aroundSlot周围总共有aroundSlot.bombs个雷
-                                // 如果otherHiddenCount为0且aroundSlot.bombs > 0，则当前slot必为雷
-                                if (otherHiddenCount == 0 && aroundSlot.bombs > 0) {
-                                    priority = Integer.MIN_VALUE + 1; // 确定是雷，极低优先级
-                                    break;
-                                }
-                                // 如果aroundSlot.bombs为0，则当前slot安全
-                                else if (aroundSlot.bombs == 0) {
-                                    safeClues++; // 收集安全线索
-                                }
-                                // 如果aroundSlot.bombs <= otherHiddenCount + 1，
-                                // 则当前slot可能安全
-                                else if (aroundSlot.bombs <= otherHiddenCount) {
-                                    safeClues++; // 这种情况下当前slot可能是安全的
-                                } else {
-                                    // aroundSlot.bombs > otherHiddenCount，当前slot必须是雷
-                                    dangerClues++; // 收集危险线索
-                                }
+                                // 分布在(hiddenAroundCount)个未挖掘格子中
+                                int totalHiddenCount = otherHiddenCount + 1; // 包括当前slot
+                                double slotMineProbFromThisClue = (double) aroundSlot.bombs / totalHiddenCount;
+                                // 取最大值作为最终概率
+                                mineProbability = Math.max(mineProbability, slotMineProbFromThisClue);
                             }
                         }
-                    }
-                    
-                    if (priority != Integer.MIN_VALUE + 1) { // 如果不是已确定的危险
-                        // 基于线索数量计算优先级
-                        priority = safeClues * 500 - dangerClues * 1000;
-                        
-                        // 3. 一般启发式规则
-                        
-                        // 优先挖掘角落和边缘
-                        if ((i == 0 && j == 0) || (i == 0 && j == 6) || (i == 6 && j == 0) || (i == 6 && j == 6)) {
-                            // 角落格子
-                            priority += 100;
-                        } else if (i == 0 || i == 6 || j == 0 || j == 6) {
-                            // 边缘格子
-                            priority += 50;
-                        }
-                        
-                        // 基于起始位置的特殊处理
-                        if (startPosList.contains(slot.pos)) {
-                            priority += 30;
-                        }
-                        
-                        // 检查周围隐藏格子数量
-                        int hiddenNeighbors = 0;
-                        for (SlotInfo aroundSlot : aroundSlots) {
-                            if (!aroundSlot.isDigged()) {
-                                hiddenNeighbors++;
-                            }
-                        }
-                        
-                        // 增加周围隐藏格子较多的格子的优先级（这些可能更容易推理）
-                        priority += hiddenNeighbors * 10;
                     }
                 }
+                
+                // 将概率转换为优先级（概率越低，优先级越高）
+                int priority = (int) ((1.0 - mineProbability) * 10000);
+                
+                // 一般启发式规则微调
+                
+                // 优先挖掘角落和边缘
+                if ((i == 0 && j == 0) || (i == 0 && j == 6) || (i == 6 && j == 0) || (i == 6 && j == 6)) {
+                    // 角落格子
+                    priority += 100;
+                } else if (i == 0 || i == 6 || j == 0 || j == 6) {
+                    // 边缘格子
+                    priority += 50;
+                }
+                
+                // 基于起始位置的特殊处理
+                if (startPosList.contains(slot.pos)) {
+                    priority += 30;
+                }
+                
+                // 检查周围隐藏格子数量
+                int hiddenNeighbors = 0;
+                for (SlotInfo aroundSlot : aroundSlots) {
+                    if (!aroundSlot.isDigged()) {
+                        hiddenNeighbors++;
+                    }
+                }
+                
+                // 增加周围隐藏格子较多的格子的优先级
+                priority += hiddenNeighbors * 10;
                 
                 // 设置最终优先级
                 slot.priority = priority;

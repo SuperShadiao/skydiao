@@ -24,8 +24,8 @@ public final class CustomFabricEvents {
     }
 
     /**
-    * mouseButtonInfo 0 left 1 right 2 mid
-    */
+     * mouseButtonInfo 0 left 1 right 2 mid
+     */
     public static final Event<@NotNull MouseButtonEvent> MOUSE_BUTTON_EVENT = EventFactory.createArrayBacked(MouseButtonEvent.class, callbacks -> (windowsHandle, mouseButtonInfo, pressState) -> {
         boolean cancelled = false;
         for (MouseButtonEvent callback : callbacks) {
@@ -77,6 +77,18 @@ public final class CustomFabricEvents {
 
     public interface SendPacketEvent {
         public void onSendPacket(Packet<?> packet);
+    }
+
+    public static final Event<@NotNull SendPacketCancellableEvent> CLIENT_SEND_CANCELLABLE_PACKET_EVENT = EventFactory.createArrayBacked(SendPacketCancellableEvent.class, callbacks -> (packet) -> {
+        boolean cancelled = false;
+        for (SendPacketCancellableEvent callback : callbacks) {
+            cancelled |= callback.onSendPacket(packet);
+        }
+        return cancelled;
+    });
+
+    public interface SendPacketCancellableEvent {
+        public boolean onSendPacket(Packet<?> packet);
     }
 
     public static final Event<@NotNull TPSUpdate> ON_TPS_UPDATE = EventFactory.createArrayBacked(TPSUpdate.class, callbacks -> (tps, formattedTPS) -> {

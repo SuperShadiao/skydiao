@@ -120,23 +120,28 @@ public class InventoryItemFilter extends AbstractListener {
     }
 
     private boolean matchItems(Slot slot) {
-        String value0 = filterTextBox.getValue().trim();
-        String value = value0.toLowerCase();
+        try {
+            String value0 = filterTextBox.getValue().trim();
+            String value = value0.toLowerCase();
 
-        List<Component> list = slot.getItem().getTooltipLines(Item.TooltipContext.of(mc.level), mc.player, TooltipFlag.Default.NORMAL);
-        boolean flag = false;
-        flag |= list.stream().anyMatch(c -> ToolList.getInstance().deleteColorCode(c.getString()).toLowerCase().contains(value));
-        if(!flag) {
-            try {
-                Pattern pattern = Pattern.compile(value0);
-                flag = list.stream().anyMatch(c -> {
-                    String s = ToolList.getInstance().deleteColorCode(c.getString());
-                    return pattern.matcher(s).find();
-                });
-            } catch (Exception ignored) {}
+            List<Component> list = slot.getItem().getTooltipLines(Item.TooltipContext.of(mc.level), mc.player, TooltipFlag.Default.NORMAL);
+            boolean flag = false;
+            flag |= list.stream().anyMatch(c -> ToolList.getInstance().deleteColorCode(c.getString()).toLowerCase().contains(value));
+            if(!flag) {
+                try {
+                    Pattern pattern = Pattern.compile(value0);
+                    flag = list.stream().anyMatch(c -> {
+                        String s = ToolList.getInstance().deleteColorCode(c.getString());
+                        return pattern.matcher(s).find();
+                    });
+                } catch (Exception ignored) {}
+            }
+
+            return flag;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
-
-        return flag;
     }
 
 }

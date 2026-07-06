@@ -38,6 +38,8 @@ import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Util;
@@ -113,6 +115,7 @@ public class BasicListener extends AbstractListener {
         ClientPlayConnectionEvents.DISCONNECT.register(this::onDisconnect);
         ClientReceiveMessageEvents.GAME.register(this::onChat);
         ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
+        CustomFabricEvents.CLIENT_SEND_CANCELLABLE_PACKET_EVENT.register(this::onSendFirmPacket);
         ClientReceiveMessageEvents.MODIFY_GAME.register(this::onModifyChat);
         LevelRenderEvents.END_MAIN.register(this::onLastRender);
         ClientLifecycleEvents.CLIENT_STARTED.register((mc) -> {
@@ -123,6 +126,17 @@ public class BasicListener extends AbstractListener {
                 BLiveListener.launch();
             }
         });
+    }
+
+    private static final Identifier firmModListPayload = Identifier.fromNamespaceAndPath("firmament", "mod_list");
+    private boolean onSendFirmPacket(Packet<?> packet) {
+        if(packet instanceof ServerboundCustomPayloadPacket(CustomPacketPayload payload)) {
+            if (firmModListPayload.equals(payload.type().id())) {
+                logger.info("已拦截Firmament的告状行为 (Connection)");
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
