@@ -14,7 +14,7 @@
     "sources": "https://github.com/SuperShadiao/skydiao"
   },
   "icon": "assets/skydiao/icon.png",
-  "environment": "client",
+  "environment": "*",
   "entrypoints": {
     "main": [
       "pers.XiaoShadiao.skydiao.SkyDiaoMod"

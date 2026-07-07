@@ -34,7 +34,8 @@ public class MixinReportTypeCustomMessage {
             "Minecraft更好的崩溃(报告)由小沙雕制作!",
             "Autofisher: hey 5i_XiaoShadiao i see you posted a very nice hypixelhelper autofish + rat mod on github",
             "There are so many Autofishers in main lobby #18!",
-            "[MVP++] SpaceByte: 5i_XiaoShadiao give m e hypixel helper source"
+            "[MVP++] SpaceByte: 5i_XiaoShadiao give m e hypixel helper source",
+            "A100512B: 5run vg corpse之内如果我出locket所有人当我爸爸好吧。"
     );
 
     @Overwrite
