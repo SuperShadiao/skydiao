@@ -39,6 +39,7 @@ import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
@@ -76,6 +77,7 @@ import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 import pers.XiaoShadiao.skydiao.utils.renderutils.ImageTexture;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -139,12 +141,30 @@ public class BasicListener extends AbstractListener {
         return false;
     }
 
+    private ClientPacketListener packetSender;
+
     private boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
-//        if(packet instanceof ClientboundResourcePackPushPacket) {
-//            System.out.println(((ClientboundResourcePackPushPacket) packet).url());
-//            return StatusManager.get().isInSkyblock();
-//        }
-//
+        if(packet instanceof ClientboundResourcePackPushPacket packet2) {
+            boolean inSkyblock = StatusManager.get().hasStatus();
+            if(inSkyblock) {
+                ToolList.addThreadedTask(() -> {
+                    try {
+                        FileUtils.copyInputStreamToFile(ToolList.getInstance().makeReqToURL(packet2.url()), new File(mc.getResourcePackDirectory().toFile(), "hypixel_resoucepack.zip"));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException _) {
+
+                    }
+                    ToolList.printChatMessage(Component.literal("§a[小沙雕] §e注意: 小沙雕移除了Hypixel自带的资源包, 并将其写入了材质包文件夹, 如果你遇到黑紫色材质错误, 请在材质包选择页面手动安装 (优先级可以设置)"));
+                }, null);
+                mc.execute(() -> packetSender.send(new ServerboundResourcePackPacket(packet2.id(), ServerboundResourcePackPacket.Action.SUCCESSFULLY_LOADED)));
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -212,6 +232,7 @@ public class BasicListener extends AbstractListener {
     }
 
     private void onJoinServer(ClientPacketListener clientPacketListener, PacketSender packetSender, Minecraft minecraft) {
+        this.packetSender = clientPacketListener;
         if(!isConnectedToServer) {
             isConnectedToServer = true;
             SkyblockBlacklistManager.updateBlacklist();
