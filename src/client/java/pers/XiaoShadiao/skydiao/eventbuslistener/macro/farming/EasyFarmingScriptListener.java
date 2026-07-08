@@ -4,9 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
@@ -268,7 +267,6 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             });
             autoSpray();
             autoChangePet();
-            autoKillPest();
             bonusListener();
         }
     }
@@ -319,22 +317,22 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         spraying = true;
 
         ToolList.addThreadedTask(() -> {
-            Thread.sleep(1000 + ToolList.getInstance().random.nextInt(600));
+            Thread.sleep(500 + ToolList.getInstance().random.nextInt(300));
             InputSimulator.unpressAllKey();
-            Thread.sleep(500 + ToolList.getInstance().random.nextInt(600));
+            Thread.sleep(250 + ToolList.getInstance().random.nextInt(300));
             int lastSelectedSlot = mc.player.getInventory().getSelectedSlot();
             InputSimulator.switchItem(index);
 
-            Thread.sleep(500 + ToolList.getInstance().random.nextInt(600));
+            Thread.sleep(200 + ToolList.getInstance().random.nextInt(150));
             InputSimulator.pressRightClick();
-            Thread.sleep(200);
+            Thread.sleep(250 + ToolList.getInstance().random.nextInt(100));
             InputSimulator.unpressAllKey();
 
-            Thread.sleep(500 + ToolList.getInstance().random.nextInt(600));
+            Thread.sleep(250 + ToolList.getInstance().random.nextInt(300));
             InputSimulator.switchItem(lastSelectedSlot);
-            Thread.sleep(500 + ToolList.getInstance().random.nextInt(600));
+            Thread.sleep(250 + ToolList.getInstance().random.nextInt(300));
             startCurrentActions();
-            Thread.sleep(3000 + ToolList.getInstance().random.nextInt(600));
+            Thread.sleep(4000 + ToolList.getInstance().random.nextInt(300));
 
             spraying = false;
             return null;
@@ -365,16 +363,34 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         return TabReader.findLineWith("\\[Lvl \\d+\\] .*?" + petName) != null;
     }
 
+    private String getPetType() {
+        if (withPet("Slug") || withPet("Mosquito")) return "pest";
+        else if (withPet("Hedgehog") || withPet("Rose Dragon")) return "kpest";
+        else if (withPet("Mooshroom Cow") || withPet("Rose Dragon")) return "farm";
+        return "none";
+    }
+
     private void autoChangePet() {
         if (!ConfigManager.autoChangePet.getValue() || spraying) return;
 
+        if (hasPests() && "kpest".equals(getPetType()) && autoPestsConfig != null) {
+            autoKillPest(false);
+            return;
+        }
+
         String target = null;
-        if (cooldownReady() && !(withPet("Slug") || withPet("Mosquito")))
-            target = "Slug | Mosquito";
-        else if (hasPests() && !(withPet("Hedgehog") || withPet("Rose Dragon")))
-            target = "Hedgehog | RD";
-        else if (!cooldownReady() && !hasPests() && !(withPet("Mooshroom Cow") || withPet("Rose Dragon")))
-            target = "MC | RD";
+        if (cooldownReady() && !"pest".equals(getPetType()))
+            target = "pest";
+        else if (hasPests() && !"kpest".equals(getPetType()))
+            target = "kpest";
+        else if (!cooldownReady() && !hasPests() && !"farm".equals(getPetType()))
+            target = "farm";
+
+        if ("kpest".equals(target) && autoPestsConfig != null) {
+            autoKillPest(true);
+            return;
+        }
+
         if (target == null) return;
 
         changeAndRight("rod");
@@ -402,45 +418,52 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 
     private ArrayList<Integer> autoPestsConfig = null;
 
-    private void autoKillPest() {
-        if (autoPestsConfig == null || spraying) return;
-        if (!hasPests() || !(withPet("Hedgehog") || withPet("Rose Dragon"))) return;
-
-        int index = farmingToolIndex.getOrDefault("vacuum", -1);
-        if (index == -1) return;
+    private void autoKillPest(boolean changePet) {
+        int vacuum = farmingToolIndex.getOrDefault("vacuum", -1);
+        int rod = farmingToolIndex.getOrDefault("rod", -1);
+        if (vacuum == -1 || rod == -1) return;
 
         spraying = true;
         ToolList.addThreadedTask(() -> {
-            Thread.sleep(1000 + ToolList.getInstance().random.nextInt(200));
-            InputSimulator.unpressAllKey();
             Thread.sleep(500 + ToolList.getInstance().random.nextInt(200));
+            InputSimulator.unpressAllKey();
+            Thread.sleep(250 + ToolList.getInstance().random.nextInt(100));
             ToolList.sendChatMessage("/setspawn");
             String line = TabReader.findLineStartsWith("Plots:").substring(7);
             String[] split = line.split(",");
             System.out.println(split[0]);
-            Thread.sleep(500 + ToolList.getInstance().random.nextInt(200));
+            Thread.sleep(250 + ToolList.getInstance().random.nextInt(100));
             ToolList.sendChatMessage("/tptoplot " + split[0]);
-            Thread.sleep(500 + ToolList.getInstance().random.nextInt(200));
-            int lastSelectedSlot = mc.player.getInventory().getSelectedSlot();
-            InputSimulator.switchItem(index);
             Thread.sleep(1000 + ToolList.getInstance().random.nextInt(200));
+
+            int lastSelectedSlot = mc.player.getInventory().getSelectedSlot();
+
+            if (changePet) {
+                InputSimulator.switchItem(rod);
+                Thread.sleep(200 + ToolList.getInstance().random.nextInt(100));
+                InputSimulator.pressRightClick();
+                Thread.sleep(250 + ToolList.getInstance().random.nextInt(100));
+            }
+
+            InputSimulator.switchItem(vacuum);
+            Thread.sleep(250 + ToolList.getInstance().random.nextInt(100));
 
             for (int i = 0; i < autoPestsConfig.get(0); i++) {
                 InputSimulator.pressRightClick();
                 InputSimulator.setForward(true);
-                Thread.sleep(autoPestsConfig.get(1) + ToolList.getInstance().random.nextInt(200));
+                Thread.sleep(autoPestsConfig.get(1) + 1);
                 InputSimulator.setForward(false);
                 Thread.sleep(autoPestsConfig.get(2) + ToolList.getInstance().random.nextInt(200));
                 InputSimulator.unpressAllKey();
             }
 
-            Thread.sleep(1000 + ToolList.getInstance().random.nextInt(200));
+            Thread.sleep(500 + ToolList.getInstance().random.nextInt(100));
             InputSimulator.switchItem(lastSelectedSlot);
-            Thread.sleep(1000 + ToolList.getInstance().random.nextInt(200));
+            Thread.sleep(1000 + ToolList.getInstance().random.nextInt(100));
             ToolList.sendChatMessage("/warp garden");
             Thread.sleep(1000 + ToolList.getInstance().random.nextInt(200));
             startCurrentActions();
-            Thread.sleep(3000);
+            Thread.sleep(4000);
             spraying = false;
             return null;
         });
