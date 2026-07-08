@@ -153,12 +153,14 @@ public class BasicListener extends AbstractListener {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException _) {
+                    for (int i = 0; i < 3; i++) {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException _) {
 
+                        }
+                        ToolList.printChatMessage(Component.literal("§a[小沙雕] §e注意: 小沙雕移除了Hypixel自带的资源包, 并将其写入了材质包文件夹, 如果你遇到黑紫色材质错误, 请在材质包选择页面手动安装 (优先级可以设置)"));
                     }
-                    ToolList.printChatMessage(Component.literal("§a[小沙雕] §e注意: 小沙雕移除了Hypixel自带的资源包, 并将其写入了材质包文件夹, 如果你遇到黑紫色材质错误, 请在材质包选择页面手动安装 (优先级可以设置)"));
                 }, null);
                 mc.execute(() -> packetSender.send(new ServerboundResourcePackPacket(packet2.id(), ServerboundResourcePackPacket.Action.SUCCESSFULLY_LOADED)));
                 return true;
