@@ -130,7 +130,7 @@ public class InputSimulator {
         } else {
             while (leftClickCounter > 0) {
                 leftClickCounter--;
-                if(!mc.gameMode.isDestroying() && ((MixinMultiPlayerGameModeDestroyBlockDelayAccessor) mc.gameMode).getDestroyDelay() <= 1) bl3 |= startAttack();
+                if(!mc.gameMode.isDestroying() && (((MixinMultiPlayerGameModeDestroyBlockDelayAccessor) mc.gameMode).getDestroyDelay() <= 1 || !(mc.hitResult instanceof BlockHitResult result) || result.getType() != HitResult.Type.BLOCK)) bl3 |= startAttack();
             }
 
             while (rightClickCounter > 0) {

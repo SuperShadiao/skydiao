@@ -148,7 +148,7 @@ public class ChatClient extends Thread {
                 if(System.currentTimeMillis() - heartbeatTime > 120000) {
                     throw new IOException("Heartbeat Timeout");
                 }
-                if(ijjjjj % 60 == 0) sender.sendHeartbeat();
+                if(ijjjjj % 19 == 0) sender.sendHeartbeat();
                 if(ijjjjj++ == 10) retryCount = 5;
             }
         } catch (Exception e) {

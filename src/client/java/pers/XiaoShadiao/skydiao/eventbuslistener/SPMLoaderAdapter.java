@@ -209,7 +209,7 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
                 FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.wrappedBuffer(decode));
                 int animationIndex = buf.readVarInt();
                 String category = buf.readUtf();
-                // System.out.println(category);
+                logger.info("Decode result: category '" + category + "' | animationIndex " + animationIndex);
                 for (Entity entity : mc.level.entitiesForRendering()) {
                     if(entity instanceof AbstractClientPlayer player) {
                         if(packet.sender.equals(player.getName().getString())) {
@@ -219,8 +219,10 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
                                 OrderedStringMap<String, String> extraAnimations;
                                 if (StringUtils.isNotBlank(category) && extraAnimationClassify.containsKey(category)) {
                                     extraAnimations = extraAnimationClassify.get(category);
+                                    logger.info("Use category animation");
                                 } else {
                                     extraAnimations = modelProperties.getExtraAnimation();
+                                    logger.info("Use default animation");
                                 }
 
                                 if (extraAnimations.size() > animationIndex) {
