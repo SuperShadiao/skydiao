@@ -12,6 +12,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.AutoLoadoutListener;
 import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
 import pers.XiaoShadiao.skydiao.utils.Banned;
 import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
@@ -46,7 +47,8 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                     return builder.buildFuture();
                 })).executes(this::executeBan))),
                 getArgConstantInstance("想看看盔甲架的世界").executes(this::executeArmorStandWorld),
-                getArgConstantInstance("autoclick").then(getArgInstance("action", StringArgumentType.string()).suggests((c, b) -> b.suggest("addleft").suggest("addright").suggest("addleftright").suggest("remove").buildFuture()).executes(this::executeAutoClicker))
+                getArgConstantInstance("autoclick").then(getArgInstance("action", StringArgumentType.string()).suggests((c, b) -> b.suggest("addleft").suggest("addright").suggest("addleftright").suggest("remove").buildFuture()).executes(this::executeAutoClicker)),
+                getArgConstantInstance("loto").then(getArgInstance("index", IntegerArgumentType.integer()).executes(this::openAndChangeLoadout))
         );
     }
 
@@ -74,7 +76,7 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
         try {
             Banned.BanReason b = Banned.BanReason.valueOf(type.toUpperCase());
             for (Banned.BanTime t : Banned.BanTime.values()) {
-                if(String.valueOf(t.day).equals(time)) {
+                if (String.valueOf(t.day).equals(time)) {
                     Banned.ban(b, t, 0);
                 }
             }
@@ -144,11 +146,26 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
 
     protected int executeClaimReward(CommandContext<FabricClientCommandSource> context) {
         HypixelRewardClaimer hrc = HypixelRewardClaimer.getCurrent();
-        if(hrc != null && hrc.hasData && !hrc.claimed) {
+        if (hrc != null && hrc.hasData && !hrc.claimed) {
             hrc.setTargetReward(IntegerArgumentType.getInteger(context, "index"));
             hrc.doClaim();
         }
         return 0;
     }
 
+    private int openAndChangeLoadout(CommandContext<FabricClientCommandSource> context) {
+        int index = IntegerArgumentType.getInteger(context, "index");
+        if (index <= 0 || index > 27) {
+            context.getSource().sendError(Component.literal("§a[小沙雕] §c loadout序号必须为1-27"));
+            return 1;
+        }
+        AutoLoadoutListener.loadout = index;
+        ToolList.sendChatMessage("/loadout");
+        ToolList.addThreadedTask(() -> {
+            Thread.sleep(10000);
+            AutoLoadoutListener.loadout = 0;
+            return null;
+        });
+        return 0;
+    }
 }

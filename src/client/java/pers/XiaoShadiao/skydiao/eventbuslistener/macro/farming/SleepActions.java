@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SleepActions {
+    public static boolean actionDoing = false;
 
     @FunctionalInterface
     public interface funcWithoutCtx {
@@ -39,39 +40,49 @@ public class SleepActions {
         }
     }
 
-    private ActionsWithSleep() {
+    private SleepActions() {
     }
 
-    private ArrayList<Action> actions = new ArrayList<>();
+    private final ArrayList<Action> actions = new ArrayList<>();
     private final Map<String, Object> context = new HashMap<>();
 
     public void run() {
+        actionDoing = true;
         ToolList.addThreadedTask(() -> {
             for (Action action : actions) {
                 if (action.ro != null) action.ro.run();
                 if (action.rw != null) action.rw.run(context);
-                int randSleep = ToolList.getInstance().random.nextInt(action.sleepMs / 2);
+                int randSleep = ToolList.getInstance().random.nextInt(action.sleepMs / 4);
                 if (action.sleepMs + randSleep > 0) Thread.sleep(action.sleepMs + randSleep);
             }
+            actionDoing = false;
             return null;
         });
     }
 
-    public static ActionsWithSleep builder() {
-        return new ActionsWithSleep();
+    public static SleepActions builder() {
+        return new SleepActions();
     }
 
-    public ActionsWithSleep addAction(funcWithoutCtx r, int sleepMs) {
+    public SleepActions addAction(funcWithoutCtx r, int sleepMs) {
         actions.add(new Action(r, sleepMs));
         return this;
     }
 
-    public ActionsWithSleep addAction(funcWithCtx r, int sleepMs) {
+    public SleepActions addAction(funcWithCtx r, int sleepMs) {
         actions.add(new Action(r, sleepMs));
         return this;
     }
 
-    public ActionsWithSleep addSleep(int sleepMs) {
+    public SleepActions addAction(funcWithoutCtx r) {
+        return addAction(r, 0);
+    }
+
+    public SleepActions addAction(funcWithCtx r) {
+        return addAction(r, 0);
+    }
+
+    public SleepActions addSleep(int sleepMs) {
         actions.add(new Action(sleepMs));
         return this;
     }

@@ -14,8 +14,6 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.item.ItemStack;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
@@ -37,7 +35,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class EasyFarmingScriptListener extends AbstractListener implements IMacro {
 
@@ -109,8 +106,6 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 
     private long nodeExecMinDelay = 100;
     private long nodeExecMaxDelay = 200;
-
-    private boolean spraying = false;
 
     @Override
     public String getListenerName() {
@@ -187,6 +182,24 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         return mc.player != null && ToolList.getInstance().deleteColorCode(mc.player.getInventory().getSelectedItem().getHoverName().getString()).equals("Squeaky Mousemat");
     }
 
+    private void startCurrentActions() {
+        ToolList.addThreadedTask(() -> {
+            Thread.sleep(ToolList.getInstance().random.nextLong(nodeExecMaxDelay - nodeExecMinDelay) + nodeExecMinDelay);
+            InputSimulator.unpressAllKey();
+            if (enabled) {
+                for (IOperation<?> op : currentWorking.ops) {
+                    op.op();
+                    if (op instanceof OperationSendCommand) {
+                        lastSendCommandTime = System.currentTimeMillis();
+                    }
+                }
+            } else {
+                InputSimulator.unpressAllKey();
+            }
+            return null;
+        });
+    }
+
     private void onStartClientTick(Minecraft mc) {
         if (mc.player == null) return;
 
@@ -195,7 +208,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         }
 
         boolean toggled = false;
-        if (!spraying && enabled && currentHandItemIndex != mc.player.getInventory().getSelectedSlot() && currentWorking != null) {
+        if (!SleepActions.actionDoing && enabled && currentHandItemIndex != mc.player.getInventory().getSelectedSlot() && currentWorking != null) {
             ended = true;
             ToolList.printChatMessage(Component.literal("§a[小沙雕] §e手上物品发生变化, 已自动停止脚本"));
         }
@@ -203,8 +216,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             enabled = !enabled;
             ended = false;
             toggled = true;
-            getFarmingToolIndex();
-            getAutoPestsConfig();
+            getAutoFarmingConfig();
         }
         if (enabled && currentEditing != null) {
             enabled = false;
@@ -265,208 +277,109 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                     }
                 }
             });
-            autoSpray();
-            autoChangePet();
+            autoActions();
             bonusListener();
         }
     }
 
-    private final Map<String, Integer> farmingToolIndex = new HashMap<>();
+    private Map<String, Integer> farmingToolIndex = null;
+    private ArrayList<Integer> autoPestsConfig = null;
+    private ArrayList<Integer> autoLoadoutConfig = null;
+    private boolean autoSprayonatorConfig = false;
 
-    private void getFarmingToolIndex() {
-        farmingToolIndex.clear();
-        Inventory inventory = mc.player.getInventory();
-        for (int hotbarSlot = 0; hotbarSlot < 9; hotbarSlot++) {
-            ItemStack stack = inventory.getItem(hotbarSlot);
-            if (stack.isEmpty()) continue;
-            String itemName = stack.getHoverName().getString().toLowerCase();
-            if (itemName.contains("vacuum")) farmingToolIndex.put("vacuum", hotbarSlot);
-            else if (itemName.contains(" rod")) farmingToolIndex.put("rod", hotbarSlot);
-            else if (itemName.contains("sprayonator")) farmingToolIndex.put("sprayonator", hotbarSlot);
-        }
-        if (!farmingToolIndex.containsKey("vacuum"))
-            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c没有在快捷栏找到vacuum，不会自动杀虫"));
-        if (!farmingToolIndex.containsKey("rod"))
-            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c没有在快捷栏找到钓鱼竿，不会自动切换宠物"));
-        if (!farmingToolIndex.containsKey("sprayonator"))
-            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c没有在快捷栏找到sprayonator，不会自动喷药"));
+    private void getAutoFarmingConfig() {
+        farmingToolIndex = FarmingUtils.getFarmingToolIndex();
+        autoPestsConfig = FarmingUtils.strConfToIntArr(ConfigManager.autoKillPests.getValue(),
+                "自动杀害虫", 3);
+        autoLoadoutConfig = FarmingUtils.strConfToIntArr(ConfigManager.autoChangeLo.getValue(),
+                "自动切换装备", 4);
+        autoSprayonatorConfig = ConfigManager.autoSprayonator.getValue();
     }
 
-    private void startCurrentActions() {
-        ToolList.addThreadedTask(() -> {
-            Thread.sleep(ToolList.getInstance().random.nextLong(nodeExecMaxDelay - nodeExecMinDelay) + nodeExecMinDelay);
-            InputSimulator.unpressAllKey();
-            if (enabled) {
-                for (IOperation<?> op : currentWorking.ops) {
-                    op.op();
-                    if (op instanceof OperationSendCommand) {
-                        lastSendCommandTime = System.currentTimeMillis();
-                    }
-                }
-            } else {
-                InputSimulator.unpressAllKey();
-            }
-            return null;
-        });
+    private void autoActions() {
+        autoKillPest();
+        autoChangeLoadout();
+        autoSpray();
     }
 
-    private void changeAndRight(String item) {
-        int index = farmingToolIndex.getOrDefault(item, -1);
-        if (index == -1) return;
+    private void autoKillPest() {
+        if (autoPestsConfig == null || SleepActions.actionDoing || !FarmingUtils.hasPests()) return;
+        int vacuum = farmingToolIndex.getOrDefault("vacuum", -1);
+        if (vacuum == -1) return;
+        ToolList.printChatMessage(Component.literal("§a[小沙雕] §b准备自动杀虫"));
 
-        spraying = true;
+        SleepActions kpest = SleepActions.builder();
 
-        ToolList.addThreadedTask(() -> {
-            Thread.sleep(500 + ToolList.getInstance().random.nextInt(300));
-            InputSimulator.unpressAllKey();
-            Thread.sleep(250 + ToolList.getInstance().random.nextInt(300));
-            int lastSelectedSlot = mc.player.getInventory().getSelectedSlot();
-            InputSimulator.switchItem(index);
+        kpest.addSleep(1000)
+                .addAction(InputSimulator::unpressAllKey, 300);
 
-            Thread.sleep(200 + ToolList.getInstance().random.nextInt(150));
-            InputSimulator.pressRightClick();
-            Thread.sleep(250 + ToolList.getInstance().random.nextInt(100));
-            InputSimulator.unpressAllKey();
+        if (!FarmingUtils.withPetType("kpest") && autoLoadoutConfig != null)
+            kpest.addAction(() -> FarmingUtils.changeLoadout(autoLoadoutConfig.get(2)), 4000);
 
-            Thread.sleep(250 + ToolList.getInstance().random.nextInt(300));
-            InputSimulator.switchItem(lastSelectedSlot);
-            Thread.sleep(250 + ToolList.getInstance().random.nextInt(300));
-            startCurrentActions();
-            Thread.sleep(4000 + ToolList.getInstance().random.nextInt(300));
+        kpest.addAction(ctx -> {
+                    ctx.put("lastSelectedSlot", mc.player.getInventory().getSelectedSlot());
+                    InputSimulator.switchItem(vacuum);
+                }, 300)
+                .addAction(() -> ToolList.sendChatMessage("/setspawn"), 250)
+                .addAction(FarmingUtils::tpToPestPlot, 1000)
+                .addAction(InputSimulator::pressRightClick, 300);
 
-            spraying = false;
-            return null;
-        });
+        for (int i = 0; i < autoPestsConfig.get(0); i++)
+            kpest.addAction(() -> InputSimulator.setForward(true), autoPestsConfig.get(1))
+                    .addAction(() -> InputSimulator.setForward(false), autoPestsConfig.get(2));
+
+        kpest.addAction(InputSimulator::unpressAllKey, 200)
+                .addAction(ctx -> InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")), 500)
+                .addAction(() -> ToolList.sendChatMessage("/warp garden"), 1000)
+                .addAction(this::startCurrentActions, 5000)
+                .run();
+    }
+
+    private void autoChangeLoadout() {
+        if (autoLoadoutConfig == null || SleepActions.actionDoing) return;
+
+        int target = -1;
+        boolean hasPests = FarmingUtils.hasPests();
+        boolean cooldownReady = FarmingUtils.cooldownReady(autoLoadoutConfig.get(3));
+        if (cooldownReady && !FarmingUtils.withPetType("pest"))
+            target = 1;
+        else if (hasPests && !FarmingUtils.withPetType("kpest"))
+            target = 2;
+        else if (!cooldownReady && !hasPests && !FarmingUtils.withPetType("farm"))
+            target = 0;
+        if (target == -1) return;
+
+        ToolList.printChatMessage(Component.literal("§a[小沙雕] §b准备自动切换装备"));
+        final int targetIndex = target;
+        SleepActions.builder()
+                .addSleep(1000)
+                .addAction(InputSimulator::unpressAllKey, 300)
+                .addAction(() -> FarmingUtils.changeLoadout(autoLoadoutConfig.get(targetIndex)), 4000)
+                .addAction(this::startCurrentActions, 5000)
+                .run();
     }
 
     private void autoSpray() {
-        if (!ConfigManager.autoSprayonator.getValue() ||
-                spraying ||
+        if (!autoSprayonatorConfig || SleepActions.actionDoing ||
                 TabReader.findLineWith("Spray: None") == null) return;
-        changeAndRight("sprayonator");
-    }
+        Integer spray = farmingToolIndex.getOrDefault("sprayonator", -1);
+        if (spray == -1) return;
+        ToolList.printChatMessage(Component.literal("§a[小沙雕] §b准备自动喷洒药剂"));
 
-    private boolean cooldownReady() {
-        return (TabReader.findLineWith("Cooldown: 5s") != null) ||
-                (TabReader.findLineWith("Cooldown: 4s") != null) ||
-                (TabReader.findLineWith("Cooldown: 3s") != null) ||
-                (TabReader.findLineWith("Cooldown: 2s") != null) ||
-                (TabReader.findLineWith("Cooldown: 1s") != null) ||
-                (TabReader.findLineWith("Cooldown: READY") != null);
-    }
-
-    private boolean hasPests() {
-        return TabReader.findLineWith("Alive: 0") == null;
-    }
-
-    private boolean withPet(String petName) {
-        return TabReader.findLineWith("\\[Lvl \\d+\\] .*?" + petName) != null;
-    }
-
-    private String getPetType() {
-        if (withPet("Slug") || withPet("Mosquito")) return "pest";
-        else if (withPet("Hedgehog") || withPet("Rose Dragon")) return "kpest";
-        else if (withPet("Mooshroom Cow") || withPet("Rose Dragon")) return "farm";
-        return "none";
-    }
-
-    private void autoChangePet() {
-        if (!ConfigManager.autoChangePet.getValue() || spraying) return;
-
-        if (hasPests() && "kpest".equals(getPetType()) && autoPestsConfig != null) {
-            autoKillPest(false);
-            return;
-        }
-
-        String target = null;
-        if (cooldownReady() && !"pest".equals(getPetType()))
-            target = "pest";
-        else if (hasPests() && !"kpest".equals(getPetType()))
-            target = "kpest";
-        else if (!cooldownReady() && !hasPests() && !"farm".equals(getPetType()))
-            target = "farm";
-
-        if ("kpest".equals(target) && autoPestsConfig != null) {
-            autoKillPest(true);
-            return;
-        }
-
-        if (target == null) return;
-
-        changeAndRight("rod");
-    }
-
-    private void getAutoPestsConfig() {
-        String config = ConfigManager.autoKillPests.getValue();
-        if (config == null || config.isEmpty()) {
-            autoPestsConfig = null;
-            return;
-        }
-        try {
-            ArrayList<Integer> collect = Arrays.stream(config.split("[,，]"))
-                    .map(String::trim)
-                    .filter(s -> !s.isEmpty())
-                    .map(Integer::valueOf)
-                    .collect(Collectors.toCollection(ArrayList::new));
-            if (collect.size() != 3) throw new Exception();
-            autoPestsConfig = collect;
-        } catch (Exception e) {
-            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c无法开启自动害虫，自动害虫配置错误，请按照指引配置"));
-            autoPestsConfig = null;
-        }
-    }
-
-    private ArrayList<Integer> autoPestsConfig = null;
-
-    private void autoKillPest(boolean changePet) {
-        int vacuum = farmingToolIndex.getOrDefault("vacuum", -1);
-        int rod = farmingToolIndex.getOrDefault("rod", -1);
-        if (vacuum == -1 || rod == -1) return;
-
-        spraying = true;
-        ToolList.addThreadedTask(() -> {
-            Thread.sleep(500 + ToolList.getInstance().random.nextInt(200));
-            InputSimulator.unpressAllKey();
-            Thread.sleep(250 + ToolList.getInstance().random.nextInt(100));
-            ToolList.sendChatMessage("/setspawn");
-            String line = TabReader.findLineStartsWith("Plots:").substring(7);
-            String[] split = line.split(",");
-            System.out.println(split[0]);
-            Thread.sleep(250 + ToolList.getInstance().random.nextInt(100));
-            ToolList.sendChatMessage("/tptoplot " + split[0]);
-            Thread.sleep(1000 + ToolList.getInstance().random.nextInt(200));
-
-            int lastSelectedSlot = mc.player.getInventory().getSelectedSlot();
-
-            if (changePet) {
-                InputSimulator.switchItem(rod);
-                Thread.sleep(200 + ToolList.getInstance().random.nextInt(100));
-                InputSimulator.pressRightClick();
-                Thread.sleep(250 + ToolList.getInstance().random.nextInt(100));
-            }
-
-            InputSimulator.switchItem(vacuum);
-            Thread.sleep(250 + ToolList.getInstance().random.nextInt(100));
-
-            for (int i = 0; i < autoPestsConfig.get(0); i++) {
-                InputSimulator.pressRightClick();
-                InputSimulator.setForward(true);
-                Thread.sleep(autoPestsConfig.get(1) + 1);
-                InputSimulator.setForward(false);
-                Thread.sleep(autoPestsConfig.get(2) + ToolList.getInstance().random.nextInt(200));
-                InputSimulator.unpressAllKey();
-            }
-
-            Thread.sleep(500 + ToolList.getInstance().random.nextInt(100));
-            InputSimulator.switchItem(lastSelectedSlot);
-            Thread.sleep(1000 + ToolList.getInstance().random.nextInt(100));
-            ToolList.sendChatMessage("/warp garden");
-            Thread.sleep(1000 + ToolList.getInstance().random.nextInt(200));
-            startCurrentActions();
-            Thread.sleep(4000);
-            spraying = false;
-            return null;
-        });
+        SleepActions.builder()
+                .addSleep(1000)
+                .addAction(InputSimulator::unpressAllKey, 300)
+                .addAction(ctx -> {
+                    ctx.put("lastSelectedSlot", mc.player.getInventory().getSelectedSlot());
+                    InputSimulator.switchItem(spray);
+                }, 300)
+                .addAction(InputSimulator::pressRightClick, 100)
+                .addAction(InputSimulator::unpressAllKey, 300)
+                .addAction(ctx -> {
+                    InputSimulator.switchItem((int) ctx.get("lastSelectedSlot"));
+                }, 300)
+                .addAction(this::startCurrentActions, 5000)
+                .run();
     }
 
     private long lastShowTime = System.currentTimeMillis();
@@ -488,7 +401,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 
     @Override
     public boolean onMacroCheck(PositionInfo beforeTP, PositionInfo afterTP) {
-        if (spraying || System.currentTimeMillis() - lastSendCommandTime < 5000) return true;
+        if (SleepActions.actionDoing || System.currentTimeMillis() - lastSendCommandTime < 5000) return true;
         ToolList.addThreadedTask(() -> {
             Thread.sleep(1500);
             ended = true;
@@ -500,7 +413,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 
     @Override
     public boolean onMacroCheck(int beforeSlot, int afterSlot) {
-        if (spraying) return true;
+        if (SleepActions.actionDoing) return true;
         ToolList.addThreadedTask(() -> {
             Thread.sleep(1500);
             ended = true;

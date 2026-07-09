@@ -910,9 +910,9 @@
       "configname": "§e农业脚本自动传送到害虫房杀虫",
       "description": "§e请确保吸虫器位于快捷栏，务必确保拥有害虫音乐盒，空代表不开启。格式为§a循环次数,向前走时间,原地吸虫时间§e单位为ms，必须用英文逗号！！"
     },
-    "fsautochangeppet": {
-      "configname": "§e农业脚本自动切换宠物",
-      "description": "§e请确钓鱼竿位于快捷栏，收集、等待害虫、杀虫时会自动切换宠物"
+    "fsautochangelo": {
+      "configname": "§e农业脚本自动切换loadout",
+      "description": "§e请确保配置两套或三套农业装备，格式为§a普通农套装索引,害虫套装索引,杀害虫套装索引,害虫冷却(s)§e，使用方法见群pdf文件"
     },
     "fsautosprayonator": {
       "configname": "§e农业脚本自动喷洒诱虫剂",
