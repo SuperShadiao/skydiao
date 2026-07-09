@@ -328,8 +328,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                     .addAction(() -> InputSimulator.setForward(false), autoPestsConfig.get(2));
 
         kpest.addAction(InputSimulator::unpressAllKey, 200)
-                .addAction(ctx ->
-                        InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")), 500, true)
+                .addAction(ctx -> InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")), 500, true)
                 .addAction(() -> ToolList.sendChatMessage("/warp garden"), 1000, true)
                 .addAction(this::startCurrentActions, 5000)
                 .run();
@@ -375,8 +374,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                 }, 300, true)
                 .addAction(InputSimulator::pressRightClick, 100)
                 .addAction(InputSimulator::unpressAllKey, 300)
-                .addAction(ctx -> InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")),
-                        300, true)
+                .addAction(ctx -> InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")), 300, true)
                 .addAction(this::startCurrentActions, 5000)
                 .run();
     }
