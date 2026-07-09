@@ -82,6 +82,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.CopyOption;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -148,18 +150,34 @@ public class BasicListener extends AbstractListener {
             boolean inSkyblock = StatusManager.get().hasStatus();
             if(inSkyblock) {
                 ToolList.addThreadedTask(() -> {
+                    List<String> errorLines = new ArrayList<>();
                     try {
-                        FileUtils.copyInputStreamToFile(ToolList.getInstance().makeReqToURL(packet2.url()), new File(mc.getResourcePackDirectory().toFile(), "hypixel_resoucepack.zip"));
+                        File temp = File.createTempFile("pack1", ".zip");
+                        File target = new File(mc.getResourcePackDirectory().toFile(), "hypixel_resoucepack.zip");
+                        FileUtils.copyInputStreamToFile(ToolList.getInstance().makeReqToURL(packet2.url()), temp);
+                        if(!FileUtils.contentEquals(temp, target)) FileUtils.moveFile(temp, target, StandardCopyOption.REPLACE_EXISTING);
                     } catch (IOException e) {
+                        errorLines.add("下载Hypixel官材失败, 请检查你的网络后重新进入Skyblock: " + e);
                         e.printStackTrace();
                     }
-                    for (int i = 0; i < 3; i++) {
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException _) {
+                    try {
+                        File temp = File.createTempFile("pack2", ".zip");
+                        File target = new File(mc.getResourcePackDirectory().toFile(), "SkyBlock Legacy.zip");
+                        FileUtils.copyInputStreamToFile(ToolList.getInstance().makeReqToURL("https://xiaoshadiao.club/3rd_lib/pack/SkyBlockLegacy.zip"), temp);
+                        if(!FileUtils.contentEquals(temp, target)) FileUtils.moveFile(temp, target, StandardCopyOption.REPLACE_EXISTING);
+                    } catch (IOException e) {
+                        errorLines.add("下载Legacy (原版) 材质包失败, 请检查你的网络后重新进入Skyblock: " + e);
+                        e.printStackTrace();
+                    }
 
-                        }
-                        ToolList.printChatMessage(Component.literal("§a[小沙雕] §e注意: 小沙雕移除了Hypixel自带的资源包, 并将其写入了材质包文件夹, 如果你遇到黑紫色材质错误, 请在材质包选择页面手动安装 (优先级可以设置)"));
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException _) {
+
+                    }
+                    ToolList.printChatMessage(Component.literal("§a[小沙雕] §e注意: 小沙雕移除了Hypixel自带的资源包, 并将其写入了材质包文件夹, 如果你遇到黑紫色材质错误, 请在材质包选择页面手动安装 (优先级可以设置), 其中hypixel pack是官方材质包, legacy pack是将物品恢复为原版材质包"));
+                    for (String errorLine : errorLines) {
+                        ToolList.printChatMessage(Component.literal("§a[小沙雕] §c" + errorLine));
                     }
                 }, null);
                 mc.execute(() -> packetSender.send(new ServerboundResourcePackPacket(packet2.id(), ServerboundResourcePackPacket.Action.SUCCESSFULLY_LOADED)));

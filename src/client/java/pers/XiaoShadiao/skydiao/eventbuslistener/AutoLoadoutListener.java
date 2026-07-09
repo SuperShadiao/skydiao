@@ -51,12 +51,22 @@ public class AutoLoadoutListener extends AbstractListener {
         ToolList.addThreadedTask(() -> {
             Thread.sleep(1200 + ToolList.getInstance().random.nextInt(300));
             for (int i = 0; i < page; i++) {
-                mc.gameMode.handleContainerInput(menu.containerId, 44, 0, ContainerInput.PICKUP, mc.player);
+                mc.execute(() -> {
+                    if (mc.player != null && mc.gameMode != null) {
+                        mc.gameMode.handleContainerInput(menu.containerId, 44, 0, ContainerInput.PICKUP, mc.player);
+                    }
+                });
                 Thread.sleep(1500 + ToolList.getInstance().random.nextInt(300));
             }
-            mc.gameMode.handleContainerInput(menu.containerId, slot, 0, ContainerInput.PICKUP, mc.player);
+            mc.execute(() -> {
+                if (mc.player != null && mc.gameMode != null) {
+                    mc.gameMode.handleContainerInput(menu.containerId, slot, 0, ContainerInput.PICKUP, mc.player);
+                }
+            });
             Thread.sleep(1500 + ToolList.getInstance().random.nextInt(150));
-            mc.screen.onClose();
+            mc.execute(() -> {
+                if(mc.screen != null) mc.screen.onClose();
+            });
             return null;
         });
     }
