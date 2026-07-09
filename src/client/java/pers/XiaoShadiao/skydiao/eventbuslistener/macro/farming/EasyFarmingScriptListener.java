@@ -308,20 +308,19 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         if (vacuum == -1) return;
         ToolList.printChatMessage(Component.literal("§a[小沙雕] §b准备自动杀虫"));
 
-        SleepActions kpest = SleepActions.builder();
-
-        kpest.addSleep(1000)
+        SleepActions kpest = SleepActions.builder()
+                .addSleep(1000)
                 .addAction(InputSimulator::unpressAllKey, 300);
 
         if (!FarmingUtils.withPetType("kpest") && autoLoadoutConfig != null)
-            kpest.addAction(() -> FarmingUtils.changeLoadout(autoLoadoutConfig.get(2)), 4000);
+            kpest.addAction(() -> FarmingUtils.changeLoadout(autoLoadoutConfig.get(2)), 4100);
 
         kpest.addAction(ctx -> {
                     ctx.put("lastSelectedSlot", mc.player.getInventory().getSelectedSlot());
                     InputSimulator.switchItem(vacuum);
-                }, 300)
+                }, 300, true)
                 .addAction(() -> ToolList.sendChatMessage("/setspawn"), 250)
-                .addAction(FarmingUtils::tpToPestPlot, 1000)
+                .addAction(FarmingUtils::tpToPestPlot, 1000, true)
                 .addAction(InputSimulator::pressRightClick, 300);
 
         for (int i = 0; i < autoPestsConfig.get(0); i++)
@@ -329,8 +328,9 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                     .addAction(() -> InputSimulator.setForward(false), autoPestsConfig.get(2));
 
         kpest.addAction(InputSimulator::unpressAllKey, 200)
-                .addAction(ctx -> InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")), 500)
-                .addAction(() -> ToolList.sendChatMessage("/warp garden"), 1000)
+                .addAction(ctx ->
+                        InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")), 500, true)
+                .addAction(() -> ToolList.sendChatMessage("/warp garden"), 1000, true)
                 .addAction(this::startCurrentActions, 5000)
                 .run();
     }
@@ -354,7 +354,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         SleepActions.builder()
                 .addSleep(1000)
                 .addAction(InputSimulator::unpressAllKey, 300)
-                .addAction(() -> FarmingUtils.changeLoadout(autoLoadoutConfig.get(targetIndex)), 4000)
+                .addAction(() -> FarmingUtils.changeLoadout(autoLoadoutConfig.get(targetIndex)), 4100)
                 .addAction(this::startCurrentActions, 5000)
                 .run();
     }
@@ -372,12 +372,11 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                 .addAction(ctx -> {
                     ctx.put("lastSelectedSlot", mc.player.getInventory().getSelectedSlot());
                     InputSimulator.switchItem(spray);
-                }, 300)
+                }, 300, true)
                 .addAction(InputSimulator::pressRightClick, 100)
                 .addAction(InputSimulator::unpressAllKey, 300)
-                .addAction(ctx -> {
-                    InputSimulator.switchItem((int) ctx.get("lastSelectedSlot"));
-                }, 300)
+                .addAction(ctx -> InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")),
+                        300, true)
                 .addAction(this::startCurrentActions, 5000)
                 .run();
     }
@@ -401,7 +400,8 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 
     @Override
     public boolean onMacroCheck(PositionInfo beforeTP, PositionInfo afterTP) {
-        if (SleepActions.actionDoing || System.currentTimeMillis() - lastSendCommandTime < 5000) return true;
+        if (SleepActions.antiMarco() || System.currentTimeMillis() - lastSendCommandTime < 5000) return true;
+        if (System.currentTimeMillis() - lastSendCommandTime < 5000) return true;
         ToolList.addThreadedTask(() -> {
             Thread.sleep(1500);
             ended = true;
@@ -413,7 +413,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 
     @Override
     public boolean onMacroCheck(int beforeSlot, int afterSlot) {
-        if (SleepActions.actionDoing) return true;
+        if (SleepActions.antiMarco()) return true;
         ToolList.addThreadedTask(() -> {
             Thread.sleep(1500);
             ended = true;

@@ -9,6 +9,11 @@ import java.util.Map;
 
 public class SleepActions {
     public static boolean actionDoing = false;
+    private static long antiMarcoTime;
+
+    public static boolean antiMarco() {
+        return System.currentTimeMillis() - antiMarcoTime < 2000;
+    }
 
     @FunctionalInterface
     public interface funcWithoutCtx {
@@ -21,22 +26,30 @@ public class SleepActions {
     }
 
     private static class Action {
-        public funcWithCtx rw;
-        public funcWithoutCtx ro;
-        public int sleepMs;
+        private final funcWithCtx rw;
+        private final funcWithoutCtx ro;
+        private final int sleepMs;
+        private final boolean antiMarco;
 
-        public Action(funcWithCtx r, int sleepMs) {
+        public Action(funcWithCtx r, int sleepMs, boolean antiMarco) {
             this.rw = r;
+            this.ro = null;
             this.sleepMs = sleepMs;
+            this.antiMarco = antiMarco;
         }
 
-        public Action(funcWithoutCtx r, int sleepMs) {
+        public Action(funcWithoutCtx r, int sleepMs, boolean antiMarco) {
+            this.rw = null;
             this.ro = r;
             this.sleepMs = sleepMs;
+            this.antiMarco = antiMarco;
         }
 
         public Action(int sleepMs) {
+            this.rw = null;
+            this.ro = null;
             this.sleepMs = sleepMs;
+            this.antiMarco = false;
         }
     }
 
@@ -50,10 +63,11 @@ public class SleepActions {
         actionDoing = true;
         ToolList.addThreadedTask(() -> {
             for (Action action : actions) {
+                if (action.antiMarco) antiMarcoTime = System.currentTimeMillis();
                 if (action.ro != null) action.ro.run();
                 if (action.rw != null) action.rw.run(context);
-                int randSleep = ToolList.getInstance().random.nextInt(action.sleepMs / 4);
-                if (action.sleepMs + randSleep > 0) Thread.sleep(action.sleepMs + randSleep);
+                int randSleep = ToolList.getInstance().random.nextInt(action.sleepMs / 4) + action.sleepMs;
+                if (randSleep > 0) Thread.sleep(randSleep);
             }
             actionDoing = false;
             return null;
@@ -64,14 +78,22 @@ public class SleepActions {
         return new SleepActions();
     }
 
-    public SleepActions addAction(funcWithoutCtx r, int sleepMs) {
-        actions.add(new Action(r, sleepMs));
+    public SleepActions addAction(funcWithoutCtx r, int sleepMs, boolean antiMarco) {
+        actions.add(new Action(r, sleepMs, antiMarco));
         return this;
     }
 
-    public SleepActions addAction(funcWithCtx r, int sleepMs) {
-        actions.add(new Action(r, sleepMs));
+    public SleepActions addAction(funcWithCtx r, int sleepMs, boolean antiMarco) {
+        actions.add(new Action(r, sleepMs, antiMarco));
         return this;
+    }
+
+    public SleepActions addAction(funcWithoutCtx r, int sleepMs) {
+        return addAction(r, sleepMs, false);
+    }
+
+    public SleepActions addAction(funcWithCtx r, int sleepMs) {
+        return addAction(r, sleepMs, false);
     }
 
     public SleepActions addAction(funcWithoutCtx r) {

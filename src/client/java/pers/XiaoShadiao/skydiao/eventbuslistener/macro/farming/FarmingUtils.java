@@ -66,7 +66,6 @@ public class FarmingUtils {
                 else if ("s".equals(unit)) s = num;
             }
             int total = m * 60 + s;
-            if (withPetType("pest")) return total < 15;
             return total < readyS;
         } catch (Exception e) {
             return false;
