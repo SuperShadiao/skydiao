@@ -156,16 +156,10 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
     private int openAndChangeLoadout(CommandContext<FabricClientCommandSource> context) {
         int index = IntegerArgumentType.getInteger(context, "index");
         if (index <= 0 || index > 27) {
-            context.getSource().sendError(Component.literal("§a[小沙雕] §c loadout序号必须为1-27"));
+            context.getSource().sendError(Component.literal("§a[小沙雕] §cloadout序号必须为1-27"));
             return 1;
         }
-        AutoLoadoutListener.loadout = index;
-        ToolList.sendChatMessage("/loadout");
-        ToolList.addThreadedTask(() -> {
-            Thread.sleep(10000);
-            AutoLoadoutListener.loadout = 0;
-            return null;
-        });
+        AbstractListener.autoLoadoutListener.switchLoadout(index, null);
         return 0;
     }
 }

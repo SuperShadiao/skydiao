@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 
 public class EasyFarmingScriptListener extends AbstractListener implements IMacro {
 
@@ -313,13 +314,13 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                 .addAction(InputSimulator::unpressAllKey, 300);
 
         if (!FarmingUtils.withPetType("kpest") && autoLoadoutConfig != null)
-            kpest.addAction(() -> FarmingUtils.changeLoadout(autoLoadoutConfig.get(2)), 4100);
+            kpest.addAction(() -> FarmingUtils.changeLoadout(autoLoadoutConfig.get(2)), 500);
 
         kpest.addAction(ctx -> {
                     ctx.put("lastSelectedSlot", mc.player.getInventory().getSelectedSlot());
                     InputSimulator.switchItem(vacuum);
                 }, 300, true)
-                .addAction(() -> ToolList.sendChatMessage("/setspawn"), 250)
+                .addAction(() -> ToolList.sendChatMessage("/setspawn"), 450)
                 .addAction(FarmingUtils::tpToPestPlot, 1000, true)
                 .addAction(InputSimulator::pressRightClick, 300);
 
@@ -353,7 +354,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         SleepActions.builder()
                 .addSleep(1000)
                 .addAction(InputSimulator::unpressAllKey, 300)
-                .addAction(() -> FarmingUtils.changeLoadout(autoLoadoutConfig.get(targetIndex)), 4100)
+                .addAction(() -> FarmingUtils.changeLoadout(autoLoadoutConfig.get(targetIndex)), 500)
                 .addAction(this::startCurrentActions, 5000)
                 .run();
     }
