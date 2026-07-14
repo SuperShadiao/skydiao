@@ -101,4 +101,21 @@ public final class CustomFabricEvents {
         public void update(double tps, String formattedTPS);
     }
 
+    public enum SimulatorClickType {
+        LEFT,
+        RIGHT,
+    }
+
+    public static final Event<@NotNull SimulatorClickEvent> ON_SIMULATOR_CLICK = EventFactory.createArrayBacked(SimulatorClickEvent.class, callbacks -> (type) -> {
+        boolean cancelled = false;
+        for (SimulatorClickEvent callback : callbacks) {
+            cancelled |= callback.onSimulatorClick(type);
+        }
+        return cancelled;
+    });
+
+    public interface SimulatorClickEvent {
+        public boolean onSimulatorClick(SimulatorClickType type);
+    }
+
 }

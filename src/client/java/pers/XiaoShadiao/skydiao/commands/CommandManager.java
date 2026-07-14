@@ -26,6 +26,8 @@ public interface CommandManager {
     public static final HHFarmingScriptCommand HH_FARMING_SCRIPT_COMMAND = new HHFarmingScriptCommand();
     public static final SkydiaoFSCommand SKYDIAO_FS_COMMAND = new SkydiaoFSCommand();
     public static final XSDCShowCommand XSDC_SHOW_COMMAND = new XSDCShowCommand();
+    public static final SkydiaoStopABFCommand SKYDIAO_STOP_AF_COMMAND = new SkydiaoStopABFCommand();
+    public static final HHStopABFCommand HH_STOP_AF_COMMAND = new HHStopABFCommand();
 
     public static void registerCommands() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {

@@ -3,11 +3,11 @@ package pers.XiaoShadiao.skydiao.utils;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
 import net.hypixel.modapi.HypixelModAPI;
-import net.hypixel.modapi.fabric.FabricModAPI;
 import net.hypixel.modapi.packet.impl.serverbound.ServerboundPartyInfoPacket;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientChunkCache;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -19,22 +19,19 @@ import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PositionMoveRotation;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.chunk.LevelChunkSection;
-import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -44,13 +41,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.system.Platform;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinEntityCloneableAccessor;
 
 import javax.net.ssl.HttpsURLConnection;
-import java.io.*;
-import java.lang.reflect.Method;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -386,14 +384,22 @@ public class ToolList {
         };
     }
 
-    public void playSound(SoundEvent soundEvent) {
-        if (mc.player != null) {
-            mc.execute(() -> mc.player.playSound(soundEvent, 1.0F, 1.0F));
-        }
+    public SimpleSoundInstance playSound(SoundEvent soundEvent) {
+        Vec3 pos = Vec3.ZERO;
+        SimpleSoundInstance soundInstance = new SimpleSoundInstance(
+                soundEvent.location(),
+                SoundSource.PLAYERS,
+                1, 1,
+                RandomSource.create(random.nextLong()),
+                false, 0, SoundInstance.Attenuation.LINEAR,
+                pos.x(), pos.y(), pos.z(), true
+        );
+        mc.execute(() -> mc.getSoundManager().play(soundInstance));
+        return soundInstance;
     }
 
     public boolean isEntityOnWorld(Entity entity) {
-        return mc.level != null && mc.level.getEntity(entity.getId()) == entity;
+        return entity != null && mc.level != null && mc.level.getEntity(entity.getId()) == entity;
     }
 
     public HitResult predictPlayerAimBlock(Entity e) {
@@ -477,7 +483,6 @@ public class ToolList {
     public Slot[][] mapSlotsToArray(ChestMenu menu) {
         int totalCount = (9 * menu.getRowCount());
         Slot[][] slots = new Slot[9][menu.getRowCount()];
-        new Slot(null, 0, 0, 0);
         int i = 0;
         for (Slot slot : menu.slots) {
             if(i >= totalCount) break;

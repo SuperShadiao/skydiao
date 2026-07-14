@@ -1,7 +1,6 @@
 package pers.XiaoShadiao.skydiao.utils.pathfinder;
 
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -10,7 +9,6 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
-import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
@@ -19,7 +17,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 public class EntityFollower extends Thread {
@@ -57,7 +54,7 @@ public class EntityFollower extends Thread {
         this.names = names;
         this.avoidNames = avoidNames;
         this.tryAttack = tryAttack;
-        this.swordSlot = ToolList.mc.player.getInventory().getSelectedSlot();
+        this.swordSlot = customConfig != null && customConfig.getSwordIndex() != -1 ? customConfig.getSwordIndex() : ToolList.mc.player.getInventory().getSelectedSlot();
         this.blacklistUnreachable = blacklistUnreachable;
         this.customConfig = customConfig;
 
@@ -279,6 +276,15 @@ public class EntityFollower extends Thread {
         }
         public Function<Entity, Double> getDistanceTransfer() {
             return distanceTransfer;
+        }
+
+        private int swordIndex = -1;
+        public EntityFollowerConfig setSwordIndex(int swordIndex) {
+            if(swordIndex >= 0 && swordIndex <= 8) this.swordIndex = swordIndex;
+            return this;
+        }
+        public int getSwordIndex() {
+            return swordIndex;
         }
 
     }

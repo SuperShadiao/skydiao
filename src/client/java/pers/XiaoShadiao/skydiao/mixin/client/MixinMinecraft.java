@@ -5,13 +5,11 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.minecraft.UserApiService;
 import com.mojang.authlib.yggdrasil.ProfileResult;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
-import com.mojang.authlib.yggdrasil.YggdrasilUserApiService;
 import com.mojang.blaze3d.GpuOutOfMemoryException;
 import com.mojang.logging.LogUtils;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportType;
 import net.minecraft.ReportedException;
-import net.minecraft.util.Util;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
@@ -20,16 +18,19 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ProfileKeyPairManager;
 import net.minecraft.client.resources.SplashManager;
 import net.minecraft.client.telemetry.ClientTelemetryManager;
+import net.minecraft.server.Bootstrap;
 import net.minecraft.server.Services;
-import net.minecraft.util.profiling.*;
+import net.minecraft.util.Util;
+import net.minecraft.util.profiling.ActiveProfiler;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.profiling.SingleTickProfiler;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
-import pers.XiaoShadiao.skydiao.irc.ChatClient;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.screen.MinecraftCrashedScreen;
 import pers.XiaoShadiao.skydiao.utils.ClientRenderCrashFixer;
@@ -41,8 +42,8 @@ import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.Proxy;
+import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
 @Mixin(Minecraft.class)
 public class MixinMinecraft {
@@ -163,7 +164,7 @@ public class MixinMinecraft {
             ClientRenderCrashFixer.fix();
             CustomRenderPipeline.closeAll();
             CrashReport report = var11.getReport();
-            saveReport(this.gameDirectory, report);
+            saveReport0(this.gameDirectory, report);
             setScreen(new MinecraftCrashedScreen(var11.getCause(), report));
             LOGGER.error(LogUtils.FATAL_MARKER, report.getFriendlyReport(ReportType.CRASH));
             LOGGER.error(LogUtils.FATAL_MARKER, "啊, 可莉炸客户端又被你发现了, 可莉又闯祸了...");
@@ -193,7 +194,7 @@ public class MixinMinecraft {
                 ClientRenderCrashFixer.fix();
                 CustomRenderPipeline.closeAll();
                 CrashReport report = new CrashReport("Unexpected error", var12);
-                saveReport(this.gameDirectory, report);
+                saveReport0(this.gameDirectory, report);
                 setScreen(new MinecraftCrashedScreen(var12, report));
                 LOGGER.error(LogUtils.FATAL_MARKER, report.getFriendlyReport(ReportType.CRASH));
                 LOGGER.error(LogUtils.FATAL_MARKER, "啊, 可莉炸客户端又被你发现了, 可莉又闯祸了...");
@@ -239,9 +240,30 @@ public class MixinMinecraft {
         InputSimulator.rightClickDelay = this.rightClickDelay;
     }
 
-    @Shadow
-    public static int saveReport(File file, CrashReport crashReport) {
-        return 0;
+    @Unique
+    private static int saveReport0(final File gameDirectory, final CrashReport crash) {
+        Path crashDir = gameDirectory.toPath().resolve("crash-reports");
+        Path crashFile = crashDir.resolve("crash-" + Util.getFilenameFormattedDateTime() + "-client.txt");
+        Bootstrap.realStdoutPrintln(crash.getFriendlyReport(ReportType.CRASH));
+        LOGGER.debug("Disabling console - remaining logs will be available only in log file");
+
+        byte var4;
+        if (crash.getSaveFile() != null) {
+            Bootstrap.realStdoutPrintln("#@!@# Game crashed! Crash report saved to: #@!@# " + crash.getSaveFile().toAbsolutePath());
+            return -1;
+        }
+
+        if (!crash.saveToFile(crashFile, ReportType.CRASH)) {
+            Bootstrap.realStdoutPrintln("#@?@# Game crashed! Crash report could not be saved. #@?@#");
+            return -2;
+        }
+
+        Bootstrap.realStdoutPrintln("#@!@# Game crashed! Crash report saved to: #@!@# " + crashFile.toAbsolutePath());
+        var4 = -1;
+
+        // 这里有关闭stdOut的操作, 但是因为防崩端, 还是需要使用, 所以不要关闭
+
+        return var4;
     }
 
     @Shadow

@@ -1,11 +1,11 @@
 package pers.XiaoShadiao.skydiao.hud;
 
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.resources.Identifier;
+import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.macro.slayer.vs.AutoBloodfiendListener;
 import pers.XiaoShadiao.skydiao.utils.Register;
 
 public abstract class XSDHUD implements HudElement {
@@ -17,6 +17,8 @@ public abstract class XSDHUD implements HudElement {
     public static final BlindOrDying blindOrDying = new BlindOrDying();
     public static final BigTitle bigTitle = new BigTitle();
     public static final HUDCrashFixer hudCrashFixer = new HUDCrashFixer();
+    public static final AutoBloodfiendListener.TaskRender abfTaskRender = MacroManagerListener.autoBloodfiendListener.new TaskRender();
+    public static final GenshinImpactHeatCold genshinImpactHeatCold = new GenshinImpactHeatCold();
 
     public static void init() {
         Register.execRegister(XSDHUD.class, XSDHUD.class, XSDHUD::runRegister);

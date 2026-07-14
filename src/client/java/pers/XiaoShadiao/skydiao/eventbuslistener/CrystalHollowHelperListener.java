@@ -15,11 +15,9 @@ import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
@@ -29,7 +27,10 @@ import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -125,6 +126,11 @@ public class CrystalHollowHelperListener extends AbstractListener {
                 activeCrystalScanners.add(startScanFairyGrotto(CrystalType.FAIRY_GROTTO, PRECURSOR_REMNANTS_BB));
                 activeCrystalScanners.add(startScanFairyGrotto(CrystalType.FAIRY_GROTTO, GOBLIN_HOLDOUT_BB));
                 activeCrystalScanners.add(startScanBear3(CrystalType.BEAR3, GOBLIN_HOLDOUT_BB));
+
+                int cpu = Runtime.getRuntime().availableProcessors();
+                if(cpu < 13 && ConfigManager.crystalHollowHelperDisableThreadLimit.getValue()) {
+                    ToolList.printChatMessage(Component.literal("§a[小沙雕] §c警告: 当前CPU核数小于13 (当前为" + cpu + "核), 如果客户端发生卡顿, 请前往设置中关闭线程限制绕过!"));
+                }
             }
         } else if(inCN && !tempInCN) {
             inCN = false;
@@ -183,7 +189,12 @@ public class CrystalHollowHelperListener extends AbstractListener {
         }
     }
 
-    private final ExecutorService structureScannerExecutor = Executors.newWorkStealingPool(Math.min(13, Runtime.getRuntime().availableProcessors()));
+    public void updateThreadLimit() {
+        if(structureScannerExecutor != null) structureScannerExecutor.shutdownNow();
+        structureScannerExecutor = Executors.newWorkStealingPool(ConfigManager.crystalHollowHelperDisableThreadLimit.getValue() ? 13 : Math.min(13, Runtime.getRuntime().availableProcessors()));
+    }
+
+    private ExecutorService structureScannerExecutor = Executors.newWorkStealingPool(Math.min(13, Runtime.getRuntime().availableProcessors()));
     private final BiPredicate<ClientLevel, BlockPos> barrierFinder = (level, bp) -> level.getBlockState(bp).getBlock() == Blocks.BARRIER;
     private final BiPredicate<ClientLevel, BlockPos> lavaFinder = (level, bp) -> level.getBlockState(bp).getBlock() == Blocks.LAVA;
     private final BiPredicate<ClientLevel, BlockPos> pinkGlassPaneFinder = (level, bp) -> {

@@ -8,12 +8,19 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.ContainerInput;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
@@ -24,6 +31,7 @@ import pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.op.OperationSendC
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.keybinds.KeyBindsManager;
+import pers.XiaoShadiao.skydiao.utils.PageSwitchCallback;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
@@ -35,7 +43,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
 
 public class EasyFarmingScriptListener extends AbstractListener implements IMacro {
 
@@ -120,6 +127,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register(this::onUnload);
         LevelRenderEvents.END_MAIN.register(this::onLastRender);
         CustomFabricEvents.MOUSE_BUTTON_EVENT.register(this::onMouseButton);
+        ScreenEvents.AFTER_INIT.register(this::onScreenAfterInit);
     }
 
     private boolean onMouseButton(long windwos, MouseButtonInfo mouseButtonInfo, int state) {
@@ -316,6 +324,10 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         if (!FarmingUtils.withPetType("kpest") && autoLoadoutConfig != null)
             kpest.addAction(() -> FarmingUtils.changeLoadout(autoLoadoutConfig.get(2)), 500);
 
+        if (ConfigManager.fsGardenMoonFlowerMode.getValue()) {
+            executeDayNightSwitch(kpest, false);
+        }
+
         kpest.addAction(ctx -> {
                     ctx.put("lastSelectedSlot", mc.player.getInventory().getSelectedSlot());
                     InputSimulator.switchItem(vacuum);
@@ -330,9 +342,47 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 
         kpest.addAction(InputSimulator::unpressAllKey, 200)
                 .addAction(ctx -> InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")), 500, true)
-                .addAction(() -> ToolList.sendChatMessage("/warp garden"), 1000, true)
-                .addAction(this::startCurrentActions, 5000)
+                .addAction(() -> ToolList.sendChatMessage("/warp garden"), 1000, true);
+
+        if (ConfigManager.fsGardenMoonFlowerMode.getValue()) {
+            executeDayNightSwitch(kpest, true);
+        }
+
+        kpest.addAction(this::startCurrentActions, 5000)
                 .run();
+    }
+
+    private void executeDayNightSwitch(SleepActions sleepActions, boolean night) {
+        sleepActions.addAction(ctx -> {
+                    this.pageSwitchCallback = new PageSwitchCallback();
+                    ToolList.sendChatMessage("/desk");
+                    ctx.put("screen", this.pageSwitchCallback.getScreen());
+                }, 600)
+                .addAction(ctx -> {
+                    Screen screen = (Screen) ctx.get("screen");
+                    if (!(screen instanceof ContainerScreen)) return;
+                    ChestMenu menu = ((ContainerScreen) screen).getMenu();
+                    Container container = menu.getContainer();
+                    if (!(container instanceof SimpleContainer)) return;
+                    if (mc.gameMode != null && mc.player != null) {
+                        mc.execute(() -> mc.gameMode.handleContainerInput(menu.containerId, 50, 0, ContainerInput.PICKUP, mc.player));
+                        this.pageSwitchCallback = new PageSwitchCallback();
+                        ctx.put("screen", this.pageSwitchCallback.getScreen());
+                    }
+                }, 600)
+                .addAction(ctx -> {
+                    Screen screen = (Screen) ctx.get("screen");
+                    if (!(screen instanceof ContainerScreen)) return;
+                    ChestMenu menu = ((ContainerScreen) screen).getMenu();
+                    Container container = menu.getContainer();
+                    if (!(container instanceof SimpleContainer)) return;
+                    if (mc.gameMode != null && mc.player != null) {
+                        mc.execute(() -> mc.gameMode.handleContainerInput(menu.containerId, night ? 13 : 11, 0, ContainerInput.PICKUP, mc.player));
+                    }
+                }, 500)
+                .addAction(() -> {
+                    if (mc.screen != null) mc.screen.onClose();
+                }, 600);
     }
 
     private void autoChangeLoadout() {
@@ -682,4 +732,14 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         ToolList.printChatMessage(Component.literal("§a[小沙雕] §e已设置节点执行全局最大延迟为" + delay + "ms!"));
         save();
     }
+
+    private PageSwitchCallback pageSwitchCallback = new PageSwitchCallback();
+
+    private void onScreenAfterInit(Minecraft minecraft, Screen screen, int i, int i1) {
+        if(pageSwitchCallback != null) {
+            pageSwitchCallback.setScreen(screen);
+            pageSwitchCallback = null;
+        }
+    }
+
 }

@@ -12,5 +12,29 @@
       "skydiao:getchecked/2",
       "skydiao:getchecked/3"
     ]
+  },
+  "yscs": {
+    "subtitle": "Frostbite Start Sound",
+    "sounds": [
+      "skydiao:ys/cold_start"
+    ]
+  },
+  "ysc": {
+    "subtitle": "Frostbite Sound",
+    "sounds": [
+      "skydiao:ys/cold"
+    ]
+  },
+  "ysenter": {
+    "subtitle": "Heat Start Increase",
+    "sounds": [
+      "skydiao:ys/e"
+    ]
+  },
+  "yswarning": {
+    "subtitle": "Over Heat Warning Sound",
+    "sounds": [
+      "skydiao:ys/w"
+    ]
   }
 }

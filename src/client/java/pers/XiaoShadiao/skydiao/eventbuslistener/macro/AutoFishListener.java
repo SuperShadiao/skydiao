@@ -508,11 +508,13 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
         if (mc.level == null || mc.player == null || mc.player.fishing == null) {
             return false;
         }
-        if (!StatusManager.get().isInSkyblock()) {
+        if (!StatusManager.get().hasStatus()) {
             return mc.player.fishing.isInLiquid();
         }
         Vec3 posB = mc.player.fishing.position();
         Vec3 posA = posB.add(0, -0.3, 0);
+
+
 
         return mc.level.getFluidState(BlockPos.containing(posA)).is(FluidTags.WATER) || mc.level.getFluidState(BlockPos.containing(posB)).is(FluidTags.WATER)
         || mc.level.getFluidState(BlockPos.containing(posA)).is(FluidTags.LAVA) || mc.level.getFluidState(BlockPos.containing(posB)).is(FluidTags.LAVA);

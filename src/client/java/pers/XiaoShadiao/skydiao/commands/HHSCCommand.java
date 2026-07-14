@@ -26,6 +26,7 @@ import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.E2AMappingListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon.DungeonF7BossbarListener;
 import pers.XiaoShadiao.skydiao.hud.CustomBossbar;
+import pers.XiaoShadiao.skydiao.hud.GenshinImpactHeatCold;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
@@ -128,6 +129,24 @@ public class HHSCCommand extends SkydiaoCommand {
             }));
             devcommand.then(getArgConstantInstance("restartcnscanner").executes(context -> {
                 AbstractListener.crystalHollowHelperListener.inCN = false;
+                return 0;
+            }));
+            devcommand.then(getArgConstantInstance("testheat").executes(context -> {
+                XSDHUD.genshinImpactHeatCold.debug1 = GenshinImpactHeatCold.ColorType.heat;
+                XSDHUD.genshinImpactHeatCold.debugHeatOrColdValue = Math.min(ToolList.getInstance().random.nextInt(150), 100);
+                return 0;
+            }));
+            devcommand.then(getArgConstantInstance("testnoheat").executes(context -> {
+                XSDHUD.genshinImpactHeatCold.debugHeatOrColdValue = null;
+                return 0;
+            }));
+            devcommand.then(getArgConstantInstance("testcold").executes(context -> {
+                XSDHUD.genshinImpactHeatCold.debug1 = GenshinImpactHeatCold.ColorType.cold;
+                XSDHUD.genshinImpactHeatCold.debugHeatOrColdValue = ToolList.getInstance().random.nextInt(100);
+                return 0;
+            }));
+            devcommand.then(getArgConstantInstance("testnocold").executes(context -> {
+                XSDHUD.genshinImpactHeatCold.debugHeatOrColdValue = null;
                 return 0;
             }));
         } else {

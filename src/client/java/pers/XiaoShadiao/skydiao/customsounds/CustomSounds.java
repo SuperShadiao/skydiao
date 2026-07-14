@@ -14,6 +14,11 @@ public class CustomSounds {
     // and is called in the mod to use the custom sound
     public static final SoundEvent STAR_RAIL_NOTIFICATION = registerSound("star_rail_notification");
     public static final SoundEvent ALERT_MACRO_CHECK = registerSound("alert_macro_check");
+    public static final SoundEvent YSCS = registerSound("yscs");
+    public static final SoundEvent YSC = registerSound("ysc");
+    public static final SoundEvent YSENTER = registerSound("ysenter");
+    public static final SoundEvent YSWARNING = registerSound("yswarning");
+
 
     // actual registration of all the custom SoundEvents
     private static SoundEvent registerSound(String id) {

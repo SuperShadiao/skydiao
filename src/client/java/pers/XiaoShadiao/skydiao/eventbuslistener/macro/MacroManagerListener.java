@@ -12,10 +12,10 @@ import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetHeldSlotPacket;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import org.lwjgl.glfw.GLFW;
 import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.EasyFarmingScriptListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.macro.slayer.vs.AutoBloodfiendListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.irc.ChatPacket;
@@ -36,6 +36,7 @@ public class MacroManagerListener extends AbstractListener {
     public static final PathFinderExecutor pathFinderExecutor = new PathFinderExecutor();
     public static final AutoDojo autoDojo = new AutoDojo();
     public static final EasyFarmingScriptListener farmingScript = new EasyFarmingScriptListener();
+    public static final AutoBloodfiendListener autoBloodfiendListener = new AutoBloodfiendListener();
 
     public long lastOpenChatTime = 0;
     public boolean isChatOpen = false;
@@ -157,7 +158,10 @@ public class MacroManagerListener extends AbstractListener {
             historyPoses.add(mc.player.position());
             activeMacros.removeIf(m -> {
                 boolean b = !m.isMacroActive();
-                if(b) m.onMacroUnload();
+                if(b) {
+                    m.onMacroUnload();
+                    logger.info("Unloaded macro: {}", m.getMacroName());
+                }
                 return b;
             });
         } else {

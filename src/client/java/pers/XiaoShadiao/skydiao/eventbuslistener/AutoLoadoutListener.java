@@ -1,6 +1,5 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener;
 
-import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -10,12 +9,10 @@ import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.ContainerInput;
-import org.apache.commons.lang3.mutable.MutableBoolean;
+import pers.XiaoShadiao.skydiao.utils.PageSwitchCallback;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class AutoLoadoutListener extends AbstractListener {
@@ -182,28 +179,6 @@ public class AutoLoadoutListener extends AbstractListener {
         });
 
         ToolList.sendChatMessage("/loadout");
-    }
-
-    private class PageSwitchCallback {
-
-        private Screen screen = null;
-
-        private final CountDownLatch latch = new CountDownLatch(1);
-
-        public void setScreen(Screen screen) {
-            this.screen = screen;
-            latch.countDown();
-        }
-
-        public Screen getScreen() {
-            try {
-                latch.await(10000, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            return screen;
-        }
-
     }
 
 }

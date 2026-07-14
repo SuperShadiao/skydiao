@@ -39,6 +39,8 @@ import java.util.concurrent.*;
 
 public class PathFinderExecutor extends AbstractListener implements IMacro {
 
+    private long lastSendTipTime;
+
     public float rotationYaw;
     public float rotationPitch;
     public float turnedYaw;
@@ -247,10 +249,12 @@ public class PathFinderExecutor extends AbstractListener implements IMacro {
             pathFindQueue.clear();
             pathblocks = pathFinder.getPath();
 
-            ToolList.printChatMessage(Component.literal("§a[小沙雕] §e请使用/skydiaopf stopgoal来停止傻卵机器人的操作"));
-            ToolList.printChatMessage(Component.literal("§a[小沙雕] §e** 寻路系统来自FDPClient的AStar寻路 **"));
-            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c警告: 请不要在机器人操作时打开任何容器界面 (例如箱子, 背包等, 以免被封号), 也不要乱按鼠标左右键 (避免触发MultiAction被封号)!"));
-
+            if(System.currentTimeMillis() - lastSendTipTime > 30000) {
+                lastSendTipTime = System.currentTimeMillis();
+                ToolList.printChatMessage(Component.literal("§a[小沙雕] §e请使用/skydiaopf stopgoal来停止傻卵机器人的操作"));
+                ToolList.printChatMessage(Component.literal("§a[小沙雕] §e** 寻路系统来自FDPClient的AStar寻路 **"));
+                ToolList.printChatMessage(Component.literal("§a[小沙雕] §c警告: 请不要在机器人操作时打开任何容器界面 (例如箱子, 背包等, 以免被封号), 也不要乱按鼠标左右键 (避免触发MultiAction被封号)!"));
+            }
             BlockPos goal = pathFinder.endPath;
             if(isMinerAlive()) pathblocks.add(pathFinder.endPath);
             long timeout = System.currentTimeMillis();

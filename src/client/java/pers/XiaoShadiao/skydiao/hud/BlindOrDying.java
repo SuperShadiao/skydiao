@@ -1,19 +1,14 @@
 package pers.XiaoShadiao.skydiao.hud;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.state.gui.ColoredRectangleRenderState;
-import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
@@ -51,48 +46,5 @@ public class BlindOrDying extends XSDHUD {
         context.guiRenderState.addGuiElement(new ColoredRectangleRenderState2(RenderPipelines.GUI, TextureSetup.noTexture(), new Matrix3x2f(pose), context.guiWidth(), context.guiHeight(), context.guiWidth() * 3 / 4, 0, rgb, 0, context.scissorStack.peek()));
         context.guiRenderState.addGuiElement(new ColoredRectangleRenderState (RenderPipelines.GUI, TextureSetup.noTexture(), new Matrix3x2f(pose), context.guiWidth(), context.guiHeight(), 0, context.guiHeight() * 3 / 4, rgb, 0, context.scissorStack.peek()));
         context.guiRenderState.addGuiElement(new ColoredRectangleRenderState (RenderPipelines.GUI, TextureSetup.noTexture(), new Matrix3x2f(pose), 0, 0, context.guiWidth(), context.guiHeight() / 4, rgb, 0, context.scissorStack.peek()));
-    }
-
-    public record ColoredRectangleRenderState2(
-            RenderPipeline pipeline,
-            TextureSetup textureSetup,
-            Matrix3x2f pose,
-            int x0,
-            int y0,
-            int x1,
-            int y1,
-            int col1,
-            int col2,
-            @Nullable ScreenRectangle scissorArea,
-            @Nullable ScreenRectangle bounds
-    ) implements GuiElementRenderState {
-        public ColoredRectangleRenderState2(
-                RenderPipeline renderPipeline,
-                TextureSetup textureSetup,
-                Matrix3x2f matrix3x2f,
-                int i,
-                int j,
-                int k,
-                int l,
-                int m,
-                int n,
-                @Nullable ScreenRectangle screenRectangle
-        ) {
-            this(renderPipeline, textureSetup, matrix3x2f, i, j, k, l, m, n, screenRectangle, getBounds(i, j, k, l, matrix3x2f, screenRectangle));
-        }
-
-        @Override
-        public void buildVertices(VertexConsumer vertexConsumer) {
-            vertexConsumer.addVertexWith2DPose(this.pose(), this.x0(), this.y0()).setColor(this.col1());
-            vertexConsumer.addVertexWith2DPose(this.pose(), this.x0(), this.y1()).setColor(this.col1());
-            vertexConsumer.addVertexWith2DPose(this.pose(), this.x1(), this.y1()).setColor(this.col2());
-            vertexConsumer.addVertexWith2DPose(this.pose(), this.x1(), this.y0()).setColor(this.col2());
-        }
-
-        @Nullable
-        private static ScreenRectangle getBounds(int i, int j, int k, int l, Matrix3x2f matrix3x2f, @Nullable ScreenRectangle screenRectangle) {
-            ScreenRectangle screenRectangle2 = new ScreenRectangle(i, j, k - i, l - j).transformMaxBounds(matrix3x2f);
-            return screenRectangle != null ? screenRectangle.intersection(screenRectangle2) : screenRectangle2;
-        }
     }
 }

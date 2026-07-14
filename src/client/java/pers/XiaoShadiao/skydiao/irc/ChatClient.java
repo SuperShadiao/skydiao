@@ -3,6 +3,12 @@ package pers.XiaoShadiao.skydiao.irc;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
+import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.ICustomSkinModelLoader;
+import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
+import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.XSDSafeSession;
 
 import java.io.*;
 import java.net.Socket;
@@ -10,13 +16,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Base64;
 import java.util.UUID;
-
-import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
-import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
-import pers.XiaoShadiao.skydiao.eventbuslistener.ICustomSkinModelLoader;
-import pers.XiaoShadiao.skydiao.utils.ToolList;
-import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
-import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.XSDSafeSession;
 
 public class ChatClient extends Thread {
 
@@ -105,8 +104,15 @@ public class ChatClient extends Thread {
             log.info("创建Socket...");
             try {
                 String[] hostPort = url.replace("https://", "").replace("http://", "").replace("tcp://", "").split(":");
-                // String[] hostPort = {"localhost", "831"};
-                socket = new Socket(hostPort[0], Integer.parseInt(hostPort[1]));
+                if(ToolList.getInstance().isDevEnvironment()) {
+                    try {
+                        socket = new Socket("localhost", 831);
+                    } catch (IOException e) {
+                        socket = new Socket(hostPort[0], Integer.parseInt(hostPort[1]));
+                    }
+                } else {
+                    socket = new Socket(hostPort[0], Integer.parseInt(hostPort[1]));
+                }
                 socket.setSoTimeout(150_000);
                 socket.setKeepAlive(false);
             } catch (IOException e) {

@@ -13,9 +13,11 @@ public class WindowsUtils {
     }
 
     public static void focusWindows() {
-        long handle = ToolList.mc.getWindow().handle();
-        if(isWindowsIconfied()) GLFW.glfwRestoreWindow(handle);
-        GLFW.glfwFocusWindow(handle);
+        ToolList.mc.execute(() -> {
+            long handle = ToolList.mc.getWindow().handle();
+            if(isWindowsIconfied()) GLFW.glfwRestoreWindow(handle);
+            GLFW.glfwFocusWindow(handle);
+        });
     }
 
 }

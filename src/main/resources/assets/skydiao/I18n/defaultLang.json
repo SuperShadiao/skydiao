@@ -926,6 +926,18 @@
       "configname": "§ebonus过期时提醒",
       "description": "§e自动农业时bonus过期提醒"
     },
+    "crystalhollowhelperdisablethreadlimit": {
+      "configname": "§e水晶矿洞助手线程限制绕过",
+      "description": "§e无视当前电脑CPU核数, 强制启动所有扫描线程 (如果扫描时客户端发生卡顿, 请关闭该选项!)"
+    },
+    "fsgardenmoonflowermode": {
+      "configname": "§e农业脚本月花模式",
+      "description": "§e农业脚本月花模式, 自动杀虫时, 会自动切换到白天杀虫, 返回后自动切换到黑夜农业"
+    },
+    "genshinimpactheatcoldrender": {
+      "configname": "§e炎热值寒冷值渲染",
+      "description": "§e低仿原神炎热寒冷条"
+    },
     "about1": "§e小沙雕的QQ: 3381949033",
     "about2": "§e小沙雕の狗窝: https://xiaoshadiao.club/qqg",
     "about3": "§e部分快捷键设置可在 ESC->选项(设置)->控制 中找到",

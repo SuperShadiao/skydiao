@@ -306,6 +306,7 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
     }
 
     private void switchToModel(String modelId, String textureId) {
+        if (!StatusManager.get().hasStatus() || modelId == null || textureId == null) return;
         ChatPacket packet = new IRCModelPacket(modelId, textureId, "", "switch").toIRCPacket();
         trySendToIRC(packet);
     }

@@ -14,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinMultiPlayerGameModeDestroyBlockDelayAccessor;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
@@ -66,11 +67,15 @@ public class InputSimulator {
     }
 
     public static void pressLeftClick() {
+        if(CustomFabricEvents.ON_SIMULATOR_CLICK.invoker().onSimulatorClick(CustomFabricEvents.SimulatorClickType.LEFT)) return;
+
         if (!isMouseLeftHolding) leftClickCounter++;
         isMouseLeftHolding = true;
     }
 
     public static void pressRightClick() {
+        if(CustomFabricEvents.ON_SIMULATOR_CLICK.invoker().onSimulatorClick(CustomFabricEvents.SimulatorClickType.RIGHT)) return;
+
         if (!isMouseRightHolding) rightClickCounter++;
         isMouseRightHolding = true;
     }
@@ -350,7 +355,12 @@ public class InputSimulator {
                 hasPitchValue = false;
             }
         }
+        actuallyYaw = getPlayerYaw0();
+        actuallyPitch = getPlayerPitch0();
     }
+
+    private static float actuallyYaw;
+    private static float actuallyPitch;
 
     public static void updateAimHelper(AimHelper aimHelper) {
         currentAimingInstance = aimHelper;
@@ -386,10 +396,18 @@ public class InputSimulator {
     }
 
     public static float getPlayerYaw() {
-        return mc.player == null ? 0 : mc.player.getYRot();
+        return actuallyYaw;
     }
 
     public static float getPlayerPitch() {
+        return actuallyPitch;
+    }
+
+    private static float getPlayerYaw0() {
+        return mc.player == null ? 0 : mc.player.getYRot();
+    }
+
+    private static float getPlayerPitch0() {
         return mc.player == null ? 0 : mc.player.getXRot();
     }
 
