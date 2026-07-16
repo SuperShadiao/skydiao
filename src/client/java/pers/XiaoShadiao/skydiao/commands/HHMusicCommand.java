@@ -3,9 +3,7 @@ package pers.XiaoShadiao.skydiao.commands;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
 import pers.XiaoShadiao.skydiao.screen.MusicPlayerScreen;
-import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.List;
 

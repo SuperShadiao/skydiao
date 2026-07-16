@@ -1,27 +1,19 @@
 package pers.XiaoShadiao.skydiao.utils.mircosoftaccount;
 
-import com.mojang.authlib.exceptions.*;
+import com.mojang.authlib.exceptions.InvalidCredentialsException;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.util.UndashedUuid;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
-import net.minecraft.network.chat.Component;
-import net.minecraft.util.Crypt;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
-import javax.crypto.SecretKey;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.math.BigInteger;
-import java.security.PublicKey;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class XSDSafeSession extends User {
 

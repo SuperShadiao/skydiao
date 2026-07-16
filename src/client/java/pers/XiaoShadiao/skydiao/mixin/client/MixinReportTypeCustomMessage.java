@@ -5,7 +5,6 @@ import net.minecraft.util.Util;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Unique;
-import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.List;
 

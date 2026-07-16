@@ -19,9 +19,9 @@ import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.keybinds.KeyBindsManager;
 import pers.XiaoShadiao.skydiao.screen.mircosoftaccount.AccountSelectScreen;
+import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.autoupdater.AutoUpdater;
 import pers.XiaoShadiao.skydiao.utils.autoupdater.ExecuteOfflineThread;
-import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.XSDSafeSession;
@@ -49,6 +49,10 @@ public class SkyDiaoModClient implements ClientModInitializer {
     @Override
 	public void onInitializeClient() {
 
+        System.out.println("[小沙雕] 当前类加载器: " + SkyDiaoModClient.class.getClassLoader());
+        System.out.println("[小沙雕] 加载器父加载器: " + SkyDiaoModClient.class.getClassLoader().getParent());
+        System.out.println("[小沙雕] 加载器父类: " + SkyDiaoModClient.class.getClassLoader().getClass().getSuperclass());
+        System.out.println("[小沙雕] 加载器父类的父类: " + SkyDiaoModClient.class.getClassLoader().getClass().getSuperclass().getSuperclass());
         SkyDiaoPreLaunch.getInstance().execInitJars();
 
         AutoUpdater.checkUpdate();

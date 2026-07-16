@@ -1,7 +1,6 @@
 package pers.XiaoShadiao.skydiao.commands;
 
 import com.mojang.brigadier.LiteralMessage;
-import com.mojang.brigadier.Message;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -11,7 +10,6 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
-import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.EasyFarmingScriptListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.ExecuteNode;
@@ -20,7 +18,6 @@ import pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.op.OperationPress
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.op.OperationRotation;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.op.OperationSendCommand;
 import pers.XiaoShadiao.skydiao.keybinds.KeyBindsManager;
-import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
 import java.util.ArrayList;

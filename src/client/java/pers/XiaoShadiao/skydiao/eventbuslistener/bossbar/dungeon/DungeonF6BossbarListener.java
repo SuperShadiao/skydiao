@@ -2,31 +2,24 @@ package pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.components.LerpingBossEvent;
 import net.minecraft.client.player.RemotePlayer;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.monster.Giant;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import pers.XiaoShadiao.skydiao.eventbuslistener.E2AMappingListener;
 import pers.XiaoShadiao.skydiao.hud.CustomBossbar;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinBossbarEventGetter;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
-import java.awt.*;
-import java.util.*;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 public class DungeonF6BossbarListener extends AbstractDungeonBossbar {
 

@@ -1,6 +1,5 @@
 package pers.XiaoShadiao.skydiao.server.utils;
 
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 

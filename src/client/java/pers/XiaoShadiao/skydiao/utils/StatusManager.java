@@ -1,16 +1,11 @@
 package pers.XiaoShadiao.skydiao.utils;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import net.hypixel.data.type.ServerType;
 import net.hypixel.modapi.packet.impl.clientbound.event.ClientboundLocationPacket;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 public class StatusManager extends Thread {

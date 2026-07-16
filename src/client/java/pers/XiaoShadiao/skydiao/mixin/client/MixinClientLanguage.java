@@ -1,7 +1,6 @@
 package pers.XiaoShadiao.skydiao.mixin.client;
 
 import net.minecraft.client.resources.language.ClientLanguage;
-import net.minecraft.client.resources.language.I18n;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

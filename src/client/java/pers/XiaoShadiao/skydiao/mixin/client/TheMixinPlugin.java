@@ -1,12 +1,7 @@
 package pers.XiaoShadiao.skydiao.mixin.client;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.DetectedVersion;
-import net.minecraft.SharedConstants;
-import net.minecraft.WorldVersion;
 import org.objectweb.asm.tree.ClassNode;
-import org.spongepowered.asm.mixin.FabricUtil;
-import org.spongepowered.asm.mixin.extensibility.IMixinConfig;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 

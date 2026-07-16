@@ -1,6 +1,5 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.op;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 

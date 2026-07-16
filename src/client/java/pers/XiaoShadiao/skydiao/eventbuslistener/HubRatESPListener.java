@@ -3,7 +3,6 @@ package pers.XiaoShadiao.skydiao.eventbuslistener;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;

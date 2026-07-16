@@ -1,16 +1,7 @@
 package pers.XiaoShadiao.skydiao.mixin.client.debug;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import com.sun.jna.internal.ReflectionUtils;
-import net.minecraft.CrashReport;
-import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 // issue from 19minutes
 

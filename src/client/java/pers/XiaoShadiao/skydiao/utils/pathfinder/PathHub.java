@@ -1,7 +1,6 @@
 package pers.XiaoShadiao.skydiao.utils.pathfinder;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 

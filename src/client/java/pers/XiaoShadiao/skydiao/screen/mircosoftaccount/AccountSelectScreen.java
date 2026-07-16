@@ -22,7 +22,6 @@ import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.VerifyHttpServer;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.hwid.HWIDGenerator_v4;
-import pers.XiaoShadiao.skydiao.utils.renderutils.ImageTexture;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 
 import java.awt.*;
@@ -32,7 +31,6 @@ import java.awt.datatransfer.Transferable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.Callable;

@@ -5,12 +5,10 @@ import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -20,7 +18,6 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
@@ -171,7 +168,9 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
     @Override
     public void onPreLaunch() {
         instance = this;
-        if(this.getClass().getClassLoader().getParent() instanceof URLClassLoader urlClassLoader) {
+        ClassLoader classLoader = this.getClass().getClassLoader();
+        if(!(classLoader instanceof URLClassLoader)) classLoader = classLoader.getParent();
+        if(classLoader instanceof URLClassLoader urlClassLoader) {
             moveOldLibToNewLib();
             initJars = () -> {
                 for (Lib lib : libs) {
@@ -185,6 +184,7 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
                         throw new RuntimeException(e);
                     }
                 }
+                log.info("成功添加" + libs.size() + "个jar文件到" + urlClassLoader);
             };
         } else {
             throw new RuntimeException("Can't lookup the URLClassLoader");

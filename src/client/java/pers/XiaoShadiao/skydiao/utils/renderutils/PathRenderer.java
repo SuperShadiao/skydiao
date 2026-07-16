@@ -1,7 +1,6 @@
 package pers.XiaoShadiao.skydiao.utils.renderutils;
 
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
 

@@ -1,6 +1,5 @@
 package pers.XiaoShadiao.skydiao.server.mixin.fun;
 
-import net.fabricmc.fabric.mixin.event.lifecycle.LivingEntityMixin;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;

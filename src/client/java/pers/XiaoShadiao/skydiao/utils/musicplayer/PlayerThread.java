@@ -1,25 +1,13 @@
 package pers.XiaoShadiao.skydiao.utils.musicplayer;
 
-import com.google.gson.*;
-import javazoom.jl.decoder.Bitstream;
-import javazoom.jl.decoder.BitstreamException;
-import javazoom.jl.decoder.JavaLayerException;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.screen.MusicPlayerScreen;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
-import java.io.*;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.io.File;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class PlayerThread {
 

@@ -3,7 +3,6 @@ package pers.XiaoShadiao.skydiao.irc;
 import com.google.gson.JsonObject;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.ArrayBlockingQueue;

@@ -6,10 +6,7 @@ import moe.nea.firmament.util.net.HttpUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
-import java.io.InputStream;
 import java.net.URI;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
 @Mixin(targets = "moe.nea.firmament.util.net.HttpUtil")
 public class FirmamentGithubRepoProxy {

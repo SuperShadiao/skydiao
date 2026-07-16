@@ -13,7 +13,6 @@ import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import top.mrxiaom.bili.live.client.BApi;
 import top.mrxiaom.bili.live.client.BApiClient;
-import top.mrxiaom.bili.live.client.data.EmptyInfo;
 import top.mrxiaom.bili.live.runtime.utils.SignHolder;
 
 import javax.crypto.Mac;
@@ -28,7 +27,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 
 public class BLiveListener extends Thread {
 
