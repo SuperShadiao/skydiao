@@ -137,6 +137,11 @@ public class MineshaftShareListener extends AbstractListener {
         }
     }
 
+    public void debugFoundShaft() {
+        inMineshaftDebug = true;
+        flagFoundShaft();
+    }
+
     public void onTick(Minecraft mc) {
         if(!inviteThreadRunning && !mineshaftClosed && isInMineshaft()) {
             interrupt();

@@ -218,6 +218,8 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
         }
     }
 
+    private int fishTriggeredCount;
+
     private void executeThread() {
 
         isReady = false;
@@ -240,12 +242,23 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
             if(ConfigManager.autoFishAutoRotation.getValue()) antiAFKRotation.interrupt();
         }
 
+        fishTriggeredCount++;
         activeThisMacro();
+        try {
+            double random = Math.abs(Math.sin(System.currentTimeMillis() / 1000d));
+            Thread.sleep((long) (20 * random * random));
+            if(fishTriggeredCount > 12 && ToolList.getInstance().random.nextInt(10) == 5) {
+                fishTriggeredCount = 0;
+                Thread.sleep((long) (150 * random));
+            }
+        } catch (InterruptedException e) {
+
+        }
         InputSimulator.singleRightClick();
 
         while(true) {
             try {
-                Thread.sleep(300);
+                Thread.sleep(300 + ToolList.getInstance().random.nextInt(80));
                 Thread.sleep(ConfigManager.autofishrethrowhookdelay.getValue());
                 break;
             } catch (InterruptedException e) {

@@ -89,7 +89,7 @@ public class HHSCCommand extends SkydiaoCommand {
 
                 }
             })))));
-            devcommand.then(getArgConstantInstance("triggerfakeshaftannounce").executes((context) -> owo(AbstractListener.mineshaftShareListener::flagFoundShaft)));
+            devcommand.then(getArgConstantInstance("triggerfakeshaftannounce").executes((context) -> owo(AbstractListener.mineshaftShareListener::debugFoundShaft)));
             devcommand.then(getArgConstantInstance("sendfakemacrocheck").executes((context) -> {
                 ChatPacket packet = new ChatPacket();
                 packet.initSender();

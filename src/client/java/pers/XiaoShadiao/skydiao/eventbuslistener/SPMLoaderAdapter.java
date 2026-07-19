@@ -44,10 +44,7 @@ import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.lang.reflect.Method;
 import java.nio.file.Files;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinModelLoader {
 
@@ -114,8 +111,8 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
 
         if (mc.player == null) return;
         PlayerCapability.get(mc.player).ifPresent(cap -> {
-            String modelId = cap.getModelId().toLowerCase();
-            String currentTextureName = cap.getCurrentTextureName().toLowerCase();
+            String modelId = parseModelId(cap.getModelId());
+            String currentTextureName = cap.getCurrentTextureName();
             if (!modelId.equals(currentModelId) || !currentTextureName.equals(currentTextureId)) {
                 currentModelId = modelId;
                 currentTextureId = currentTextureName;
@@ -196,9 +193,10 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
             case "upload" -> uploadModelToIRC(model.modelId);
             case "download" -> loadModel(Base64.getDecoder().decode(model.data), model.modelId);
             case "switch" -> {
-                name2Id.put(packet.sender, Pair.of(model.modelId.toLowerCase(), model.textureId));
-                if (ClientModelManager.getModelContext(model.modelId.toLowerCase()).isEmpty()) {
-                    ChatPacket downloadPacket = new IRCModelPacket(model.modelId.toLowerCase(), "", "", "download").toIRCPacket();
+                String modelIdLowerCase = parseModelId(model.modelId);
+                name2Id.put(packet.sender, Pair.of(modelIdLowerCase, model.textureId));
+                if (ClientModelManager.getModelContext(modelIdLowerCase).isEmpty()) {
+                    ChatPacket downloadPacket = new IRCModelPacket(modelIdLowerCase, "", "", "download").toIRCPacket();
                     trySendToIRC(downloadPacket);
                 }
             }
@@ -274,18 +272,19 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
                     RawYsmModel.class
             );
             loadMethod.setAccessible(true);
-            loadMethod.invoke(null, id.toLowerCase(), rawModel);
+            String realId = parseModelId(id);
+            loadMethod.invoke(null, realId, rawModel);
 
-            ToolList.printChatMessage(Component.literal("§a[小沙雕] 从IRC下载了一个YSM模型: §e" + id));
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] 从IRC下载了一个YSM模型: §e" + realId));
             ToolList.printChatMessage(Component.literal("§a[小沙雕] 注意, 模型文件不会写到你的磁盘, 意味着你可以在模型列表看到该玩家的模型, 但重启后资源将被释放! 若你想要对方的模型, 请找他手动索取!"));
-            logger.info("加载了一个YSM模型: {}", id);
+            logger.info("加载了一个YSM模型: {}", realId);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     private void uploadModelToIRC(String modelId) {
-        modelId = modelId.toLowerCase();
+        modelId = parseModelId(modelId);
         String finalModelId = modelId;
 
         ClientModelManager.getLocalModelSourcePath(modelId).ifPresent(path -> {
@@ -360,11 +359,29 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
                 return;
             }
             cap.initModelWithTexture(modelId, textureId);
-            currentModelId = modelId;
+            currentModelId = parseModelId(modelId);
             currentTextureId = textureId;
             logger.info("Switched Model to {} | {}", currentModelId, currentTextureId);
             switchToModel(modelId, textureId);
         });
+    }
+
+    private String stripImportExtension(String modelId) {
+        String lower = modelId.toLowerCase(Locale.ROOT);
+        for (String extension : new String[]{".ysm", ".zip", ".bbmodel"}) {
+            if (lower.endsWith(extension)) {
+                return modelId.substring(0, modelId.length() - extension.length());
+            }
+        }
+        return modelId;
+    }
+
+    private String normalizeLocalModelId(String modelId) {
+        return stripImportExtension(modelId.replace('\\', '/').toLowerCase(Locale.ROOT).replaceAll("/+", "/"));
+    }
+
+    private String parseModelId(String modelId) {
+        return stripImportExtension(normalizeLocalModelId(modelId));
     }
 
 }
