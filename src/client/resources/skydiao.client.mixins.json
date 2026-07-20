@@ -42,6 +42,7 @@
     "MixinRemoveMaxHealthLimit",
     "MixinReportTypeCustomMessage",
     "MixinSendPacket",
+    "MixinStartConnectServer",
     "MixinUserDataSecurer",
     "adapter.chatpatches.MixinChatPatcherTranslateButton",
     "adapter.firmament.FirmamentGithubRepoProxy",

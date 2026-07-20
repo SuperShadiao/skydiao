@@ -21,19 +21,19 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.client.gui.screens.DeathScreen;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
@@ -91,6 +91,7 @@ public class BasicListener extends AbstractListener {
     public PlayerSkin selfPlayerSkin;
 
     public static final Identifier customCape = Identifier.fromNamespaceAndPath("skydiao", "custom_cape");
+    private ServerData currentServerData;
 
     @Override
     public String getListenerName() {
@@ -171,6 +172,11 @@ public class BasicListener extends AbstractListener {
                 }, null);
                 mc.execute(() -> packetSender.send(new ServerboundResourcePackPacket(packet2.id(), ServerboundResourcePackPacket.Action.SUCCESSFULLY_LOADED)));
                 return true;
+            }
+        } else if(packet instanceof ClientboundDisconnectPacket(Component reason)) {
+            ClientPacketListener connection = mc.getConnection();
+            if(connection != null) {
+                currentServerData = connection.getServerData();
             }
         }
 
@@ -281,6 +287,10 @@ public class BasicListener extends AbstractListener {
         }
     }
 
+    private Button reconnectButton;
+    private Button autoReconnectSwitchButton;
+    private int reconnectCountDown = 0;
+    private long lastCheckSessionTime = System.currentTimeMillis();
     private void onGuiFinishedInit(Minecraft client, Screen screen, int scaledWidth, int scaledHeight) {
         if(screen instanceof TitleScreen titleScreen) {
             List<AbstractWidget> buttons = Screens.getWidgets(titleScreen);
@@ -292,7 +302,11 @@ public class BasicListener extends AbstractListener {
                 ).bounds(scaledHeight < 270 ? 10 : scaledWidth / 2 - 50, scaledHeight - (scaledHeight < 270 ? 35 : 28), scaledHeight < 270 ? Math.min(100, left - 15) : 100, 20).build());
             }
         } else if(screen instanceof JoinMultiplayerScreen mpscreen) {
-            MinecraftLogin.checkSessionExpiredAndLogin();
+            if(System.currentTimeMillis() - lastCheckSessionTime > 60000) {
+                lastCheckSessionTime = System.currentTimeMillis();
+                MinecraftLogin.checkSessionExpiredAndLogin();
+            }
+            currentServerData = null;
         } else if(screen instanceof DeathScreen deathScreen) {
             List<AbstractWidget> buttons = Screens.getWidgets(deathScreen);
             int left = buttons.stream().min(Comparator.comparingInt(AbstractWidget::getX)).get().getX();
@@ -301,7 +315,36 @@ public class BasicListener extends AbstractListener {
                     Component.literal("§a打开聊天栏"),
                     (button) -> ToolList.mc.setScreen(new ChatScreen("/l", false))
             ).bounds(scaledHeight < 270 ? 10 : scaledWidth / 2 - 50, scaledHeight - (scaledHeight < 270 ? 35 : 28), scaledHeight < 270 ? Math.min(100, left - 15) : 100, 20).build());
+        } else if(screen instanceof DisconnectedScreen disconnectedScreen && currentServerData != null) {
+            List<AbstractWidget> buttons = Screens.getWidgets(disconnectedScreen);
+            buttons.remove(reconnectButton);
+            buttons.remove(autoReconnectSwitchButton);
+            AbstractWidget widget = buttons.stream().max(Comparator.comparingInt(AbstractWidget::getY)).get();
+            int top = widget.getY();
+            int left = widget.getX();
+
+            int height = widget.getHeight();
+            int width = widget.getWidth();
+
+            buttons.add(reconnectButton = Button.builder(
+                    Component.literal(translate("gui.disconnected.buttonreconnect", ""/*" (" + (int) (重连倒计时 / 40) + "s)"*/)),
+                    (button) -> ConnectScreen.startConnecting(new JoinMultiplayerScreen(new TitleScreen()), mc, ServerAddress.parseString(currentServerData.ip), currentServerData, false, null)
+            ).bounds(left, top + 25, width, height).build());
+
+            buttons.add(autoReconnectSwitchButton = Button.builder(
+                    Component.literal(ConfigManager.autoReconnect.getI18nName() + ": " + ConfigManager.autoReconnect.getI18nValue()),
+                    (button) -> {
+                        ConfigManager.autoReconnect.setValue(!ConfigManager.autoReconnect.getValue());
+                        button.setMessage(Component.literal(ConfigManager.autoReconnect.getI18nName() + ": " + ConfigManager.autoReconnect.getI18nValue()));
+                    }
+            ).bounds(5, scaledHeight - 25, 100, 20).build());
+
+            reconnectCountDown = 60;
         }
+    }
+
+    public void setCurrentServerData(ServerData serverData) {
+        currentServerData = serverData;
     }
 
     private void onHypixelPacket(ClientboundHypixelPacket packet) {
@@ -416,6 +459,21 @@ public class BasicListener extends AbstractListener {
 
         if (!ConfigManager.blivelistener.getValue() && BLiveListener.isListening()) {
             BLiveListener.stopListen();
+        }
+
+        if(ConfigManager.autoReconnect.getValue()) {
+            if (currentServerData != null && reconnectButton != null && reconnectCountDown > 0) {
+                reconnectCountDown--;
+                reconnectButton.setMessage(Component.literal(translate("gui.disconnected.buttonreconnect", " (" + (int) (reconnectCountDown / 20) + "s)")));
+                if (reconnectCountDown == 0) {
+                    ConnectScreen.startConnecting(new JoinMultiplayerScreen(new TitleScreen()), mc, ServerAddress.parseString(currentServerData.ip), currentServerData, false, null);
+                }
+            }
+        } else {
+            reconnectCountDown = 60;
+            if (reconnectButton != null) {
+                reconnectButton.setMessage(Component.literal(translate("gui.disconnected.buttonreconnect", "")));
+            }
         }
     }
 
