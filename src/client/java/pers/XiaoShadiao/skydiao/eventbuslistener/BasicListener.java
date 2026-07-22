@@ -401,7 +401,7 @@ public class BasicListener extends AbstractListener {
             }
             Optional.ofNullable(mc.getConnection()).map(c -> c.getPlayerInfo(mc.player.getUUID())).map(PlayerInfo::getSkin).ifPresent(skin -> selfPlayerSkin = skin);
         }
-        if(ConfigManager.keepSprint.getValue()) {
+        if(ConfigManager.keepSprint.getValue() && !MacroManagerListener.autoDojo.isDoingSwiftness()) {
             InputSimulator.setSprint(true);
         }
         while(KeyBindsManager.toggleKeepSprint.consumeClick()) {

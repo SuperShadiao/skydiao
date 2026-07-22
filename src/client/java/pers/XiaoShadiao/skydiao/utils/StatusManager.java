@@ -91,7 +91,7 @@ public class StatusManager extends Thread {
             map.put("lobbyName", lobbyName);
             ToolList.getInstance().log.info("已加载玩家在线信息: " + map);
 
-            if(hasStatus && online) if(ChatClientManager.serverAvailable()) ChatClientManager.getChatClient().sender.sendOnlineInfo();
+            if(hasStatus && online) if(ChatClientManager.serverAvailable()) ChatClientManager.getChatClient().sender.sendOnlineInfo(this);
         }
 
     }

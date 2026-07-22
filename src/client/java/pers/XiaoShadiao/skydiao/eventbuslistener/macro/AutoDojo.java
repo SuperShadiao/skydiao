@@ -1,5 +1,6 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener.macro;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayFIFOQueue;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
@@ -61,6 +62,16 @@ public class AutoDojo extends AbstractListener implements IMacro {
     private double controlCurrentDeltaZ = 0;
     private int controlAverageTick = 0;
 
+    private int jumpCounter = 0;
+
+    private record MasteryBlockInfo(BlockPos pos, ArmorStand timer) {
+        public boolean isVaild() {
+            return mc.level.getBlockState(pos).getBlock() == Blocks.YELLOW_WOOL;
+        }
+    }
+    private final ObjectArrayFIFOQueue<MasteryBlockInfo> masteryTargetPoses = new ObjectArrayFIFOQueue<>();
+    private int releaseMasteryRightClickCount;
+
     @Override
     public String getListenerName() {
         return "AutoDojo";
@@ -117,7 +128,6 @@ public class AutoDojo extends AbstractListener implements IMacro {
         }
         return -1;
     }
-
     private void onWorldUnload(Minecraft mc, ClientLevel level) {
         currentDojo = DojoType.NONE;
     }
@@ -133,6 +143,8 @@ public class AutoDojo extends AbstractListener implements IMacro {
 
             startControlPos = null;
             currentControlTargetEntity = null;
+            jumpCounter = 0;
+            masteryTargetPoses.clear();
             InputSimulator.releaseAllKey();
         }
 
@@ -179,7 +191,14 @@ public class AutoDojo extends AbstractListener implements IMacro {
                 } else {
                     InputSimulator.setSprint(false);
                 }
-                InputSimulator.setJump(mc.level.getBlockState(playerPos.below()).getBlock() == Blocks.AIR && distManhattanPlayer <= distManhattan && distManhattanPlayer > 0.75);
+                boolean shouldJump = mc.level.getBlockState(playerPos.below()).getBlock() == Blocks.AIR && distManhattanPlayer <= distManhattan && distManhattanPlayer > 0.75;
+                if(shouldJump) {
+                    jumpCounter++;
+                    if(jumpCounter > 1 || distManhattan <= 2) InputSimulator.setJump(true);
+                } else {
+                    jumpCounter = 0;
+                    InputSimulator.setJump(false);
+                }
             }
             case CONTROL -> {
                 BlockPos playerPos = BlockPos.containing(mc.player.getX(), mc.player.getY(), mc.player.getZ());
@@ -265,6 +284,47 @@ public class AutoDojo extends AbstractListener implements IMacro {
                     InputSimulator.switchItem(targetItemIndex);
                 }
             }
+            case MASTERY -> {
+                while(!masteryTargetPoses.isEmpty()) {
+                    MasteryBlockInfo first = masteryTargetPoses.first();
+                    if(!first.isVaild()) {
+                        masteryTargetPoses.dequeue();
+                        continue;
+                    }
+                    if(releaseMasteryRightClickCount <= 0) {
+                        AimHelper.getYawPitchByDoublePos(
+                                first.pos().getX() + 0.5,
+                                first.pos().getY() + 1.25,
+                                first.pos().getZ() + 0.5
+                        ).updateToAimHelper(aimHelper);
+                    }
+                    String string = first.timer.getName().getString();
+                    if(string.contains("0:" + ConfigManager.autoDojoMasteryShootTiming.getValue())
+                    || string.contains("0:" + (ConfigManager.autoDojoMasteryShootTiming.getValue() - 1))) {
+                        releaseMasteryRightClickCount = 1;
+                    }
+                    break;
+                }
+                if(releaseMasteryRightClickCount <= 0) {
+                    InputSimulator.pressRightClick();
+                } else {
+                    InputSimulator.releaseRightClick();
+                }
+                if(releaseMasteryRightClickCount > 0) releaseMasteryRightClickCount--;
+                for (Entity entity : mc.level.entitiesForRendering()) {
+                    if(entity instanceof ArmorStand armorStand) {
+                        if(entity.getName().getString().matches("\\d:\\d{3}")) {
+                            for (BlockPos blockPos : BlockPos.betweenClosed(armorStand.getBoundingBox().inflate(2))) {
+                                Block block = mc.level.getBlockState(blockPos).getBlock();
+                                if(block == Blocks.YELLOW_WOOL) {
+                                    MasteryBlockInfo x = new MasteryBlockInfo(blockPos.immutable(), armorStand);
+                                    masteryTargetPoses.enqueue(x);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -327,6 +387,10 @@ public class AutoDojo extends AbstractListener implements IMacro {
         return currentDojo == DojoType.NONE || currentDojo == null;
     }
 
+    public boolean isDoingSwiftness() {
+        return currentDojo == DojoType.SWIFT;
+    }
+
     @Override
     public boolean onMacroCheck(PositionInfo beforeTP, PositionInfo afterTP) {
         return true; // 马口检查了, 不会报警, 如果真发生了, 等亖吧 (bushi
@@ -346,7 +410,8 @@ public class AutoDojo extends AbstractListener implements IMacro {
         NONE("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", false),
         SWIFT("Test of Swiftness OBJECTIVES", true),
         DISCIPLINE("Test of Discipline OBJECTIVES", false),
-        CONTROL("Test of Control OBJECTIVES", true)
+        CONTROL("Test of Control OBJECTIVES", true),
+        MASTERY("Test of Mastery OBJECTIVES", true)
         ;
 
         public final String chatMessage;

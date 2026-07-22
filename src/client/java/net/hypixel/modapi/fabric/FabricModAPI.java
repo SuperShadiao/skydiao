@@ -4,14 +4,19 @@ import com.mojang.logging.LogUtils;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationNetworking;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.hypixel.modapi.HypixelModAPI;
+import net.hypixel.modapi.HypixelModAPIImplementation;
 import net.hypixel.modapi.fabric.event.HypixelModAPICallback;
 import net.hypixel.modapi.fabric.event.HypixelModAPIErrorCallback;
 import net.hypixel.modapi.fabric.payload.ClientboundHypixelPayload;
 import net.hypixel.modapi.fabric.payload.ServerboundHypixelPayload;
+import net.hypixel.modapi.packet.HypixelPacket;
+import net.hypixel.modapi.packet.impl.clientbound.ClientboundHelloPacket;
 import net.hypixel.modapi.packet.impl.clientbound.event.ClientboundLocationPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.codec.StreamCodec;
@@ -20,36 +25,56 @@ import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 
-public class FabricModAPI implements ClientModInitializer {
+public class FabricModAPI implements ClientModInitializer, HypixelModAPIImplementation {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final boolean DEBUG_MODE = FabricLoader.getInstance().isDevelopmentEnvironment() || Boolean.getBoolean("net.hypixel.modapi.debug");
 
+    private boolean onHypixel = false;
+
+    @GameTest
+    @Override
     public void onInitializeClient() {
-        reloadRegistrations();
-        registerPacketSender();
+        HypixelModAPI.getInstance().setModImplementation(this);
+    }
+
+    @Override
+    public void onInit() {
+        HypixelModAPI.getInstance().createHandler(ClientboundHelloPacket.class, packet -> onHypixel = true);
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> onHypixel = false);
+
         if (DEBUG_MODE) {
             LOGGER.info("Debug mode is enabled!");
             registerDebug();
         }
 
+        reloadRegistrations();
     }
 
-    private static void registerPacketSender() {
-        HypixelModAPI.getInstance().setPacketSender(packet -> {
-            ServerboundHypixelPayload hypixelPayload = new ServerboundHypixelPayload(packet);
-            if (Minecraft.getInstance().getConnection() != null) {
-                ClientPlayNetworking.send(hypixelPayload);
-                return true;
-            } else {
-                try {
-                    ClientConfigurationNetworking.send(hypixelPayload);
-                    return true;
-                } catch (IllegalStateException var3) {
-                    LOGGER.warn("Failed to send a packet as the client is not connected to a server '{}'", packet);
-                    return false;
-                }
-            }
-        });
+    @Override
+    public boolean sendPacket(HypixelPacket packet) {
+        if (!isConnectedToHypixel()) {
+            return false;
+        }
+
+        ServerboundHypixelPayload hypixelPayload = new ServerboundHypixelPayload(packet);
+
+        if (Minecraft.getInstance().getConnection() != null) {
+            ClientPlayNetworking.send(hypixelPayload);
+            return true;
+        }
+
+        try {
+            ClientConfigurationNetworking.send(hypixelPayload);
+            return true;
+        } catch (IllegalStateException ignored) {
+            LOGGER.warn("Failed to send a packet as the client is not connected to a server '{}'", packet);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isConnectedToHypixel() {
+        return onHypixel;
     }
 
     /**
@@ -80,7 +105,9 @@ public class FabricModAPI implements ClientModInitializer {
 
     private static void registerClientbound(String identifier) {
         try {
-            CustomPacketPayload.Type<ClientboundHypixelPayload> clientboundId = new CustomPacketPayload.Type<>(Identifier.parse(identifier));
+            CustomPacketPayload.Type<ClientboundHypixelPayload> clientboundId = new CustomPacketPayload.Type<>(
+                    Identifier.parse(identifier)
+            );
             StreamCodec<ByteBuf, ClientboundHypixelPayload> codec = ClientboundHypixelPayload.buildCodec(clientboundId);
             PayloadTypeRegistry.clientboundPlay().register(clientboundId, codec);
             PayloadTypeRegistry.clientboundConfiguration().register(clientboundId, codec);
@@ -132,7 +159,9 @@ public class FabricModAPI implements ClientModInitializer {
 
     private static void registerServerbound(String identifier) {
         try {
-            CustomPacketPayload.Type<ServerboundHypixelPayload> serverboundId = new CustomPacketPayload.Type<>(Identifier.parse(identifier));
+            CustomPacketPayload.Type<ServerboundHypixelPayload> serverboundId = new CustomPacketPayload.Type<>(
+                    Identifier.parse(identifier)
+            );
             StreamCodec<ByteBuf, ServerboundHypixelPayload> codec = ServerboundHypixelPayload.buildCodec(serverboundId);
             PayloadTypeRegistry.serverboundPlay().register(serverboundId, codec);
             PayloadTypeRegistry.serverboundConfiguration().register(serverboundId, codec);

@@ -85,6 +85,7 @@ public class ConfigManager {
     public static final BooleanConfigOption pfXRay = new BooleanConfigOption("pathfinderxray", false);
     public static final BooleanConfigOption autoDojo = new BooleanConfigOption("autodojo", false);
     public static final IntConfigOption autoDojoControlPredictDist = new IntConfigOption("autodojocontrolpredictdist", 8);
+    public static final SelectConfigOption autoDojoMasteryShootTiming = new SelectConfigOption("autodojomasteryshoottiming", 2, List.of("0.0s", "0.1s", "0.2s", "0.3s", "0.4s", "0.5s", "0.6s", "0.7s", "0.8s", "0.9s"));
     public static final BooleanConfigOption necronLadderNotification = new BooleanConfigOption("necronladdernotification", true);
     public static final BooleanConfigOption dungeonf7autoterm = new BooleanConfigOption("dungeonf7autoterm", false);
     public static final BooleanConfigOption enablexsdccommandtip = new BooleanConfigOption("enablexsdccommandtip", true);
@@ -191,7 +192,7 @@ public class ConfigManager {
             Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip, enableircafktip, enableircmacrochecktip, cooltitle, customTitleText)),
             Map.entry("工具类", List.of(inventoryFilter, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodehideserverid, keepSprint, autoReconnect)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
-            Map.entry("自动类", List.of(autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, skyblockriftautodanceroom, carnivalAutoFruitDigger, skyblockautobloodfiend, skyblockautobloodfiendlowhealth)),
+            Map.entry("自动类", List.of(autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, carnivalAutoFruitDigger, skyblockautobloodfiend, skyblockautobloodfiendlowhealth)),
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareAnnounce, skyblockSafeIsland, crystalHollowHelper, crystalHollowHelperDebug, crystalHollowDupServerTipper, crystalHollowHelperDisableThreadLimit, genshinImpactHeatColdRender)),
             Map.entry("combat", List.of(slayerTogether)),
             Map.entry("foraging", List.of(galateashulker)),

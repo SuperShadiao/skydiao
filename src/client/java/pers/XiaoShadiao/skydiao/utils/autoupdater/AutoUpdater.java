@@ -208,7 +208,7 @@ public class AutoUpdater {
                     File oldFile1 = oldFile;
                     Matcher matcher = Pattern.compile("([^\\/]+\\.jar)").matcher(string);
                     if(matcher.find()) oldFile1 = new File(modsFolder, matcher.group());
-
+                    log.info(oldFile1);
                     if(oldFile1.exists()) {
                         oldFile = oldFile1;
                     } else {

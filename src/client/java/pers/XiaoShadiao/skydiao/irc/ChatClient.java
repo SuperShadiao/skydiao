@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.ICustomSkinModelLoader;
+import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.XSDSafeSession;
@@ -198,7 +199,7 @@ public class ChatClient extends Thread {
 
         if(AbstractListener.basicListener.isAFK()) sender.sendAFK(true);
 
-        sender.sendOnlineInfo();
+        sender.sendOnlineInfo(StatusManager.get());
 
         if(lastIRCError != null) {
             p = new ChatPacket();

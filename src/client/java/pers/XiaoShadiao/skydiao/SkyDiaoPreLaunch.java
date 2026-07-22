@@ -175,11 +175,13 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
             initJars = () -> {
                 for (Lib lib : libs) {
                     try {
-                        if(lib.getLoadFile().exists() && !lib.isLoadExist()) {
-                            lib.getLoadFile().delete();
+                        File loadFile = lib.getLoadFile();
+                        if(loadFile.exists() && !lib.isLoadExist()) {
+                            loadFile.delete();
                             throw new RuntimeException("lib文件" + lib.name + "已损坏, 请重新启动客户端。");
                         }
-                        addURL(urlClassLoader, lib.getLoadFile().toURI().toURL());
+                        log.info(loadFile);
+                        addURL(urlClassLoader, loadFile.toURI().toURL());
                     } catch (MalformedURLException e) {
                         throw new RuntimeException(e);
                     }

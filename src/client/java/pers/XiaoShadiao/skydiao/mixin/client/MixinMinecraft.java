@@ -225,7 +225,7 @@ public class MixinMinecraft {
             this.rightClickDelay = InputSimulator.rightClickDelay;
         }
         if(instance == ToolList.mc.options.keyUse) {
-            return original.call(instance) || (InputSimulator.isMouseRightHolding && InputSimulator.rightClickDelay == 0 && !InputSimulator.hasRemainRightClick() && !InputSimulator.isInventoryOpen());
+            return original.call(instance) || (InputSimulator.isMouseRightHolding && !InputSimulator.hasRemainRightClick() && !InputSimulator.isInventoryOpen());
         }
         return original.call(instance);
     }

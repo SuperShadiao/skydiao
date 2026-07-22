@@ -67,12 +67,11 @@ public class ClientSender extends ChatClient {
         send(packet);
     }
 
-    public void sendOnlineInfo() {
+    public void sendOnlineInfo(StatusManager sm) {
         ChatPacket packet = new ChatPacket();
         packet.packetType = "onlineinfo";
 
         JsonObject json = new JsonObject();
-        StatusManager sm = StatusManager.get();
         if(sm != null) {
             json.addProperty("serverID", String.valueOf(sm.getServerID()));
             json.addProperty("gameType", String.valueOf(sm.getType()));
