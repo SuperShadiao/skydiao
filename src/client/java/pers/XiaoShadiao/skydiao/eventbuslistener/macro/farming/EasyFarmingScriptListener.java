@@ -292,14 +292,14 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
     }
 
     private Map<String, Integer> farmingToolIndex = null;
-    private ArrayList<Integer> autoPestsConfig = null;
+    // private ArrayList<Integer> autoPestsConfig = null;
     private ArrayList<Integer> autoLoadoutConfig = null;
     private boolean autoSprayonatorConfig = false;
 
     private void getAutoFarmingConfig() {
         farmingToolIndex = FarmingUtils.getFarmingToolIndex();
-        autoPestsConfig = FarmingUtils.strConfToIntArr(ConfigManager.autoKillPests.getValue(),
-                "自动杀害虫", 3);
+//        autoPestsConfig = FarmingUtils.strConfToIntArr(ConfigManager.autoKillPests.getValue(),
+//                "自动杀害虫", 3);
         autoLoadoutConfig = FarmingUtils.strConfToIntArr(ConfigManager.autoChangeLo.getValue(),
                 "自动切换装备", 4);
         autoSprayonatorConfig = ConfigManager.autoSprayonator.getValue();
@@ -312,10 +312,11 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
     }
 
     private void autoKillPest() {
-        if (autoPestsConfig == null || SleepActions.actionDoing || !FarmingUtils.hasPests()) return;
+        if (/*autoPestsConfig == null || */!ConfigManager.halfAutoKillPests.getValue() || SleepActions.actionDoing || !FarmingUtils.hasPests()) return;
         int vacuum = farmingToolIndex.getOrDefault("vacuum", -1);
         if (vacuum == -1) return;
-        ToolList.printChatMessage(Component.literal("§a[小沙雕] §b准备自动杀虫"));
+        ToolList.printChatMessage(Component.literal("§a[小沙雕] §b害虫已生成, 正在等待人工杀虫..."));
+        XSDHUD.bigTitle.updateTitleMsg("§e害虫已生成, 正在进行预操作...", 6000, SoundEvents.WITHER_SPAWN);
 
         SleepActions kpest = SleepActions.builder()
                 .addSleep(1000)
@@ -328,20 +329,35 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             executeDayNightSwitch(kpest, false);
         }
 
-        kpest.addAction(ctx -> {
+
+        kpest.addAction(InputSimulator::unpressAllKey)
+                .addAction(ctx -> {
                     ctx.put("lastSelectedSlot", mc.player.getInventory().getSelectedSlot());
                     InputSimulator.switchItem(vacuum);
                 }, 300, true)
-                .addAction(() -> ToolList.sendChatMessage("/setspawn"), 450)
-                .addAction(FarmingUtils::tpToPestPlot, 1000, true)
-                .addAction(InputSimulator::pressRightClick, 300);
+                .addAction(() -> ToolList.sendChatMessage("/setspawn"))
+//                .addAction(FarmingUtils::tpToPestPlot, 1000, true)
+//                .addAction(InputSimulator::pressRightClick, 300);
+//
+//        for (int i = 0; i < autoPestsConfig.get(0); i++)
+//            kpest.addAction(() -> InputSimulator.setForward(true), autoPestsConfig.get(1))
+//                    .addAction(() -> InputSimulator.setForward(false), autoPestsConfig.get(2));
+//
+//        kpest.addAction(InputSimulator::unpressAllKey, 200)
+//                .addAction(ctx -> InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")), 500, true)
 
-        for (int i = 0; i < autoPestsConfig.get(0); i++)
-            kpest.addAction(() -> InputSimulator.setForward(true), autoPestsConfig.get(1))
-                    .addAction(() -> InputSimulator.setForward(false), autoPestsConfig.get(2));
+                .addAction(() -> XSDHUD.bigTitle.updateTitleMsg("§b预操作完成, 请手动杀虫!", 6000, SoundEvents.WITHER_SPAWN))
+                .addAction(() -> {
+                    while (FarmingUtils.hasPests()) {
+                        try {
+                            SleepActions.flagAntiMacro();
+                            Thread.sleep(100);
+                        } catch (InterruptedException _) {}
+                    }
+                }, 0, true)
+                .addAction(() -> XSDHUD.bigTitle.updateTitleMsg("§e即将返回原来的点位...", 4000), 1500, true)
 
-        kpest.addAction(InputSimulator::unpressAllKey, 200)
-                .addAction(ctx -> InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")), 500, true)
+                .addAction(ctx -> InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")), 500)
                 .addAction(() -> ToolList.sendChatMessage("/warp garden"), 1000, true);
 
         if (ConfigManager.fsGardenMoonFlowerMode.getValue()) {

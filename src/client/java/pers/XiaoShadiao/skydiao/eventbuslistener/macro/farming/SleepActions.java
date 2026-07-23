@@ -1,6 +1,7 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming;
 
 
+import net.minecraft.network.chat.Component;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.ArrayList;
@@ -59,17 +60,27 @@ public class SleepActions {
     private final ArrayList<Action> actions = new ArrayList<>();
     private final Map<String, Object> context = new HashMap<>();
 
+    public static void flagAntiMacro() {
+        antiMarcoTime = System.currentTimeMillis();
+    }
+
     public void run() {
         actionDoing = true;
         ToolList.addThreadedTask(() -> {
-            for (Action action : actions) {
-                if (action.antiMarco) antiMarcoTime = System.currentTimeMillis();
-                if (action.ro != null) action.ro.run();
-                if (action.rw != null) action.rw.run(context);
-                int randSleep = ToolList.getInstance().random.nextInt(action.sleepMs / 4) + action.sleepMs;
-                if (randSleep > 0) Thread.sleep(randSleep);
+            try {
+                for (Action action : actions) {
+                    if (action.antiMarco) flagAntiMacro();
+                    if (action.ro != null) action.ro.run();
+                    if (action.rw != null) action.rw.run(context);
+                    int randSleep = ToolList.getInstance().random.nextInt(action.sleepMs / 4 + 1) + action.sleepMs;
+                    if (randSleep > 0) Thread.sleep(randSleep);
+                }
+            } catch (Exception e) {
+                ToolList.getInstance().log.catching(e);
+                ToolList.printChatMessage(Component.literal("§a[小沙雕] §c执行农业脚本时出错: " + e + ", 如果问题频繁发生, 请发送日志给小沙雕."));
+            } finally {
+                actionDoing = false;
             }
-            actionDoing = false;
             return null;
         });
     }

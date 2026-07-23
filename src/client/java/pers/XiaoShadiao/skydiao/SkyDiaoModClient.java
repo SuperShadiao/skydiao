@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 public class SkyDiaoModClient implements ClientModInitializer {
 
     public static final String MOD_ID = "skydiao";
-    public static final String VERSION = "0.5.7";
+    public static final String VERSION = "0.5.8";
 
     public static final String CONST_QQGROUP_MAIN = "728972740";
     public static final String CONST_QQGROUP_OTHER1 = "1103539591";

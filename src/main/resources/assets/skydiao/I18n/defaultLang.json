@@ -942,6 +942,10 @@
       "configname": "§e自动Dojo Mastery射击时间",
       "description": "§e在Dojo Mastery项目中, 当黄色羊毛倒计时到达指定时间后射击, 例如设置为0.2s则在黄色羊毛倒计时到0.2s时射击, 该选项需要根据你的网络延迟设置"
     },
+    "fshalfautokillpests": {
+      "configname": "§e农业脚本半自动杀虫",
+      "description": "§e请确保吸虫器位于快捷栏，之后会自动切换loadout，完成后将由你来手动杀虫，完成后会自动回到原处继续农业"
+    },
     "about1": "§e小沙雕的QQ: 3381949033",
     "about2": "§e小沙雕の狗窝: https://xiaoshadiao.club/qqg",
     "about3": "§e部分快捷键设置可在 ESC->选项(设置)->控制 中找到",

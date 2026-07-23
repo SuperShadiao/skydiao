@@ -73,6 +73,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -145,19 +146,21 @@ public class BasicListener extends AbstractListener {
                         File temp = File.createTempFile("pack1", ".zip");
                         File target = new File(mc.getResourcePackDirectory().toFile(), "hypixel_resoucepack.zip");
                         FileUtils.copyInputStreamToFile(ToolList.getInstance().makeReqToURL(packet2.url()), temp);
-                        if(!FileUtils.contentEquals(temp, target)) FileUtils.moveFile(temp, target, StandardCopyOption.REPLACE_EXISTING);
+                        if(!FileUtils.contentEquals(temp, target)) Files.move(temp.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     } catch (IOException e) {
                         errorLines.add("下载Hypixel官材失败, 请检查你的网络后重新进入Skyblock: " + e);
-                        e.printStackTrace();
+                        errorLines.add("如果提示文件已被占用, 则当前官方材质包已发生更新, 请前往材质包选择页面卸载材质包后重新进入Skyblock, 并在弹出消息后重新安装材质包!");
+                        logger.catching(e);
                     }
                     try {
                         File temp = File.createTempFile("pack2", ".zip");
                         File target = new File(mc.getResourcePackDirectory().toFile(), "SkyBlock Legacy.zip");
                         FileUtils.copyInputStreamToFile(ToolList.getInstance().makeReqToURL("https://xiaoshadiao.club/3rd_lib/pack/SkyBlockLegacy.zip"), temp);
-                        if(!FileUtils.contentEquals(temp, target)) FileUtils.moveFile(temp, target, StandardCopyOption.REPLACE_EXISTING);
+                        if(!FileUtils.contentEquals(temp, target)) Files.move(temp.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     } catch (IOException e) {
                         errorLines.add("下载Legacy (原版) 材质包失败, 请检查你的网络后重新进入Skyblock: " + e);
-                        e.printStackTrace();
+                        errorLines.add("如果提示文件已被占用, 则当前官方材质包已发生更新, 请前往材质包选择页面卸载材质包后重新进入Skyblock, 并在弹出消息后重新安装材质包!");
+                        logger.catching(e);
                     }
 
                     try {

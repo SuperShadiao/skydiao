@@ -267,6 +267,8 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
 
     private void afterScreenRender(Screen screen, GuiGraphicsExtractor guiGraphics, int width, int height, float deltaTick) {
         if (!ConfigManager.dungeonf7autoterm.getValue()) return;
+        if (currentTerminal == TerminalType.MELODY && System.currentTimeMillis() - lastClickTime < 1000 &&
+                Optional.ofNullable(lastClick).map(Click::slot).map(s -> s.index).equals(Optional.ofNullable(pendingClick).map(Click::slot).map(s -> s.index))) return;
         if (System.currentTimeMillis() - lastClickTime > ToolList.getInstance().random.nextInt(31) + ConfigManager.dungeonf7autotermclickdelay.getValue() && pendingClick != null) {
             Click temp = lastClick = pendingClick;
             pendingClick = null;

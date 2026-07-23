@@ -104,6 +104,7 @@ public class ConfigManager {
     public static final BooleanConfigOption hubratesp = new BooleanConfigOption("hubratesp", true);
     public static final BooleanConfigOption autoSprayonator = new BooleanConfigOption("fsautosprayonator", false).flagAsMacroFeature();
     public static final StringConfigOption autoKillPests = new StringConfigOption("fsautokillpests", "").flagAsMacroFeature();
+    public static final BooleanConfigOption halfAutoKillPests = new BooleanConfigOption("fshalfautokillpests", false).flagAsMacroFeature();
     public static final StringConfigOption autoChangeLo = new StringConfigOption("fsautochangelo", "").flagAsMacroFeature();
     public static final BooleanConfigOption gardenTrapPrompt = new BooleanConfigOption("gardentrapprompt", true);
     public static final BooleanConfigOption gardenBonusPrompt = new BooleanConfigOption("gardenbonusprompt", true);
@@ -196,7 +197,7 @@ public class ConfigManager {
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareAnnounce, skyblockSafeIsland, crystalHollowHelper, crystalHollowHelperDebug, crystalHollowDupServerTipper, crystalHollowHelperDisableThreadLimit, genshinImpactHeatColdRender)),
             Map.entry("combat", List.of(slayerTogether)),
             Map.entry("foraging", List.of(galateashulker)),
-            Map.entry("farming", List.of(hubratesp, autoSprayonator, autoChangeLo, autoKillPests, gardenTrapPrompt, gardenBonusPrompt, fsGardenMoonFlowerMode)),
+            Map.entry("farming", List.of(hubratesp, autoSprayonator, autoChangeLo, halfAutoKillPests, gardenTrapPrompt, gardenBonusPrompt, fsGardenMoonFlowerMode)),
             Map.entry("fishing", List.of(hotspotrender, autogg, lotusAtollHelper, fishingBigFishRender, fishingBigFishTip)),
             Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7InactiveTerminalRender, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered, dungeonDrinkPotion, dungeonBloodRoomTime, dungeonTrashTPS, dungeonf7msgbotssleap)),
             Map.entry("rift", List.of(rifttimegunhelper)),

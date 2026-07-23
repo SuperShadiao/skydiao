@@ -12,13 +12,12 @@ import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
-import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.network.protocol.game.*;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Blaze;
 import net.minecraft.world.entity.player.Player;
@@ -118,6 +117,7 @@ public class GhostEntityFixer extends AbstractListener {
     private void enqueueRemoveEntity(Entity entity) {
         if(entity instanceof ArmorStand && !entity.getName().getString().contains("❤")) return;
         if(entity instanceof Blaze) return;
+        if(entity instanceof WitherBoss) return;
         if(entity instanceof RemotePlayer player) {
             if(player.getTeam() != null) {
                 String name = player.getTeam().getName();
@@ -147,6 +147,14 @@ public class GhostEntityFixer extends AbstractListener {
             } else if (packet instanceof ClientboundAddEntityPacket addEntityPacket) {
                 entityId = addEntityPacket.getId();
                 increaseCount = 2;
+            } else if (packet instanceof ClientboundEntityPositionSyncPacket syncPacket) {
+                entityId = syncPacket.id();
+            } else if (packet instanceof ClientboundTeleportEntityPacket entityPacket) {
+                entityId = entityPacket.id();
+            } else if (packet instanceof ClientboundSetEntityMotionPacket entityPacket) {
+                entityId = entityPacket.id();
+            } else if (packet instanceof ClientboundSetEntityLinkPacket entityPacket) {
+                entityId = entityPacket.getSourceId();
             }
             if(entityId != null) {
                 Entity entity = mc.level.getEntity(entityId);
