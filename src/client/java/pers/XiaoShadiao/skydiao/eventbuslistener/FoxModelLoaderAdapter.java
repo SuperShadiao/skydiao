@@ -81,7 +81,7 @@ public class FoxModelLoaderAdapter extends AbstractListener implements ICustomSk
     private void onSendPacket(Packet<?> packet) {
         if (packet instanceof ServerboundCustomPayloadPacket(CustomPacketPayload payload)) {
             // logger.info("Send Custom Payload: " + payload.type().id());
-            if (payload.type().id().getNamespace().equals("sparkle_morpher")) {
+            if (payload.type().id().getNamespace().equals("yes_steve_model")) {
                 if (payload instanceof YSMPayload(FriendlyByteBuf buf)) {
                     FriendlyByteBuf copy = new FriendlyByteBuf(buf.copy());
                     long id = copy.readUnsignedByte();
