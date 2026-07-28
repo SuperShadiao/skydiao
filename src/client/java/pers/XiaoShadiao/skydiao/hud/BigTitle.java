@@ -25,16 +25,24 @@ public class BigTitle extends XSDHUD {
         ScreenEvents.AFTER_INIT.register(this::afterScreenInit);
     }
 
+    @Override
+    public void renderEffect(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
+
+    }
+
     private void afterScreenInit(Minecraft mc, Screen screen, int scaledWidth, int scaledHeight) {
         ScreenEvents.afterExtract(screen).register(this::render);
     }
 
     private void render(Screen screen, GuiGraphicsExtractor guiGraphics, int i, int i1, float v) {
-        render(guiGraphics, mc.getDeltaTracker());
+        extractRenderState(guiGraphics, mc.getDeltaTracker());
     }
 
     @Override
-    public void render(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
+    public void render(GuiGraphicsExtractor context, DeltaTracker tickCounter, boolean force) {
+        if(System.currentTimeMillis() >= displayTime && force) {
+            updateTitleMsg("什么? Bonzo爆炸了?", 1000, null);
+        }
         if(title != null && System.currentTimeMillis() < displayTime && mc.player != null && mc.level != null) {
             Matrix3x2fStack pose = context.pose();
             pose.pushMatrix();
@@ -45,6 +53,11 @@ public class BigTitle extends XSDHUD {
         }
     }
 
+    @Override
+    public String getHudName() {
+        return "big_title";
+    }
+
     public void updateTitleMsg(String title, long displayTime) {
         updateTitleMsg(title, displayTime, SoundEvents.NOTE_BLOCK_PLING.value());
     }
@@ -52,7 +65,7 @@ public class BigTitle extends XSDHUD {
     public void updateTitleMsg(String title, long displayTime, SoundEvent soundEvent) {
         this.title = title;
         this.displayTime = System.currentTimeMillis() + displayTime;
-        ToolList.getInstance().playSound(soundEvent);
+        if(soundEvent != null) ToolList.getInstance().playSound(soundEvent);
     }
 
 }

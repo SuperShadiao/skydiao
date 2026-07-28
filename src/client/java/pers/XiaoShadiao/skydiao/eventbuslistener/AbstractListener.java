@@ -61,6 +61,7 @@ public abstract class AbstractListener extends Thread {
     public static final XiaoShadiaoCommandListener xiaoShadiaoCommandListenerListener = new XiaoShadiaoCommandListener();
     public static final AutoLoadoutListener autoLoadoutListener = new AutoLoadoutListener();
     public static final F7InactiveTerminalRenderListener f7InactiveTerminalRenderListener = new F7InactiveTerminalRenderListener();
+    public static final BetterAFKPlaceListener betterAFKPlaceListener = new BetterAFKPlaceListener();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();

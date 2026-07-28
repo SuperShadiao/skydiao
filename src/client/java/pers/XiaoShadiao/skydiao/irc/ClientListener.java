@@ -90,7 +90,7 @@ public class ClientListener extends ChatClient {
 
                                 handler.handle(packet, this);
                             } catch (Exception e) {
-                                if(ToolList.getInstance().isDevEnvironment()) {
+                                if(ToolList.getInstance().isXiaoShadiao()) {
                                     System.out.println("BAD PACKET: " + new String(data.toByteArray(), StandardCharsets.UTF_8));
                                     e.printStackTrace();
                                 }

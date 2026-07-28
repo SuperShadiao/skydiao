@@ -3,6 +3,7 @@ package pers.XiaoShadiao.skydiao.screen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.components.tabs.GridLayoutTab;
 import net.minecraft.client.gui.components.tabs.Tab;
@@ -23,10 +24,15 @@ import pers.XiaoShadiao.skydiao.config.option.*;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
+import pers.XiaoShadiao.skydiao.utils.screen.XSDSliderButton;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager.translate;
@@ -130,7 +136,7 @@ public class ConfigScreen extends Screen {
         if(ToolList.getInstance().isDevEnvironment()) {
             List<ConfigOption<?>> test = new ArrayList<>();
             for (int i = 0; i < 50; i++) {
-                switch(ToolList.getInstance().random.nextInt(5)) {
+                switch(ToolList.getInstance().random.nextInt(6)) {
                     case 0:
                         test.add(new BooleanConfigOption("test" + i, true));
                         break;
@@ -144,9 +150,12 @@ public class ConfigScreen extends Screen {
                         test.add(new StringConfigOption("test" + i, "awa"));
                         break;
                     case 4:
-                    default:
                         test.add(new SelectConfigOption("test" + i, 0, List.of("a", "b", "c")));
                         break;
+                    case 5:
+                        test.add(new ColorConfigOption("test" + i, new Color(ToolList.getInstance().random.nextInt(256), ToolList.getInstance().random.nextInt(256), ToolList.getInstance().random.nextInt(256)).getRGB()));
+                        break;
+                    default:
                 }
             }
             list.add(new ConfigTab("test", test));
@@ -293,7 +302,7 @@ public class ConfigScreen extends Screen {
             public ConfigList(ConfigTab tab) {
                 super(Minecraft.getInstance(), ConfigScreen.this.width, ConfigScreen.this.layout.getContentHeight(), ConfigScreen.this.layout.getHeaderHeight(), 20);
                 for (ConfigOption<?> configOption : configOptions) {
-                    addEntry(new ConfigEntry(configOption, tab));
+                    addEntry(configOption instanceof ColorConfigOption ? new ColorConfigEntry(configOption, tab) : new ConfigEntry(configOption, tab));
                 }
                 this.tab = tab;
             }
@@ -388,6 +397,88 @@ public class ConfigScreen extends Screen {
                 @Override
                 public @NotNull List<? extends GuiEventListener> children() {
                     return List.of(widget);
+                }
+            }
+
+            public static class ColorConfigEntry extends AbstractConfigEntry {
+                private final ConfigOption<?> option;
+                private final XSDSliderButton r;
+                private final XSDSliderButton g;
+                private final XSDSliderButton b;
+                private Color color;
+                private final ConfigTab tab;
+                public ColorConfigEntry(ConfigOption<?> option, ConfigTab tab) {
+                    this.option = option;
+                    this.tab = tab;
+                    switch(option) {
+                        case ColorConfigOption colorOption -> {
+
+                            color = new Color(colorOption.getValue());
+                            DoubleSupplier rSupplier = () -> color.getRed() / 255d;
+                            DoubleSupplier gSupplier = () -> color.getGreen() / 255d;
+                            DoubleSupplier bSupplier = () -> color.getBlue() / 255d;
+                            DoubleConsumer rSetter = (r) -> colorOption.setValue((color = new Color((int) (r * 255), color.getGreen(), color.getBlue())).getRGB());
+                            DoubleConsumer gSetter = (g) -> colorOption.setValue((color = new Color(color.getRed(), (int) (g * 255), color.getBlue())).getRGB());
+                            DoubleConsumer bSetter = (b) -> colorOption.setValue((color = new Color(color.getRed(), color.getGreen(), (int) (b * 255))).getRGB());
+                            Supplier<String> rMsg = () -> "§c" + color.getRed();
+                            Supplier<String> gMsg = () -> "§a" + color.getGreen();
+                            Supplier<String> bMsg = () -> "§1" + color.getBlue();
+
+                            r = new XSDSliderButton(0, 0, 33, 20, Component.empty(), 1)
+                                    .valueGetter(rSupplier)
+                                    .valueSetter(rSetter)
+                                    .stringMsgGetter(rMsg);
+                            g = new XSDSliderButton(0, 0, 33, 20, Component.empty(), 1)
+                                    .valueGetter(gSupplier)
+                                    .valueSetter(gSetter)
+                                    .stringMsgGetter(gMsg);
+                            b = new XSDSliderButton(0, 0, 33, 20, Component.empty(), 1)
+                                    .valueGetter(bSupplier)
+                                    .valueSetter(bSetter)
+                                    .stringMsgGetter(bMsg);
+
+                        }
+                        default -> throw new UnsupportedOperationException(option.getClass().getName());
+                    };
+                    MutableComponent component = Component.literal(option.getI18nDesc());
+                    if(option.isMacroFeature()) {
+                        component.append("\n\n");
+                        component.append(translate("config.macrofeaturealert"));
+                    }
+                    if(option instanceof TimeDelayOption) {
+                        component.append("\n\n");
+                        component.append(translate("config.timedelaydesc"));
+                    }
+                    r.setTooltip(Tooltip.create(component));
+                    g.setTooltip(Tooltip.create(component));
+                    b.setTooltip(Tooltip.create(component));
+                }
+
+                @Override
+                public @NotNull List<? extends NarratableEntry> narratables() {
+                    return List.of(r, g, b);
+                }
+
+                @Override
+                public void extractContent(GuiGraphicsExtractor guiGraphics, int left, int top, boolean bl, float f) {
+                    String name = option.getI18nName();
+                    // guiGraphics.drawString(Minecraft.getInstance().font, name, getContentX() - 5, getContentY() + 5, 0xFFFFFFFF);
+                    RenderUtils.renderScrollingString(guiGraphics, ToolList.mc.font, Component.literal(name), getContentX(), getContentX(), getContentY() - 25, getContentX() + 100, getContentY() + 44, 0xFFFFFFFF);
+                    r.setX(getContentRight() - r.getWidth() + 5 - 33 - 33);
+                    r.setY(getContentY());
+                    r.extractRenderState(guiGraphics, left, top, f);
+                    g.setX(getContentRight() - g.getWidth() + 5 - 33);
+                    g.setY(getContentY());
+                    g.extractRenderState(guiGraphics, left, top, f);
+                    b.setX(getContentRight() - b.getWidth() + 5);
+                    b.setY(getContentY());
+                    b.extractRenderState(guiGraphics, left, top, f);
+                    if(r.isHoveredOrFocused() || g.isHoveredOrFocused() || b.isHoveredOrFocused()) guiGraphics.fill(getContentRight() - r.getWidth() + 5 - 33 - 33 - 21, getContentY(), getContentRight() - r.getWidth() + 5 - 33 - 33 - 1, getContentY() + 20, color.getRGB());
+                }
+
+                @Override
+                public @NotNull List<? extends GuiEventListener> children() {
+                    return List.of(r, g, b);
                 }
             }
 

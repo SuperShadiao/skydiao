@@ -463,9 +463,9 @@ public class AutoBloodfiendListener extends AbstractListener implements IMacro {
         }
 
         @Override
-        public void render(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
-            if(checkIsDisabled()) return;
-            if(bloodfiendInstance != null || debugSkills != null) {
+        public void render(GuiGraphicsExtractor context, DeltaTracker tickCounter, boolean force) {
+            if(!force && checkIsDisabled()) return;
+            if(force || bloodfiendInstance != null || debugSkills != null) {
                 int i = context.guiHeight() / 2;
                 int x = context.guiWidth() / 3;
 
@@ -490,6 +490,16 @@ public class AutoBloodfiendListener extends AbstractListener implements IMacro {
                     i += mc.font.lineHeight;
                 }
             }
+        }
+
+        @Override
+        public void renderEffect(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
+
+        }
+
+        @Override
+        public String getHudName() {
+            return "auto_bloodfiend_task_render";
         }
 
     }

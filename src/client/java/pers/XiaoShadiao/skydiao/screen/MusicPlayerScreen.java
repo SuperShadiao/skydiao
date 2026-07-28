@@ -20,6 +20,7 @@ import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicInfo;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.PlayerThread;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
+import pers.XiaoShadiao.skydiao.utils.screen.XSDSliderButton;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -81,22 +82,30 @@ public class MusicPlayerScreen extends Screen {
             b.setMessage(Component.literal(ConfigManager.musicplayermode.getCurrentDisplayString()));
             PlayerThread.clearQueue();
         }).size(70, 20).build());
-        linearLayout.addChild(new AbstractSliderButton(0, 0, 120, 20, Component.literal("音量"), 0.5) {
-            {
-                updateMessage();
-            }
+        linearLayout.addChild(
+                new XSDSliderButton(0, 0, 120, 20, Component.literal("音量"), 0.5)
+                        .valueGetter(() -> ConfigManager.xsdmusicvolume.getValue() / 200.0d)
+                        .valueSetter(value -> ConfigManager.xsdmusicvolume.setValue((int) (200 * value)))
+                        .stringMsgGetter(() -> "音量: " + ConfigManager.xsdmusicvolume.getValue())
+        );
 
-            @Override
-            protected void updateMessage() {
-                setMessage(Component.literal("音量: " + ConfigManager.xsdmusicvolume.getValue()));
-            }
-
-            @Override
-            protected void applyValue() {
-                ConfigManager.xsdmusicvolume.setValue((int) (200 * value));
-                updateMessage();
-            }
-        });
+//        {
+//            {
+//                updateMessage();
+//                setValue(ConfigManager.xsdmusicvolume.getValue() / 200.0d);
+//            }
+//
+//            @Override
+//            protected void updateMessage() {
+//            setMessage(Component.literal("音量: " + ConfigManager.xsdmusicvolume.getValue()));
+//        }
+//
+//            @Override
+//            protected void applyValue() {
+//            ConfigManager.xsdmusicvolume.setValue((int) (200 * value));
+//            updateMessage();
+//        }
+//        }
 
         linearLayout.setX(width / 2);
         musicList = new MusicList();

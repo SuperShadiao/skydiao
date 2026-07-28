@@ -114,7 +114,7 @@ public class ChatClient extends Thread {
                 } else {
                     socket = new Socket(hostPort[0], Integer.parseInt(hostPort[1]));
                 }
-                socket.setSoTimeout(150_000);
+                socket.setSoTimeout(0);
                 socket.setKeepAlive(false);
             } catch (IOException e) {
                 throw new RuntimeException(e);

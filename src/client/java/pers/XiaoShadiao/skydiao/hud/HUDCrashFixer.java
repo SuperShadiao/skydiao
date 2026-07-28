@@ -15,8 +15,18 @@ public class HUDCrashFixer extends XSDHUD {
     }
 
     @Override
-    public void render(@NotNull GuiGraphicsExtractor context, @NotNull DeltaTracker tickCounter) {
+    public void render(@NotNull GuiGraphicsExtractor context, @NotNull DeltaTracker tickCounter, boolean force) {
         ClientRenderCrashFixer.gg = context;
+    }
+
+    @Override
+    public void renderEffect(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
+        ClientRenderCrashFixer.gg = context;
+    }
+
+    @Override
+    public String getHudName() {
+        return null;
     }
 
 }

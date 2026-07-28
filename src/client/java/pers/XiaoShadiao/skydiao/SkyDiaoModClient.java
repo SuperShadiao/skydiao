@@ -1,6 +1,7 @@
 package pers.XiaoShadiao.skydiao;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.hypixel.modapi.HypixelModAPI;
 import net.hypixel.modapi.fabric.FabricModAPI;
@@ -31,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 public class SkyDiaoModClient implements ClientModInitializer {
 
     public static final String MOD_ID = "skydiao";
-    public static final String VERSION = "0.5.8";
+    public static final String VERSION = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow(AssertionError::new).getMetadata().getVersion().getFriendlyString();
 
     public static final String CONST_QQGROUP_MAIN = "728972740";
     public static final String CONST_QQGROUP_OTHER1 = "1103539591";
@@ -55,6 +56,7 @@ public class SkyDiaoModClient implements ClientModInitializer {
         System.out.println("[小沙雕] 加载器父类的父类: " + SkyDiaoModClient.class.getClassLoader().getClass().getSuperclass().getSuperclass());
         SkyDiaoPreLaunch.getInstance().execInitJars();
 
+        AutoUpdater.unlock();
         AutoUpdater.checkUpdate();
         try {
             CrowdinI18nManager.initI18n(CrowdinI18nManager.LangCode.chinese).future.get(10, TimeUnit.SECONDS);
@@ -95,7 +97,9 @@ public class SkyDiaoModClient implements ClientModInitializer {
 
         CommandManager.registerCommands();
         KeyBindsManager.registerKeyBinds();
-        Runtime.getRuntime().addShutdownHook(new Thread(new ExecuteOfflineThread()));
+        ExecuteOfflineThread task = new ExecuteOfflineThread();
+        Runtime.getRuntime().addShutdownHook(new Thread(task));
+        ClientLifecycleEvents.CLIENT_STOPPING.register(task::run);
 
     }
 }

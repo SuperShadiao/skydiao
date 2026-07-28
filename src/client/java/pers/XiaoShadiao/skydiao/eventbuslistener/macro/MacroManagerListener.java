@@ -1,5 +1,6 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener.macro;
 
+import com.mojang.text2speech.Narrator;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.client.Minecraft;
@@ -130,6 +131,8 @@ public class MacroManagerListener extends AbstractListener {
         ToolList.printChatMessage(Component.literal("§a[小沙雕] §cAlert! Macro check!"));
         ToolList.printChatMessage(Component.literal("§a[小沙雕] §c请不要慌张, 如果你在当前状态第一次被check, 立即切换为手动并返回继续当前操作 (比如继续钓鱼), 发生第二次check再进行响应!"));
         WindowsUtils.focusWindows();
+        // mc.getNarrator().saySystemNow("Alert! Macro check! 警告! 马口检查!");
+        Narrator.getNarrator().say("Alert! Macro check! 警告! 马口检查!", false, 1);
         alertTasks.removeIf(t -> t.future.isDone());
         if(alertTasks.size() < 3) {
             alertTasks.add(ToolList.addThreadedTask(() -> {

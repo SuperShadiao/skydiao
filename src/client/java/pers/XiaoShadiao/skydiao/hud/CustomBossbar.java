@@ -67,6 +67,11 @@ public class CustomBossbar extends XSDHUD {
         LevelRenderEvents.END_MAIN.register(this::onLastRender);
     }
 
+    @Override
+    public void renderEffect(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
+
+    }
+
     private void onLastRender(LevelRenderContext context) {
         if(starRailBossBar != null) {
             LivingEntity entity = starRailBossBar.getTargetEntity();
@@ -124,8 +129,11 @@ public class CustomBossbar extends XSDHUD {
     }
 
     @Override
-    public void render(@NotNull GuiGraphicsExtractor context, @NotNull DeltaTracker tickCounter) {
+    public void render(@NotNull GuiGraphicsExtractor context, @NotNull DeltaTracker tickCounter, boolean force) {
         if(mc.level == null) return;
+        if(force) {
+            addEntityToBossbar(mc.player);
+        }
         MixinBossbarEventGetter bossbarEventGetter = (MixinBossbarEventGetter) mc.gui.getBossOverlay();
         List<UUID> temp = new ArrayList<>(bossbarEventGetter.getEvents().size());
         bossbarEventGetter.getEvents().forEach((uuid, lerpingBossEvent) -> {
@@ -301,6 +309,11 @@ public class CustomBossbar extends XSDHUD {
         pose.popMatrix();
         boolean finalClearFlag = clearFlag;
         animationMap.entrySet().removeIf(entry -> ((finalClearFlag && !eventBossbars.contains(entry.getKey())) || !entry.getValue().isActive()) && mc.level.getEntity(entry.getKey()) == null);
+    }
+
+    @Override
+    public String getHudName() {
+        return "custom_bossbar";
     }
 
     public void addEntityToBossbar(LivingEntity entity) {

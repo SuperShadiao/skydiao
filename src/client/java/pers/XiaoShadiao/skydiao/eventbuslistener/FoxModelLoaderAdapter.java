@@ -23,6 +23,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.PacketListener;
@@ -43,10 +44,7 @@ import rip.ysm.api.network.fabric.YSMPayload;
 
 import java.lang.reflect.Method;
 import java.nio.file.Files;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class FoxModelLoaderAdapter extends AbstractListener implements ICustomSkinModelLoader {
 
@@ -60,6 +58,7 @@ public class FoxModelLoaderAdapter extends AbstractListener implements ICustomSk
     private String currentTextureId;
 
     private boolean isFlying = false;
+    private int delaySyncTick = 0;
 
     private final Map<String, Pair<String, String>> name2Id = new HashMap<>();
 
@@ -82,7 +81,7 @@ public class FoxModelLoaderAdapter extends AbstractListener implements ICustomSk
     private void onSendPacket(Packet<?> packet) {
         if (packet instanceof ServerboundCustomPayloadPacket(CustomPacketPayload payload)) {
             // logger.info("Send Custom Payload: " + payload.type().id());
-            if (payload.type().id().getNamespace().equals("yes_steve_model")) {
+            if (payload.type().id().getNamespace().equals("sparkle_morpher")) {
                 if (payload instanceof YSMPayload(FriendlyByteBuf buf)) {
                     FriendlyByteBuf copy = new FriendlyByteBuf(buf.copy());
                     long id = copy.readUnsignedByte();
@@ -99,6 +98,7 @@ public class FoxModelLoaderAdapter extends AbstractListener implements ICustomSk
     private void onUnload(Minecraft mc, ClientLevel level) {
         name2Id.clear();
         switchToModel(currentModelId, currentTextureId);
+        delaySyncTick = 40;
     }
 
     private void onTick(Minecraft mc) {
@@ -110,10 +110,14 @@ public class FoxModelLoaderAdapter extends AbstractListener implements ICustomSk
         if (!NetworkHandler.isClientConnected()) {
             NetworkHandler.markClientHandshakeComplete();
         }
+        if(delaySyncTick > 0) {
+            delaySyncTick--;
+            if(delaySyncTick == 0) resendSwitchPacket();
+        }
 
         if (mc.player == null) return;
         PlayerCapability.get(mc.player).ifPresent(cap -> {
-            String modelId = cap.getModelId();
+            String modelId = parseModelId(cap.getModelId());
             String currentTextureName = cap.getCurrentTextureName();
             if (!modelId.equals(currentModelId) || !currentTextureName.equals(currentTextureId)) {
                 currentModelId = modelId;
@@ -131,7 +135,7 @@ public class FoxModelLoaderAdapter extends AbstractListener implements ICustomSk
                         String currentId = cap.getModelId();
                         String currentTextureName = cap.getCurrentTextureName();
                         if (ClientModelManager.getModelContext(id.first()).isPresent()) {
-                            if (!currentId.equals(id.first()) || !currentTextureName.equals(id.second())) {
+                            if (!currentId.equals(id.first()) || !currentTextureName.equals(id.second()) || !cap.isModelReady() || !cap.isModelInitialized()) {
                                 cap.initModelWithTexture(id.first(), id.second());
                             }
                         }
@@ -195,9 +199,10 @@ public class FoxModelLoaderAdapter extends AbstractListener implements ICustomSk
             case "upload" -> uploadModelToIRC(model.modelId);
             case "download" -> loadModel(Base64.getDecoder().decode(model.data), model.modelId);
             case "switch" -> {
-                name2Id.put(packet.sender, Pair.of(model.modelId.toLowerCase(), model.textureId));
-                if (ClientModelManager.getModelContext(model.modelId.toLowerCase()).isEmpty()) {
-                    ChatPacket downloadPacket = new IRCModelPacket(model.modelId.toLowerCase(), "", "", "download").toIRCPacket();
+                String modelIdLowerCase = parseModelId(model.modelId);
+                name2Id.put(packet.sender, Pair.of(modelIdLowerCase, model.textureId));
+                if (ClientModelManager.getModelContext(modelIdLowerCase).isEmpty()) {
+                    ChatPacket downloadPacket = new IRCModelPacket(modelIdLowerCase, "", "", "download").toIRCPacket();
                     trySendToIRC(downloadPacket);
                 }
             }
@@ -208,7 +213,7 @@ public class FoxModelLoaderAdapter extends AbstractListener implements ICustomSk
                 FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.wrappedBuffer(decode));
                 int animationIndex = buf.readVarInt();
                 String category = buf.readUtf();
-                // System.out.println(category);
+                logger.info("Decode result: category '" + category + "' | animationIndex " + animationIndex);
                 for (Entity entity : mc.level.entitiesForRendering()) {
                     if(entity instanceof AbstractClientPlayer player) {
                         if(packet.sender.equals(player.getName().getString())) {
@@ -218,8 +223,10 @@ public class FoxModelLoaderAdapter extends AbstractListener implements ICustomSk
                                 OrderedStringMap<String, String> extraAnimations;
                                 if (StringUtils.isNotBlank(category) && extraAnimationClassify.containsKey(category)) {
                                     extraAnimations = extraAnimationClassify.get(category);
+                                    logger.info("Use category animation");
                                 } else {
                                     extraAnimations = modelProperties.getExtraAnimation();
+                                    logger.info("Use default animation");
                                 }
 
                                 if (extraAnimations.size() > animationIndex) {
@@ -249,6 +256,7 @@ public class FoxModelLoaderAdapter extends AbstractListener implements ICustomSk
     }
 
     private void loadModel(byte[] data, String id) {
+        Throwable anotherException = null;
         try {
             // 先解析 .ysm 文件
             Method parseMethod = ClientModelManager.class.getDeclaredMethod(
@@ -261,42 +269,65 @@ public class FoxModelLoaderAdapter extends AbstractListener implements ICustomSk
             try {
                 rawModel = (RawYsmModel) parseMethod.invoke(null, id + ".ysm", data);
             } catch(Throwable e) {
-                logger.warn("尝试YSM格式失败: " + e + ", 尝试使用ZIP");
+                anotherException = e;
+                logger.error("尝试YSM格式失败, 尝试使用ZIP");
+                logger.catching(e);
                 rawModel = (RawYsmModel) parseMethod.invoke(null, id + ".zip", data);
             }
-
             // 加载到内存
-            Method loadMethod = ClientModelManager.class.getDeclaredMethod(
-                    "loadLocalModel",
-                    String.class,
-                    RawYsmModel.class
-            );
-            loadMethod.setAccessible(true);
-            loadMethod.invoke(null, id.toLowerCase(), rawModel);
+            String realId = parseModelId(id);
+            Method loadMethod;
+            try {
+                loadMethod = ClientModelManager.class.getDeclaredMethod(
+                        "loadLocalModel",
+                        String.class,
+                        RawYsmModel.class
+                );
+                loadMethod.setAccessible(true);
+                loadMethod.invoke(null, realId, rawModel);
+            } catch (Throwable e) {
+                loadMethod = ClientModelManager.class.getDeclaredMethod(
+                        "loadLocalModel",
+                        String.class,
+                        RawYsmModel.class,
+                        boolean.class
+                );
+                loadMethod.setAccessible(true);
+                loadMethod.invoke(null, realId, rawModel, true);
+            }
 
-            ToolList.printChatMessage(Component.literal("§a[小沙雕] 从IRC下载了一个YSM模型: §e" + id));
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] 从IRC下载了一个YSM模型: §e" + realId));
             ToolList.printChatMessage(Component.literal("§a[小沙雕] 注意, 模型文件不会写到你的磁盘, 意味着你可以在模型列表看到该玩家的模型, 但重启后资源将被释放! 若你想要对方的模型, 请找他手动索取!"));
-            logger.info("加载了一个YSM模型: {}", id);
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c警告: 小沙雕禁止任何18+模型/内容, 如果你遇到对方包含这些内容, 请及时反馈给小沙雕"));
+            logger.info("加载了一个YSM模型: {}", realId);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            logger.error("解析从IRC下发的YSM模型失败: {}", e.getMessage());
+            logger.catching(e);
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c解析从IRC下发的YSM模型失败: " + e.getMessage()));
+            if(anotherException != null) {
+                ToolList.printChatMessage(Component.literal("§a[小沙雕] §c另一个错误: " + anotherException.getMessage()));
+            }
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c如果问题频繁发生, 请反馈给小沙雕!"));
         }
     }
 
     private void uploadModelToIRC(String modelId) {
-        modelId = modelId.toLowerCase();
+        modelId = parseModelId(modelId);
         String finalModelId = modelId;
 
-        ClientModelManager.getLocalModelSourcePath(modelId).ifPresent(path -> {
-            try {
-                byte[] bytes = Files.readAllBytes(path);
-                String base64 = Base64.getEncoder().encodeToString(bytes);
-                ChatPacket packet = new IRCModelPacket(finalModelId, "", base64, "upload").toIRCPacket();
-                trySendToIRC(packet);
-                switchToModel(currentModelId, currentTextureId);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+        if(ClientModelManager.getModelContext(modelId).isPresent()) {
+            ClientModelManager.getLocalModelSourcePath(modelId).ifPresent(path -> {
+                try {
+                    byte[] bytes = Files.readAllBytes(path);
+                    String base64 = Base64.getEncoder().encodeToString(bytes);
+                    ChatPacket packet = new IRCModelPacket(finalModelId, "", base64, "upload").toIRCPacket();
+                    trySendToIRC(packet);
+                    switchToModel(currentModelId, currentTextureId);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
     }
 
     public void resendSwitchPacket() {
@@ -304,7 +335,8 @@ public class FoxModelLoaderAdapter extends AbstractListener implements ICustomSk
     }
 
     private void switchToModel(String modelId, String textureId) {
-        ChatPacket packet = new IRCModelPacket(modelId.toLowerCase(), textureId, "", "switch").toIRCPacket();
+        if (!StatusManager.get().hasStatus() || modelId == null || textureId == null) return;
+        ChatPacket packet = new IRCModelPacket(modelId, textureId, "", "switch").toIRCPacket();
         trySendToIRC(packet);
     }
 
@@ -339,7 +371,11 @@ public class FoxModelLoaderAdapter extends AbstractListener implements ICustomSk
     }
 
     public void restoreModelSelection() {
-        PlayerCapability.get(mc.player).ifPresent(cap -> {
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player == null) {
+            return;
+        }
+        PlayerCapability.get(player).ifPresent(cap -> {
             if (!"default".equals(cap.getModelId())) {
                 return;
             }
@@ -353,11 +389,29 @@ public class FoxModelLoaderAdapter extends AbstractListener implements ICustomSk
                 return;
             }
             cap.initModelWithTexture(modelId, textureId);
-            currentModelId = modelId;
+            currentModelId = parseModelId(modelId);
             currentTextureId = textureId;
             logger.info("Switched Model to {} | {}", currentModelId, currentTextureId);
             switchToModel(modelId, textureId);
         });
+    }
+
+    private String stripImportExtension(String modelId) {
+        String lower = modelId.toLowerCase(Locale.ROOT);
+        for (String extension : new String[]{".ysm", ".zip", ".bbmodel"}) {
+            if (lower.endsWith(extension)) {
+                return modelId.substring(0, modelId.length() - extension.length());
+            }
+        }
+        return modelId;
+    }
+
+    private String normalizeLocalModelId(String modelId) {
+        return stripImportExtension(modelId.replace('\\', '/').toLowerCase(Locale.ROOT).replaceAll("/+", "/"));
+    }
+
+    private String parseModelId(String modelId) {
+        return stripImportExtension(normalizeLocalModelId(modelId));
     }
 
 }

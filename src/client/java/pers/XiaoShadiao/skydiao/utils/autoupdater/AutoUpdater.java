@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
+import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.io.File;
@@ -15,10 +16,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
@@ -40,6 +38,8 @@ public class AutoUpdater {
         modsFolder = new File(ToolList.mc.gameDirectory, "mods");
     }
 
+    private static CountDownLatch locker = new CountDownLatch(1);
+
     private static boolean passedUpdateTip;
     public static final File updaterEXE = new File(ToolList.mc.gameDirectory, "xsdhhup.exe");
     private static File oldFile,newFile;
@@ -54,6 +54,10 @@ public class AutoUpdater {
 
     public static AutoUpdater getInstance() {
         return hh;
+    }
+
+    public static void unlock() {
+        locker.countDown();
     }
 
     public static AutoUpdater checkUpdate() {
@@ -98,6 +102,15 @@ public class AutoUpdater {
 
     private static AutoUpdater checkUpdate2() {
 
+        while(true) {
+            try {
+                locker.await();
+                break;
+            } catch (InterruptedException _) {
+
+            }
+        }
+
         log.info("awa");
         log.info("让我康康有没有更新可以用!");
 
@@ -141,6 +154,7 @@ public class AutoUpdater {
                         log.info("似乎没有更新可用!");
                         up = new AutoUpdater(up.URL,up.newVer,true);
                     };
+                    try { AbstractListener.basicListener.setSPMVersion(jo.get("spmv").getAsString()); } catch (Exception _) {}
 
                     return up;
                 } catch(Exception e) {

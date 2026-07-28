@@ -1,5 +1,6 @@
 package pers.XiaoShadiao.skydiao.utils.autoupdater;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.Util;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
@@ -9,7 +10,10 @@ import java.io.File;
 import java.io.IOException;
 
 public class ExecuteOfflineThread implements Runnable {
+    private boolean executed = false;
     public void run() {
+        if(executed) return;
+        executed = true;
         ConfigManager.saveConfig();
         ToolList.getInstance().log.info("SkyDiao Mod version check: " + SkyDiaoModClient.VERSION + "->" + SkyDiaoModClient.getCurrentNewVersion());
         if(!SkyDiaoModClient.VERSION.equals(SkyDiaoModClient.getCurrentNewVersion())) {
@@ -26,5 +30,9 @@ public class ExecuteOfflineThread implements Runnable {
         } else {
             ToolList.getInstance().log.info("SkyDiao 当前已是最新版 ovo");
         }
+    }
+
+    public void run(Minecraft mc) {
+        run();
     }
 }

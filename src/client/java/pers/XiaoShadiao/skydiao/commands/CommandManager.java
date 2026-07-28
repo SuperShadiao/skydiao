@@ -28,6 +28,8 @@ public interface CommandManager {
     public static final XSDCShowCommand XSDC_SHOW_COMMAND = new XSDCShowCommand();
     public static final SkydiaoStopABFCommand SKYDIAO_STOP_AF_COMMAND = new SkydiaoStopABFCommand();
     public static final HHStopABFCommand HH_STOP_AF_COMMAND = new HHStopABFCommand();
+    public static final SkydiaoHudCommand SKYDIAO_HUD_COMMAND = new SkydiaoHudCommand();
+    public static final HHHudCommand HH_HUD_COMMAND = new HHHudCommand();
 
     public static void registerCommands() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {

@@ -18,6 +18,11 @@ public class StarRailNotification extends XSDHUD {
         HudElementRegistry.addLast(Objects.requireNonNull(Identifier.tryBuild("skydiao", "starrailtip")), this);
     }
 
+    @Override
+    public void renderEffect(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
+
+    }
+
     public String message = "";
 
     private Type type;
@@ -26,9 +31,9 @@ public class StarRailNotification extends XSDHUD {
     private long updateTime;
 
     @Override
-    public void render(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
-
-        boolean flag = System.currentTimeMillis() - updateTime > 3000 + message.length() * 100L;
+    public void render(GuiGraphicsExtractor context, DeltaTracker tickCounter, boolean force) {
+        if(animationFadeOut != 0 && force) updateMessage("test", Type.tip);
+        boolean flag = !force && System.currentTimeMillis() - updateTime > 3000 + message.length() * 100L;
 
         float particalTick = tickCounter.getGameTimeDeltaTicks() * 3;
 
@@ -51,6 +56,7 @@ public class StarRailNotification extends XSDHUD {
                 context.fill((int) (width / 2f - 20 - (25 * (Math.cos(Math.min(animationFadeIn / 600, 0.5) * Math.PI))) - strLength / 2), (int) (height * 0.22f + 55 + (1-Math.cos(animationFadeIn / 800 * Math.PI) * 20)), (int) (width / 2f + 20 + (25 * (Math.cos(Math.min(animationFadeIn / 600, 0.5) * Math.PI))) + strLength / 2), (int) (height * 0.22f + 75 + (1-Math.cos(animationFadeIn / 800 * Math.PI) * 20)), color);
                 context.centeredText(mc.font, message, width / 2, (int) (height * 0.22f + 61 + (1-Math.cos(animationFadeIn / 800 * Math.PI) * 20)), new Color(1, 1f, 1f, alpha).getRGB());
                 break;
+            case tip:
             case success:
                 strLength = mc.font.width(message);
                 context.blit(RenderPipelines.GUI_TEXTURED, type.resource, width / 2 - 16, (int) (height * 0.22 + (1-Math.cos(animationFadeIn / 800 * Math.PI)) * 20), 0, 0, 32, 32, 32, 32, ((int) (alpha * 255) << 24) | 0xFFFFFF);
@@ -60,6 +66,11 @@ public class StarRailNotification extends XSDHUD {
                 break;
         }
 
+    }
+
+    @Override
+    public String getHudName() {
+        return "star_rail_notification";
     }
 
     public void updateMessage(String s, Type type0)  {
@@ -74,7 +85,7 @@ public class StarRailNotification extends XSDHUD {
     public enum Type {
         warning(Identifier.tryBuild("skydiao", "textures/starrail/warning.png")),
         success(Identifier.tryBuild("skydiao", "textures/starrail/success.png")),
-        tip(Identifier.tryBuild("skydiao", "textures/starrail/warning.png"));
+        tip(Identifier.tryBuild("skydiao", "textures/starrail/success.png"));
 
         public final Identifier resource;
 

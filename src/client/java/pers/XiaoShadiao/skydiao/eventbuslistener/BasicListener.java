@@ -277,6 +277,7 @@ public class BasicListener extends AbstractListener {
                                 ));
                             }
                         }
+                        checkOtherUpdates(update);
                     }
                     if (FabricLoader.getInstance().isModLoaded("modmenu")) {
                         ToolList.printChatMessage(Component.literal("§a[小沙雕] 你已安装ModMenu, 你可以§e点击这里§a中查看SkyDiao Mod的配置, 或者按 §eESC -> 模组 §a查看").withStyle(Style.EMPTY
@@ -511,6 +512,23 @@ public class BasicListener extends AbstractListener {
         } catch (Exception e) {
             logger.error("Error reset cape", e);
             logger.catching(e);
+        }
+    }
+
+    private String spmVersion = null;
+
+    public void setSPMVersion(String spmVersion) {
+        this.spmVersion = spmVersion;
+    }
+
+    private void checkOtherUpdates(AutoUpdater update) {
+        if (FabricLoader.getInstance().isModLoaded("sparkle_morpher") && spmVersion != null) {
+            FabricLoader.getInstance().getModContainer("sparkle_morpher").ifPresent(c -> {
+                if(!Objects.equals(spmVersion, c.getMetadata().getVersion().getFriendlyString())) {
+                    ToolList.printChatMessage(Component.literal("§a[小沙雕] Sparkle Morpher (YSM) 新版本可用: " + spmVersion));
+                    ToolList.printChatMessage(Component.literal("§a[小沙雕] 访问下载:§e https://5ixsd.top/spmmod"));
+                }
+            });
         }
     }
 }

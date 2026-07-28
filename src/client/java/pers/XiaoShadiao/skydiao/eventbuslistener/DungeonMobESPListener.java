@@ -52,10 +52,19 @@ public class DungeonMobESPListener extends AbstractListener {
                         RenderUtils.renderTrace(worldRender2, entity, MobType.Shadow.r, MobType.Shadow.g, MobType.Shadow.b, 1);
                     }
                 }
-                if (entity instanceof Bat && !entity.isInvisible() && XSDHUD.customBossbar.getStarRailBossBar() == null) {
-                    RenderUtils.renderESP(worldRender, entity, 1, 0.5f, 0, 1, true);
-                    RenderUtils.renderESP(worldRender2, entity, 1, 0.5f, 0, 1, false);
-                    RenderUtils.renderTrace(worldRender2, entity, 1, 0.5f, 0, 1);
+                if(XSDHUD.customBossbar.getStarRailBossBar() == null) {
+                    if (entity instanceof Bat && !entity.isInvisible()) {
+                        RenderUtils.renderESP(worldRender, entity, 1, 0.5f, 0, 1, true);
+                        RenderUtils.renderESP(worldRender2, entity, 1, 0.5f, 0, 1, false);
+                        RenderUtils.renderTrace(worldRender2, entity, 1, 0.5f, 0, 1);
+                    } else if(entity instanceof RemotePlayer player) {
+                        String trim = ToolList.getInstance().deleteColorCode(player.getName().getString()).trim();
+                        if(trim.equals("Bonzo") || trim.contains("Livid") || trim.contains("Scarf")) {
+                            RenderUtils.renderESP(worldRender, entity, 0, 1, 1, 1, true);
+                            RenderUtils.renderESP(worldRender2, entity, 0, 1, 1, 1, false);
+                            RenderUtils.renderTrace(worldRender2, entity, 0, 1, 1, 1);
+                        }
+                    }
                 }
             }
 

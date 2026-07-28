@@ -14,6 +14,7 @@ import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -52,6 +53,9 @@ public class ConfigManager {
         }
     };
     public static final StringConfigOption customTitleText = new StringConfigOption("customtitletext", "");
+
+    public static final ColorConfigOption lyricColor1 = new ColorConfigOption("lyriccolor1", new Color(0x00, 0xFF, 0x00).getRGB());
+    public static final ColorConfigOption lyricColor2 = new ColorConfigOption("lyriccolor2", new Color(0xFF, 0xFF, 0xFF).getRGB());
 
     public static final BooleanConfigOption mineshaftSharing = new BooleanConfigOption("skyblockmineshaftsharing", true);
     public static final BooleanConfigOption autogg = new BooleanConfigOption("autogg", true);
@@ -145,6 +149,7 @@ public class ConfigManager {
     public static final BooleanConfigOption dungeonf7InactiveTerminalRender = new BooleanConfigOption("skyblockdungeonf7inactiveterminaldisplay", true);
     public static final BooleanConfigOption genshinImpactHeatColdRender = new BooleanConfigOption("genshinimpactheatcoldrender", true);
     public static final BooleanConfigOption autoReconnect = new BooleanConfigOption("autoreconnect", true);
+    public static final BooleanConfigOption afkInOtherPlace = new BooleanConfigOption("afkinotherplace", true);
 
     public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
@@ -166,6 +171,8 @@ public class ConfigManager {
     public static final StringConfigOption dungeonDrinkPotion = new StringConfigOption("dungeondrinkpotion", "能量饮料真好喝! 我为Dungeon Potion代言!");
     public static final StringConfigOption dungeonTrashTPS = new StringConfigOption("dungeontrashtps", "太强了喵, 我们服务器有很高的[tps] TPS喵!");
     public static final StringConfigOption dungeonf7msgbotssleap = new StringConfigOption("dungeonf7msgbotssleap", "已安全到达Simon Says处, 准许Leap!");
+
+    public static final StringConfigOption hudOffsetAndScale = new StringConfigOption("hudoffsetandscale", "{}");
 
     public static final StringConfigOption[] dungeonf7msgbotsimonsays = {
             dungeonf7msgbotsimonsays1,
@@ -191,7 +198,7 @@ public class ConfigManager {
 
     public static final List<Map.Entry<String, List<ConfigOption<?>>>> categories = List.of(
             Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip, enableircafktip, enableircmacrochecktip, cooltitle, customTitleText)),
-            Map.entry("工具类", List.of(inventoryFilter, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodehideserverid, keepSprint, autoReconnect)),
+            Map.entry("工具类", List.of(inventoryFilter, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodehideserverid, keepSprint, autoReconnect, afkInOtherPlace)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
             Map.entry("自动类", List.of(autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, carnivalAutoFruitDigger, skyblockautobloodfiend, skyblockautobloodfiendlowhealth)),
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareAnnounce, skyblockSafeIsland, crystalHollowHelper, crystalHollowHelperDebug, crystalHollowDupServerTipper, crystalHollowHelperDisableThreadLimit, genshinImpactHeatColdRender)),
@@ -201,7 +208,7 @@ public class ConfigManager {
             Map.entry("fishing", List.of(hotspotrender, autogg, lotusAtollHelper, fishingBigFishRender, fishingBigFishTip)),
             Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7InactiveTerminalRender, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered, dungeonDrinkPotion, dungeonBloodRoomTime, dungeonTrashTPS, dungeonf7msgbotssleap)),
             Map.entry("rift", List.of(rifttimegunhelper)),
-            Map.entry("界面类", List.of(bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, dyingtip, noblind, nosuffoverlay, fireOverlay))
+            Map.entry("界面类", List.of(bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, dyingtip, noblind, nosuffoverlay, fireOverlay, lyricColor1, lyricColor2))
     );
 
 

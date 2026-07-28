@@ -946,6 +946,18 @@
       "configname": "§e农业脚本半自动杀虫",
       "description": "§e请确保吸虫器位于快捷栏，之后会自动切换loadout，完成后将由你来手动杀虫，完成后会自动回到原处继续农业"
     },
+    "lyriccolor1": {
+      "configname": "§e歌词颜色1",
+      "description": "§e渲染正在播放的音乐的当前歌词颜色"
+    },
+    "lyriccolor2": {
+      "configname": "§e歌词颜色2",
+      "description": "§e渲染正在播放的音乐的非当前歌词颜色"
+    },
+    "afkinotherplace": {
+      "configname": "§e更好挂机的地方",
+      "description": "§e当你因为挂机进入limbo时, 自动前往一个较好的地方挂机"
+    },
     "about1": "§e小沙雕的QQ: 3381949033",
     "about2": "§e小沙雕の狗窝: https://xiaoshadiao.club/qqg",
     "about3": "§e部分快捷键设置可在 ESC->选项(设置)->控制 中找到",

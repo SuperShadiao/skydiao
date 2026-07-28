@@ -21,6 +21,7 @@ import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.awt.*;
 import java.util.Objects;
+import java.util.function.BooleanSupplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,6 +29,9 @@ public class GenshinImpactHeatCold extends XSDHUD {
 
     public ColorType debug1 = null;
     public Integer debugHeatOrColdValue = null;
+
+    private boolean forceMode;
+    private BooleanSupplier delayedForceModeUpdate;
 
     // ===================================================================
 
@@ -42,9 +46,11 @@ public class GenshinImpactHeatCold extends XSDHUD {
     private SimpleSoundInstance keepingWarningSound;
 
     @Override
-    public void render(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
+    public void render(GuiGraphicsExtractor context, DeltaTracker tickCounter, boolean force) {
+        delayedForceModeUpdate = () -> force;
         // TODO 自动生成的方法存根
         if(!shouldRender()) return;
+
         Matrix3x2fStack pose = context.pose();
         pose.pushMatrix();
         pose.translate(-1, 0);
@@ -90,7 +96,6 @@ public class GenshinImpactHeatCold extends XSDHUD {
             if(heatOrColdValue >= currentColor.warningStage1) {
                 context.fill(guiPosX - 42, guiPosY - 47 + 50, guiPosX - 40 + 83, guiPosY - 52 + 50, new Color(1f,0,0,(float) (75f / 255f * Math.sin(Math.PI * Math.max(timewarnrender,0) / 30d))).getRGB());
 
-                draw(context, getColor(currentColor,(int) (75 * (Math.min(timewarn,20) / 20f))).getRGB());
                 if(heatOrColdValue >= currentColor.warningStage2) {
                     // context.fill(guiPosX - 42, guiPosY - 47 + 50, guiPosX - 40 + 83, guiPosY - 52 + 50, new Color(1f,0,0,(float) (40f / 255f * Math.sin(Math.PI * Math.max(timewarnrender,0) / 30d))).getRGB());
                     context.fill(guiPosX - 42, guiPosY - 47 + 50, guiPosX - 40 + 83, guiPosY - 52 + 50, new Color(1f,0,0,(float) (80f / 255f * (animation2 / 10f))).getRGB());
@@ -108,10 +113,22 @@ public class GenshinImpactHeatCold extends XSDHUD {
             }
         }
 
+        pose.popMatrix();
+    }
+
+    @Override
+    public void renderEffect(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
+        if(heatOrColdValue >= currentColor.warningStage1) {
+            draw(context, getColor(currentColor,(int) (75 * (Math.min(timewarn,20) / 20f))).getRGB());
+        }
         if(animation2 > 0) {
             draw2(context, getColor(currentColor,(int) (75f * (animation2 / 10f))).getRGB());
         }
-        pose.popMatrix();
+    }
+
+    @Override
+    public String getHudName() {
+        return "heatcold";
     }
 
     public void update0(Minecraft mc) {
@@ -121,8 +138,12 @@ public class GenshinImpactHeatCold extends XSDHUD {
     }
 
     public void update(Minecraft mc) {
-        // animation++;
-        // TODO 自动生成的方法存根
+
+        if(delayedForceModeUpdate != null) {
+            forceMode = delayedForceModeUpdate.getAsBoolean();
+            delayedForceModeUpdate = null;
+        }
+
         if(heatOrColdValue >= currentColor.warningStage1) timewarn++; else timewarn = 0;
         if(timewarn % 100 == 1) {
             ToolList.getInstance().playSound(CustomSounds.YSWARNING);
@@ -148,7 +169,7 @@ public class GenshinImpactHeatCold extends XSDHUD {
         if(mc.level == null) {
             heatOrColdValue = 0;
         } else {
-            try {
+            a:try {
                 for(Component s : ToolList.getInstance().fetchScoreboardLines()) {
                     // LogManager.getLogger().info(s);
                     String line = ToolList.getInstance().deleteColorCode(s.getString());
@@ -158,7 +179,7 @@ public class GenshinImpactHeatCold extends XSDHUD {
                             heatOrColdValue = Integer.parseInt(m.group(1));
                             currentColor = ColorType.heat;
                             f = true;
-                            break;
+                            break a;
                         }
                     };
                     if(line.contains("Cold:")) {
@@ -167,9 +188,14 @@ public class GenshinImpactHeatCold extends XSDHUD {
                             heatOrColdValue = Integer.parseInt(m.group(1));
                             currentColor = ColorType.cold;
                             f = true;
-                            break;
+                            break a;
                         }
-                    };
+                    }
+                }
+                if(forceMode) {
+                    heatOrColdValue = 50;
+                    currentColor = ColorType.heat;
+                    f = true;
                 }
             } catch(Exception e) {
                 
@@ -190,7 +216,7 @@ public class GenshinImpactHeatCold extends XSDHUD {
 
     public boolean shouldRender() {
         // TODO 自动生成的方法存根
-        return ConfigManager.genshinImpactHeatColdRender.getValue() && (StatusManager.get().isInSkyblock() || ToolList.getInstance().isDevEnvironment()) && L2 + L != 0;
+        return forceMode || (ConfigManager.genshinImpactHeatColdRender.getValue() && (StatusManager.get().isInSkyblock() || ToolList.getInstance().isDevEnvironment()) && L2 + L != 0);
     }
 
     private Color getColor(ColorType ct, int alpha) {
