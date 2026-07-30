@@ -30,3 +30,4 @@
 - jlayer
 - [MrXiaoM Bilibili Open Live](https://5ixsd.top/mxmbol)
 - 内置的[Firm Packet Fixer](https://modrinth.com/mod/firmament-packet-fix)用于移除Firmament的告状行为
+- [花火火的变身器](https://5ixsd.top/spmmod)

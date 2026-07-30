@@ -411,7 +411,13 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
     }
 
     private String parseModelId(String modelId) {
-        return stripImportExtension(normalizeLocalModelId(modelId));
+        return getFileName(stripImportExtension(normalizeLocalModelId(modelId)));
+    }
+
+    private String getFileName(String modelId) {
+        String[] split = modelId.split("/");
+        if(split.length == 0) return modelId;
+        return split[split.length - 1];
     }
 
 }

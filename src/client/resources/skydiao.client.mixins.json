@@ -37,6 +37,9 @@
     "MixinEntityCloneableAccessor",
     "MixinFishHookEntityHookedAccessor",
     "MixinFogRendererRemoveBlindness",
+    "MixinFreecamFreelookCamera",
+    "MixinLevelRenderer",
+    "MixinOption",
     "MixinPacketListener",
     "MixinRandomClassCrash",
     "MixinRemoveMaxHealthLimit",
@@ -60,6 +63,7 @@
     "adapter.spmloader.EnableConnectionVaild",
     "adapter.spmloader.FlyingStateChange",
     "adapter.spmloader.FlyingStateChangeParent",
+    "adapter.spmloader.FreecamAndFreelookFixer",
     "adapter.spmloader.MixinHelmetRemover",
     "blivemode.MixinEntity",
     "blivemode.MixinEntityPlayer"

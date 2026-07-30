@@ -1,11 +1,15 @@
 package pers.XiaoShadiao.skydiao.mixin.client;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.input.MouseButtonInfo;
+import net.minecraft.client.player.LocalPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
@@ -30,4 +34,12 @@ public class MixinMouseHandlerListenable {
             ci.cancel();
         }
     }
+
+    @WrapOperation(method = "turnPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;turn(DD)V"))
+    private void turnPlayer(LocalPlayer instance, double xo, double yo, Operation<Void> original) {
+        if (!AbstractListener.freecamAndFreelook.handlePlayerTurn(xo, yo)) {
+            original.call(instance, xo, yo);
+        }
+    }
+
 }

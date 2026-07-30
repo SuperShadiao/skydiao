@@ -17,8 +17,12 @@ public class PageSwitchCallback {
     }
 
     public Screen getScreen() {
+        return getScreen(10000);
+    }
+
+    public Screen getScreen(long timeoutMs) {
         try {
-            latch.await(10000, TimeUnit.MILLISECONDS);
+            latch.await(timeoutMs, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

@@ -47,7 +47,8 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                 })).executes(this::executeBan))),
                 getArgConstantInstance("想看看盔甲架的世界").executes(this::executeArmorStandWorld),
                 getArgConstantInstance("autoclick").then(getArgInstance("action", StringArgumentType.string()).suggests((c, b) -> b.suggest("addleft").suggest("addright").suggest("addleftright").suggest("remove").buildFuture()).executes(this::executeAutoClicker)),
-                getArgConstantInstance("loto").then(getArgInstance("index", IntegerArgumentType.integer()).executes(this::openAndChangeLoadout))
+                getArgConstantInstance("loto").then(getArgInstance("index", IntegerArgumentType.integer()).executes(this::openAndChangeLoadout)),
+                getArgConstantInstance("fastclearminingstash").executes(_ -> awa(AbstractListener.fastClearMiningStash::startClearTask))
         );
     }
 

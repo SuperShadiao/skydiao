@@ -452,7 +452,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         if (!ConfigManager.gardenBonusPrompt.getValue()) return;
         long now = System.currentTimeMillis();
         if (now - lastShowTime < 11000) return;
-        String bonus = TabReader.findLineStartsWith("Bonus:");
+        String bonus = TabReader.findLineStartsWith("Bonus:").orElse(null);
         lastShowTime = now;
         if ("Bonus: INACTIVE".equals(bonus))
             XSDHUD.bigTitle.updateTitleMsg("Bonus过期了", 5000, SoundEvents.WITHER_SPAWN);

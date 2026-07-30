@@ -7,6 +7,8 @@ import com.google.gson.JsonParser;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import pers.XiaoShadiao.skydiao.config.option.*;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.bilibili.BLiveListener;
@@ -17,15 +19,21 @@ import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 public class ConfigManager {
+
+    private static final Logger log = LogManager.getLogger();
+
     public static final File config_folder = Paths.get(ToolList.mc.gameDirectory.getPath(), "config", "小沙雕_config", "skydiao").toFile();
     public static final File configFile = getCustomConfigFileName("config.json");
 
@@ -150,6 +158,7 @@ public class ConfigManager {
     public static final BooleanConfigOption genshinImpactHeatColdRender = new BooleanConfigOption("genshinimpactheatcoldrender", true);
     public static final BooleanConfigOption autoReconnect = new BooleanConfigOption("autoreconnect", true);
     public static final BooleanConfigOption afkInOtherPlace = new BooleanConfigOption("afkinotherplace", true);
+    public static final DoubleConfigOption freecamFlySpeed = new DoubleConfigOption("freecamflyspeed", 1.0);
 
     public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
@@ -198,7 +207,7 @@ public class ConfigManager {
 
     public static final List<Map.Entry<String, List<ConfigOption<?>>>> categories = List.of(
             Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip, enableircafktip, enableircmacrochecktip, cooltitle, customTitleText)),
-            Map.entry("工具类", List.of(inventoryFilter, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodehideserverid, keepSprint, autoReconnect, afkInOtherPlace)),
+            Map.entry("工具类", List.of(inventoryFilter, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodehideserverid, keepSprint, autoReconnect, afkInOtherPlace, freecamFlySpeed)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
             Map.entry("自动类", List.of(autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, carnivalAutoFruitDigger, skyblockautobloodfiend, skyblockautobloodfiendlowhealth)),
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareAnnounce, skyblockSafeIsland, crystalHollowHelper, crystalHollowHelperDebug, crystalHollowDupServerTipper, crystalHollowHelperDisableThreadLimit, genshinImpactHeatColdRender)),
@@ -285,6 +294,8 @@ public class ConfigManager {
         capeFolder = getCustomConfigFileName("customcape");
         capeFolder.mkdirs();
         capeFile = new File(capeFolder, "cape.png");
+
+        checkDisabledConfigs();
     }
 
     private static boolean resetToDefault() {
@@ -320,6 +331,64 @@ public class ConfigManager {
             e.printStackTrace();
         }
         return flag;
+    }
+
+    private static void checkDisabledConfigs() {
+        Thread thread = Thread.currentThread();
+        FutureTask<Void> task = new FutureTask<>(() -> {
+
+            int sleepTime = 5;
+            while (true) {
+                try(InputStream is = ToolList.getInstance().makeReqToURL("https://xiaoshadiao.club/skydiaoDisabledFeatures.json")) {
+                    String result = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+                    Iterator<JsonElement> it = JsonParser.parseString(result).getAsJsonArray().iterator();
+
+                    List<String> list = new ArrayList<>();
+                    while (it.hasNext()) {
+                        JsonElement next = it.next();
+                        list.add(next.getAsString());
+                    }
+
+                    setDisabledFeatures(list);
+                    break;
+                } catch (IOException e) {
+                    log.error("Can't get disabled features");
+                    log.catching(e);
+                    if(sleepTime > 0) {
+                        sleepTime--;
+                        if(sleepTime == 0) {
+                            thread.interrupt();
+                        }
+                        continue;
+                    }
+                    Thread.sleep(60000);
+                }
+            }
+            return null;
+        });
+
+        new Thread(task, "Disabled Features Checker").start();
+        try {
+            task.get(10, TimeUnit.SECONDS);
+        } catch (ExecutionException | TimeoutException e) {
+            log.error("Check disabled features timed out", e);
+        } catch (InterruptedException ignored) {
+
+        }
+    }
+
+    private static List<String> disabledFeatures = Collections.emptyList();
+
+    public static void setDisabledFeatures(List<String> list) {
+        disabledFeatures = Collections.unmodifiableList(list);
+    }
+
+    public static boolean isForceDisabled(String name) {
+        return disabledFeatures.contains(name);
+    }
+
+    public static boolean isForceDisabled(ConfigOption<?> option) {
+        return disabledFeatures.contains(option.getName());
     }
 
 }

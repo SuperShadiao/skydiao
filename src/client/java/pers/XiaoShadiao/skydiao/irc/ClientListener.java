@@ -44,6 +44,7 @@ public class ClientListener extends ChatClient {
     public void run() {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         ByteArrayOutputStream data = new ByteArrayOutputStream();
+        int byteCounter = 0;
         try {
             int i;
             boolean startRecordFlag = false;
@@ -51,6 +52,11 @@ public class ClientListener extends ChatClient {
             while((i = is.read()) != -1) {
 
                 try {
+                    byteCounter++;
+                    if(byteCounter > 100 * 1024) {
+                        byteCounter = 0;
+                        flagHeartbeat();
+                    }
                     buffer.write(i);
                     byte[] bytes = buffer.toByteArray();
                     for(int j = 0; j < Math.min(4, bytes.length); j++) {

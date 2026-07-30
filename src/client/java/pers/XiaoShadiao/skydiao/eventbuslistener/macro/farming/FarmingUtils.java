@@ -8,10 +8,7 @@ import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.tab.TabReader;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -55,9 +52,9 @@ public class FarmingUtils {
     private static final Pattern PATTERN = Pattern.compile("(\\d+)([ms])", Pattern.CASE_INSENSITIVE);
 
     public static boolean cooldownReady(int readyS) {
-        String cooldown = TabReader.findLineWith("Cooldown: ");
-        if (cooldown == null) return false;
-        String cooldownTime = cooldown.substring(cooldown.indexOf(":") + 2);
+        Optional<String> cooldown = TabReader.findLineWith("Cooldown: ");
+        if (cooldown.isEmpty()) return false;
+        String cooldownTime = cooldown.get().substring(cooldown.get().indexOf(":") + 2);
         if (cooldownTime.contains("READY")) return true;
         try {
             Matcher matcher = PATTERN.matcher(cooldownTime);
@@ -76,11 +73,11 @@ public class FarmingUtils {
     }
 
     public static boolean hasPests() {
-        return TabReader.findLineWith("Alive: 0") == null && TabReader.findLineStartsWith("Plots:").substring(7).split(",").length > 0;
+        return TabReader.findLineWith("Alive: 0").isEmpty() && TabReader.findLineStartsWith("Plots:").map(s -> s.substring(7).split(",").length > 0).orElse(false);
     }
 
     public static boolean withPet(String petName) {
-        return TabReader.findLineWith("\\[Lvl \\d+\\] .*?" + petName) != null;
+        return TabReader.findLineWith("\\[Lvl \\d+\\] .*?" + petName).isPresent();
     }
 
     public static boolean withPetType(String wait) {
@@ -104,7 +101,6 @@ public class FarmingUtils {
     }
 
     public static void tpToPestPlot() {
-        String[] split = TabReader.findLineStartsWith("Plots:").substring(7).split(",");
-        ToolList.sendChatMessage("/tptoplot " + split[0]);
+        TabReader.findLineStartsWith("Plots:").map(s -> s.substring(7).split(",")).ifPresent(split -> ToolList.sendChatMessage("/tptoplot " + split[0]));
     }
 }

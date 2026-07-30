@@ -37,4 +37,10 @@ public class BooleanConfigOption extends ConfigOption<Boolean> {
         feature.immutableUsingThisFeatures = Collections.unmodifiableList(feature.usingThisFeatures);
         return this;
     }
+
+    public Boolean getValue() {
+        if(isForceDisabled()) return false;
+        return value;
+    }
+
 }

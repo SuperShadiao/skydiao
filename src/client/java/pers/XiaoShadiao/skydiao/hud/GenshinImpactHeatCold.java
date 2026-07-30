@@ -50,7 +50,6 @@ public class GenshinImpactHeatCold extends XSDHUD {
         delayedForceModeUpdate = () -> force;
         // TODO 自动生成的方法存根
         if(!shouldRender()) return;
-
         Matrix3x2fStack pose = context.pose();
         pose.pushMatrix();
         pose.translate(-1, 0);
@@ -119,7 +118,7 @@ public class GenshinImpactHeatCold extends XSDHUD {
     @Override
     public void renderEffect(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
         if(heatOrColdValue >= currentColor.warningStage1) {
-            draw(context, getColor(currentColor,(int) (75 * (Math.min(timewarn,20) / 20f))).getRGB());
+            draw(context, getColor(currentColor,(int) (75 * (Math.min(timewarn, 20) / 20f))).getRGB());
         }
         if(animation2 > 0) {
             draw2(context, getColor(currentColor,(int) (75f * (animation2 / 10f))).getRGB());

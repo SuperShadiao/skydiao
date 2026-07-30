@@ -16,6 +16,10 @@ public class KeyBindsManager {
     public static final KeyMapping toggleFarmingScript = new KeyMapping("key.category.skydiao.togglefarmingscript", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
     public static final KeyMapping toggleKeepSprint = new KeyMapping("key.category.skydiao.toggleSprint", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
 
+    public static final KeyMapping toggleFreelook = new KeyMapping("key.toggleFreelook", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
+    public static final KeyMapping pressFreelook = new KeyMapping("key.freelook", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
+    public static final KeyMapping toggleFreecam = new KeyMapping("key.toggleFreecam", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
+
     public static void registerKeyBinds() {
         Register.execRegister(KeyBindsManager.class, KeyMapping.class, KeyMappingHelper::registerKeyMapping);
     }

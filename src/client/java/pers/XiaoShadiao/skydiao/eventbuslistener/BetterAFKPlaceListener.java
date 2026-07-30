@@ -11,6 +11,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.item.Items;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
@@ -60,9 +61,17 @@ public class BetterAFKPlaceListener extends AbstractListener {
             if (!(container0 instanceof SimpleContainer)) return null;
             mc.execute(() -> {
                 if (mc.player != null && mc.gameMode != null) {
-                    mc.gameMode.handleContainerInput(menu0.containerId, 11, 0, ContainerInput.PICKUP, mc.player);
+                    for (int i = 11; i < 15; i++) {
+                        if (menu0.slots.get(i).getItem().getItem() == Items.PLAYER_HEAD) {
+                            mc.gameMode.handleContainerInput(menu0.containerId, i, 0, ContainerInput.PICKUP, mc.player);
+                            break;
+                        }
+                    }
                 }
             });
+            Thread.sleep(5000);
+            if(StatusManager.get().isInSkyblock() && "dynamic".equals(StatusManager.get().getMode())) return null;
+            ToolList.sendChatMessage("/limbo");
             return null;
         });
     }

@@ -49,6 +49,7 @@
     "enabled": "§a开",
     "macrofeaturealert": "§c§l警告: 该功能为Macro功能, Hypixel禁止这种自动化功能, 使用该功能造成的任何后果自负.",
     "timedelaydesc": "§e这是一个延迟配置项, 单位一般是毫秒 (ms)",
+    "forcedisabled": "§c警告: 该功能已被小沙雕远程控制禁用, 可能是由于该功能有高风险或者有严重bug, 请等待小沙雕重新开启该功能",
     "autogg": {
       "configname": "§e全自动刷人品值装置",
       "description": "§e小游戏结束时自动发gg"

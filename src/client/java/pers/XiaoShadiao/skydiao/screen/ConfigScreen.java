@@ -313,9 +313,9 @@ public class ConfigScreen extends Screen {
             }
 
             public static class ConfigEntry extends AbstractConfigEntry {
-                private final ConfigOption<?> option;
-                private final AbstractWidget widget;
-                private final ConfigTab tab;
+                protected final ConfigOption<?> option;
+                protected final AbstractWidget widget;
+                protected final ConfigTab tab;
                 public ConfigEntry(ConfigOption<?> option, ConfigTab tab) {
                     this.option = option;
                     this.tab = tab;
@@ -358,6 +358,25 @@ public class ConfigScreen extends Screen {
                             });
                             yield editBox;
                         }
+                        case DoubleConfigOption doubleOption -> {
+                            EditBox editBox = new EditBox(ToolList.mc.font, 0, 0, 100, 20, Component.literal(doubleOption.getI18nName()));
+                            editBox.setValue(doubleOption.getValue().toString());
+                            editBox.setResponder(stringx -> {
+                                try {
+                                    if(stringx.trim().isEmpty()) {
+                                        editBox.setValue("0");
+                                        doubleOption.setValue(0.0);
+                                    } else {
+                                        double d = Double.parseDouble(stringx);
+                                        doubleOption.setValue(d);
+                                    }
+                                    editBox.setTextColor(-2039584);
+                                } catch (NumberFormatException e) {
+                                    editBox.setTextColor(-65536);
+                                }
+                            });
+                            yield editBox;
+                        }
                         case StringConfigOption stringOption -> {
                             EditBox editBox = new EditBox(ToolList.mc.font, 0, 0, 100, 20, Component.literal(stringOption.getI18nName()));
                             editBox.setMaxLength(1000);
@@ -375,6 +394,11 @@ public class ConfigScreen extends Screen {
                     if(option instanceof TimeDelayOption) {
                         component.append("\n\n");
                         component.append(translate("config.timedelaydesc"));
+                    }
+                    if(option.isForceDisabled()) {
+                        widget.active = false;
+                        component.append("\n\n");
+                        component.append(translate("config.forcedisabled"));
                     }
                     widget.setTooltip(Tooltip.create(component));
                 }
@@ -400,16 +424,13 @@ public class ConfigScreen extends Screen {
                 }
             }
 
-            public static class ColorConfigEntry extends AbstractConfigEntry {
-                private final ConfigOption<?> option;
+            public static class ColorConfigEntry extends ConfigEntry {
                 private final XSDSliderButton r;
                 private final XSDSliderButton g;
                 private final XSDSliderButton b;
                 private Color color;
-                private final ConfigTab tab;
                 public ColorConfigEntry(ConfigOption<?> option, ConfigTab tab) {
-                    this.option = option;
-                    this.tab = tab;
+                    super(option, tab);
                     switch(option) {
                         case ColorConfigOption colorOption -> {
 
@@ -448,6 +469,13 @@ public class ConfigScreen extends Screen {
                     if(option instanceof TimeDelayOption) {
                         component.append("\n\n");
                         component.append(translate("config.timedelaydesc"));
+                    }
+                    if(option.isForceDisabled()) {
+                        r.active = false;
+                        g.active = false;
+                        b.active = false;
+                        component.append("\n\n");
+                        component.append(translate("config.forcedisabled"));
                     }
                     r.setTooltip(Tooltip.create(component));
                     g.setTooltip(Tooltip.create(component));

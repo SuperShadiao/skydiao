@@ -1,5 +1,7 @@
 package pers.XiaoShadiao.skydiao.config.option;
 
+import pers.XiaoShadiao.skydiao.config.ConfigManager;
+
 import static pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager.translate;
 
 public class ConfigOption<T> {
@@ -95,4 +97,9 @@ public class ConfigOption<T> {
     }
 
     public record ModDepends(String modId, String requiredVersion, String downloadUrl) { }
+
+    public boolean isForceDisabled() {
+        return ConfigManager.isForceDisabled(this);
+    }
+
 }

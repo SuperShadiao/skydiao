@@ -11,6 +11,7 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.LerpingBossEvent;
+import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -23,6 +24,7 @@ import net.minecraft.world.BossEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.pig.Pig;
@@ -32,12 +34,14 @@ import net.minecraft.world.entity.projectile.arrow.Arrow;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2fStack;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.E2AMappingListener;
+import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinBossbarEventGetter;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
@@ -65,6 +69,39 @@ public class CustomBossbar extends XSDHUD {
         AttackEntityCallback.EVENT.register(this::onAttackEntity);
         ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register(this::onWorldUnload);
         LevelRenderEvents.END_MAIN.register(this::onLastRender);
+        CustomFabricEvents.MOUSE_BUTTON_EVENT.register(this::onMouseClick);
+    }
+
+    private boolean onMouseClick(long windowsHandler, MouseButtonInfo mouseButtonInfo, int state) {
+        if(ConfigManager.bossbarAddTargetEntity.getValue() && mc.screen == null && mc.player != null && mouseButtonInfo.button() == 1 && state == 1) {
+            if(小沙雕没有神剑_咕咕嘎嘎()) {
+                Vec3 thisPos = mc.player.position();
+                Vec3 forward = thisPos.add(mc.player.getForward().multiply(10, 10, 10));
+
+                for (Entity entity : mc.level.entitiesForRendering()) {
+                    if (!(entity instanceof LivingEntity) || entity instanceof ArmorStand || entity == mc.player)
+                        continue;
+                    double distanceSqr = Math.min(entity.distanceToSqr(thisPos), entity.distanceToSqr(forward));
+                    if (distanceSqr <= 49) {
+                        addEntityToBossbar(entity.asLivingEntity());
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private final Set<String> 神 = Set.of(
+            "ASTRAEA",
+            "HYPERION",
+            "VALKYRIE",
+            "SCYLLA"
+    );
+
+    private boolean 小沙雕没有神剑_咕咕嘎嘎() {
+        if(mc.player == null) return false;
+
+        return 神.contains(ToolList.getInstance().tryGetSkyblockItemId(mc.player.getItemHeldByArm(HumanoidArm.RIGHT)));
     }
 
     @Override

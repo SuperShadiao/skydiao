@@ -8,6 +8,7 @@ import net.minecraft.network.chat.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class TabReader {
@@ -38,24 +39,24 @@ public class TabReader {
         return tabLines;
     }
 
-    public static String findLineStartsWith(String prefix) {
+    public static Optional<String> findLineStartsWith(String prefix) {
         refreshTab();
         for (String line : tabLines) {
             if (line.startsWith(prefix)) {
-                return line;
+                return Optional.of(line);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
-    public static String findLineWith(String regex) {
+    public static Optional<String> findLineWith(String regex) {
         refreshTab();
         Pattern pattern = Pattern.compile(regex);
         for (String line : tabLines) {
             if (pattern.matcher(line).find()) {
-                return line;
+                return Optional.of(line);
             }
         }
-        return null;
+        return Optional.empty();
     }
 }

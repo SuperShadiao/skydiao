@@ -30,8 +30,8 @@ public class GardenTrapListener extends AbstractListener {
         long now = System.currentTimeMillis();
         if (now - lastShowTime < 30000) return;
 
-        String fullTraps = TabReader.findLineStartsWith("Full Traps:");
-        String noBait = TabReader.findLineStartsWith("No Bait:");
+        String fullTraps = TabReader.findLineStartsWith("Full Traps:").orElse(null);
+        String noBait = TabReader.findLineStartsWith("No Bait:").orElse(null);
 
         LinkedList<String> cps = new LinkedList<>();
 
