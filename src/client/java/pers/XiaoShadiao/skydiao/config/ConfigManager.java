@@ -370,10 +370,8 @@ public class ConfigManager {
         new Thread(task, "Disabled Features Checker").start();
         try {
             task.get(10, TimeUnit.SECONDS);
-        } catch (ExecutionException | TimeoutException e) {
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             log.error("Check disabled features timed out", e);
-        } catch (InterruptedException ignored) {
-
         }
     }
 

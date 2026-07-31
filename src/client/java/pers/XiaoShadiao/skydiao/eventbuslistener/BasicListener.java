@@ -138,7 +138,10 @@ public class BasicListener extends AbstractListener {
 
     private boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
         if(packet instanceof ClientboundResourcePackPushPacket packet2) {
-            boolean inSkyblock = StatusManager.get().hasStatus();
+            boolean inSkyblock = false;
+            if (packet2.prompt().isPresent()) {
+                inSkyblock = packet2.prompt().get().getString().toLowerCase().contains("skyblock");
+            }
             if(inSkyblock) {
                 ToolList.addThreadedTask(() -> {
                     List<String> errorLines = new ArrayList<>();
