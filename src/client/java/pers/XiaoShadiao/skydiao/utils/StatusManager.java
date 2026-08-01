@@ -144,4 +144,7 @@ public class StatusManager extends Thread {
         return "SkyBlock".equals(gameType);
     }
 
+    public boolean isInRavengard() {
+        return "RAVENGARD_DUNGEON_TRIO".equals(gameMode) || "RAVENGARD_HUB".equals(gameMode);
+    }
 }

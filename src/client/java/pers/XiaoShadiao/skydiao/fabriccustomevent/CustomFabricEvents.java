@@ -3,6 +3,8 @@ package pers.XiaoShadiao.skydiao.fabriccustomevent;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.hypixel.modapi.packet.ClientboundHypixelPacket;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
@@ -11,7 +13,9 @@ import org.jetbrains.annotations.NotNull;
 
 public final class CustomFabricEvents {
 
-    private CustomFabricEvents() { throw new UnsupportedOperationException("默认文本"); }
+    private CustomFabricEvents() {
+        throw new UnsupportedOperationException("默认文本");
+    }
 
     public static final Event<@NotNull HypixelPacketEvent> HYPIXEL_PACKET_EVENT = EventFactory.createArrayBacked(HypixelPacketEvent.class, callbacks -> (packet) -> {
         for (HypixelPacketEvent callback : callbacks) {
@@ -118,4 +122,13 @@ public final class CustomFabricEvents {
         public boolean onSimulatorClick(SimulatorClickType type);
     }
 
+    public static final Event<@NotNull SlotRender> ON_SLOT_RENDER = EventFactory.createArrayBacked(SlotRender.class, callbacks -> (screen, guiGraphics, mouseX, mouseY, tickDelta) -> {
+        for (SlotRender callback : callbacks) {
+            callback.renderSlots(screen, guiGraphics, mouseX, mouseY, tickDelta);
+        }
+    });
+
+    public interface SlotRender {
+        public void renderSlots(Screen screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float tickDelta);
+    }
 }

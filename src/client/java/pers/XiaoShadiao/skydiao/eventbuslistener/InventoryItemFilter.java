@@ -22,6 +22,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.screen.InventoryRegexSearcherConfigScreen;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
@@ -44,6 +45,7 @@ public class InventoryItemFilter extends AbstractListener {
     @Override
     public void registerListeners() {
         ScreenEvents.AFTER_INIT.register(this::afterScreenInit);
+        CustomFabricEvents.ON_SLOT_RENDER.register(this::renderSlots);
     }
 
     private EditBox filterTextBox;
@@ -96,7 +98,7 @@ public class InventoryItemFilter extends AbstractListener {
         return true;
     }
 
-    public void postRender(Screen screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float tickDelta) {
+    public void renderSlots(Screen screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float tickDelta) {
         if(!enabled || !(screen instanceof AbstractContainerScreen<?> abstractContainerScreen)) return;
 
         AbstractContainerMenu menu = abstractContainerScreen.getMenu();

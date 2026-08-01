@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
+import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 
 @Mixin(AbstractContainerScreen.class)
 public class MixinAbstractContainerScreenHook extends Screen {
@@ -19,7 +19,8 @@ public class MixinAbstractContainerScreenHook extends Screen {
 
     @Inject(method = "extractContents", at = @At("TAIL"))
     public void /*renderContents*/extractContents(GuiGraphicsExtractor guiGraphics, int i, int j, float f, CallbackInfo ci) {
-        AbstractListener.inventoryItemFilter.postRender(this, guiGraphics, i, j, f);
+        // AbstractListener.inventoryItemFilter.postRender(this, guiGraphics, i, j, f);
+        CustomFabricEvents.ON_SLOT_RENDER.invoker().renderSlots(this, guiGraphics, i, j, f);
     }
 
 }

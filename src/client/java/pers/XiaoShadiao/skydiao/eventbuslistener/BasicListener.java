@@ -138,6 +138,7 @@ public class BasicListener extends AbstractListener {
 
     private boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
         if(packet instanceof ClientboundResourcePackPushPacket packet2) {
+            logger.info("自定义材质包: {}", packet2.url());
             boolean inSkyblock = false;
             if (packet2.prompt().isPresent()) {
                 inSkyblock = packet2.prompt().get().getString().toLowerCase().contains("skyblock");

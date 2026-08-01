@@ -19,6 +19,7 @@ import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class FastClearMiningStash extends AbstractListener {
 
@@ -133,14 +134,24 @@ public class FastClearMiningStash extends AbstractListener {
     }
 
     // private List<String> gemstoneRarity = List.of("ROUGH_", "FLAWED_", "FINE_");
+    private final Map<String, String> specialMapping = Map.of(
+            "CACTUS", "ENCHANTED_CACTUS_GREEN:1",
+            "INK_SACK:2", "ENCHANTED_CACTUS_GREEN:2"
+    );
 
     private String handleId(String id) {
+        if(specialMapping.get(id) != null) {
+            return specialMapping.get(id);
+        }
         boolean enchanted = true;
         if(id.endsWith("_INGOT")) {
             id = id.substring(0, id.length() - 6);
         }
         if(id.endsWith("_ORE")) {
             id = id.substring(0, id.length() - 4);
+        }
+        if(id.endsWith("_ITEM")) {
+            id = id.substring(0, id.length() - 5);
         }
         if(id.startsWith("ROUGH_")) {
             id = "FLAWED_" + id.substring(6);
