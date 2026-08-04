@@ -101,16 +101,6 @@ public class AutoUpdater {
     }
 
     private static AutoUpdater checkUpdate2() {
-
-        while(true) {
-            try {
-                locker.await();
-                break;
-            } catch (InterruptedException _) {
-
-            }
-        }
-
         log.info("awa");
         log.info("让我康康有没有更新可以用!");
 
@@ -154,7 +144,8 @@ public class AutoUpdater {
                         log.info("似乎没有更新可用!");
                         up = new AutoUpdater(up.URL,up.newVer,true);
                     };
-                    try { AbstractListener.basicListener.setSPMVersion(jo.get("spmv").getAsString()); } catch (Exception _) {}
+
+                    handleOtherData(jo);
 
                     return up;
                 } catch(Exception e) {
@@ -174,6 +165,19 @@ public class AutoUpdater {
             } else log.error("(检测)更新反复出错, 请检查网络连接!");
         }
         return up;
+    }
+
+    private static void handleOtherData(JsonObject jo) {
+        while(true) {
+            try {
+                locker.await();
+                break;
+            } catch (InterruptedException _) {
+
+            }
+        }
+        try { AbstractListener.basicListener.setSPMVersion(jo.get("spmv").getAsString()); } catch (Exception _) {}
+        try { AbstractListener.betterAFKPlaceListener.setXiaoShadiaoNeedMoreSocialXP(jo.get("xiaoshadiaoWantMoreSocialXP").getAsBoolean()); } catch (Exception _) {}
     }
 
     private static AutoUpdater download(AutoUpdater up) {

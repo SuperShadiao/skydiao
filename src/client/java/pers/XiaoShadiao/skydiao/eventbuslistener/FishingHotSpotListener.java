@@ -58,6 +58,9 @@ public class FishingHotSpotListener extends AbstractFishingListener {
                 RenderUtils.renderESP(wr2, entity.position(), 1, 0, 1, alpha, true);
             }
         }
+
+        wr1.finishDraw();
+        wr2.finishDraw();
     }
 
     private void onStartTick(Minecraft mc) {

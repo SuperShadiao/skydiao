@@ -313,8 +313,8 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 
     private void autoKillPest() {
         if (/*autoPestsConfig == null || */!ConfigManager.halfAutoKillPests.getValue() || SleepActions.actionDoing || !FarmingUtils.hasPests()) return;
-        int vacuum = farmingToolIndex.getOrDefault("vacuum", -1);
-        if (vacuum == -1) return;
+//        int vacuum = farmingToolIndex.getOrDefault("vacuum", -1);
+//        if (vacuum == -1) return;
         ToolList.printChatMessage(Component.literal("§a[小沙雕] §b害虫已生成, 正在等待人工杀虫..."));
         XSDHUD.bigTitle.updateTitleMsg("§e害虫已生成, 正在进行预操作...", 6000, SoundEvents.WITHER_SPAWN);
 
@@ -333,7 +333,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         kpest.addAction(InputSimulator::unpressAllKey)
                 .addAction(ctx -> {
                     ctx.put("lastSelectedSlot", mc.player.getInventory().getSelectedSlot());
-                    InputSimulator.switchItem(vacuum);
+                    // InputSimulator.switchItem(vacuum);
                 }, 300, true)
                 .addAction(() -> ToolList.sendChatMessage("/setspawn"))
 //                .addAction(FarmingUtils::tpToPestPlot, 1000, true)
@@ -358,7 +358,20 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                 .addAction(() -> XSDHUD.bigTitle.updateTitleMsg("§e即将返回原来的点位...", 4000), 1500, true)
 
                 .addAction(ctx -> InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")), 500)
-                .addAction(() -> ToolList.sendChatMessage("/warp garden"), 1000, true);
+                .addAction(() -> ToolList.sendChatMessage("/warp garden"), 100, true);
+
+
+        kpest.addAction(() -> {
+            try {
+                if(!mc.player.onGround()) {
+                    InputSimulator.setShift(true);
+                    Thread.sleep(200);
+                    InputSimulator.setShift(false);
+                } else {
+                    Thread.sleep(200);
+                }
+            } catch (InterruptedException _) {}
+        }, 500);
 
         if (ConfigManager.fsGardenMoonFlowerMode.getValue()) {
             executeDayNightSwitch(kpest, true);

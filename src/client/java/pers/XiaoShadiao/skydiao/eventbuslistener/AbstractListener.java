@@ -65,6 +65,8 @@ public abstract class AbstractListener extends Thread {
     public static final FastClearMiningStash fastClearMiningStash = new FastClearMiningStash();
     public static final FreecamAndFreelook freecamAndFreelook = new FreecamAndFreelook();
     public static final RavengardHelper ravengardHelper = new RavengardHelper();
+    public static final AutoReelListener autoReelListener = new AutoReelListener();
+    public static final TorrhusCanyonHelperListener torrhusCanyonHelperListener = new TorrhusCanyonHelperListener();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();

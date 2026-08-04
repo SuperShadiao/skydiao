@@ -964,6 +964,46 @@
       "configname": "§eRavengard助手",
       "description": "§e在Ravengard中帮你筛选出高伤害, 高价值的物品"
     },
+    "dungeonkeyrender": {
+      "configname": "§eDungeon Key标记",
+      "description": "§e渲染Dungeon Key的位置"
+    },
+    "openfscommandaction": {
+      "configname": "§e农业脚本指令设置",
+      "description": "§e点击跳转到农业脚本指令设置"
+    },
+    "openfskeybind": {
+      "configname": "§e农业脚本快捷键设置",
+      "description": "§e点击跳转到农业脚本快捷键设置"
+    },
+    "openfreelookandfreecamaction": {
+      "configname": "§eFreelook和Freecam快捷键",
+      "description": "§e点击设置Freelook和Freecam快捷键"
+    },
+    "openautoclickaction": {
+      "configname": "§e连点器设置",
+      "description": "§e点击转到连点器设置"
+    },
+    "autoreel": {
+      "configname": "§eAuto Reel",
+      "description": "§e使用Lasso Hunting工具时, 到达REEL时机时自动右键"
+    },
+    "autoreelautoaim": {
+      "configname": "§eAuto Reel自动瞄准",
+      "description": "§e使用Lasso Hunting工具时, 自动瞄准目标防止目标挣脱"
+    },
+    "torrhuscanyonhelper": {
+      "configname": "§eTorrhus Canyon助手",
+      "description": "§e在Torrhus Canyon中帮你寻找巨大蜜蜂和Tiki"
+    },
+    "openclearstashcommand": {
+      "configname": "§e快速清除Stash物品",
+      "description": "§e点击清除Stash中的物品"
+    },
+    "openhud": {
+      "configname": "§e打开HUD设置",
+      "description": "§e点击打开HUD设置"
+    },
     "about1": "§e小沙雕的QQ: 3381949033",
     "about2": "§e小沙雕の狗窝: https://xiaoshadiao.club/qqg",
     "about3": "§e部分快捷键设置可在 ESC->选项(设置)->控制 中找到",

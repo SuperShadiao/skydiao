@@ -136,7 +136,10 @@ public class FastClearMiningStash extends AbstractListener {
     // private List<String> gemstoneRarity = List.of("ROUGH_", "FLAWED_", "FINE_");
     private final Map<String, String> specialMapping = Map.of(
             "CACTUS", "ENCHANTED_CACTUS_GREEN:1",
-            "INK_SACK:2", "ENCHANTED_CACTUS_GREEN:2"
+            "INK_SACK:2", "ENCHANTED_CACTUS_GREEN:2",
+            "SUGAR_CANE", "ENCHANTED_SUGAR",
+            "BLAZE_ROD", "ENCHANTED_BLAZE_POWDER",
+            "COCOA_BEANS", "ENCHANTED_COCOA"
     );
 
     private String handleId(String id) {
@@ -153,12 +156,12 @@ public class FastClearMiningStash extends AbstractListener {
         if(id.endsWith("_ITEM")) {
             id = id.substring(0, id.length() - 5);
         }
-        if(id.startsWith("ROUGH_")) {
-            id = "FLAWED_" + id.substring(6);
-            enchanted = false;
-        }
         if(id.startsWith("FLAWED_")) {
             id = "FINE_" + id.substring(7);
+            enchanted = false;
+        }
+        if(id.startsWith("ROUGH_")) {
+            id = "FLAWED_" + id.substring(6);
             enchanted = false;
         }
 

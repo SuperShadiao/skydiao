@@ -228,18 +228,20 @@ public class BasicListener extends AbstractListener {
             });
         }
 
-        Matcher m = Pattern.compile("[a-zA-Z]+").matcher(message);
-        while(m.find()) {
-            String words = m.group();
-            if(words.toLowerCase().contains("discord") || words.toLowerCase().endsWith("dc") || (words.toLowerCase().contains("dc") && words.length() <= 3)) {
-                MutableComponent ic = Component.literal("§a[小沙雕] §c" + translate("features.antiscammer.notification"));
-                Style cs = Style.EMPTY
-                        .withClickEvent(new ClickEvent.OpenUrl(URI.create("https://xiaoshadiao.club/antiscamming")))
-                        .withHoverEvent(new HoverEvent.ShowText(Component.literal(translate("features.antiscammer.click2"))));
-                MutableComponent ic2 = Component.literal(" §e" + translate("features.antiscammer.click")).setStyle(cs);
+        if(message.toLowerCase().contains(":") && !message.toLowerCase().startsWith("profile id:")) {
+            Matcher m = Pattern.compile("[a-zA-Z]+").matcher(message);
+            while(m.find()) {
+                String words = m.group();
+                if(words.toLowerCase().contains("discord") || words.toLowerCase().endsWith("dc") || (words.toLowerCase().contains("dc") && words.length() <= 3)) {
+                    MutableComponent ic = Component.literal("§a[小沙雕] §c" + translate("features.antiscammer.notification"));
+                    Style cs = Style.EMPTY
+                            .withClickEvent(new ClickEvent.OpenUrl(URI.create("https://xiaoshadiao.club/antiscamming")))
+                            .withHoverEvent(new HoverEvent.ShowText(Component.literal(translate("features.antiscammer.click2"))));
+                    MutableComponent ic2 = Component.literal(" §e" + translate("features.antiscammer.click")).setStyle(cs);
 
-                ToolList.printChatMessage(ic.append(ic2));
-                break;
+                    ToolList.printChatMessage(ic.append(ic2));
+                    break;
+                }
             }
         }
     }

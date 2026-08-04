@@ -190,8 +190,9 @@ public class CrystalHollowHelperListener extends AbstractListener {
     }
 
     public void updateThreadLimit() {
-        if(structureScannerExecutor != null) structureScannerExecutor.shutdownNow();
+        ExecutorService temp = structureScannerExecutor;
         structureScannerExecutor = Executors.newWorkStealingPool(ConfigManager.crystalHollowHelperDisableThreadLimit.getValue() ? 13 : Math.min(13, Runtime.getRuntime().availableProcessors()));
+        if(temp != null) temp.shutdownNow();
     }
 
     private ExecutorService structureScannerExecutor = Executors.newWorkStealingPool(Math.min(13, Runtime.getRuntime().availableProcessors()));

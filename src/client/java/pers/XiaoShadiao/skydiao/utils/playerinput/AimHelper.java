@@ -2,6 +2,7 @@ package pers.XiaoShadiao.skydiao.utils.playerinput;
 
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 public class AimHelper {
@@ -168,5 +169,13 @@ public class AimHelper {
         float pitch = (float) -(Math.atan2(deltaY, Math.sqrt(deltaX * deltaX + deltaZ * deltaZ)) * (180 / Math.PI)); // Pitch
 
         return new Result(yaw, pitch);
+    }
+
+    public static Result getYawPitchByEntity(Entity entity) {
+        return getYawPitchByDoublePos(entity.getX(), entity.getY(), entity.getZ());
+    }
+
+    public static Result getYawPitchByEntityEye(Entity entity) {
+        return getYawPitchByDoublePos(entity.getX(), entity.getY() + entity.getEyeHeight(), entity.getZ());
     }
 }

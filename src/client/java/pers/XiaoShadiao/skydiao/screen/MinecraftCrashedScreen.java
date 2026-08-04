@@ -15,8 +15,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -85,6 +89,8 @@ public class MinecraftCrashedScreen extends Screen {
         context.text(this.font, "§d** 哼--哼-- 啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊... **", 25, 80 + this.font.lineHeight * 7, 0xFFFFFFFF, false);
         context.text(this.font, "§a还不快感谢小沙雕?", 25, 80 + this.font.lineHeight * 9, 0xFFFFFFFF, false);
 
+        context.text(this.font, "§c§l§k|§c§l 若要反馈崩溃问题, 请点击左下角按钮导出崩溃报告发送, 而不是反馈这个页面的截图 §c§l§k|", 25, 80 + this.font.lineHeight * 11, 0xFFFFFFFF, false);
+
         super.extractRenderState(context, mouseX, mouseY, delta);
     }
 
@@ -120,5 +126,48 @@ public class MinecraftCrashedScreen extends Screen {
         }
 
         return new ModInfo(currentClassName, currentStack, currentStackClassName);
+    }
+    
+    private int counter = 0;
+
+    @Override
+    public void tick() {
+        counter++;
+        if(counter >= 20) {
+            counter = 0;
+            updateClipboard();
+        }
+        super.tick();
+    }
+    
+    private void updateClipboard() {
+        Path saveFile = crashReport.getSaveFile();
+        if (saveFile != null && Files.exists(saveFile)) {
+            try {
+                java.io.File file = saveFile.toFile();
+                List<java.io.File> files = Collections.singletonList(file);
+                
+                Transferable fileTransferable = new Transferable() {
+                    @Override
+                    public DataFlavor[] getTransferDataFlavors() {
+                        return new DataFlavor[]{DataFlavor.javaFileListFlavor};
+                    }
+
+                    @Override
+                    public boolean isDataFlavorSupported(DataFlavor flavor) {
+                        return DataFlavor.javaFileListFlavor.equals(flavor);
+                    }
+
+                    @Override
+                    public Object getTransferData(DataFlavor flavor) {
+                        return files;
+                    }
+                };
+                
+                ToolList.getToolkit().getSystemClipboard().setContents(fileTransferable, null);
+            } catch (Exception e) {
+                mc.keyboardHandler.setClipboard(throwable.toString());
+            }
+        }
     }
 }

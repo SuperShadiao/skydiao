@@ -19,6 +19,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.projectile.FishingHook;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
@@ -371,7 +372,14 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
 
     private boolean isHoldingFishRod() {
         if(mc.player == null) return false;
-        return mc.player.getMainHandItem().getItem() == Items.FISHING_ROD && !mc.player.getMainHandItem().getHoverName().getString().contains("Carnival");
+
+        ItemStack itemStack = mc.player.getMainHandItem();
+        if(!(itemStack.getItem() == Items.FISHING_ROD)) return false;
+        String id = ToolList.getInstance().tryGetSkyblockItemId(itemStack);
+        if("SOUL_WHIP".equals(id) || "FLAMING_FLAY".equals(id)) return false;
+        if(itemStack.getHoverName().getString().contains("Carnival")) return false;
+
+        return true;
     }
 
     @Override
@@ -531,7 +539,7 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
 
 
         return mc.level.getFluidState(BlockPos.containing(posA)).is(FluidTags.WATER) || mc.level.getFluidState(BlockPos.containing(posB)).is(FluidTags.WATER)
-        || mc.level.getFluidState(BlockPos.containing(posA)).is(FluidTags.LAVA) || mc.level.getFluidState(BlockPos.containing(posB)).is(FluidTags.LAVA);
+                || mc.level.getFluidState(BlockPos.containing(posA)).is(FluidTags.LAVA) || mc.level.getFluidState(BlockPos.containing(posB)).is(FluidTags.LAVA);
     }
 
     private boolean isReady;

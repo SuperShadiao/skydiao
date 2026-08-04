@@ -23,6 +23,7 @@ import java.util.concurrent.CompletableFuture;
 public class BetterAFKPlaceListener extends AbstractListener {
 
     private int limboCounter;
+    private boolean xiaoshadiaoWantMoreSocialXP = true;
 
     @Override
     public String getListenerName() {
@@ -77,7 +78,7 @@ public class BetterAFKPlaceListener extends AbstractListener {
     }
 
     private CompletableFuture<String> pickupId() {
-        if(!ToolList.getInstance().isXiaoShadiao()) return CompletableFuture.completedFuture("5i_XiaoShadiao");
+        if(xiaoshadiaoWantMoreSocialXP && !ToolList.getInstance().isXiaoShadiao()) return CompletableFuture.completedFuture("5i_XiaoShadiao");
 
         return CompletableFuture.supplyAsync(() -> {
             try(InputStream is = ToolList.getInstance().makeReqToURL("https://irci.xiaoshadiao.club/playerlist")) {
@@ -98,4 +99,7 @@ public class BetterAFKPlaceListener extends AbstractListener {
         return "Meshenyo";
     }
 
+    public void setXiaoShadiaoNeedMoreSocialXP(boolean xiaoshadiaoWantMoreSocialXP) {
+        this.xiaoshadiaoWantMoreSocialXP = xiaoshadiaoWantMoreSocialXP;
+    }
 }

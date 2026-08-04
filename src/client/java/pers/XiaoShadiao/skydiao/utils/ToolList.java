@@ -1,5 +1,6 @@
 package pers.XiaoShadiao.skydiao.utils;
 
+import com.mojang.authlib.properties.Property;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
 import net.hypixel.modapi.HypixelModAPI;
@@ -27,7 +28,9 @@ import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -45,6 +48,7 @@ import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinEntityCloneableAccessor;
 
 import javax.net.ssl.HttpsURLConnection;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,6 +58,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -63,11 +68,21 @@ import java.util.stream.Collectors;
 
 public class ToolList {
 
+    private static final Toolkit toolkit;
+
     public static final Minecraft mc;
 
     static {
         mc = Minecraft.getInstance();
         if (mc == null) throw new AssertionError("不允许在Minecraft实例启动前加载ToolList, 检查一下代码看看。(如果处于运行环境, 请将该问题报告给小沙雕! " + SkyDiaoModClient.CONST_QQGROUP_MAIN + ")");
+        String oldHeadless = System.getProperty("java.awt.headless", "false");
+        System.setProperty("java.awt.headless", "false");
+        toolkit = Toolkit.getDefaultToolkit();
+        System.setProperty("java.awt.headless", oldHeadless);
+    }
+
+    public static Toolkit getToolkit() {
+        return toolkit;
     }
 
     private static ToolList instance;
@@ -508,6 +523,12 @@ public class ToolList {
 
     public @NotNull <T extends Entity> T cloneEntity(T entity) {
         return (T) ((MixinEntityCloneableAccessor) entity).clone();
+    }
+
+    public String getSkullBase64(ItemStack itemStack) {
+        if(itemStack.getItem() != Items.PLAYER_HEAD) return null;
+        Property property = itemStack.getComponents().getOrDefault(DataComponents.PROFILE, ResolvableProfile.createUnresolved("")).partialProfile().properties().get("textures").iterator().next();
+        return Optional.of(property.value()).orElse(null); // 返回 Base64 皮肤信息;
     }
 
     public record TPInfo(PositionMoveRotation from, PositionMoveRotation to) { }

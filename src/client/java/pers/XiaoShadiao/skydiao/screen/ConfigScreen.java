@@ -384,6 +384,10 @@ public class ConfigScreen extends Screen {
                             editBox.setResponder(stringOption::setValue);
                             yield editBox;
                         }
+                        case ActionConfigOption actionOption -> Button.builder(
+                                Component.literal(actionOption.getI18nValue()),
+                                actionOption::setValue
+                        ).bounds(0, 0, 100, 20).build();
                         default -> throw new UnsupportedOperationException(option.getClass().getName());
                     };
                     MutableComponent component = Component.literal(option.getI18nDesc());
