@@ -440,7 +440,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 
     private void autoSpray() {
         if (!autoSprayonatorConfig || SleepActions.actionDoing ||
-                TabReader.findLineWith("Spray: None") == null) return;
+                TabReader.findLineWith("Spray: None").isEmpty()) return;
         Integer spray = farmingToolIndex.getOrDefault("sprayonator", -1);
         if (spray == -1) return;
         ToolList.printChatMessage(Component.literal("§a[小沙雕] §b准备自动喷洒药剂"));
