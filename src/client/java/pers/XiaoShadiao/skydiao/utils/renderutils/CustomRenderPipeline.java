@@ -11,6 +11,9 @@ import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.loader.api.FabricLoader;
+import net.irisshaders.iris.api.v0.IrisProgram;
+import net.irisshaders.iris.apiimpl.IrisApiV0Impl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MappableRingBuffer;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -65,6 +68,20 @@ public class CustomRenderPipeline {
                     .build()
     );
 
+    static {
+        try {
+            if(FabricLoader.getInstance().isModLoaded("iris")) initIrisShader();
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void initIrisShader() {
+        IrisApiV0Impl.INSTANCE.assignPipeline(THROUGH_WALLS_FILL, IrisProgram.BASIC);
+        IrisApiV0Impl.INSTANCE.assignPipeline(NO_THROUGH_WALLS_FILL, IrisProgram.BASIC);
+        IrisApiV0Impl.INSTANCE.assignPipeline(THROUGH_WALLS_LINE, IrisProgram.LINES);
+        IrisApiV0Impl.INSTANCE.assignPipeline(NO_THROUGH_WALLS_LINE, IrisProgram.LINES);
+    }
 
     // :::custom-pipelines:define-pipeline
     // :::custom-pipelines:extraction-phase

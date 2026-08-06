@@ -50,6 +50,7 @@ import pers.XiaoShadiao.skydiao.config.option.ConfigOption;
 import pers.XiaoShadiao.skydiao.eventbuslistener.bilibili.BLiveListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
+import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.irc.ChatPacket;
 import pers.XiaoShadiao.skydiao.keybinds.KeyBindsManager;
@@ -145,12 +146,18 @@ public class BasicListener extends AbstractListener {
             }
             if(inSkyblock) {
                 ToolList.addThreadedTask(() -> {
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException _) {}
                     List<String> errorLines = new ArrayList<>();
                     try {
                         File temp = File.createTempFile("pack1", ".zip");
                         File target = new File(mc.getResourcePackDirectory().toFile(), "hypixel_resoucepack.zip");
+                        ToolList.printChatMessage(Component.literal("§a[小沙雕] §eHypixel官材: " + packet2.url()));
+                        if(!target.exists()) XSDHUD.bigTitle.updateTitleMsg("§e正在获取Hypixel官材...如果长时间未完成, 请检查网络", 120000);
                         FileUtils.copyInputStreamToFile(ToolList.getInstance().makeReqToURL(packet2.url()), temp);
                         if(!FileUtils.contentEquals(temp, target)) Files.move(temp.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        XSDHUD.bigTitle.updateTitleMsg("§eHyp官材获取成功, 请前往材质包页面查看", 3000);
                     } catch (IOException e) {
                         errorLines.add("下载Hypixel官材失败, 请检查你的网络后重新进入Skyblock: " + e);
                         errorLines.add("如果提示文件已被占用, 则当前官方材质包已发生更新, 请前往材质包选择页面卸载材质包后重新进入Skyblock, 并在弹出消息后重新安装材质包!");
@@ -161,6 +168,7 @@ public class BasicListener extends AbstractListener {
                         File target = new File(mc.getResourcePackDirectory().toFile(), "SkyBlock Legacy.zip");
                         FileUtils.copyInputStreamToFile(ToolList.getInstance().makeReqToURL("https://xiaoshadiao.club/3rd_lib/pack/SkyBlockLegacy.zip"), temp);
                         if(!FileUtils.contentEquals(temp, target)) Files.move(temp.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        XSDHUD.bigTitle.updateTitleMsg("§eLegacy (原版) 材质包获取成功, 请前往材质包页面查看", 3000);
                     } catch (IOException e) {
                         errorLines.add("下载Legacy (原版) 材质包失败, 请检查你的网络后重新进入Skyblock: " + e);
                         errorLines.add("如果提示文件已被占用, 则当前官方材质包已发生更新, 请前往材质包选择页面卸载材质包后重新进入Skyblock, 并在弹出消息后重新安装材质包!");
