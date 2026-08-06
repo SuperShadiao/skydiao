@@ -147,4 +147,8 @@ public class StatusManager extends Thread {
     public boolean isInRavengard() {
         return "RAVENGARD_DUNGEON_TRIO".equals(gameMode) || "RAVENGARD_HUB".equals(gameMode);
     }
+
+    public boolean isInSafari() {
+        return "safari".equals(gameMode);
+    }
 }

@@ -7,10 +7,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.animal.armadillo.Armadillo;
 import net.minecraft.world.entity.animal.bee.Bee;
 import net.minecraft.world.level.block.Blocks;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
-import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 
@@ -18,7 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class TorrhusCanyonHelperListener extends AbstractListener {
+public class TorrhusCanyonHelperListener extends AbstractForagingListener {
 
     private Thread tikiScannerThread = new Thread();
 
@@ -36,7 +36,7 @@ public class TorrhusCanyonHelperListener extends AbstractListener {
     }
 
     private void onLastRender(LevelRenderContext context) {
-        if(!ConfigManager.torrhusCanyonHelper.getValue() || mc.level == null || mc.player == null || !inCorrectIsland()) return;
+        if(!ConfigManager.torrhusCanyonHelper.getValue() || mc.level == null || mc.player == null || !isInTorrhusCanyon()) return;
 
         RenderUtils.WorldRender wr1 = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_LINE);
         RenderUtils.WorldRender wr2 = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_FILL);
@@ -59,6 +59,9 @@ public class TorrhusCanyonHelperListener extends AbstractListener {
                     RenderUtils.renderESP(wr1, entity, 1, 1, 0, 1, false);
                     RenderUtils.renderESP(wr2, entity, 1, 1, 0, 1, true);
                 }
+            } else if(entity instanceof Armadillo) {
+                RenderUtils.renderESP(wr1, entity, 1, 0.4f, 0, 1, false);
+                RenderUtils.renderESP(wr2, entity, 1, 0.4f, 0, 1, true);
             }
         }
 
@@ -67,7 +70,7 @@ public class TorrhusCanyonHelperListener extends AbstractListener {
     }
 
     private void onClientTick(Minecraft mc) {
-        if(!ConfigManager.torrhusCanyonHelper.getValue() || mc.player == null || mc.level == null || !inCorrectIsland()) return;
+        if(!ConfigManager.torrhusCanyonHelper.getValue() || mc.player == null || mc.level == null || !isInTorrhusCanyon()) return;
 
         if(!tikiScannerThread.isAlive()) {
             tikiScannerThread = new Thread(this::scanTiki, "Torrhus Canyon Tiki Scanner");
@@ -78,7 +81,7 @@ public class TorrhusCanyonHelperListener extends AbstractListener {
     }
 
     private void scanTiki() {
-        while(inCorrectIsland()) {
+        while(isInTorrhusCanyon()) {
             scanTiki0();
         }
     }
@@ -118,10 +121,6 @@ public class TorrhusCanyonHelperListener extends AbstractListener {
         } catch (Exception e) {
             logger.catching(e);
         }
-    }
-
-    private boolean inCorrectIsland() {
-        return "foraging_3".equals(StatusManager.get().getMode());
     }
 
 }

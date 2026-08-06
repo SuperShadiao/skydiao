@@ -67,6 +67,8 @@ public abstract class AbstractListener extends Thread {
     public static final RavengardHelper ravengardHelper = new RavengardHelper();
     public static final AutoReelListener autoReelListener = new AutoReelListener();
     public static final TorrhusCanyonHelperListener torrhusCanyonHelperListener = new TorrhusCanyonHelperListener();
+    public static final iPhoneBrowserHelperListener iPhoneBrowserHelperListener = new iPhoneBrowserHelperListener();
+    public static final FloorDroppingRenderListener floorDroppingRenderListener = new FloorDroppingRenderListener();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();

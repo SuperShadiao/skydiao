@@ -1004,6 +1004,18 @@
       "configname": "§e打开HUD设置",
       "description": "§e点击打开HUD设置"
     },
+    "safariboardcasthotspot": {
+      "configname": "§eSafari广播Hotspot",
+      "description": "§e在Safari中自动发送自己的Hotspot区域"
+    },
+    "safaritargetrenderepesp": {
+      "configname": "§eSafari ESP",
+      "description": "§e在Safari中帮你标记出目标"
+    },
+    "floordroppingrender": {
+      "configname": "§e树岛地面掉落物品渲染",
+      "description": "§e渲染地面掉落的物品"
+    },
     "about1": "§e小沙雕的QQ: 3381949033",
     "about2": "§e小沙雕の狗窝: https://xiaoshadiao.club/qqg",
     "about3": "§e部分快捷键设置可在 ESC->选项(设置)->控制 中找到",

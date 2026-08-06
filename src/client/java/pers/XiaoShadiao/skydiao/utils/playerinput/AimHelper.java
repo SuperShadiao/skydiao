@@ -2,6 +2,7 @@ package pers.XiaoShadiao.skydiao.utils.playerinput;
 
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Position;
 import net.minecraft.world.entity.Entity;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
@@ -178,4 +179,9 @@ public class AimHelper {
     public static Result getYawPitchByEntityEye(Entity entity) {
         return getYawPitchByDoublePos(entity.getX(), entity.getY() + entity.getEyeHeight(), entity.getZ());
     }
+
+    public static Result getYawPitchByVec3(Position vec3) {
+        return getYawPitchByDoublePos(vec3.x(), vec3.y(), vec3.z());
+    }
+
 }

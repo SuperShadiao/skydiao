@@ -20,7 +20,6 @@ import java.awt.datatransfer.Transferable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -145,7 +144,9 @@ public class MinecraftCrashedScreen extends Screen {
         if (saveFile != null && Files.exists(saveFile)) {
             try {
                 java.io.File file = saveFile.toFile();
-                List<java.io.File> files = Collections.singletonList(file);
+                java.io.File latestLog = new java.io.File(new java.io.File(mc.gameDirectory, "logs"), "latest.log");
+
+                List<java.io.File> files = latestLog.exists() ? List.of(latestLog, file) : List.of(file);
                 
                 Transferable fileTransferable = new Transferable() {
                     @Override
