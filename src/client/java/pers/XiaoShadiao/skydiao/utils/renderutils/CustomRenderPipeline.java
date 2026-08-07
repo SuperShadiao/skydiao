@@ -176,6 +176,7 @@ public class CustomRenderPipeline {
     // :::custom-pipelines:drawing-phase
     public void draw(Minecraft client, @SuppressWarnings("SameParameterValue") RenderPipeline pipeline) {
         // Build the buffer
+        RenderSystem.assertOnRenderThread();
         try {
             if (buffer == null) return;
 
@@ -196,6 +197,7 @@ public class CustomRenderPipeline {
 
     private GpuBuffer upload(MeshData.DrawState drawParameters, VertexFormat format, MeshData builtBuffer) {
         // Calculate the size needed for the vertex buffer
+        RenderSystem.assertOnRenderThread();
         int vertexBufferSize = drawParameters.vertexCount() * format.getVertexSize();
 
         // Initialize or resize the vertex buffer as needed

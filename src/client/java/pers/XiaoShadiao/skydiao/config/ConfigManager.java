@@ -155,7 +155,7 @@ public class ConfigManager {
         @Override
         public void setValue(Boolean value) {
             super.setValue(value);
-            AbstractListener.crystalHollowHelperListener.updateThreadLimit();
+            ToolList.mc.schedule(AbstractListener.crystalHollowHelperListener::updateThreadLimit);
         }
     };
     public static final BooleanConfigOption dungeonf7InactiveTerminalRender = new BooleanConfigOption("skyblockdungeonf7inactiveterminaldisplay", true);

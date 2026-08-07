@@ -8,6 +8,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 
@@ -43,6 +44,7 @@ public class FloorDroppingRenderListener extends AbstractForagingListener {
             }
         }
         for (BlockPos position : positions) {
+            if (ToolList.getInstance().isFullBlock(mc.level.getBlockState(position.above()))) continue;
             RenderUtils.renderESP(wr1, position, isInGalgame() ? 1 : 0, 1, 0, 1, false);
             RenderUtils.renderESP(wr2, position, isInGalgame() ? 1 : 0, 1, 0, 1, true);
         }

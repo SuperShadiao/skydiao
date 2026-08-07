@@ -32,7 +32,7 @@ public class FreecamAndFreelook extends AbstractListener {
 
     @Override
     public void registerListeners() {
-        ClientTickEvents.START_CLIENT_TICK.register(this::onClientTick);
+        ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
     }
 
     private void onClientTick(Minecraft mc) {

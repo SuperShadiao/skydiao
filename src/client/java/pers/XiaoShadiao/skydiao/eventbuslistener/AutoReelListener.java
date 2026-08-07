@@ -15,7 +15,7 @@ import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
 public class AutoReelListener extends AbstractListener {
 
-    private final AimHelper aimHelper = new AimHelper();
+    private final AimHelper aimHelper = new AimHelper(1.75);
     private long lastRightClickTime;
     private int delayTick;
     private boolean shouldAimGround;
