@@ -15,7 +15,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.irisshaders.iris.api.v0.IrisProgram;
 import net.irisshaders.iris.apiimpl.IrisApiV0Impl;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MappableRingBuffer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.core.Direction;
@@ -91,7 +90,7 @@ public class CustomRenderPipeline {
     // :::custom-pipelines:extraction-phase
     // :::custom-pipelines:drawing-phase
     private static final Vector4f COLOR_MODULATOR = new Vector4f(1f, 1f, 1f, 1f);
-    private MappableRingBuffer vertexBuffer;
+    private XSDMappableRingBuffer vertexBuffer;
 
 
     private static final Map<RenderPipeline, CustomRenderPipeline> cache = new HashMap<>();
@@ -120,14 +119,10 @@ public class CustomRenderPipeline {
         if (fillBox) {
             XSDShapeRenderer.addChainedFilledBoxVertices(matrices, buffer, x1, y1, z1, x2, y2, z2, r, g, b, a / 2);
         } else {
-//            for (float i = -0.01f; i <= 0.01f; i += 0.01f) {
-//                XSDShapeRenderer.renderLineBox(matrices.last(), buffer, x1 + i, y1 + i, z1 + i, x2 - i, y2 - i, z2 - i, r, g, b, a);
-//            }
             XSDShapeRenderer.renderLineBox(matrices.last(), buffer, x1, y1, z1, x2, y2, z2, r, g, b, a);
         }
 
         matrices.popPose();
-        // draw(ToolList.mc, pipeline);
     }
 
     public void renderTrace(LevelRenderContext context, RenderPipeline pipeline, float x1, float y1, float z1, float x2, float y2, float z2, float r, float g, float b, float a) {
@@ -164,10 +159,7 @@ public class CustomRenderPipeline {
         }
         int rgb1 = new Color(r1, g1, b1, a1).getRGB();
         int rgb2 = new Color(r2, g2, b2, a2).getRGB();
-//        for (float i = -0.01f; i <= 0.01f; i += 0.01f) {
-//            RenderUtils.renderVector(matrices, buffer, new Vector3f(x1 - i, y1, z1 - i), new Vec3(x2 - i, y2, z2 - i), rgb1, rgb2);
-//            RenderUtils.renderVector(matrices, buffer, new Vector3f(x1 - i, y1, z1 + i), new Vec3(x2 - i, y2, z2 + i), rgb1, rgb2);
-//        }
+
         RenderUtils.renderVector(matrices, buffer, new Vector3f(x1, y1, z1), new Vec3(x2, y2, z2), rgb1, rgb2);
         matrices.popPose();
     }
@@ -206,7 +198,7 @@ public class CustomRenderPipeline {
                 vertexBuffer.close();
             }
 
-            vertexBuffer = new MappableRingBuffer(() -> "SkyDiao render pipeline", GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_MAP_WRITE, vertexBufferSize);
+            vertexBuffer = new XSDMappableRingBuffer(() -> "SkyDiao render pipeline", GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_MAP_WRITE, vertexBufferSize, 10);
         }
 
         // Copy vertex data into the vertex buffer

@@ -66,7 +66,6 @@
     "adapter.spmloader.FreecamAndFreelookFixer",
     "adapter.spmloader.MixinHelmetRemover",
     "blivemode.MixinEntity",
-    "blivemode.MixinEntityPlayer",
-    "debug.MixinSyncGPU"
+    "blivemode.MixinEntityPlayer"
   ]
 }

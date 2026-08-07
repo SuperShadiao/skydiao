@@ -24,7 +24,6 @@ import pers.XiaoShadiao.skydiao.utils.Register;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.WindowsUtils;
 
-import java.io.File;
 import java.util.*;
 
 public class MacroManagerListener extends AbstractListener {
@@ -43,8 +42,6 @@ public class MacroManagerListener extends AbstractListener {
     public boolean isChatOpen = false;
     private int smallTickFlag;
     public boolean isScreenOpen = false;
-
-    public static final File recordDir = new File(new File(mc.gameDirectory, "screenshots"), "xsd_alert_macro_check");
 
     @Override
     public String getListenerName() {
@@ -65,8 +62,6 @@ public class MacroManagerListener extends AbstractListener {
             }
         });
         macros = Collections.unmodifiableList(macros);
-
-        recordDir.mkdirs();
     }
 
     private void onChat(Component component, boolean b) {

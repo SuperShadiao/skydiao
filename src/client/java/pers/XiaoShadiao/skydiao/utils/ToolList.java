@@ -68,21 +68,11 @@ import java.util.stream.Collectors;
 
 public class ToolList {
 
-    private static final Toolkit toolkit;
-
     public static final Minecraft mc;
 
     static {
         mc = Minecraft.getInstance();
         if (mc == null) throw new AssertionError("不允许在Minecraft实例启动前加载ToolList, 检查一下代码看看。(如果处于运行环境, 请将该问题报告给小沙雕! " + SkyDiaoModClient.CONST_QQGROUP_MAIN + ")");
-        String oldHeadless = System.getProperty("java.awt.headless", "false");
-        System.setProperty("java.awt.headless", "false");
-        toolkit = Toolkit.getDefaultToolkit();
-        System.setProperty("java.awt.headless", oldHeadless);
-    }
-
-    public static Toolkit getToolkit() {
-        return toolkit;
     }
 
     private static ToolList instance;

@@ -38,7 +38,7 @@ public class AutoUpdater {
         modsFolder = new File(ToolList.mc.gameDirectory, "mods");
     }
 
-    private static final CountDownLatch locker = new CountDownLatch(1);
+    private static CountDownLatch locker = new CountDownLatch(1);
 
     private static boolean passedUpdateTip;
     public static final File updaterEXE = new File(ToolList.mc.gameDirectory, "xsdhhup.exe");
@@ -145,14 +145,7 @@ public class AutoUpdater {
                         up = new AutoUpdater(up.URL,up.newVer,true);
                     };
 
-                    JsonObject finalJo = jo;
-                    while(true) {
-                        try {
-                            locker.await();
-                            break;
-                        } catch (InterruptedException _) {}
-                    }
-                    ToolList.mc.execute(() -> handleOtherData(finalJo));
+                    handleOtherData(jo);
 
                     return up;
                 } catch(Exception e) {
@@ -175,6 +168,14 @@ public class AutoUpdater {
     }
 
     private static void handleOtherData(JsonObject jo) {
+        while(true) {
+            try {
+                locker.await();
+                break;
+            } catch (InterruptedException _) {
+
+            }
+        }
         try { AbstractListener.basicListener.setSPMVersion(jo.get("spmv").getAsString()); } catch (Exception _) {}
         try { AbstractListener.betterAFKPlaceListener.setXiaoShadiaoNeedMoreSocialXP(jo.get("xiaoshadiaoWantMoreSocialXP").getAsBoolean()); } catch (Exception _) {}
     }

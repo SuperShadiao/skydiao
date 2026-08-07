@@ -17,6 +17,9 @@ import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -164,10 +167,12 @@ public class MinecraftCrashedScreen extends Screen {
                         return files;
                     }
                 };
-                
-                ToolList.getToolkit().getSystemClipboard().setContents(fileTransferable, null);
+
+                throw new UnsupportedOperationException("Clipboard is temporarily unavailable.");
             } catch (Exception e) {
-                mc.keyboardHandler.setClipboard(throwable.toString());
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                throwable.printStackTrace(new PrintStream(baos));
+                mc.keyboardHandler.setClipboard(baos.toString(Charset.defaultCharset()));
             }
         }
     }
