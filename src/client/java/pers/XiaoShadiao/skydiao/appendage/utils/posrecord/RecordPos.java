@@ -14,6 +14,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 import static pers.XiaoShadiao.skydiao.SkyDiaoModClient.MOD_ID;
 
@@ -92,6 +95,17 @@ public class RecordPos {
             return null;
         }
 
+
+    }
+
+    public static List<String> getPListFileNames(){
+        File directory = RecordPos.SAVE_DIRECTORY.toFile();
+        File[] files = directory.listFiles((d, name) -> name.endsWith(".json"));
+        if (files == null) return null;
+        Arrays.sort(files, Comparator.comparing(File::getName).reversed());
+        ArrayList<String> slist = new ArrayList<>();
+        List.of(files).forEach(f->slist.add(f.getName()));
+        return slist;
 
     }
 

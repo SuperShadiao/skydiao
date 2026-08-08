@@ -17,8 +17,9 @@ import pers.XiaoShadiao.skydiao.appendage.eventbuslistener.macro.mining.Obsidian
 import pers.XiaoShadiao.skydiao.appendage.utils.posrecord.RecordPos;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 
-import java.io.File;
 import java.util.*;
+
+import static pers.XiaoShadiao.skydiao.appendage.utils.posrecord.RecordPos.getPListFileNames;
 
 //APPEND
 public class ApdCommand extends BaseRootRunnableCommand {
@@ -184,19 +185,10 @@ public class ApdCommand extends BaseRootRunnableCommand {
 
     }
 
-    private List<String> getPListFileNames(){
-        File directory = RecordPos.SAVE_DIRECTORY.toFile();
-        File[] files = directory.listFiles((d, name) -> name.endsWith(".json"));
-        if (files == null) return null;
-        Arrays.sort(files, Comparator.comparing(File::getName).reversed());
-        ArrayList<String> slist = new ArrayList<>();
-        List.of(files).forEach(f->slist.add(f.getName()));
-        return slist;
 
-    }
 
     private int setrecpos(CommandContext<FabricClientCommandSource> context) {
-        ObsidianListener.plist = RecordPos.getLocal(context.getArgument("filename", String.class));
+        ConfigManager.autoObsidianPositionsFile.setValue(context.getArgument("filename", String.class));
         context.getSource().sendFeedback(Component.literal("已选择文件:"+context.getArgument("filename", String.class)).withColor(0xd672de));
         logger.info(ObsidianListener.plist.positions().toString());
 
@@ -291,16 +283,16 @@ public class ApdCommand extends BaseRootRunnableCommand {
 
     private int setDrillSlot(CommandContext<FabricClientCommandSource> context){
         int slot = context.getArgument("slot", Integer.class);
-        int slot2 = ObsidianListener.getDrillSlot();
-        ObsidianListener.setDrillSlot(slot);
+        int slot2 = ConfigManager.drillSlot.getValue();
+        ConfigManager.drillSlot.setValue(slot);
         context.getSource().sendFeedback(Component.literal("已将钻头栏原先的值"+slot2+"替换为"+slot).withColor(0xd672de));
         return 1;
     }
 
     private int setLanternSlot(CommandContext<FabricClientCommandSource> context){
         int slot = context.getArgument("slot", Integer.class);
-        int slot2 = ObsidianListener.getLanternSlot();
-        ObsidianListener.setLanternSlot(slot);
+        int slot2 = ConfigManager.lanternSlot.getValue();
+        ConfigManager.lanternSlot.setValue(slot);
         context.getSource().sendFeedback(Component.literal("已将灯笼栏原先的值"+slot2+"替换为"+slot).withColor(0xd672de));
         return 1;
     }
@@ -319,31 +311,31 @@ public class ApdCommand extends BaseRootRunnableCommand {
     }
 
     private int setPlayerCheck(CommandContext<FabricClientCommandSource> context){
-        boolean b = ObsidianWRListener.playerCheck;
+        boolean b = ConfigManager.obsidianPlayerCheck.getValue();
 
         if(b){
-            ObsidianWRListener.playerCheck=false;
+            ConfigManager.obsidianPlayerCheck.setValue(false);
         }
-        else ObsidianWRListener.playerCheck = true;
+        else ConfigManager.obsidianPlayerCheck.setValue(true);
         context.getSource().sendFeedback(Component.literal("已将玩家检测设为:"+!b).withColor(0xd672de));
         return 1;
     }
 
     private int setModeCheck(CommandContext<FabricClientCommandSource> context){
-        boolean b = ObsidianWRListener.skyblockTheEndCheck;
+        boolean b = ConfigManager.obsidianTheEndCheck.getValue();
 
         if(b){
-            ObsidianWRListener.skyblockTheEndCheck=false;
+            ConfigManager.obsidianTheEndCheck.setValue(false);
         }
-        else ObsidianWRListener.skyblockTheEndCheck = true;
+        else ConfigManager.obsidianTheEndCheck.setValue(true);
         context.getSource().sendFeedback(Component.literal("已将末地检测设为:"+!b).withColor(0xd672de));
         return 1;
     }
 
     private int setPlayerCheckRange(CommandContext<FabricClientCommandSource> context){
         int range = context.getArgument("range", Integer.class);
-        int range2 = ObsidianWRListener.getRange();
-        ObsidianWRListener.setRange(range);
+        int range2 = ConfigManager.obsidianPlayerCheckRange.getValue();
+        ConfigManager.obsidianPlayerCheckRange.setValue(range);
         context.getSource().sendFeedback(Component.literal("已将范围"+ range2 +"替换为"+ range).withColor(0xd672de));
         return 1;
     }
@@ -351,12 +343,12 @@ public class ApdCommand extends BaseRootRunnableCommand {
     private int info(CommandContext<FabricClientCommandSource> context){
         List<String> list = List.of(
                 "自动黑曜石(+Retry)信息如下:",
-                "点列存档:"+ObsidianListener.plist.name(),
-                "钻头栏:"+ObsidianListener.getDrillSlot(),
-                "灯笼栏:"+ObsidianListener.getLanternSlot(),
-                "是否开启玩家检测:"+ObsidianWRListener.playerCheck,
-                "玩家检测范围(大):"+ObsidianWRListener.getRange(),
-                "是否开启末地检测:"+ObsidianWRListener.skyblockTheEndCheck
+                "点列存档:"+ConfigManager.autoObsidianPositionsFile,
+                "钻头栏:"+ConfigManager.drillSlot.getValue(),
+                "灯笼栏:"+ConfigManager.lanternSlot.getValue(),
+                "是否开启玩家检测:"+ConfigManager.obsidianPlayerCheck.getValue(),
+                "玩家检测范围(大):"+ConfigManager.obsidianPlayerCheckRange.getValue(),
+                "是否开启末地检测:"+ConfigManager.obsidianTheEndCheck.getValue()
         );
         for(String str: list){
             context.getSource().sendFeedback(Component.literal(str).withColor(0xd672de));

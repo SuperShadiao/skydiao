@@ -377,6 +377,11 @@ public class ConfigScreen extends Screen {
                             });
                             yield editBox;
                         }
+                        case StringGetterSelectConfigOption stringGetterSelectConfigOption -> Button.builder(
+                                Component.literal("->"),
+                                (_)->Minecraft.getInstance().setScreenAndShow(
+                                        new StringListScreen(stringGetterSelectConfigOption.getI18nName(),CrowdinI18nManager.translate("stringlistscreen.subtitle")+stringGetterSelectConfigOption.getValue(),stringGetterSelectConfigOption))
+                        ).bounds(0, 0, 100, 20).build();
                         case StringConfigOption stringOption -> {
                             EditBox editBox = new EditBox(ToolList.mc.font, 0, 0, 100, 20, Component.literal(stringOption.getI18nName()));
                             editBox.setMaxLength(1000);
