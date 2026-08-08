@@ -18,6 +18,8 @@ public class CustomSounds {
     public static final SoundEvent YSC = registerSound("ysc");
     public static final SoundEvent YSENTER = registerSound("ysenter");
     public static final SoundEvent YSWARNING = registerSound("yswarning");
+    public static final SoundEvent NPC = registerSound("nearby_player_check");
+
 
 
     // actual registration of all the custom SoundEvents

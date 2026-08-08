@@ -27,6 +27,11 @@ import java.util.List;
 
 public class RenderUtils {
 
+    public static void renderCircle(WorldRender worldRender, Vec3 center, float radius, int segments){
+        checkAccess(_3d, worldRender.pipeline, "renderCircle()");
+        worldRender.crpl.renderCircle(worldRender.context, worldRender.pipeline, center, radius, segments);
+    }
+
     public static void renderScrollingString(
             GuiGraphicsExtractor guiGraphics,
             Font font,

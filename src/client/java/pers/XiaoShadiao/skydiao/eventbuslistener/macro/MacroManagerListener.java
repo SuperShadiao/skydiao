@@ -13,6 +13,8 @@ import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetHeldSlotPacket;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import pers.XiaoShadiao.skydiao.appendage.eventbuslistener.macro.mining.ObsidianListener;
+import pers.XiaoShadiao.skydiao.appendage.eventbuslistener.macro.mining.ObsidianWRListener;
 import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.EasyFarmingScriptListener;
@@ -37,6 +39,9 @@ public class MacroManagerListener extends AbstractListener {
     public static final AutoDojo autoDojo = new AutoDojo();
     public static final EasyFarmingScriptListener farmingScript = new EasyFarmingScriptListener();
     public static final AutoBloodfiendListener autoBloodfiendListener = new AutoBloodfiendListener();
+
+    public static final ObsidianListener obsidianListener = new ObsidianListener();
+    public static final ObsidianWRListener obsidianWRListener = new ObsidianWRListener();
 
     public long lastOpenChatTime = 0;
     public boolean isChatOpen = false;

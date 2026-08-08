@@ -36,5 +36,11 @@
     "sounds": [
       "skydiao:ys/w"
     ]
+  },
+  "nearby_player_check": {
+    "subtitle": "Nearby Player Check Sound",
+    "sounds": [
+      "skydiao:getchecked/lap_finish"
+    ]
   }
 }
