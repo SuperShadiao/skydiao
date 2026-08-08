@@ -14,6 +14,8 @@ import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
+import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.XSDSafeSession;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -24,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -176,4 +179,5 @@ public class MinecraftCrashedScreen extends Screen {
             }
         }
     }
+
 }

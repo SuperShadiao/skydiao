@@ -10,6 +10,7 @@ import pers.XiaoShadiao.skydiao.utils.Register;
 
 public interface CommandManager {
 
+    public static final ApdCommand APD_COMMAND = new ApdCommand();
     public static final XSDChatCommand XSD_CHAT_COMMAND = new XSDChatCommand();
     public static final HHMCommand HHM_COMMAND = new HHMCommand();
     public static final JoinMineshaftCommand JOIN_MINESHAFT_COMMAND = new JoinMineshaftCommand();
@@ -31,7 +32,6 @@ public interface CommandManager {
     public static final HHStopABFCommand HH_STOP_AF_COMMAND = new HHStopABFCommand();
     public static final SkydiaoHudCommand SKYDIAO_HUD_COMMAND = new SkydiaoHudCommand();
     public static final HHHudCommand HH_HUD_COMMAND = new HHHudCommand();
-    public static final ApdCommand APD_COMMAND = new ApdCommand();
 
     public static void registerCommands() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {

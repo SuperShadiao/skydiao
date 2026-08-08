@@ -31,6 +31,7 @@ public abstract class XSDHUD implements HudElement {
     public static final AutoBloodfiendListener.TaskRender abfTaskRender = MacroManagerListener.autoBloodfiendListener.new TaskRender();
     public static final GenshinImpactHeatCold genshinImpactHeatCold = new GenshinImpactHeatCold();
     public static final MusicLyricDisplay musicLyricDisplay = new MusicLyricDisplay();
+    public static final DungeonReviveItemCD dungeonReviveItemCD = new DungeonReviveItemCD();
 
     public static final List<XSDHUD> huds = Util.make(new ArrayList<>(), arr -> Register.execRegister(XSDHUD.class, XSDHUD.class, arr::add));
 

@@ -61,16 +61,16 @@ public final class CustomFabricEvents {
         public boolean onMouseScroll(long windowsHandle, double idk, double scrollCount);
     }
 
-    public static final Event<@NotNull PacketEvent<PacketListener>> CLIENT_PACKET_EVENT = EventFactory.createArrayBacked(PacketEvent.class, callbacks -> (packet, packetListener, packetProcessor) -> {
+    public static final Event<@NotNull PacketEvent> CLIENT_PACKET_EVENT = EventFactory.createArrayBacked(PacketEvent.class, callbacks -> (packet, packetListener, packetProcessor) -> {
         boolean cancel = false;
-        for (PacketEvent<PacketListener> callback : callbacks) {
+        for (PacketEvent callback : callbacks) {
             cancel |= callback.onPacket(packet, packetListener, packetProcessor);
         }
         return cancel;
     });
 
-    public interface PacketEvent<T extends PacketListener> {
-        public boolean onPacket(Packet<T> packet, T packetListener, PacketProcessor packetProcessor);
+    public interface PacketEvent {
+        public boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor);
     }
 
     public static final Event<@NotNull SendPacketEvent> CLIENT_SEND_PACKET_EVENT = EventFactory.createArrayBacked(SendPacketEvent.class, callbacks -> (packet) -> {

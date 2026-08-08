@@ -212,7 +212,7 @@ public class SkydiaoFarmingScriptCommand extends BaseRootRunnableCommand {
 
         List<String> helps = List.of(
                 "§a[小沙雕] §e帮助:",
-                "§a[小沙雕] §e/skydiaofs addnode §f- §b在你当前位置添加一个节点",
+                "§a[小沙雕] §e/skydiaofs addnode §f- §b在你当前位置添加一个节点 (节点如果是空操作则称为空白节点, 到达该空白节点时脚本会提醒你并自动停止)",
                 "§a[小沙雕] §e/skydiaofs removenode §f- §b删除当前正在编辑的节点",
                 "§a[小沙雕] §e/skydiaofs clone §f- §b克隆当前正在编辑的节点到你当前的位置, 所有操作将保留",
                 "§a[小沙雕] §e/skydiaofs editnearestnode §f- §b编辑你当前位置离你最近的节点",

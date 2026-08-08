@@ -45,7 +45,6 @@ public class MacroManagerListener extends AbstractListener {
 
     public long lastOpenChatTime = 0;
     public boolean isChatOpen = false;
-    private int smallTickFlag;
     public boolean isScreenOpen = false;
 
     @Override
@@ -88,14 +87,12 @@ public class MacroManagerListener extends AbstractListener {
 
                     double distance = historyPoses.stream().mapToDouble(vec3 -> vec3.distanceTo(after.position())).min().orElse(0.0);
                     float deltaYaw = Math.abs(before.yaw() - after.yaw());
-                    if (smallTickFlag > 200 || distance > 0.65 || (deltaYaw > 0.05 && deltaYaw < 360 - 0.05) || Math.abs(before.pitch() - after.pitch()) > 0.05) {
+                    if (distance > 0.65 || (deltaYaw > 0.05 && deltaYaw < 360 - 0.05) || Math.abs(before.pitch() - after.pitch()) > 0.05) {
                         boolean flag = true;
                         for (IMacro macro : activeMacros) {
                             flag &= !macro.onMacroCheck(before, after);
                         }
                         if (flag) triggerAlert(before, after);
-                    } else {
-                        smallTickFlag += 100;
                     }
                 }
             } else if(packet instanceof ClientboundSetHeldSlotPacket(int slot)) {
@@ -177,8 +174,6 @@ public class MacroManagerListener extends AbstractListener {
             lastOpenChatTime = System.currentTimeMillis();
         }
         isChatOpen = temp;
-
-        if(smallTickFlag > 0) smallTickFlag--;
 
         if(!activeMacros.isEmpty()) {
             if(WindowsUtils.isWindowsIconfied() && !WindowsUtils.isWindowsFocused()) {

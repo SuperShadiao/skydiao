@@ -409,8 +409,7 @@ public class AccountSelectScreen extends Screen {
                 verifyHttpServerException = e;
             }
         }
-        // LinearLayout linearLayout2 = this.layout.addToFooter(LinearLayout.vertical().spacing(8));
-        // linearLayout2.addChild(new StringWidget(Component.literal(tipMessage), font));
+
         LinearLayout linearLayout = footerButtonLayout =  this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
         linearLayout.addChild(LinearLayout.horizontal().spacing(8));
         linearLayout.addChild(Button.builder(Component.literal(translate("gui.accountmanager.buttonback")), this::onClose).build());
@@ -564,4 +563,5 @@ public class AccountSelectScreen extends Screen {
             super.removeEntry(entry);
         }
     }
+
 }

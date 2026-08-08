@@ -358,20 +358,22 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                 .addAction(() -> XSDHUD.bigTitle.updateTitleMsg("§e即将返回原来的点位...", 4000), 1500, true)
 
                 .addAction(ctx -> InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")), 500)
-                .addAction(() -> ToolList.sendChatMessage("/warp garden"), 100, true);
+                .addAction(() -> ToolList.sendChatMessage("/warp garden"), 500, true);
 
 
         kpest.addAction(() -> {
             try {
                 if(!mc.player.onGround()) {
-                    InputSimulator.setShift(true);
-                    Thread.sleep(200);
+                    while(!mc.player.onGround()) {
+                        InputSimulator.setShift(true);
+                        Thread.sleep(200);
+                    }
                     InputSimulator.setShift(false);
                 } else {
                     Thread.sleep(200);
                 }
             } catch (InterruptedException _) {}
-        }, 500);
+        }, 200);
 
         if (ConfigManager.fsGardenMoonFlowerMode.getValue()) {
             executeDayNightSwitch(kpest, true);

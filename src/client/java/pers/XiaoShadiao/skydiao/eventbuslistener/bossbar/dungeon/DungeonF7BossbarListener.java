@@ -445,7 +445,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
     private long stormThunderFlagTime = 0;
 
-    private boolean onPacket(Packet<PacketListener> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
+    private boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
         Map.Entry<String, StarRailNotification.Type> turnItToStarRailMsg = null;
         boolean cancelFlag = true;
 
