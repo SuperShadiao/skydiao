@@ -1,15 +1,11 @@
 package pers.XiaoShadiao.skydiao.appendage.eventbuslistener.macro.mining;
 
-import javazoom.jl.player.Player;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
-import org.slf4j.LoggerFactory;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
