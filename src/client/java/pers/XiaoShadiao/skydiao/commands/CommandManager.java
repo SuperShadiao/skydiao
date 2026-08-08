@@ -5,6 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import pers.XiaoShadiao.skydiao.appendage.command.ApdCommand;
 import pers.XiaoShadiao.skydiao.utils.Register;
 
 public interface CommandManager {
@@ -30,6 +31,7 @@ public interface CommandManager {
     public static final HHStopABFCommand HH_STOP_AF_COMMAND = new HHStopABFCommand();
     public static final SkydiaoHudCommand SKYDIAO_HUD_COMMAND = new SkydiaoHudCommand();
     public static final HHHudCommand HH_HUD_COMMAND = new HHHudCommand();
+    public static final ApdCommand APD_COMMAND = new ApdCommand();
 
     public static void registerCommands() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {

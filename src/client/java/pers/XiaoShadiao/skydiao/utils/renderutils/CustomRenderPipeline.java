@@ -75,6 +75,49 @@ public class CustomRenderPipeline {
         }
     }
 
+    public void renderCircle(LevelRenderContext context, RenderPipeline pipeline, Vec3 center, float radius, int segments){
+        PoseStack matrices = context.poseStack();
+        Vec3 camera = context.levelState().cameraRenderState.pos;
+
+        assert matrices != null;
+        matrices.pushPose();
+        matrices.translate(-camera.x, -camera.y, -camera.z);
+
+        if (buffer == null) {
+            buffer = new BufferBuilder(allocator, pipeline.getVertexFormatMode(), pipeline.getVertexFormat());
+        }
+
+        renderCircle1(buffer, matrices.last(), center, radius, segments);
+
+        matrices.popPose();
+
+    }
+
+    public static void renderCircle1(VertexConsumer vertexConsumer, PoseStack.Pose pose,
+                                     Vec3 center, float radius, int segments) {
+
+
+        float angleStep = (float) (2 * Math.PI / segments);
+
+        for (int i = 0; i < segments; i++) {
+            float angle1 = i * angleStep;
+            float angle2 = (i+1) * angleStep;
+
+            float x1 = (float) (center.x + radius * Math.cos(angle1));
+            float z1 = (float) (center.z + radius * Math.sin(angle1));
+            float x2 = (float) (center.x + radius * Math.cos(angle2));
+            float z2 = (float) (center.z + radius * Math.sin(angle2));
+            float y = (float) center.y;
+
+            vertexConsumer.addVertex(pose, (float) center.x, y, (float) center.z)
+                    .setColor(0.0f, 1.0f, 0.0f, 0.3f);
+            vertexConsumer.addVertex(pose, x1, y, z1)
+                    .setColor(0.0f, 1.0f, 0.0f, 0.3f);
+            vertexConsumer.addVertex(pose, x2, y, z2)
+                    .setColor(0.0f, 1.0f, 0.0f, 0.3f);
+        }
+    }
+
     private static void initIrisShader() {
         IrisApiV0Impl.INSTANCE.assignPipeline(THROUGH_WALLS_FILL, IrisProgram.BASIC);
         IrisApiV0Impl.INSTANCE.assignPipeline(NO_THROUGH_WALLS_FILL, IrisProgram.BASIC);

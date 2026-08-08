@@ -50,7 +50,11 @@ public class StatusManager extends Thread {
         hypLocation = hypPacket;
         updateStatus();
     }
-    
+
+    public ClientboundLocationPacket getHypLocation(){
+        return hypLocation;
+    }
+
     public static void cleanHypixelPacket() {
         hypLocation = null;
         updateStatus();

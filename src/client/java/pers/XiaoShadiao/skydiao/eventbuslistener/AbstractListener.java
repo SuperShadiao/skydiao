@@ -3,6 +3,7 @@ package pers.XiaoShadiao.skydiao.eventbuslistener;
 import net.minecraft.client.Minecraft;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import pers.XiaoShadiao.skydiao.appendage.eventbuslistener.EditingPListListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon.*;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.CarnivalFruitDigger;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
@@ -80,6 +81,8 @@ public abstract class AbstractListener extends Thread {
 
     public static final FoxModelLoaderAdapter foxModelLoaderAdapter = new FoxModelLoaderAdapter();
     public static final SPMLoaderAdapter spmlLoaderAdapter = new SPMLoaderAdapter();
+
+    public static final EditingPListListener editingPListListener = new EditingPListListener();
 
     public static final List<ICustomSkinModelLoader> modelLoaderAdapters = List.of(
             foxModelLoaderAdapter,

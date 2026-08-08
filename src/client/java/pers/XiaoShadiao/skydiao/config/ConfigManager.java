@@ -229,6 +229,9 @@ public class ConfigManager {
     public static final ActionConfigOption openClearStashCommand = new ActionConfigOption("openclearstashcommand", openChat.apply("/skydiao fastclearminingstash"));
     public static final ActionConfigOption openHud = new ActionConfigOption("openhud", () -> ToolList.mc.setScreenAndShow(new HudConfigScreen(ToolList.mc.screen)));
 
+    public static final BooleanConfigOption iAutoObsidian = new BooleanConfigOption("iAutoObsidian", false);
+    public static final BooleanConfigOption iAutoObsidianWR = new BooleanConfigOption("iAutoObsidianWithRetry", false);
+
     public static final List<Map.Entry<String, List<ConfigOption<?>>>> categories = List.of(
             Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip, enableircafktip, enableircmacrochecktip, cooltitle, customTitleText)),
             Map.entry("工具类", List.of(inventoryFilter, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodehideserverid, keepSprint, autoReconnect, afkInOtherPlace, freecamFlySpeed, openFreelookAndFreecamAction, openAutoClickAction, openClearStashCommand)),
@@ -242,7 +245,8 @@ public class ConfigManager {
             Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonKeyRender, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7InactiveTerminalRender, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered, dungeonDrinkPotion, dungeonBloodRoomTime, dungeonTrashTPS, dungeonf7msgbotssleap)),
             Map.entry("rift", List.of(rifttimegunhelper)),
             Map.entry("界面类", List.of(openHud, bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, dyingtip, noblind, nosuffoverlay, fireOverlay, lyricColor1, lyricColor2)),
-            Map.entry("ravengard", List.of(ravengardHelper))
+            Map.entry("ravengard", List.of(ravengardHelper)),
+            Map.entry("新增类", List.of(iAutoObsidian,iAutoObsidianWR))
     );
 
 
