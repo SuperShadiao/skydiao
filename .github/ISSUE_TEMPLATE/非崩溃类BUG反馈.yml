@@ -1,0 +1,44 @@
+name: 非崩溃类BUG
+description: 提交游戏内功能异常等非崩溃类问题
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: input
+    id: mod-version
+    attributes:
+      label: Mod版本
+      description: 请填写你当前使用的 Mod 版本号
+      placeholder: "例如: 0.4.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Bug描述
+      description: 请详细描述你遇到的异常现象，以及你期望的正确表现是什么。
+      placeholder: |
+        例如：某怪物ESP功能无法正确标记目标
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: 复现步骤
+      description: 请列出导致该问题的具体操作步骤。
+      placeholder: |
+        农业脚本自动杀虫后, 脚本可能出现异常, 如未落地, 挖空气等。
+    validations:
+      required: true
+
+  - type: upload
+    id: reproduction-media
+    attributes:
+      label: 复现步骤截图或录屏
+      description: |
+        请上传相关的截图或录屏视频，以便我们更直观地理解问题。
+        - 支持格式：PNG, JPG, GIF, MP4, MOV 等
+        - 建议上传能清晰展示异常现象的图片或短视频。
+    validations:
+      required: true
