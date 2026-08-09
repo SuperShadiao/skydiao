@@ -246,18 +246,20 @@ public class ConfigManager {
             super.setValue(value);
         }
     }.flagAsMacroFeature();
+    public static final ActionConfigOption obsidianPositionHelper = new ActionConfigOption("obsidianpositionhelper", openChat.apply("/apd recpos help"));
     public static final StringGetterSelectConfigOption autoObsidianPositionsFile = new StringGetterSelectConfigOption("autoobsidianpositionsfile","", RecordPos::getPListFileNames);
     public static final IntConfigOption drillSlot = new IntConfigOption("drillslot", 7);
     public static final IntConfigOption lanternSlot = new IntConfigOption("lanternslot", 6);
     public static final IntConfigOption obsidianPlayerCheckRange = new IntConfigOption("obsidianplayercheckrange", 15);
     public static final BooleanConfigOption obsidianPlayerCheck = new BooleanConfigOption("obsidianplayercheck", true);
     public static final BooleanConfigOption obsidianTheEndCheck = new BooleanConfigOption("obsidiantheendcheck", true);
+    public static final IntConfigOption obsidianCycleTicks = new IntConfigOption("obsidiancycleticks", 9);
 
     public static final List<Map.Entry<String, List<ConfigOption<?>>>> categories = List.of(
             Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip, enableircafktip, enableircmacrochecktip, cooltitle, customTitleText)),
             Map.entry("工具类", List.of(inventoryFilter, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodehideserverid, keepSprint, autoReconnect, afkInOtherPlace, freecamFlySpeed, openFreelookAndFreecamAction, openAutoClickAction, openClearStashCommand)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
-            Map.entry("自动类", List.of(autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, carnivalAutoFruitDigger, skyblockautobloodfiend, skyblockautobloodfiendlowhealth, iAutoObsidian, iAutoObsidianWR, autoObsidianPositionsFile, drillSlot, lanternSlot, obsidianPlayerCheckRange, obsidianPlayerCheck, obsidianTheEndCheck)),
+            Map.entry("自动类", List.of(autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, carnivalAutoFruitDigger, skyblockautobloodfiend, skyblockautobloodfiendlowhealth, iAutoObsidian, iAutoObsidianWR, obsidianPositionHelper, autoObsidianPositionsFile, drillSlot, lanternSlot, obsidianPlayerCheckRange, obsidianPlayerCheck, obsidianTheEndCheck, obsidianCycleTicks)),
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareAnnounce, skyblockSafeIsland, crystalHollowHelper, crystalHollowHelperDebug, crystalHollowDupServerTipper, crystalHollowHelperDisableThreadLimit, genshinImpactHeatColdRender)),
             Map.entry("combat", List.of(slayerTogether)),
             Map.entry("foraging", List.of(galateashulker, autoReel, autoReelAutoAim, torrhusCanyonHelper, safariBoardcastHotspot, safariBoardcastTradeNPC, safariRenderTargetESP, floorDroppingRender)),

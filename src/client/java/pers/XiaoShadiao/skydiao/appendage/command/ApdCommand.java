@@ -65,6 +65,7 @@ public class ApdCommand extends BaseRootRunnableCommand {
                                 .executes(this::recposDelete2).then(getArgInstance("to", IntegerArgumentType.integer(1)).executes(this::recposDelete))
                         ))
                         .then(getArgConstantInstance("getall").executes(this::recposGetall))
+                        .then(getArgConstantInstance("help").executes(this::recposHelp)).executes(this::recposHelp)
                 ,
                 //开关AutoObsidian或进行设置
                 getArgConstantInstance("_om")
@@ -256,6 +257,24 @@ public class ApdCommand extends BaseRootRunnableCommand {
         if(RecordPos.plist!=null) RecordPos.save();
         RecordPos.plist = RecordPos.getLocal(context.getArgument("filename", String.class));
         context.getSource().sendFeedback(Component.literal("已加载文件:"+RecordPos.plist.name()).withColor(0xd672de));
+        return 1;
+    }
+
+    private int recposHelp(CommandContext<FabricClientCommandSource> context){
+        List<String> list = List.of(
+                "recpos命令指南",
+                "recpos start <文件名>       --开始记录点列",
+                "recpos load <文件名>        --加载点列存档",
+                "recpos record              --记录所在位置",
+                "recpos undo [<数量>]        --撤回最后几次操作(默认1次)",
+                "recpos del <from> [<to>]   --删除存档中指定序号的点",
+                "recpos getall              --给出存档中所有点的数据",
+                "recpos save                --保存",
+                "recpos exit                --不保存,直接退出",
+                "recpos listFiles           --列出所有文件名",
+                "注:点列存档保存在config/Ipositions中."
+        );
+        for(String str:list) context.getSource().sendFeedback(Component.literal(str).withColor(0xd672de));
         return 1;
     }
 
