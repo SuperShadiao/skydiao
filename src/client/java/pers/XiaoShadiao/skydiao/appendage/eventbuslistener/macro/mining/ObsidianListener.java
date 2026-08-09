@@ -827,7 +827,7 @@ public class ObsidianListener extends AbstractListener implements IMacro {
     }
 
     public static String giwk(String key){
-        return CrowdinI18nManager.translate("autoobsidian."+key);
+        return CrowdinI18nManager.translate("features.autoobsidian."+key);
     }
 
     public static MutableComponent getGradientComponent(String text, int color1, int color2){

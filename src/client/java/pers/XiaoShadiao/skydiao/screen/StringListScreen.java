@@ -56,14 +56,14 @@ public class StringListScreen extends Screen {
         for(int i = 0; i < stringList.size(); i++){
             if(isInSquare((int) event.x(), (int) event.y(),x1,y1+i*16+cy,x2,y1+(i+1)*16+cy)) {
                 target = stringList.get(i);
-                subtitle = CrowdinI18nManager.translate("stringlistscreen.subtitle") +target;
+                subtitle = CrowdinI18nManager.translate("gui.stringlistscreen.subtitle") +target;
             }
         }
 
         if(isInSquare((int) event.x(), (int) event.y(),x1,y2+6,x1+40,y2+26)&&target!=null){
             stringGetterSelectConfigOption.setValue(target);
             if(!isPressedYet){
-                mc.player.sendSystemMessage(Component.literal(CrowdinI18nManager.translate("stringlistscreen.msgconfirm")+target).withColor(0x6694fa));
+                mc.player.sendSystemMessage(Component.literal(CrowdinI18nManager.translate("gui.stringlistscreen.msgconfirm")+target).withColor(0x6694fa));
             }
         }
 
@@ -127,9 +127,9 @@ public class StringListScreen extends Screen {
         context.disableScissor();
 
         context.fill(x1,y2+6,x1+40,y2+26,0xffadadad);
-        context.text(mc.font,CrowdinI18nManager.translate("stringlistscreen.buttonconfirm"),x1+5, y2+12,0xffffffff);
+        context.text(mc.font,CrowdinI18nManager.translate("gui.stringlistscreen.buttonconfirm"),x1+5, y2+12,0xffffffff);
         context.fill(x1+50,y2+6,x1+90,y2+26,0xffadadad);
-        context.text(mc.font,CrowdinI18nManager.translate("stringlistscreen.buttonback"),x1+55, y2+12,0xffffffff);
+        context.text(mc.font,CrowdinI18nManager.translate("gui.stringlistscreen.buttonback"),x1+55, y2+12,0xffffffff);
 
 
         super.extractRenderState(context, mouseX, mouseY, partialTicks);

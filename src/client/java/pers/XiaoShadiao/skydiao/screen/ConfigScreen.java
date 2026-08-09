@@ -380,7 +380,7 @@ public class ConfigScreen extends Screen {
                         case StringGetterSelectConfigOption stringGetterSelectConfigOption -> Button.builder(
                                 Component.literal("->"),
                                 (_)->Minecraft.getInstance().setScreenAndShow(
-                                        new StringListScreen(stringGetterSelectConfigOption.getI18nName(),CrowdinI18nManager.translate("stringlistscreen.subtitle")+stringGetterSelectConfigOption.getValue(),stringGetterSelectConfigOption))
+                                        new StringListScreen(stringGetterSelectConfigOption.getI18nName(),CrowdinI18nManager.translate("gui.stringlistscreen.subtitle")+stringGetterSelectConfigOption.getValue(),stringGetterSelectConfigOption))
                         ).bounds(0, 0, 100, 20).build();
                         case StringConfigOption stringOption -> {
                             EditBox editBox = new EditBox(ToolList.mc.font, 0, 0, 100, 20, Component.literal(stringOption.getI18nName()));

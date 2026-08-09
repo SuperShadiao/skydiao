@@ -1144,6 +1144,12 @@
       "buttonchooseoneconfig": "打开OneConfig菜单",
       "buttonback": "返回"
     },
+    "stringlistscreen": {
+      "subtitle": "已选择:",
+      "msgconfirm": "已确认选择:",
+      "buttonconfirm": "确认",
+      "buttonback": "返回"
+    },
     "accountmanager": {
       "buttonentrance": "多账号管理",
       "buttonexport": "明文导出账号文件",
@@ -1253,6 +1259,20 @@
         "detected": "检测到"
       }
     },
+    "autoobsidian": {
+      "positionsfilenotfind": "未找到点列存档.",
+      "positioncounterror": "存档点数不应<=1.",
+      "slotswitched": "物品栏被切换超过20ticks,停止运行.",
+      "sofaraway": "玩家与目标点距离超过%s,停止运行.",
+      "blocknotfound": "超过20ticks未发现满足要求的方块,停止运行.",
+      "placelantern": "将在约%s秒后放置灯笼.",
+      "playertooclosed": "检测到以下玩家在附近:",
+      "playertooclosed2": "检测到持续10秒玩家在附近，开始急停20秒",
+      "retry": "%s秒后将重启AutoObsidian",
+      "retried": "已重启AutoObsidian",
+      "sofaraway2": "距离过远,停止运行.",
+      "notintheend": "不在skyblock末地,无法运行."
+    },
     "antiscammer": {
       "notification": "请不要相信任何以免费rank, 语音 (vc) 为由邀请你加入Discord服务器的老外, 更不要相信Discord服务器内的\"微软账号验证\"。如果你信了, 相信小沙雕, 你会后悔终身!",
       "click": "[点击这里查看为什么]",
@@ -1283,25 +1303,5 @@
         "translate": "翻译消息"
       }
     }
-  },
-  "stringlistscreen": {
-    "subtitle": "已选择:",
-    "msgconfirm": "已确认选择:",
-    "buttonconfirm": "确认",
-    "buttonback": "返回"
-  },
-  "autoobsidian": {
-    "positionsfilenotfind": "未找到点列存档.",
-    "positioncounterror": "存档点数不应<=1.",
-    "slotswitched": "物品栏被切换超过20ticks,停止运行.",
-    "sofaraway": "玩家与目标点距离超过%s,停止运行.",
-    "blocknotfound": "超过20ticks未发现满足要求的方块,停止运行.",
-    "placelantern": "将在约%s秒后放置灯笼.",
-    "playertooclosed": "检测到以下玩家在附近:",
-    "playertooclosed2": "检测到持续10秒玩家在附近，开始急停20秒",
-    "retry": "%s秒后将重启AutoObsidian",
-    "retried": "已重启AutoObsidian",
-    "sofaraway2": "距离过远,停止运行.",
-    "notintheend": "不在skyblock末地,无法运行."
   }
 }
