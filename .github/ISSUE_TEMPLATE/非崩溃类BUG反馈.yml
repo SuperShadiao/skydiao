@@ -38,7 +38,6 @@ body:
       label: 复现步骤截图或录屏
       description: |
         请上传相关的截图或录屏视频，以便我们更直观地理解问题。
-        - 支持格式：PNG, JPG, GIF, MP4, MOV 等
-        - 建议上传能清晰展示异常现象的图片或短视频。
+        - 图片视频可以**稍微**模糊一点，确保文件不要大于25MB (超过Github不给上传)
     validations:
       required: true
