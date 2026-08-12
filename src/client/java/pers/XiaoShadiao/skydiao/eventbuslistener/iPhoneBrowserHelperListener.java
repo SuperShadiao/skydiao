@@ -72,8 +72,17 @@ public class iPhoneBrowserHelperListener extends AbstractForagingListener {
 
         RenderUtils.WorldRender wr = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_LINE);
         for (Entity entity : mc.level.entitiesForRendering()) {
+
+            if(entity instanceof RemotePlayer player && ToolList.getInstance().deleteColorCode(player.getName().getString()).trim().equals("Hideyho")) {
+                RenderUtils.renderESP(wr, entity, 1, 1, 1, 1, false);
+                continue;
+            }
+
             if((!(entity instanceof Mob)) || entity instanceof HappyGhast) continue;
-            RenderUtils.renderESP(wr, entity, 1, 0, 0, 1, false);
+
+            E2AMappingListener.MobInfo mobInfo = e2AMappingListener.getMobInfo(entity.asLivingEntity());
+
+            RenderUtils.renderESP(wr, entity, 1, mobInfo != null && mobInfo.armorStand.getName().getString().contains("SPARKLING") ? 1 : 0, 0, 1, false);
         }
 
         wr.finishDraw();

@@ -1,7 +1,9 @@
 package pers.XiaoShadiao.skydiao.utils.musicplayer;
 
 import net.minecraft.resources.Identifier;
+import org.apache.commons.io.FileUtils;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.renderutils.ImageTexture;
 
 import java.io.File;
 import java.util.Objects;
@@ -27,22 +29,25 @@ public class MusicInfo {
     
     public File musicLyric, musicFile, imgFile;
 
+    public MusicInfo() {}
+
     public boolean hasImage() {
         return ToolList.getInstance().stringHasContext(imgURL) && imgFile != null && imgFile.exists();
     }
 
     public Identifier getTexture() {
-//        if(texture == null && hasImage()) {
-//            try {
-//                if(!isDownloading) {
-//                    Identifier temp = Identifier.fromNamespaceAndPath("skydiao", "music_" + ToolList.getInstance().getMD5(singer + name + hashOrID).toLowerCase());
-//                    ToolList.mc.getTextureManager().registerAndLoad(temp, new ImageTexture(temp, FileUtils.readFileToByteArray(imgFile)));
-//                    texture = temp;
-//                }
-//            } catch (Exception e) {
-//                return null;
-//            }
-//        }
+        if(texture == null && hasImage()) {
+            try {
+                if(!isDownloading) {
+                    Identifier temp = Identifier.fromNamespaceAndPath("skydiao", "music_" + ToolList.getInstance().getMD5(singer + name + hashOrID).toLowerCase());
+                    ToolList.mc.getTextureManager().registerAndLoad(temp, new ImageTexture(temp, FileUtils.readFileToByteArray(imgFile)));
+                    texture = temp;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
 
         return texture;
     }

@@ -74,7 +74,7 @@ public class BFTaskStonewrath extends BFTask {
     public boolean isTaskFinished() {
         if(slayerInstance.getRunningTaskByClass(BFTaskManiaHandler.class) != null) return true;
 
-        boolean flying = Optional.ofNullable(slayerInstance.getBloodfiendEntityInstance()).map(Entity::getY).orElse(999999.0) < mc.player.getY() + 2;
+        boolean flying = Optional.ofNullable(slayerInstance.getBloodfiendEntityInstance()).map(Entity::getY).orElse(999999.0) < mc.player.getY() + 4;
         return slayerInstance.getRunningTaskByClass(BFTaskManiaHandler.class) != null || ((System.currentTimeMillis() - startTime > 17000 || tick <= 0) && flying);
     }
 

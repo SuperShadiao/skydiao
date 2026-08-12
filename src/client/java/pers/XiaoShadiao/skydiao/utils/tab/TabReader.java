@@ -19,7 +19,7 @@ public class TabReader {
         Minecraft mc = Minecraft.getInstance();
         ClientPacketListener connection = mc.getConnection();
         if (connection == null) {
-            tabLines.clear();
+            tabLines = null;
             return;
         }
 
@@ -36,12 +36,12 @@ public class TabReader {
 
     // 获取整行文本列表
     public static List<String> getLines() {
-        return tabLines;
+        return tabLines == null ? List.of() : tabLines;
     }
 
     public static Optional<String> findLineStartsWith(String prefix) {
         refreshTab();
-        for (String line : tabLines) {
+        for (String line : getLines()) {
             if (line.startsWith(prefix)) {
                 return Optional.of(line);
             }
@@ -52,7 +52,7 @@ public class TabReader {
     public static Optional<String> findLineWith(String regex) {
         refreshTab();
         Pattern pattern = Pattern.compile(regex);
-        for (String line : tabLines) {
+        for (String line : getLines()) {
             if (pattern.matcher(line).find()) {
                 return Optional.of(line);
             }

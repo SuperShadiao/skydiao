@@ -33,6 +33,7 @@
   "mixins": [
     "MixinAcviteProfilePathAccessor",
     "MixinClientCommonPacketListenerImpl",
+    "MixinClientPacketListener",
     "MixinEntityCloneable",
     "MixinEntityCloneableAccessor",
     "MixinFishHookEntityHookedAccessor",

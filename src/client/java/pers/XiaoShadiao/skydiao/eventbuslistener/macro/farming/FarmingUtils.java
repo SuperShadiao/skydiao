@@ -80,6 +80,10 @@ public class FarmingUtils {
         return TabReader.findLineWith("\\[Lvl \\d+\\] .*?" + petName).isPresent();
     }
 
+    public static List<String> getPestPlots() {
+        return TabReader.findLineStartsWith("Plots:").map(s -> s.substring(7).split(",")).map(Arrays::asList).orElse(List.of());
+    }
+
     public static boolean withPetType(String wait) {
         if ("pest".equals(wait))
             return withPet("Slug") || withPet("Mosquito");

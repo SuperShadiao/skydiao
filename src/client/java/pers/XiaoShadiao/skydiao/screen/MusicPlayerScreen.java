@@ -7,11 +7,13 @@ import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +24,7 @@ import pers.XiaoShadiao.skydiao.utils.musicplayer.PlayerThread;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 import pers.XiaoShadiao.skydiao.utils.screen.XSDSliderButton;
 
+import java.awt.*;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -123,6 +126,13 @@ public class MusicPlayerScreen extends Screen {
     @Override
     public void extractRenderState(GuiGraphicsExtractor guiGraphics, int i, int j, float f) {
         super.extractRenderState(guiGraphics, i, j, f);
+
+        if(PlayerThread.current != null) {
+            double time = PlayerThread.current.getPlayer().currentPlayTime();
+            double az = PlayerThread.current.getPlayer().getMusicStatus().getLength();
+
+            guiGraphics.fill(0, height - 3, (int) (width * time * 1000d / az), height, Color.GREEN.getRGB());
+        }
     }
 
     @Override
@@ -163,6 +173,10 @@ public class MusicPlayerScreen extends Screen {
             @Override
             public void extractContent(GuiGraphicsExtractor guiGraphics, int left, int top, boolean bl, float f) {
                 RenderUtils.renderScrollingString(guiGraphics, ToolList.mc.font, Component.literal((musicInfo.equals(PlayerThread.currentMusic) ? "§a" : "") + musicInfo.name + " - " + musicInfo.singer), getContentX(), getContentX(), getContentY() - 25, getContentX() + 180, getContentY() + 44, 0xFFFFFFFF);
+
+                if(musicInfo.getTexture() != null) {
+                    guiGraphics.blit(RenderPipelines.GUI_TEXTURED,  musicInfo.getTexture(), getContentX() - 25, getContentY(), 0, 0,  20, 20, 20, 20, 0xFFFFFFFF);
+                }
 
                 playButton.setX(getContentRight() - playButton.getWidth());
                 playButton.setY(getContentY());
@@ -248,6 +262,18 @@ public class MusicPlayerScreen extends Screen {
         } catch(Throwable e) {
             list.clear();
         }
+
+        if(musics != null) {
+            list.replaceAll((newMI) -> {
+                int index = musics.indexOf(newMI);
+                if(index != -1) {
+                    return musics.get(index);
+                }
+                return newMI;
+            });
+            list.forEach(MusicInfo::getTexture);
+        }
+
         return musics = list;
     }
 

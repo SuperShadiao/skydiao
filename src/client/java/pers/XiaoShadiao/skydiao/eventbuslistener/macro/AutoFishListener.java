@@ -255,6 +255,7 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
         } catch (InterruptedException e) {
 
         }
+        logger.info("收杆...");
         InputSimulator.singleRightClick();
 
         while(true) {
@@ -267,6 +268,7 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
             }
         }
 
+        logger.info("抛竿...");
         InputSimulator.singleRightClick();
 
         if(!StatusManager.get().isInSkyblock()) {
@@ -349,6 +351,7 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
 
     private void ensureHookSummoned() {
         while(isHoldingFishRod() && mc.player != null && mc.player.fishing == null) {
+            logger.info("鱼钩未抛出, 重新抛出...");
             InputSimulator.singleRightClick();
             try {
                 Thread.sleep(1000);
@@ -360,6 +363,7 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
 
     private void ensureHookUnsummoned() {
         while(isHoldingFishRod() && mc.player != null && mc.player.fishing != null) {
+            logger.info("当前急停已启动, 但鱼钩处于抛出状态, 尝试收回...");
             InputSimulator.singleRightClick();
             try {
                 Thread.sleep(1000);
@@ -437,7 +441,7 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
             return;
         }
 
-        if(fakeFishHook == null) {
+        if(fakeFishHook == null && !Vec3.ZERO.equals(mc.player.fishing.getDeltaMovement())) {
             fakeFishHook = ToolList.getInstance().cloneEntity(mc.player.fishing);
             fakeFishHook.setId(-999);
             fakeFishHook.setUUID(UUID.randomUUID());

@@ -6,9 +6,11 @@ import net.minecraft.client.Minecraft;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.URLFetchProcess;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.PlayerThread;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.StringLyric;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -20,12 +22,20 @@ public class TitleChanger extends AbstractListener {
 
     private String currentTitle = "";
 
+    public final VersionTip versionTip = new VersionTip();
+    public final CustomTitle customTitle = new CustomTitle();
+    public final DownloadProcess downloadProcess = new DownloadProcess();
+    public final FPSTPS fpsAndTps = new FPSTPS();
+    public final MusicLyric musicLyric = new MusicLyric();
+    public final Time time = new Time();
+
     private final List<Part> titleParts = List.of(
-            new VersionTip(),
-            new CustomTitle(),
-            new FPSTPS(),
-            new MusicLyric(),
-            new Time()
+            versionTip,
+            customTitle,
+            downloadProcess,
+            fpsAndTps,
+            musicLyric,
+            time
     );
 
     @Override
@@ -41,7 +51,7 @@ public class TitleChanger extends AbstractListener {
 
     private void onStartTick(Minecraft mc) {
         passedTick++;
-        if (!ConfigManager.cooltitle.getValue()) return;
+        if (!ConfigManager.cooltitle.getValue() && downloadProcess.process == null) return;
 
         titleParts.forEach(Part::tick);
         String title = titleParts.stream()
@@ -176,4 +186,30 @@ public class TitleChanger extends AbstractListener {
             return true;
         }
     }
+
+    public static class DownloadProcess implements Part {
+
+        private final List<URLFetchProcess> process = new ArrayList<>();
+
+        public void addProcess(URLFetchProcess process) {
+            this.process.add(process);
+        }
+
+        @Override
+        public String getContent() {
+            return process.isEmpty() ? "" : (process.size() == 1 ? "正在获取资源 (" : "正在获取" + process.size() + "个资源 (") + process.getFirst().getProcessString() + ")";
+        }
+
+        @Override
+        public void tick() {
+            if(!process.isEmpty()) process.removeIf(URLFetchProcess::isDone);
+        }
+
+        @Override
+        public boolean shouldShow() {
+            return !process.isEmpty();
+        }
+
+    }
+
 }

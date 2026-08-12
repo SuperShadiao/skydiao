@@ -453,6 +453,9 @@ public class AutoBloodfiendListener extends AbstractListener implements IMacro {
             RenderUtils.renderESP(wrLine, bp, 1, 0, 0, 1, false);
             RenderUtils.renderESP(wrFill, bp, 1, 0, 0, 1, true);
         }
+
+        wrFill.finishDraw();
+        wrLine.finishDraw();
     }
 
     public class TaskRender extends XSDHUD {

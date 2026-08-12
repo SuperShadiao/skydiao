@@ -168,8 +168,8 @@ public class PathFinderExecutor extends AbstractListener implements IMacro {
     }
 
     private void stopExecuteCauseWorldUnload() {
+        stopExecution();
         if(isRunning) {
-            stopExecution();
             ToolList.printChatMessage(Component.literal("§a[小沙雕] §c世界已变更, 寻路自动停止!"));
         }
     }
@@ -942,6 +942,8 @@ public class PathFinderExecutor extends AbstractListener implements IMacro {
             }
         } catch (ConcurrentModificationException e) {
         }
+        wrFill.finishDraw();
+        wrLine.finishDraw();
     }
 
     public void stopExecution() {

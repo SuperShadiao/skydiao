@@ -57,6 +57,8 @@ public class LotusAtollHelper extends AbstractFishingListener {
             RenderUtils.renderESP(wr, entity, 1, 0.5f, 0, 1, false);
             RenderUtils.renderTrace(wr, entity, 1, 0.5f, 0, 1);
         }
+
+        wr.finishDraw();
     }
 
 }

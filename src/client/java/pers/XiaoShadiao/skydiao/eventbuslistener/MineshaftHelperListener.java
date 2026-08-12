@@ -78,6 +78,9 @@ public class MineshaftHelperListener extends AbstractListener {
             RenderUtils.renderESP(wr1, entity, 0, 1, 1, 1, false);
             RenderUtils.renderTrace(wr1, entity, 0, 1, 1, 1);
         }
+
+        wr1.finishDraw();
+        wr2.finishDraw();
     }
 
     private boolean onMouseEvent(long windows, MouseButtonInfo mouseButtonInfo, int state) {

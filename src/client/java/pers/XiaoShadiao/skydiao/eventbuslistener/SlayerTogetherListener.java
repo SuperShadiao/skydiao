@@ -46,6 +46,7 @@ public class SlayerTogetherListener extends AbstractListener {
             RenderUtils.renderESP(wr, pos, 1, 1, 0, 1, false);
             RenderUtils.renderTrace(wr, pos, 1, 1, 0, 1);
         }
+        wr.finishDraw();
     }
 
     private void onStartClientTick(Minecraft mc) {

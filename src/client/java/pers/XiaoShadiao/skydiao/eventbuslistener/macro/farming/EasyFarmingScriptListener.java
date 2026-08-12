@@ -15,17 +15,25 @@ import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.PacketListener;
+import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.IMacro;
+import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.op.IOperation;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.op.OperationSendCommand;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
@@ -115,6 +123,10 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
     private long nodeExecMinDelay = 100;
     private long nodeExecMaxDelay = 200;
 
+    private int aimBlockTick = 0;
+    private int receiveFarmingExpMsgTick;
+    private int invalidMoveTick;
+
     @Override
     public String getListenerName() {
         return "EasyFarmingScriptListener";
@@ -128,6 +140,17 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         LevelRenderEvents.END_MAIN.register(this::onLastRender);
         CustomFabricEvents.MOUSE_BUTTON_EVENT.register(this::onMouseButton);
         ScreenEvents.AFTER_INIT.register(this::onScreenAfterInit);
+        CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
+    }
+
+    private boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
+        // 由于Skber SH SBA三巨头将物品栏上方信息变成了滚木, 所以需要抓包才能获取
+        if(packet instanceof ClientboundSystemChatPacket(Component content, boolean overlay)) {
+            if (overlay && ToolList.getInstance().deleteColorCode(content.getString()).contains("Farming")) {
+                receiveFarmingExpMsgTick = 0;
+            }
+        }
+        return false;
     }
 
     private boolean onMouseButton(long windwos, MouseButtonInfo mouseButtonInfo, int state) {
@@ -215,6 +238,9 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         if (mc.options.keyUse.isDown() && isHoldingMouseMat()) {
             lastSendCommandTime = System.currentTimeMillis();
         }
+        if (mc.hitResult instanceof BlockHitResult blockHitResult && blockHitResult.getType() == HitResult.Type.BLOCK) {
+            aimBlockTick = 5;
+        }
 
         boolean toggled = false;
         if (!SleepActions.actionDoing && enabled && currentHandItemIndex != mc.player.getInventory().getSelectedSlot() && currentWorking != null) {
@@ -268,12 +294,27 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 
 
         if (enabled) {
+            if(!SleepActions.actionDoing && currentWorking != null) {
+                if (aimBlockTick > 0) {
+                    aimBlockTick--;
+                    receiveFarmingExpMsgTick++;
+                    if (receiveFarmingExpMsgTick > 40) {
+                        MacroManagerListener.mml.triggerAlert("准星瞄准了方块, 但未获得Farming XP!");
+                        receiveFarmingExpMsgTick = -40;
+                    }
+                } else {
+                    receiveFarmingExpMsgTick = Math.min(receiveFarmingExpMsgTick, 0);
+                }
+            }
+            if(receiveFarmingExpMsgTick < 0) receiveFarmingExpMsgTick++;
             getNearestNode().ifPresent(node -> {
                 if (BlockPos.containing(mc.player.position()).equals(node.pos)) {
                     if (currentWorking != node) {
                         currentWorking = node;
                         ToolList.printChatMessage(Component.literal("§a[小沙雕] §e到达节点" + node.pos + ", 执行节点操作" + node.ops.stream().map(IOperation::toChatString).toList()));
                         activeThisMacro();
+                        receiveFarmingExpMsgTick = -40;
+                        invalidMoveTick = -20;
                         currentHandItemIndex = mc.player.getInventory().getSelectedSlot();
                         if (node.ops.isEmpty()) {
                             InputSimulator.unpressAllKey();
@@ -286,6 +327,21 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                     }
                 }
             });
+            if(!SleepActions.actionDoing && currentWorking != null) {
+                if(InputSimulator.backward || InputSimulator.forward || InputSimulator.left || InputSimulator.right) {
+                    Vec3 movement = mc.player.getDeltaMovement();
+                    // if(ToolList.getInstance().random.nextInt(30) == 15) ToolList.printChatMessage(Component.literal("§a[小沙雕] §e[DEBUG] " + movement));
+                    if(Math.abs(movement.x()) < 0.02 && Math.abs(movement.z()) < 0.02 && mc.player.onGround()) {
+                        invalidMoveTick++;
+                        if(invalidMoveTick > 10) {
+                            invalidMoveTick = -20;
+                            MacroManagerListener.mml.triggerAlert("任意方向键已按下, 但是玩家没有移动!");
+                        }
+                    } else {
+                        invalidMoveTick = 0;
+                    }
+                }
+            }
             autoActions();
             bonusListener();
         }
@@ -335,7 +391,20 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                     ctx.put("lastSelectedSlot", mc.player.getInventory().getSelectedSlot());
                     // InputSimulator.switchItem(vacuum);
                 }, 300, true)
-                .addAction(() -> ToolList.sendChatMessage("/setspawn"))
+                .addAction(() -> ToolList.sendChatMessage("/setspawn"), 200)
+                .addAction(ctx -> {
+                    List<String> pestPlots = FarmingUtils.getPestPlots();
+                    if(!pestPlots.isEmpty()) {
+                        String plot = pestPlots.getFirst();
+
+                        if(ToolList.getInstance().fetchScoreboardLinesNoColor().stream().noneMatch(line -> line.endsWith("Plot - " + plot) || line.contains("Plot - " + plot + " "))) {
+                            ToolList.sendChatMessage("/tptoplot " + plot);
+                            ctx.put("executedTpToSlot", Boolean.TRUE);
+                        } else {
+                            ctx.put("executedTpToSlot", Boolean.FALSE);
+                        }
+                    }
+                }, 200)
 //                .addAction(FarmingUtils::tpToPestPlot, 1000, true)
 //                .addAction(InputSimulator::pressRightClick, 300);
 //
@@ -346,7 +415,13 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 //        kpest.addAction(InputSimulator::unpressAllKey, 200)
 //                .addAction(ctx -> InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")), 500, true)
 
-                .addAction(() -> XSDHUD.bigTitle.updateTitleMsg("§b预操作完成, 请手动杀虫!", 6000, SoundEvents.WITHER_SPAWN))
+                .addAction(ctx -> {
+                    if((Boolean) ctx.get("executedTpToSlot")) {
+                        XSDHUD.bigTitle.updateTitleMsg("§b预操作完成, 请手动杀虫!", 6000, SoundEvents.WITHER_SPAWN);
+                    } else {
+                        XSDHUD.bigTitle.updateTitleMsg("§b预操作完成, 请手动杀虫 | 害虫位于当前Plot, 不进行传送", 6000, SoundEvents.WITHER_SPAWN);
+                    }
+                })
                 .addAction(() -> {
                     while (FarmingUtils.hasPests()) {
                         try {
@@ -355,9 +430,9 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                         } catch (InterruptedException _) {}
                     }
                 }, 0, true)
-                .addAction(() -> XSDHUD.bigTitle.updateTitleMsg("§e即将返回原来的点位...", 4000), 1500, true)
+                .addAction(() -> XSDHUD.bigTitle.updateTitleMsg("§e即将返回原来的点位...", 4000), 500, true)
 
-                .addAction(ctx -> InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")), 500)
+                .addAction(ctx -> InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")), 300)
                 .addAction(() -> ToolList.sendChatMessage("/warp garden"), 500, true);
 
 
@@ -375,11 +450,11 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             } catch (InterruptedException _) {}
         }, 200);
 
-        if (ConfigManager.fsGardenMoonFlowerMode.getValue()) {
+        if (ConfigManager.fsGardenMoonFlowerMode.getValue() && ConfigManager.fsGardenMoonFlowerModeKeepNightFarming.getValue()) {
             executeDayNightSwitch(kpest, true);
         }
 
-        kpest.addAction(this::startCurrentActions, 5000)
+        kpest.addAction(this::startCurrentActions, 2000)
                 .run();
     }
 
@@ -432,11 +507,16 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 
         ToolList.printChatMessage(Component.literal("§a[小沙雕] §b准备自动切换装备"));
         final int targetIndex = target;
-        SleepActions.builder()
+        SleepActions actions = SleepActions.builder()
                 .addSleep(1000)
                 .addAction(InputSimulator::unpressAllKey, 300)
-                .addAction(() -> FarmingUtils.changeLoadout(autoLoadoutConfig.get(targetIndex)), 500)
-                .addAction(this::startCurrentActions, 5000)
+                .addAction(() -> FarmingUtils.changeLoadout(autoLoadoutConfig.get(targetIndex)), 500);
+
+        if (ConfigManager.fsGardenMoonFlowerMode.getValue() && !ConfigManager.fsGardenMoonFlowerModeKeepNightFarming.getValue()) {
+            executeDayNightSwitch(actions, true);
+        }
+
+        actions.addAction(this::startCurrentActions, 2000)
                 .run();
     }
 

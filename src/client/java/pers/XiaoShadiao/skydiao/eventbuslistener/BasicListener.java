@@ -55,10 +55,7 @@ import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.irc.ChatPacket;
 import pers.XiaoShadiao.skydiao.keybinds.KeyBindsManager;
 import pers.XiaoShadiao.skydiao.screen.mircosoftaccount.AccountSelectScreen;
-import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
-import pers.XiaoShadiao.skydiao.utils.SkyblockBlacklistManager;
-import pers.XiaoShadiao.skydiao.utils.StatusManager;
-import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.*;
 import pers.XiaoShadiao.skydiao.utils.autoupdater.AutoUpdater;
 import pers.XiaoShadiao.skydiao.utils.blivesensitiveword.ServerIdSpoofer;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
@@ -67,6 +64,7 @@ import pers.XiaoShadiao.skydiao.utils.musicplayer.PlayerThread;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 import pers.XiaoShadiao.skydiao.utils.playerinput.XSDSimulatorInput;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
+import pers.XiaoShadiao.skydiao.utils.renderutils.Gif;
 import pers.XiaoShadiao.skydiao.utils.renderutils.ImageTexture;
 
 import java.io.File;
@@ -155,7 +153,10 @@ public class BasicListener extends AbstractListener {
                         File target = new File(mc.getResourcePackDirectory().toFile(), "hypixel_resoucepack.zip");
                         ToolList.printChatMessage(Component.literal("§a[小沙雕] §eHypixel官材: " + packet2.url()));
                         if(!target.exists()) XSDHUD.bigTitle.updateTitleMsg("§e正在获取Hypixel官材...如果长时间未完成, 请检查网络", 120000);
-                        FileUtils.copyInputStreamToFile(ToolList.getInstance().makeReqToURL(packet2.url()), temp);
+                        InputStream source = ToolList.getInstance().makeReqToURL(packet2.url());
+                        URLFetchProcess process = new URLFetchProcess(source);
+                        titleChanger.downloadProcess.addProcess(process);
+                        FileUtils.writeByteArrayToFile(temp, process.readAllBytes());
                         if(!FileUtils.contentEquals(temp, target)) Files.move(temp.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
                         XSDHUD.bigTitle.updateTitleMsg("§eHyp官材获取成功, 请前往材质包页面查看", 3000);
                     } catch (IOException e) {
@@ -166,7 +167,10 @@ public class BasicListener extends AbstractListener {
                     try {
                         File temp = File.createTempFile("pack2", ".zip");
                         File target = new File(mc.getResourcePackDirectory().toFile(), "SkyBlock Legacy.zip");
-                        FileUtils.copyInputStreamToFile(ToolList.getInstance().makeReqToURL("https://xiaoshadiao.club/3rd_lib/pack/SkyBlockLegacy.zip"), temp);
+                        InputStream source = ToolList.getInstance().makeReqToURL("https://xiaoshadiao.club/3rd_lib/pack/SkyBlockLegacy.zip");
+                        URLFetchProcess process = new URLFetchProcess(source);
+                        titleChanger.downloadProcess.addProcess(process);
+                        FileUtils.writeByteArrayToFile(temp, process.readAllBytes());
                         if(!FileUtils.contentEquals(temp, target)) Files.move(temp.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
                         XSDHUD.bigTitle.updateTitleMsg("§eLegacy (原版) 材质包获取成功, 请前往材质包页面查看", 3000);
                     } catch (IOException e) {
@@ -261,6 +265,10 @@ public class BasicListener extends AbstractListener {
         mc.execute(CustomRenderPipeline::closeAll);
         StatusManager.cleanHypixelPacket();
         StatusManager.destory();
+
+        ToolList.destroy();
+
+        if(ToolList.getInstance().isDevEnvironment()) Gif.clearCache();
     }
 
     private void onJoinServer(ClientPacketListener clientPacketListener, PacketSender packetSender, Minecraft minecraft) {
@@ -400,6 +408,8 @@ public class BasicListener extends AbstractListener {
         MacroManagerListener.pathFinderExecutor.stopExecution();
 
         if(SkyblockBlacklistManager.getInstance().isDone() && !SkyblockBlacklistManager.getInstance().isAvaliable()) SkyblockBlacklistManager.updateBlacklist();
+
+        if(ToolList.getInstance().isDevEnvironment()) Gif.clearCache();
     }
 
     private int afkHoldTick;

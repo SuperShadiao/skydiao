@@ -48,17 +48,18 @@ import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinEntityCloneableAccessor;
 
 import javax.net.ssl.HttpsURLConnection;
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.util.*;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -519,6 +520,42 @@ public class ToolList {
         if(itemStack.getItem() != Items.PLAYER_HEAD) return null;
         Property property = itemStack.getComponents().getOrDefault(DataComponents.PROFILE, ResolvableProfile.createUnresolved("")).partialProfile().properties().get("textures").iterator().next();
         return Optional.of(property.value()).orElse(null); // 返回 Base64 皮肤信息;
+    }
+
+    public String numberToByteString(long l) {
+        String[] sl = {"B","KB","MB","GB","TB"};
+        double d2 = l;
+
+        for(String s : sl) {
+            d2 /= 1024;
+            if(d2 < 1) {
+                return (Math.round(d2 * 1024d * 100d) / 100d) + s;
+            }
+        }
+
+        return (Math.round(d2 * 1024d * 100d) / 100d) + sl[sl.length - 1];
+    }
+
+    // 提取为静态常量，全局复用，零额外开销
+    private static final BigDecimal THOUSAND_TWENTY_FOUR = new BigDecimal("1024");
+
+    public String numberToByteString(BigInteger bytes) {
+        if (bytes == null || bytes.compareTo(BigInteger.ZERO) < 0) {
+            return "0B";
+        }
+
+        String[] sl = {"B", "KB", "MB", "GB", "TB", "PB", "EB"};
+        BigDecimal d2 = new BigDecimal(bytes);
+
+        for (String s : sl) {
+            if (d2.compareTo(THOUSAND_TWENTY_FOUR) < 0) {
+                return d2.setScale(2, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString() + s;
+            }
+            // 循环内直接使用常量，避免重复创建对象
+            d2 = d2.divide(THOUSAND_TWENTY_FOUR, 10, RoundingMode.HALF_UP);
+        }
+
+        return d2.setScale(2, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString() + sl[sl.length - 1];
     }
 
     public record TPInfo(PositionMoveRotation from, PositionMoveRotation to) { }

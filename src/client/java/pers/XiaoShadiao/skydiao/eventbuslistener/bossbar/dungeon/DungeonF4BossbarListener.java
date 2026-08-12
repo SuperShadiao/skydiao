@@ -71,6 +71,7 @@ public class DungeonF4BossbarListener extends AbstractDungeonBossbar {
                 }
             }
         }
+        wr.finishDraw();
     }
 
     private void onClientTick(Minecraft mc) {

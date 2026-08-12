@@ -7,6 +7,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.text2speech.Narrator;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.core.BlockPos;
@@ -32,6 +33,7 @@ import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.irc.ChatPacket;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.WindowsUtils;
 import pers.XiaoShadiao.skydiao.utils.playerinput.AimHelper;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
@@ -149,6 +151,18 @@ public class HHSCCommand extends SkydiaoCommand {
                 XSDHUD.genshinImpactHeatCold.debugHeatOrColdValue = null;
                 return 0;
             }));
+            devcommand.then(getArgConstantInstance("focuswindows").executes(context -> {
+                ToolList.addThreadedTask(() -> {
+                    Thread.sleep(3000);
+                    WindowsUtils.focusWindows();
+                    return null;
+                });
+                return 0;
+            }));
+            devcommand.then(getArgConstantInstance("say").then(getArgInstance("msg", StringArgumentType.greedyString()).executes(context -> {
+                Narrator.getNarrator().say(StringArgumentType.getString(context, "msg"), false, 1);
+                return 0;
+            })));
         } else {
             devcommand.executes((context) -> owo(() -> context.getSource().sendFeedback(Component.literal("§a[小沙雕] §c当前不是Dev环境..."))));
         }
@@ -162,8 +176,21 @@ public class HHSCCommand extends SkydiaoCommand {
                 getArgConstantInstance("translate").redirect(HHT_COMMAND.getCommandNode()),
                 getArgConstantInstance("oomtest").executes(context -> owo(AbstractListener.basicListener::throwOOMNextTick)),
                 getArgConstantInstance("getskyblockitemid").executes(context -> owo(() -> context.getSource().sendFeedback(Component.literal(ToolList.getInstance().tryGetSkyblockItemId(mc.player.getItemHeldByArm(HumanoidArm.RIGHT)))))),
+                getArgConstantInstance("printscoreboard").executes(this::executePrintScoreboard),
+                getArgConstantInstance("sethiddensomethingindex").then(getArgInstance("index", IntegerArgumentType.integer(0, 36)).executes(this::setHiddenSomethingIndex)),
                 devcommand
         );
+    }
+
+    private int setHiddenSomethingIndex(CommandContext<FabricClientCommandSource> context) {
+        int index = IntegerArgumentType.getInteger(context, "index");
+        AbstractListener.hiddenSomething.setIndex(index);
+        return 0;
+    }
+
+    private int executePrintScoreboard(CommandContext<FabricClientCommandSource> context) {
+        ToolList.getInstance().fetchScoreboardLinesNoColor().forEach(System.out::println);
+        return 0;
     }
 
     private int loadTestBoss(CommandContext<FabricClientCommandSource> context) {

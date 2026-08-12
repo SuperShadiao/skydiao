@@ -3,15 +3,18 @@ package pers.XiaoShadiao.skydiao.utils.renderutils;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
@@ -23,6 +26,7 @@ import org.joml.Vector3f;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinAbstractContainerScreenPosGetter;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
+import java.awt.*;
 import java.util.List;
 
 public class RenderUtils {
@@ -144,6 +148,51 @@ public class RenderUtils {
     public static void renderSlot(GuiGraphicsExtractor guiGraphics, AbstractContainerScreen<?> abstractContainerScreen, Slot slot, int rgb) {
         MixinAbstractContainerScreenPosGetter getter = (MixinAbstractContainerScreenPosGetter) abstractContainerScreen;
         guiGraphics.fill(getter.getLeftPos() + slot.x, getter.getTopPos() + slot.y, getter.getLeftPos() + slot.x + 16, getter.getTopPos() + slot.y + 16, rgb);
+    }
+
+    public enum SideDirection {
+        N(180), S(0), W(90),  E(270);
+        private final int radius;
+        SideDirection(int radius) {
+            this.radius = radius;
+        }
+        public int getRadius() {
+            return radius;
+        }
+    }
+    public enum TopMode {
+        TOP(-90), BOTTOM(90), SIDE(0);
+        private final float angle;
+        TopMode(float angle) {
+            this.angle = angle;
+        }
+        public float getAngle() {
+            return angle;
+        }
+    }
+
+    public static void renderTextureOnBlockSide(LevelRenderContext context, BlockPos pos, Identifier texture, SideDirection direction, TopMode topMode) {
+        PoseStack poseStack = context.poseStack();
+
+        poseStack.pushPose();
+        poseStack.translate(-context.levelState().cameraRenderState.pos.x + pos.getX() + 0.5, -context.levelState().cameraRenderState.pos.y + pos.getY() + 0.5, -context.levelState().cameraRenderState.pos.z + pos.getZ() + 0.5);
+
+        poseStack.mulPose(Axis.YP.rotationDegrees(direction.radius));
+        poseStack.mulPose(Axis.XP.rotationDegrees(topMode.angle));
+
+        poseStack.translate(-0.5, -0.5, -0.5);
+        poseStack.translate(1, 1, 0);
+        poseStack.mulPose(Axis.ZP.rotationDegrees(180.0f));
+
+        context.submitNodeCollector().submitCustomGeometry(poseStack, RenderTypes.text(texture), ((pose, buffer) -> {
+            float z = 1f - 1 / 2048f;
+            buffer.addVertex(pose, 0.0f, 1, z).setColor(Color.WHITE.getRGB()).setUv(0.0f, 1.0f).setLight(LightCoordsUtil.FULL_BRIGHT);
+            buffer.addVertex(pose, 1, 1, z).setColor(Color.WHITE.getRGB()).setUv(1.0f, 1.0f).setLight(LightCoordsUtil.FULL_BRIGHT);
+            buffer.addVertex(pose, 1, 0.0f, z).setColor(Color.WHITE.getRGB()).setUv(1.0f, 0.0f).setLight(LightCoordsUtil.FULL_BRIGHT);
+            buffer.addVertex(pose, 0.0f, 0.0f, z).setColor(Color.WHITE.getRGB()).setUv(0.0f, 0.0f).setLight(LightCoordsUtil.FULL_BRIGHT);
+        }));
+
+        poseStack.popPose();
     }
 
     public static class WorldRender {

@@ -1,20 +1,28 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener.macro;
 
+import com.madgag.gif.fmsware.AnimatedGifEncoder;
+import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.text2speech.Narrator;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetHeldSlotPacket;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.io.FileUtils;
 import pers.XiaoShadiao.skydiao.appendage.eventbuslistener.macro.mining.ObsidianListener;
 import pers.XiaoShadiao.skydiao.appendage.eventbuslistener.macro.mining.ObsidianWRListener;
+import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.EasyFarmingScriptListener;
@@ -26,7 +34,13 @@ import pers.XiaoShadiao.skydiao.utils.Register;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.WindowsUtils;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 
 public class MacroManagerListener extends AbstractListener {
 
@@ -47,6 +61,19 @@ public class MacroManagerListener extends AbstractListener {
     public boolean isChatOpen = false;
     public boolean isScreenOpen = false;
 
+    public static final File recordDir = new File(new File(mc.gameDirectory, "screenshots"), "xsd_alert_macro_check");
+
+    private boolean isRecording = false;
+    private final AnimatedGifEncoder gifEncoder = new AnimatedGifEncoder();
+    private File currentRecordInstance = new File(recordDir, String.valueOf(System.currentTimeMillis()));
+    private int recordCycleDelay = 0;
+    private int recordIndex = 0;
+    private int recordMoreFrame = 0;
+    private static final BigInteger MAX_RECORD_SIZE = new BigInteger("10737418240");
+    private long lastFrameTime = System.currentTimeMillis();
+
+    private int alertSpamTicker = 0;
+
     @Override
     public String getListenerName() {
         return "MacroManagerListener";
@@ -66,6 +93,8 @@ public class MacroManagerListener extends AbstractListener {
             }
         });
         macros = Collections.unmodifiableList(macros);
+
+        recordDir.mkdirs();
     }
 
     private void onChat(Component component, boolean b) {
@@ -144,7 +173,8 @@ public class MacroManagerListener extends AbstractListener {
             }, null));
         }
 
-        if(ChatClientManager.serverAvailable()) {
+        alertSpamTicker = Math.clamp(alertSpamTicker + 200, 0, 2000);
+        if(ChatClientManager.serverAvailable() && alertSpamTicker < 1000) {
             ChatPacket p = new ChatPacket();
             p.initSender();
             p.packetType = "macro_check";
@@ -168,6 +198,7 @@ public class MacroManagerListener extends AbstractListener {
             activeMacros.clear();
         }
         while(historyPoses.size() > 30) historyPoses.removeFirst();
+        if(alertSpamTicker > 0) alertSpamTicker--;
 
         boolean temp = mc.screen instanceof ChatScreen;
         if(isChatOpen && !temp) {
@@ -181,6 +212,101 @@ public class MacroManagerListener extends AbstractListener {
                 ToolList.printChatMessage(Component.literal("§a[小沙雕] §c⚠ 警告: 你不能在Macro工作的时候最小化窗口!"));
             }
         }
+        if(!isRecording && enabledRecord()) {
+            try {
+                recordCycleDelay = 0;
+                recordMoreFrame = 80;
+                recordIndex = 0;
+                currentRecordInstance = new File(recordDir, String.valueOf(System.currentTimeMillis()));
+                currentRecordInstance.mkdirs();
+                gifEncoder.start(new FileOutputStream(new File(currentRecordInstance, recordIndex + ".gif")));
+                gifEncoder.setDelay(500);
+                isRecording = true;
+            } catch (FileNotFoundException e) {}
+        } else if(isRecording && !enabledRecord()) {
+            if(recordMoreFrame > 0) {
+                recordMoreFrame--;
+            } else {
+                frameTasks.offer(() -> {
+                    gifEncoder.finish();
+                    isRecording = false;
+
+                    BigInteger size = FileUtils.sizeOfDirectoryAsBigInteger(recordDir);
+
+                    if (size.compareTo(MAX_RECORD_SIZE) > 0) {
+                        String byteString = ToolList.getInstance().numberToByteString(size);
+                        Style style = Style.EMPTY
+                                .withHoverEvent(new HoverEvent.ShowText(Component.literal("点击这里打开文件夹")))
+                                .withClickEvent(new ClickEvent.OpenFile(recordDir));
+                        ToolList.printChatMessage(Component.literal("§a[小沙雕] §c当前Macro回放文件夹已超过10GB (当前" + byteString + "), 你可以§e点击这里§c来按照时间顺序清理").withStyle(style));
+                    }
+                });
+            }
+        }
+
+        if(isRecording || recordMoreFrame > 0) {
+            Screenshot.takeScreenshot(mc.getMainRenderTarget(), image0 -> {
+                    int delay = Math.clamp(System.currentTimeMillis() - lastFrameTime, 1, 750);
+                    if (frameTasks.offer(() -> {
+                        try(NativeImage image = image0) {
+                            int w = image.getWidth();
+                            int h = image.getHeight();
+                            BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                            for (int y = 0; y < h; y++) {
+                                for (int x = 0; x < w; x++) {
+                                    bi.setRGB(x, y, image.getPixel(x, y));
+                                }
+                            }
+
+                            gifEncoder.setDelay(delay);
+                            gifEncoder.addFrame(bi);
+
+                            recordCycleDelay += delay;
+                            if (recordCycleDelay >= 10000) {
+                                recordCycleDelay = 0;
+                                recordIndex++;
+                                gifEncoder.finish();
+                                try {
+                                    gifEncoder.start(new FileOutputStream(new File(currentRecordInstance, recordIndex + ".gif")));
+                                } catch (FileNotFoundException e) {
+                                }
+                                gifEncoder.setDelay(100);
+
+                                new File(currentRecordInstance, (recordIndex - 5) + ".gif").delete();
+                            }
+                        }
+                    })) {
+                        lastFrameTime = System.currentTimeMillis();
+                    } else {
+                        image0.close();
+                    }
+                });
+        }
+    }
+
+    private boolean enabledRecord() {
+        return ConfigManager.macroReplay.getValue() && !activeMacros.isEmpty();
+    }
+
+    private final ArrayBlockingQueue<Runnable> frameTasks = new ArrayBlockingQueue<>(20);
+
+    @Override
+    public void run() {
+        while(true) {
+            try {
+                handleFrame(frameTasks.take());
+            } catch (Throwable e) {
+                logger.catching(e);
+            }
+        }
+    }
+
+    private void handleFrame(Runnable frame) {
+        frame.run();
+    }
+
+    public void addFrame(Runnable frame) {
+        frameTasks.offer(frame);
     }
 
     public void addActiveMacro(IMacro macro) {

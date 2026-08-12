@@ -1065,6 +1065,26 @@
       "configname": "§e自动挖黑曜石:关于点列存档",
       "description": "§e获取指令帮助"
     },
+    "islevolcanofinder": {
+      "configname": "§eIsle找火山",
+      "description": "§e在isle岛屿遇到正在喷发的火山时提醒你"
+    },
+    "islevolcanofindercataonlymode": {
+      "configname": "§eIsle只找Cataclysmic火山",
+      "description": "§e仅在找到Cataclysmic火山时提醒你"
+    },
+    "isledupservertip": {
+      "configname": "§eIsle重复服务器提醒",
+      "description": "§e遇到重复的Isle服务器时提醒你"
+    },
+    "fsgardenmoonflowermodekeepnightfarming": {
+      "configname": "§e农业脚本月花模式保持夜间农业",
+      "description": "§e本选项开启后, 月花模式工作顺序为: 杀完虫后立即切换为黑夜; 本选项关闭后, 月花模式工作顺序为: 杀完虫后不切换到黑夜, 在白天继续农业, 等到害虫CD到达指定时间后再切换成黑夜"
+    },
+    "macroreplay": {
+      "configname": "§e脚本实时回放",
+      "description": "§e当任意脚本类功能正在执行时, 自动录制回放 (除非你电脑性能特别差, 否则小沙雕不建议关闭该功能)"
+    },
 
     "about1": "§e小沙雕的QQ: 3381949033",
     "about2": "§e小沙雕の狗窝: https://xiaoshadiao.club/qqg",

@@ -49,8 +49,30 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                 getArgConstantInstance("autoclick").then(getArgInstance("action", StringArgumentType.string()).suggests((c, b) -> b.suggest("addleft").suggest("addright").suggest("addleftright").suggest("remove").buildFuture()).executes(this::executeAutoClicker)),
                 getArgConstantInstance("loto").then(getArgInstance("index", IntegerArgumentType.integer()).executes(this::openAndChangeLoadout)),
                 getArgConstantInstance("fastclearminingstash").executes(_ -> awa(AbstractListener.fastClearMiningStash::startClearTask)),
-                getArgConstantInstance("apd").redirect(APD_COMMAND.getCommandNode())
+                getArgConstantInstance("apd").redirect(APD_COMMAND.getCommandNode()),
+                getArgConstantInstance("isleautofindvolcano")
+                        .then(getArgConstantInstance("findCataVolcanoOnly").executes(c -> executeIsleAutoFindVolcano(c, 0)))
+                        .then(getArgConstantInstance("findAnyVolcano").executes(c -> executeIsleAutoFindVolcano(c, 1)))
+                        .then(getArgConstantInstance("stop").executes(c -> executeIsleAutoFindVolcano(c, 2)))
         );
+    }
+
+    private int executeIsleAutoFindVolcano(CommandContext<FabricClientCommandSource> context, int type) {
+        switch (type) {
+            case 0:
+                context.getSource().sendFeedback(Component.literal("§a[小沙雕] §e使用/skydiao isleautofindvolcano stop来在找到火山前停止!"));
+                AbstractListener.crismonIsleCataclysmicFinderListener.startAutoFindVolcano(true);
+                break;
+            case 1:
+                context.getSource().sendFeedback(Component.literal("§a[小沙雕] §e使用/skydiao isleautofindvolcano stop来在找到火山前停止!"));
+                AbstractListener.crismonIsleCataclysmicFinderListener.startAutoFindVolcano(false);
+                break;
+            case 2:
+                context.getSource().sendFeedback(Component.literal("§a[小沙雕] §e已停止操作"));
+                AbstractListener.crismonIsleCataclysmicFinderListener.stopAutoFindVolcano();
+                break;
+        }
+        return 0;
     }
 
     private int executeAutoClicker(CommandContext<FabricClientCommandSource> context) {
