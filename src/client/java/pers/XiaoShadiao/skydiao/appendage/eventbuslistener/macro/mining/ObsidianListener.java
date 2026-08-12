@@ -7,15 +7,18 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.*;
+import pers.XiaoShadiao.skydiao.appendage.utils.posrecord.RecordPos;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.IMacro;
 import pers.XiaoShadiao.skydiao.appendage.utils.posrecord.PositionList;
 import pers.XiaoShadiao.skydiao.appendage.utils.hitresult.PUtil;
+import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
@@ -51,10 +54,7 @@ public class ObsidianListener extends AbstractListener implements IMacro {
 
     private static int targetIndex = 0;
     private static int moveRule = 0;
-    private static int lanternSlot = 6;
-    private static int drillSlot = 7;
 
-    private static int COOLDOWN_ = 9;
     private static int cooldown = 0;
     public static int lanternTicks = 270*20;
     public static int lanternTimer = 0;
@@ -72,6 +72,10 @@ public class ObsidianListener extends AbstractListener implements IMacro {
             result.put(map.get(i), i);
         }
         return result;
+    }
+
+    private static MutableComponent mp(){
+        return getGradientComponent("[AutoObsidian]", 0x58f9eb, 0x71f958).append(" ");
     }
 
     @Override
@@ -129,13 +133,17 @@ public class ObsidianListener extends AbstractListener implements IMacro {
     private void onStartClientTick(Minecraft mc) {
         if(mc.player == null || mc.level == null ) return;
         if (ConfigManager.iAutoObsidian.getValue()) {
-            if (plist == null) {
-                Minecraft.getInstance().player.sendSystemMessage(Component.literal("[AutoObsidian] 未找到点列存档.").withColor(0xf22b30));
-                ConfigManager.iAutoObsidian.setValue(false);
-                return;
+            if(!isstartyet) {
+                PositionList pl = RecordPos.getLocal(ConfigManager.autoObsidianPositionsFile.getValue());
+                if(pl==null) {
+                    Minecraft.getInstance().player.sendSystemMessage(mp().append(Component.literal(giwk("positionsfilenotfind")).withColor(0xf22b30)));
+                    ConfigManager.iAutoObsidian.setValue(false);
+                    return;
+                }
+                else plist = pl;
             }
             if(plist.positions().size()<=1){
-                Minecraft.getInstance().player.sendSystemMessage(Component.literal("[AutoObsidian] 存档点数不应<=1.").withColor(0xf22b30));
+                Minecraft.getInstance().player.sendSystemMessage(mp().append(Component.literal(giwk("positioncounterror")).withColor(0xf22b30)));
                 ConfigManager.iAutoObsidian.setValue(false);
                 return;
             }
@@ -191,15 +199,15 @@ public class ObsidianListener extends AbstractListener implements IMacro {
             lanternTaskTimer = 0;
             slotSwitchedTimer = 0;
             retryPressTimer = 0;
-            InputSimulator.switchItem(drillSlot);
+            InputSimulator.switchItem(ConfigManager.drillSlot.getValue());
         }
 
         //1.2.物品栏校验
-        if(player.getInventory().getSelectedSlot()!=drillSlot){
+        if(player.getInventory().getSelectedSlot()!=ConfigManager.drillSlot.getValue()){
             slotSwitchedTimer++;
             if(slotSwitchedTimer >= 20){
                 ConfigManager.iAutoObsidian.setValue(false);
-                mc.player.sendSystemMessage(Component.literal("[AutoObsidian] 物品栏被切换超过20ticks,停止运行.").withColor(0xf22b30));
+                mc.player.sendSystemMessage(mp().append(Component.literal(giwk("slotswitched")).withColor(0xf22b30)));
                 slotSwitchedTimer = 0;
                 status = Status.SLOT_SWITCHED;
                 return;
@@ -211,7 +219,7 @@ public class ObsidianListener extends AbstractListener implements IMacro {
         //1.3. 距离检测
         if(ppos.distanceTo(plist.positions().get(targetIndex))>=20){
             ConfigManager.iAutoObsidian.setValue(false);
-            mc.player.sendSystemMessage(Component.literal("[AutoObsidian] 玩家与目标点距离超过20,停止运行.").withColor(0xf22b30));
+            mc.player.sendSystemMessage(mp().append(Component.literal(String.format(giwk("sofaraway"),String.valueOf(20))).withColor(0xf22b30)));
             status = Status.SO_FAR_AWAY;
         }
 
@@ -237,7 +245,7 @@ public class ObsidianListener extends AbstractListener implements IMacro {
             ISH(false,true,false);
             if(selectedNullTicks >= 20){
                 ConfigManager.iAutoObsidian.setValue(false);
-                mc.player.sendSystemMessage(Component.literal("[AutoObsidian] 超过20ticks未发现满足要求的方块,停止运行.").withColor(0xf22b30));
+                mc.player.sendSystemMessage(mp().append(Component.literal(giwk("blocknotfound")).withColor(0xf22b30)));
                 selectedNullTicks = 0;
                 status = Status.SUITABLE_BLOCK_NOT_FOUND;
                 return;
@@ -248,13 +256,13 @@ public class ObsidianListener extends AbstractListener implements IMacro {
         if(cooldown>0){
             cooldown-=1;
 
-            if(!(cooldown>=COOLDOWN_-1&&retryPressTimer==12)){
+            if(!(cooldown>=ConfigManager.obsidianCycleTicks.getValue()-1&&retryPressTimer==12)){
                 InputSimulator.pressLeftClick();
             }
             if(selected != null){
 
                 //重新规划移动按键
-                if(cooldown == COOLDOWN_/2){
+                if(cooldown == ConfigManager.obsidianCycleTicks.getValue()/2){
                     int u = 0;
                     double dAngle = 180;
                     for(int i=-2; i<=2; i++){
@@ -517,7 +525,7 @@ public class ObsidianListener extends AbstractListener implements IMacro {
         }
 
         //计时器
-        cooldown += COOLDOWN_;
+        cooldown += ConfigManager.obsidianCycleTicks.getValue();
         smoothTimer--;
         selectedNullTicks = 0;
 
@@ -539,7 +547,7 @@ public class ObsidianListener extends AbstractListener implements IMacro {
                 InputSimulator.setJump(false);
                 break;
             case 12:
-                InputSimulator.switchItem(lanternSlot);
+                InputSimulator.switchItem(ConfigManager.lanternSlot.getValue());
                 break;
             case 14:
                 InputSimulator.pressRightClick();
@@ -548,7 +556,7 @@ public class ObsidianListener extends AbstractListener implements IMacro {
                 InputSimulator.releaseRightClick();
                 break;
             case 23:
-                InputSimulator.switchItem(drillSlot);
+                InputSimulator.switchItem(ConfigManager.drillSlot.getValue());
                 break;
             default:
         }
@@ -556,7 +564,7 @@ public class ObsidianListener extends AbstractListener implements IMacro {
         if(lanternTaskTimer >= 45){
             stopActions();
             lanternTimer = Math.toIntExact(Math.round(randomDouble(lanternTicks, 15*20)));
-            mc.player.sendSystemMessage(Component.literal("[AutoObsidian] 将在约"+ Math.round((double) lanternTimer/20)+"秒后放置灯笼.").withColor(0xd672de));
+            mc.player.sendSystemMessage(mp().append(Component.literal(String.format(giwk("placelantern"),String.valueOf(Math.round((double) lanternTimer/20)))).withColor(0xd672de)));
             lanternTaskTimer = 0;
 
         }
@@ -818,20 +826,44 @@ public class ObsidianListener extends AbstractListener implements IMacro {
         SO_FAR_AWAY
     }
 
-    public static void setDrillSlot(int slot){
-        drillSlot = slot;
+    public static String giwk(String key){
+        return CrowdinI18nManager.translate("features.autoobsidian."+key);
     }
 
-    public static int getDrillSlot(){
-        return drillSlot;
+    public static MutableComponent getGradientComponent(String text, int color1, int color2){
+        int len = text.length();
+        MutableComponent component = Component.literal("");
+        int i = 0;
+        for(char c : text.toCharArray()){
+            component.append(Component.literal(String.valueOf(c)).withColor(interpolateColor(color1, color2, (float) i/(len-1))));
+            i++;
+        }
+        return component;
     }
 
-    public static void setLanternSlot(int slot){
-        lanternSlot = slot;
-    }
+    public static int interpolateColor(int startColor, int endColor, float fraction) {
+        // 限制fraction范围在0到1之间
+        fraction = Math.min(1f, Math.max(0f, fraction));
 
-    public static int getLanternSlot(){
-        return lanternSlot;
+        // 提取各通道（ARGB顺序）
+        int aStart = (startColor >> 24) & 0xFF;
+        int rStart = (startColor >> 16) & 0xFF;
+        int gStart = (startColor >> 8) & 0xFF;
+        int bStart = startColor & 0xFF;
+
+        int aEnd = (endColor >> 24) & 0xFF;
+        int rEnd = (endColor >> 16) & 0xFF;
+        int gEnd = (endColor >> 8) & 0xFF;
+        int bEnd = endColor & 0xFF;
+
+        // 线性插值
+        int a = (int) (aStart + (aEnd - aStart) * fraction);
+        int r = (int) (rStart + (rEnd - rStart) * fraction);
+        int g = (int) (gStart + (gEnd - gStart) * fraction);
+        int b = (int) (bStart + (bEnd - bStart) * fraction);
+
+        // 重新组合成ARGB int
+        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
 }

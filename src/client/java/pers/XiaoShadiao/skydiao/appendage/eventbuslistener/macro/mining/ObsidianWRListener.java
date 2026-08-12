@@ -5,7 +5,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.phys.AABB;
+import pers.XiaoShadiao.skydiao.appendage.utils.posrecord.PositionList;
+import pers.XiaoShadiao.skydiao.appendage.utils.posrecord.RecordPos;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
@@ -16,7 +19,7 @@ import pers.XiaoShadiao.skydiao.utils.ToolList;
 import java.util.ArrayList;
 import java.util.List;
 
-import static pers.XiaoShadiao.skydiao.appendage.eventbuslistener.macro.mining.ObsidianListener.plist;
+import static pers.XiaoShadiao.skydiao.appendage.eventbuslistener.macro.mining.ObsidianListener.*;
 
 public class ObsidianWRListener extends AbstractListener implements IMacro {
 
@@ -32,9 +35,9 @@ public class ObsidianWRListener extends AbstractListener implements IMacro {
     private static boolean hasPlayerClosed = false;
     private static boolean hasPlayerClosedYet = false;
 
-    public static boolean playerCheck = true;
-    private static int playerRange = 15;
-    public static boolean skyblockTheEndCheck = true;
+    private static MutableComponent mp(){
+        return getGradientComponent("[ObsidianWithRetry] ", 0x58b3f9, 0x58f9c2).append(" ");
+    }
 
     @Override
     public String getListenerName() {
@@ -70,18 +73,22 @@ public class ObsidianWRListener extends AbstractListener implements IMacro {
     private void onStartClientTick(Minecraft mc) {
         if (mc.player == null || mc.level == null) return;
         if (ConfigManager.iAutoObsidianWR.getValue()) {
-            if (plist == null) {
-                Minecraft.getInstance().player.sendSystemMessage(Component.literal("[ObsidianWithRetry] 未找到点列存档.").withColor(0xf22b30));
-                ConfigManager.iAutoObsidianWR.setValue(false);
-                return;
+            if(!isstartyet) {
+                PositionList pl = RecordPos.getLocal(ConfigManager.autoObsidianPositionsFile.getValue());
+                if(pl==null) {
+                    Minecraft.getInstance().player.sendSystemMessage(mp().append(Component.literal(giwk("positionsfilenotfind")).withColor(0xf22b30)));
+                    ConfigManager.iAutoObsidianWR.setValue(false);
+                    return;
+                }
+                else plist = pl;
             }
             if(plist.positions().size()<=1){
-                Minecraft.getInstance().player.sendSystemMessage(Component.literal("[ObsidianWithRetry] 存档点数不应<=1.").withColor(0xf22b30));
+                Minecraft.getInstance().player.sendSystemMessage(mp().append(Component.literal(giwk("positioncounterror")).withColor(0xf22b30)));
                 ConfigManager.iAutoObsidianWR.setValue(false);
                 return;
             }
-            if(!"combat_3".equals(StatusManager.get().getMode()) && skyblockTheEndCheck){
-                Minecraft.getInstance().player.sendSystemMessage(Component.literal("[ObsidianWithRetry] 不在skyblock末地,无法运行.").withColor(0xf22b30));
+            if(!"combat_3".equals(StatusManager.get().getMode()) && ConfigManager.obsidianTheEndCheck.getValue()) {
+                Minecraft.getInstance().player.sendSystemMessage(mp().append(Component.literal(giwk("notintheend")).withColor(0xf22b30)));
                 ConfigManager.iAutoObsidianWR.setValue(false);
                 return;
             }
@@ -90,11 +97,11 @@ public class ObsidianWRListener extends AbstractListener implements IMacro {
                 timer2++;
                 if(timer2>3){
                     ConfigManager.iAutoObsidianWR.setValue(false);
-                    Minecraft.getInstance().player.sendSystemMessage(Component.literal("[ObsidianWithRetry] Marco Check!").withColor(0xf22b30));
+                    Minecraft.getInstance().player.sendSystemMessage(mp().append(Component.literal(" Marco Check!").withColor(0xf22b30)));
                 }
             }
 
-            if(playerCheck) checkNearbyPlayers();
+            if(ConfigManager.obsidianPlayerCheck.getValue()) checkNearbyPlayers();
 
             if(!isready) {
                 isInCheck = false;
@@ -110,19 +117,19 @@ public class ObsidianWRListener extends AbstractListener implements IMacro {
             if (timer == -1) {
                 if (ObsidianListener.status == ObsidianListener.Status.SLOT_SWITCHED) {
                     timer = 15 * 20;
-                    mc.player.sendSystemMessage(Component.literal("[ObsidianWithRetry] 15秒后将重启AutoObsidian").withColor(0x39e8df));
+                    mc.player.sendSystemMessage(mp().append(Component.literal(String.format(giwk("retry"),String.valueOf(15))).withColor(0x39e8df)));
                 }
                 if (ObsidianListener.status == ObsidianListener.Status.SUITABLE_BLOCK_NOT_FOUND) {
                     timer = 2 * 20;
-                    mc.player.sendSystemMessage(Component.literal("[ObsidianWithRetry] 2秒后将重启AutoObsidian").withColor(0x39e8df));
+                    mc.player.sendSystemMessage(mp().append(Component.literal(String.format(giwk("retry"),String.valueOf(2))).withColor(0x39e8df)));
                 }
                 if(ObsidianListener.status == ObsidianListener.Status.SO_FAR_AWAY) {
                     ConfigManager.iAutoObsidianWR.setValue(false);
-                    mc.player.sendSystemMessage(Component.literal("[ObsidianWithRetry] 距离过远,停止运行.").withColor(0xf22b30));
+                    mc.player.sendSystemMessage(mp().append(Component.literal(giwk("sofaraway2")).withColor(0xf22b30)));
                 }
             }else if (timer == 0) {
                 ConfigManager.iAutoObsidian.setValue(true);
-                mc.player.sendSystemMessage(Component.literal("[ObsidianWithRetry] 已重启AutoObsidian").withColor(0x39e8df));
+                mc.player.sendSystemMessage(mp().append(Component.literal(giwk("retried")).withColor(0x39e8df)));
                 timer = -1;
             }
             else if (timer >= 1) {
@@ -145,7 +152,7 @@ public class ObsidianWRListener extends AbstractListener implements IMacro {
     private void checkNearbyPlayers(){
         LocalPlayer player = mc.player;
 
-        int r = playerRange;
+        int r = ConfigManager.obsidianPlayerCheckRange.getValue();
         int r2 = 7;
 
         List<RemotePlayer> players = new ArrayList<>();
@@ -196,7 +203,7 @@ public class ObsidianWRListener extends AbstractListener implements IMacro {
 
         if(hasPlayerClosed){
             if(checkPlayerCooldown ==0) {
-                player.sendSystemMessage(Component.literal("[ObsidianWithRetry] 检测到以下玩家在附近:").withColor(0xf7a740));
+                player.sendSystemMessage(mp().append(Component.literal(giwk("playertooclosed")).withColor(0xf7a740)));
                 StringBuilder stringBuilder = new StringBuilder();
                 for (RemotePlayer p : players) {
                     stringBuilder.append(p.getName().getString()).append(" ");
@@ -209,7 +216,7 @@ public class ObsidianWRListener extends AbstractListener implements IMacro {
                 PlaySoundsAndStopTimer = 0;
                 StopTimer = 0;
                 ConfigManager.iAutoObsidian.setValue(false);
-                mc.player.sendSystemMessage(Component.literal("[ObsidianWithRetry] 检测到持续10秒玩家在附近，开始急停20秒").withColor(0x39e8df));
+                mc.player.sendSystemMessage(mp().append(Component.literal(giwk("playertooclosed2")).withColor(0x39e8df)));
 
             }
         }
@@ -222,11 +229,5 @@ public class ObsidianWRListener extends AbstractListener implements IMacro {
 
     }
 
-    public static void setRange(int r){
-        playerRange = r;
-    }
-    public static int getRange(){
-        return playerRange;
-    }
 
 }

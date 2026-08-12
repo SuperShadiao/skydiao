@@ -1026,12 +1026,46 @@
     },
     "iautoobsidian": {
       "configname": "§e自动挖黑曜石",
-      "description": "§e自动挖掘末地岛的黑曜石"
+      "description": "§e自动挖掘末地岛的黑曜石.注意:本功能仅用于测试,请使用自动挖黑曜石自动重试."
     },
     "iautoobsidianwithretry": {
       "configname": "§e自动挖黑曜石自动重试",
       "description": "§e脚本遇到异常情况时, 视情况自动重试"
     },
+
+    "autoobsidianpositionsfile": {
+      "configname": "§e自动挖黑曜石:点列存档",
+      "description": "§e挖掘过程需靠近的点的存档"
+    },
+    "drillslot": {
+      "configname": "§e自动挖黑曜石:钻头栏",
+      "description": "§e0-8为物品活动栏从左到右的编号"
+    },
+    "lanternslot": {
+      "configname": "§e自动挖黑曜石:灯笼栏",
+      "description": "§e0-8为物品活动栏从左到右的编号"
+    },
+    "obsidianplayercheckrange": {
+      "configname": "§e自动挖黑曜石:检测附近玩家的大半径",
+      "description": "§e防止其他玩家视奸"
+    },
+    "obsidianplayercheck": {
+      "configname": "§e自动挖黑曜石:是否检测附近玩家",
+      "description": "§e防止其他玩家视奸"
+    },
+    "obsidiantheendcheck": {
+      "configname": "§e自动挖黑曜石:检测玩家是否在末地",
+      "description": "§e"
+    },
+    "obsidiancycleticks": {
+      "configname": "§e自动挖黑曜石:循环间隔",
+      "description": "§e这个数据减去2是每个方块的实际挖掘时间(单位:tick).若保持这个值为9,最好保证挖掘时Mining Speed≥4500"
+    },
+    "obsidianpositionhelper": {
+      "configname": "§e自动挖黑曜石:关于点列存档",
+      "description": "§e获取指令帮助"
+    },
+
     "about1": "§e小沙雕的QQ: 3381949033",
     "about2": "§e小沙雕の狗窝: https://xiaoshadiao.club/qqg",
     "about3": "§e部分快捷键设置可在 ESC->选项(设置)->控制 中找到",
@@ -1108,6 +1142,12 @@
     "selectsettingmenu": {
       "buttonchoosexiaoshadiao": "打开小沙雕的设置菜单",
       "buttonchooseoneconfig": "打开OneConfig菜单",
+      "buttonback": "返回"
+    },
+    "stringlistscreen": {
+      "subtitle": "已选择:",
+      "msgconfirm": "已确认选择:",
+      "buttonconfirm": "确认",
       "buttonback": "返回"
     },
     "accountmanager": {
@@ -1218,6 +1258,20 @@
       "notification": {
         "detected": "检测到"
       }
+    },
+    "autoobsidian": {
+      "positionsfilenotfind": "未找到点列存档.",
+      "positioncounterror": "存档点数不应<=1.",
+      "slotswitched": "物品栏被切换超过20ticks,停止运行.",
+      "sofaraway": "玩家与目标点距离超过%s,停止运行.",
+      "blocknotfound": "超过20ticks未发现满足要求的方块,停止运行.",
+      "placelantern": "将在约%s秒后放置灯笼.",
+      "playertooclosed": "检测到以下玩家在附近:",
+      "playertooclosed2": "检测到持续10秒玩家在附近，开始急停20秒",
+      "retry": "%s秒后将重启AutoObsidian",
+      "retried": "已重启AutoObsidian",
+      "sofaraway2": "距离过远,停止运行.",
+      "notintheend": "不在skyblock末地,无法运行."
     },
     "antiscammer": {
       "notification": "请不要相信任何以免费rank, 语音 (vc) 为由邀请你加入Discord服务器的老外, 更不要相信Discord服务器内的\"微软账号验证\"。如果你信了, 相信小沙雕, 你会后悔终身!",
