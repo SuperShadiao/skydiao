@@ -222,6 +222,8 @@ public class MacroManagerListener extends AbstractListener {
                 gifEncoder.start(new FileOutputStream(new File(currentRecordInstance, recordIndex + ".gif")));
                 gifEncoder.setDelay(500);
                 isRecording = true;
+                ToolList.printChatMessage(Component.literal("§a[小沙雕] §a任意脚本已启动, 实时回放已开始录制"));
+                ToolList.printChatMessage(Component.literal("§a[小沙雕] §e警告: 若客户端发生严重卡顿, 可能你的设备不是很好, 请前往设置的自动类关闭即时回放!"));
             } catch (FileNotFoundException e) {}
         } else if(isRecording && !enabledRecord()) {
             if(recordMoreFrame > 0) {
@@ -229,15 +231,18 @@ public class MacroManagerListener extends AbstractListener {
             } else {
                 frameTasks.offer(() -> {
                     gifEncoder.finish();
-                    isRecording = false;
 
                     BigInteger size = FileUtils.sizeOfDirectoryAsBigInteger(recordDir);
 
+                    Style style = Style.EMPTY
+                            .withHoverEvent(new HoverEvent.ShowText(Component.literal("点击这里打开文件夹")))
+                            .withClickEvent(new ClickEvent.OpenFile(recordDir));
+                    if(isRecording) ToolList.printChatMessage(Component.literal("§a[小沙雕] §e当前没有脚本在工作, 实时回放已停止录制. 点击这里可打开文件夹").withStyle(style));
+
+                    isRecording = false;
+
                     if (size.compareTo(MAX_RECORD_SIZE) > 0) {
                         String byteString = ToolList.getInstance().numberToByteString(size);
-                        Style style = Style.EMPTY
-                                .withHoverEvent(new HoverEvent.ShowText(Component.literal("点击这里打开文件夹")))
-                                .withClickEvent(new ClickEvent.OpenFile(recordDir));
                         ToolList.printChatMessage(Component.literal("§a[小沙雕] §c当前Macro回放文件夹已超过10GB (当前" + byteString + "), 你可以§e点击这里§c来按照时间顺序清理").withStyle(style));
                     }
                 });
@@ -245,7 +250,8 @@ public class MacroManagerListener extends AbstractListener {
         }
 
         if(isRecording || recordMoreFrame > 0) {
-            Screenshot.takeScreenshot(mc.getMainRenderTarget(), image0 -> {
+            if(frameTasks.remainingCapacity() > 1) {
+                Screenshot.takeScreenshot(mc.getMainRenderTarget(), image0 -> {
                     int delay = Math.clamp(System.currentTimeMillis() - lastFrameTime, 1, 750);
                     if (frameTasks.offer(() -> {
                         try(NativeImage image = image0) {
@@ -281,6 +287,7 @@ public class MacroManagerListener extends AbstractListener {
                         image0.close();
                     }
                 });
+            }
         }
     }
 
@@ -288,7 +295,7 @@ public class MacroManagerListener extends AbstractListener {
         return ConfigManager.macroReplay.getValue() && !activeMacros.isEmpty();
     }
 
-    private final ArrayBlockingQueue<Runnable> frameTasks = new ArrayBlockingQueue<>(20);
+    private final ArrayBlockingQueue<Runnable> frameTasks = new ArrayBlockingQueue<>(3);
 
     @Override
     public void run() {

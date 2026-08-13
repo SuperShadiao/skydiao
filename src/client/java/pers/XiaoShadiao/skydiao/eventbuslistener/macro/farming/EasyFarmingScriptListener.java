@@ -391,8 +391,9 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                     ctx.put("lastSelectedSlot", mc.player.getInventory().getSelectedSlot());
                     // InputSimulator.switchItem(vacuum);
                 }, 300, true)
-                .addAction(() -> ToolList.sendChatMessage("/setspawn"), 200)
-                .addAction(ctx -> {
+                .addAction(() -> ToolList.sendChatMessage("/setspawn"), 200);
+
+        if(ConfigManager.fsTPToPest.getValue()) kpest.addAction(ctx -> {
                     List<String> pestPlots = FarmingUtils.getPestPlots();
                     if(!pestPlots.isEmpty()) {
                         String plot = pestPlots.getFirst();
@@ -404,7 +405,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                             ctx.put("executedTpToSlot", Boolean.FALSE);
                         }
                     }
-                }, 200)
+                }, 200);
 //                .addAction(FarmingUtils::tpToPestPlot, 1000, true)
 //                .addAction(InputSimulator::pressRightClick, 300);
 //
@@ -415,7 +416,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 //        kpest.addAction(InputSimulator::unpressAllKey, 200)
 //                .addAction(ctx -> InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")), 500, true)
 
-                .addAction(ctx -> {
+        kpest.addAction(ctx -> {
                     if((Boolean) ctx.get("executedTpToSlot")) {
                         XSDHUD.bigTitle.updateTitleMsg("§b预操作完成, 请手动杀虫!", 6000, SoundEvents.WITHER_SPAWN);
                     } else {
@@ -496,16 +497,16 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 
         int target = -1;
         boolean hasPests = FarmingUtils.hasPests();
-        boolean cooldownReady = FarmingUtils.cooldownReady(autoLoadoutConfig.get(3));
-        if (cooldownReady && !FarmingUtils.withPetType("pest"))
+        FarmingUtils.ColdDown colddownReady = FarmingUtils.cooldownReady(autoLoadoutConfig.get(3));
+        if (colddownReady.ready() && !FarmingUtils.withPetType("pest"))
             target = 1;
         else if (hasPests && !FarmingUtils.withPetType("kpest"))
             target = 2;
-        else if (!cooldownReady && !hasPests && !FarmingUtils.withPetType("farm"))
+        else if (!colddownReady.ready() && !hasPests && !FarmingUtils.withPetType("farm"))
             target = 0;
         if (target == -1) return;
 
-        ToolList.printChatMessage(Component.literal("§a[小沙雕] §b准备自动切换装备"));
+        ToolList.printChatMessage(Component.literal("§a[小沙雕] §b当前害虫CD " + colddownReady.tabTime() + "s小于设置值" + colddownReady.configTime() + "s, 准备自动切换装备"));
         final int targetIndex = target;
         SleepActions actions = SleepActions.builder()
                 .addSleep(1000)

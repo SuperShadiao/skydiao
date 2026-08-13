@@ -1,5 +1,6 @@
 package pers.XiaoShadiao.skydiao.commands;
 
+import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -16,6 +17,7 @@ import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
 import pers.XiaoShadiao.skydiao.utils.Banned;
 import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
 import java.util.Arrays;
 import java.util.List;
@@ -53,8 +55,17 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                 getArgConstantInstance("isleautofindvolcano")
                         .then(getArgConstantInstance("findCataVolcanoOnly").executes(c -> executeIsleAutoFindVolcano(c, 0)))
                         .then(getArgConstantInstance("findAnyVolcano").executes(c -> executeIsleAutoFindVolcano(c, 1)))
-                        .then(getArgConstantInstance("stop").executes(c -> executeIsleAutoFindVolcano(c, 2)))
+                        .then(getArgConstantInstance("stop").executes(c -> executeIsleAutoFindVolcano(c, 2))),
+                getArgConstantInstance("lookat").then(getArgInstance("yaw", FloatArgumentType.floatArg(-360, 360)).then(getArgInstance("pitch", FloatArgumentType.floatArg(-90, 90)).executes(this::executeLookAt)))
         );
+    }
+
+    private int executeLookAt(CommandContext<FabricClientCommandSource> context) {
+        float yaw = FloatArgumentType.getFloat(context, "yaw");
+        float pitch = FloatArgumentType.getFloat(context, "pitch");
+        InputSimulator.setPlayerYaw(yaw);
+        InputSimulator.setPlayerPitch(pitch);
+        return 0;
     }
 
     private int executeIsleAutoFindVolcano(CommandContext<FabricClientCommandSource> context, int type) {

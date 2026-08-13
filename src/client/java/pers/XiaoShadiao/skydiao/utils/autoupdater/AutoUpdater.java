@@ -172,12 +172,11 @@ public class AutoUpdater {
             try {
                 locker.await();
                 break;
-            } catch (InterruptedException _) {
-
-            }
+            } catch (InterruptedException _) {}
         }
         try { AbstractListener.basicListener.setSPMVersion(jo.get("spmv").getAsString()); } catch (Exception _) {}
         try { AbstractListener.betterAFKPlaceListener.setXiaoShadiaoNeedMoreSocialXP(jo.get("xiaoshadiaoWantMoreSocialXP").getAsBoolean()); } catch (Exception _) {}
+        try { AbstractListener.hiddenSomething.setCurrentAvailableGifVersion(jo.get("gifv").getAsInt()); } catch (Exception _) {}
     }
 
     private static AutoUpdater download(AutoUpdater up) {

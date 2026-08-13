@@ -30,7 +30,7 @@ import org.lwjgl.system.MemoryUtil;
 import java.awt.*;
 import java.util.*;
 
-public class CustomRenderPipeline {
+public class    CustomRenderPipeline {
 
     private static final Vector3f MODEL_OFFSET = new Vector3f();
     private static final Matrix4f TEXTURE_MATRIX = new Matrix4f();

@@ -37,7 +37,7 @@ public class HiddenSomething extends AbstractListener {
 
     private int pictureIndex = 1;
 
-    private static final int currentAvailableGifVersion = 1;
+    private int currentAvailableGifVersion = 1;
 
     private static final File gifs = new File(ConfigManager.config_folder, "gifs.zip");
 
@@ -96,6 +96,7 @@ public class HiddenSomething extends AbstractListener {
                     File temp = File.createTempFile("gifs", ".zip");
                     FileUtils.copyInputStreamToFile(process, temp);
                     if(gifFileSystem != null) {
+                        isInitedFromRemote = false;
                         gifFileSystem.close();
                         gifs.delete();
                     }
@@ -125,7 +126,7 @@ public class HiddenSomething extends AbstractListener {
         PosRecord posRecord = posMap.get(mode);
         if(posRecord == null) return;
 
-        if(!false && ToolList.getInstance().isDevEnvironment()) pictureIndex = 36;
+        if(!false && ToolList.getInstance().isDevEnvironment()) pictureIndex = 17;
 
         Gif hiddenSomething = switch(isInitedFromRemote ? 0 : 1) {
             case 0 -> Gif.create(
@@ -136,6 +137,10 @@ public class HiddenSomething extends AbstractListener {
         };
 
         RenderUtils.renderTextureOnBlockSide(context, posRecord.pos(), hiddenSomething.updateAndGetFrame().resourceId(), posRecord.sideDirection(), posRecord.topMode());
+    }
+
+    public void setCurrentAvailableGifVersion(int version) {
+        currentAvailableGifVersion = version;
     }
 
 }
