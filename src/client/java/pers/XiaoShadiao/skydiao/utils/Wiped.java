@@ -26,7 +26,7 @@ public class Wiped {
 
             Thread.sleep(500);
             ToolList.printChatMessage(msg);
-            Thread.sleep(1300);
+            Thread.sleep(4500);
 
             while(true) {
                 Thread.sleep(500);

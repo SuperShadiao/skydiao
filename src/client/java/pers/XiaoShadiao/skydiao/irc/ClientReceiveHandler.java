@@ -25,7 +25,7 @@ public class ClientReceiveHandler {
                     ToolList.getInstance().playSound(SoundEvents.EXPERIENCE_ORB_PICKUP);
                     ToolList.printChatMessage(Component.literal("§a[XSDChat] §e有人@了你, 快看一眼吧!"));
                 }
-                if(ConfigManager.enablexsdccommandtip.getValue()) ToolList.printChatMessage(Component.literal("§a[XSDChat] 请使用/xsdc message聊天!"));
+                if(ConfigManager.enablexsdccommandtip.getValue()) ToolList.printChatMessage(Component.literal("§a[XSDChat] " + CrowdinI18nManager.translate("xsdchat.xsdctip")));
                 break;
             case "system":
                 ToolList.printChatMessage(Component.literal("§a[XSDChat] §c[SYSTEM] §f" + packet.message));
@@ -34,8 +34,8 @@ public class ClientReceiveHandler {
                 if(ConfigManager.enableircjointip.getValue()) {
                     sender.announceAuthors();
                     ToolList.printChatMessage(Component.literal("§a[XSDChat] §7[§b+§7] " + packet.getRank(true) + "§b" + packet.sender + "..."));
+                    if(ConfigManager.enablexsdccommandtip.getValue()) ToolList.printChatMessage(Component.literal("§a[XSDChat] " + CrowdinI18nManager.translate("xsdchat.xsdctip")));
                 }
-                if(ConfigManager.enablexsdccommandtip.getValue()) ToolList.printChatMessage(Component.literal("§a[XSDChat] 请使用/xsdc message聊天!"));
                 break;
             case "leave":
                 if(ConfigManager.enableircjointip.getValue()) ToolList.printChatMessage(Component.literal("§a[XSDChat] §7[§c-§7] " + packet.getRank(true) + "§c" + packet.sender + "..."));

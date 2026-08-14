@@ -417,7 +417,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 //                .addAction(ctx -> InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")), 500, true)
 
         kpest.addAction(ctx -> {
-                    if((Boolean) ctx.get("executedTpToSlot")) {
+                    if((Boolean) ctx.getOrDefault("executedTpToSlot", Boolean.TRUE)) {
                         XSDHUD.bigTitle.updateTitleMsg("§b预操作完成, 请手动杀虫!", 6000, SoundEvents.WITHER_SPAWN);
                     } else {
                         XSDHUD.bigTitle.updateTitleMsg("§b预操作完成, 请手动杀虫 | 害虫位于当前Plot, 不进行传送", 6000, SoundEvents.WITHER_SPAWN);
@@ -506,7 +506,14 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
             target = 0;
         if (target == -1) return;
 
-        ToolList.printChatMessage(Component.literal("§a[小沙雕] §b当前害虫CD " + colddownReady.tabTime() + "s小于设置值" + colddownReady.configTime() + "s, 准备自动切换装备"));
+        if(target == 1) {
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §b当前害虫CD " + colddownReady.tabTime() + "s小于设置值" + colddownReady.configTime() + "s, 准备自动切换到害虫装备 (Loadout #" + autoLoadoutConfig.get(target) + ")"));
+        } else if(target == 2) {
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §b害虫已就绪, 准备自动切换到杀虫装备 (Loadout #" + autoLoadoutConfig.get(target) + ")"));
+        } else {
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §b当前害虫CD " + colddownReady.tabTime() + "s大于设置值" + colddownReady.configTime() + "s, 自动切换到农业装备 (Loadout #" + autoLoadoutConfig.get(target) + ")"));
+        }
+
         final int targetIndex = target;
         SleepActions actions = SleepActions.builder()
                 .addSleep(1000)

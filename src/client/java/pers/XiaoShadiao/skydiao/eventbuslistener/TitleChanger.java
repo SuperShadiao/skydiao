@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager.translate;
+
 public class TitleChanger extends AbstractListener {
 
     private String mcTitle = "";
@@ -81,7 +83,7 @@ public class TitleChanger extends AbstractListener {
 
         @Override
         public String getContent() {
-            return "时间已流逝: " + ToolList.getInstance().timeToString(passedTick / 20 * 1000L);
+            return translate("features.customtitle.timepassed", ToolList.getInstance().timeToString(passedTick / 20 * 1000L));
         }
 
         @Override

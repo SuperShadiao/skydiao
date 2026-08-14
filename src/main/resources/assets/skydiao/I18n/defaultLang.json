@@ -1032,7 +1032,6 @@
       "configname": "§e自动挖黑曜石自动重试",
       "description": "§e脚本遇到异常情况时, 视情况自动重试"
     },
-
     "autoobsidianpositionsfile": {
       "configname": "§e自动挖黑曜石:点列存档",
       "description": "§e挖掘过程需靠近的点的存档"
@@ -1088,6 +1087,10 @@
     "fstopopest": {
       "configname": "§e农业脚本半自动杀虫自动TP",
       "description": "§e预操作阶段自动执行tp指令"
+    },
+    "miningcommissionentityesp": {
+      "configname": "§e挖矿任务实体目标ESP",
+      "description": "§e在挖矿任务中, 显示挖矿任务实体的目标位置, 防止你找不到目标 (尤其是水晶矿洞这种实体少的地方)"
     },
 
     "about1": "§e小沙雕的QQ: 3381949033",
@@ -1301,13 +1304,17 @@
       "notification": "请不要相信任何以免费rank, 语音 (vc) 为由邀请你加入Discord服务器的老外, 更不要相信Discord服务器内的\"微软账号验证\"。如果你信了, 相信小沙雕, 你会后悔终身!",
       "click": "[点击这里查看为什么]",
       "click2": "点击查看骗子诈骗账号的方式"
+    },
+    "customtitle": {
+      "timepassed": "时间已流逝: %s"
     }
   },
   "xsdchat": {
     "afk": {
       "in": "暂时离开了...",
       "out": "回来了..."
-    }
+    },
+    "xsdctip": "请使用/xsdc message聊天!"
   },
   "skydiao": {
     "gui": {

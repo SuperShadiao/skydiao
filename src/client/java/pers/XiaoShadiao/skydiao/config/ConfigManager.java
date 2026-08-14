@@ -179,7 +179,7 @@ public class ConfigManager {
     public static final BooleanConfigOption isleVolcanoFinder =  new BooleanConfigOption("islevolcanofinder", true);
     public static final BooleanConfigOption isleVolcanoFinderCataOnlyMode = new BooleanConfigOption("islevolcanofindercataonlymode", true);
     public static final BooleanConfigOption isleDupServerTip = new BooleanConfigOption("isledupservertip", true);
-    public static final BooleanConfigOption miningCommissionEntityESP = new BooleanConfigOption("miningcommissionentityespesp", true);
+    public static final BooleanConfigOption miningCommissionEntityESP = new BooleanConfigOption("miningcommissionentityesp", true);
     public static final BooleanConfigOption fsTPToPest = new BooleanConfigOption("fstopopest", true);
 
     public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);

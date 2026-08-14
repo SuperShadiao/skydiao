@@ -25,6 +25,7 @@
 注明方式: https://5ixsd.top/qqg 和 https://5ixsd.top/skydiao 两个链接二选一备注即可
 
 # 使用的组件或第三方库
+- [Fabric模组模版](https://github.com/FabricMC/fabric-example-mod)
 - [ModMenu](https://modrinth.com/mod/modmenu)
 - [Hypixel Fabric Mod API](https://5ixsd.top/hmfapi)
 - jlayer
