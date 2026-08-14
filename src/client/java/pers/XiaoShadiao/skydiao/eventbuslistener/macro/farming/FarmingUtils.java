@@ -51,13 +51,13 @@ public class FarmingUtils {
 
     private static final Pattern PATTERN = Pattern.compile("(\\d+)([ms])", Pattern.CASE_INSENSITIVE);
 
-    public record ColdDown(boolean ready, int tabTime, int configTime) {}
+    public record Cooldown(boolean ready, int tabTime, int configTime) {}
 
-    public static ColdDown cooldownReady(int readyS) {
-        Optional<String> cooldown = TabReader.findLineWith("ColdDown: ");
-        if (cooldown.isEmpty()) return new ColdDown(false, 600, readyS);
+    public static Cooldown cooldownReady(int readyS) {
+        Optional<String> cooldown = TabReader.findLineWith("Cooldown: ");
+        if (cooldown.isEmpty()) return new Cooldown(false, 600, readyS);
         String cooldownTime = cooldown.get().substring(cooldown.get().indexOf(":") + 2);
-        if (cooldownTime.contains("READY")) return new ColdDown(true, 0, readyS);
+        if (cooldownTime.contains("READY")) return new Cooldown(true, 0, readyS);
         try {
             Matcher matcher = PATTERN.matcher(cooldownTime);
             int m = 0, s = 0;
@@ -68,9 +68,9 @@ public class FarmingUtils {
                 else if ("s".equals(unit)) s = num;
             }
             int total = m * 60 + s;
-            return new ColdDown(total < readyS, total, readyS);
+            return new Cooldown(total < readyS, total, readyS);
         } catch (Exception e) {
-            return new ColdDown(false, 600, readyS);
+            return new Cooldown(false, 600, readyS);
         }
     }
 

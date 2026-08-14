@@ -497,7 +497,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 
         int target = -1;
         boolean hasPests = FarmingUtils.hasPests();
-        FarmingUtils.ColdDown colddownReady = FarmingUtils.cooldownReady(autoLoadoutConfig.get(3));
+        FarmingUtils.Cooldown colddownReady = FarmingUtils.cooldownReady(autoLoadoutConfig.get(3));
         if (colddownReady.ready() && !FarmingUtils.withPetType("pest"))
             target = 1;
         else if (hasPests && !FarmingUtils.withPetType("kpest"))
