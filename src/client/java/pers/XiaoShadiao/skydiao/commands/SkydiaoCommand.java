@@ -17,6 +17,7 @@ import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
 import pers.XiaoShadiao.skydiao.utils.Banned;
 import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.Wiped;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
 import java.util.Arrays;
@@ -56,8 +57,24 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                         .then(getArgConstantInstance("findCataVolcanoOnly").executes(c -> executeIsleAutoFindVolcano(c, 0)))
                         .then(getArgConstantInstance("findAnyVolcano").executes(c -> executeIsleAutoFindVolcano(c, 1)))
                         .then(getArgConstantInstance("stop").executes(c -> executeIsleAutoFindVolcano(c, 2))),
-                getArgConstantInstance("lookat").then(getArgInstance("yaw", FloatArgumentType.floatArg(-360, 360)).then(getArgInstance("pitch", FloatArgumentType.floatArg(-90, 90)).executes(this::executeLookAt)))
+                getArgConstantInstance("lookat").then(getArgInstance("yaw", FloatArgumentType.floatArg(-360, 360)).then(getArgInstance("pitch", FloatArgumentType.floatArg(-90, 90)).executes(this::executeLookAt))),
+                getArgConstantInstance("wipe").then(getArgInstance("profile", StringArgumentType.string()).suggests(((commandContext, builder) -> {
+                    Arrays.stream(Wiped.WipeProfile.values()).map(Enum::name).forEach(builder::suggest);
+                    return builder.buildFuture();
+                })).executes(this::executeWipe))
         );
+    }
+
+    private int executeWipe(CommandContext<FabricClientCommandSource> context) {
+        String profile = StringArgumentType.getString(context, "profile");
+        try {
+            Wiped.WipeProfile profile1 = Wiped.WipeProfile.valueOf(profile);
+            Wiped.wipe(profile1, 0);
+        } catch (IllegalArgumentException e) {
+            context.getSource().sendError(Component.literal("§a[小沙雕] §c未知档案名称."));
+        }
+
+        return 0;
     }
 
     private int executeLookAt(CommandContext<FabricClientCommandSource> context) {
