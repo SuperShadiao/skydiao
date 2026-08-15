@@ -53,7 +53,7 @@ public class TitleChanger extends AbstractListener {
 
     private void onStartTick(Minecraft mc) {
         passedTick++;
-        if (!ConfigManager.cooltitle.getValue() && downloadProcess.process == null) return;
+        if (!ConfigManager.cooltitle.getValue() && downloadProcess.process.isEmpty()) return;
 
         titleParts.forEach(Part::tick);
         String title = titleParts.stream()
