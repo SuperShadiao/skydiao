@@ -32,6 +32,7 @@
   },
   "mixins": [
     "MixinAcviteProfilePathAccessor",
+    "MixinBlockableEventLoop",
     "MixinClientCommonPacketListenerImpl",
     "MixinClientPacketListener",
     "MixinEntityCloneable",

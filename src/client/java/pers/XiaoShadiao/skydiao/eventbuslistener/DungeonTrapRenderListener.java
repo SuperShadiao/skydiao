@@ -37,6 +37,8 @@ public class DungeonTrapRenderListener extends AbstractListener {
     }
 
     private void onRender(LevelRenderContext context) {
+        if(mc.level == null || mc.player == null) return;
+
         RenderUtils.WorldRender worldRender = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.NO_THROUGH_WALLS_LINE);
 
         float r = 1;
@@ -76,7 +78,7 @@ public class DungeonTrapRenderListener extends AbstractListener {
 
     private void onTick(Minecraft mc) {
         // if(true) return;
-        if(ConfigManager.dungeonRenderTraps.getValue() && tickCount++ % 10 == 0 && mc.level != null) {
+        if(ConfigManager.dungeonRenderTraps.getValue() && tickCount++ % 10 == 0 && mc.level != null && mc.player != null) {
             trapsList.clear();
             for (BlockPos pos : BlockPos.betweenClosed(
                     (int) mc.player.getX() - 30,

@@ -15,6 +15,7 @@ import net.minecraft.world.item.Items;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
 import java.io.InputStream;
 import java.util.List;
@@ -49,29 +50,45 @@ public class BetterAFKPlaceListener extends AbstractListener {
 
     public void executeBackdoor() {
         ToolList.addThreadedTask(() -> {
-            CompletableFuture<String> future = pickupId();
-            ToolList.sendChatMessage("/l");
-            Thread.sleep(5000);
-            ToolList.sendChatMessage("/skyblock");
-            Thread.sleep(5000);
-            ToolList.sendChatMessage("/visit " + future.getNow(pickupDefaultId()));
-            Thread.sleep(5000);
-            if (!(mc.screen instanceof ContainerScreen containerScreen)) return null;
-            ChestMenu menu0 = containerScreen.getMenu();
-            Container container0 = menu0.getContainer();
-            if (!(container0 instanceof SimpleContainer)) return null;
-            mc.execute(() -> {
-                if (mc.player != null && mc.gameMode != null) {
-                    for (int i = 11; i < 15; i++) {
-                        if (menu0.slots.get(i).getItem().getItem() == Items.PLAYER_HEAD) {
-                            mc.gameMode.handleContainerInput(menu0.containerId, i, 0, ContainerInput.PICKUP, mc.player);
-                            break;
+            int tries = 0;
+            while(tries < 3) {
+                tries++;
+                CompletableFuture<String> future = pickupId();
+                ToolList.sendChatMessage("/l");
+                Thread.sleep(5000);
+                ToolList.sendChatMessage("/skyblock");
+                Thread.sleep(5000);
+                ToolList.sendChatMessage("/visit " + future.getNow(pickupDefaultId()));
+                Thread.sleep(5000);
+                if (!(mc.screen instanceof ContainerScreen containerScreen)) return null;
+                ChestMenu menu0 = containerScreen.getMenu();
+                Container container0 = menu0.getContainer();
+                if (!(container0 instanceof SimpleContainer)) return null;
+                mc.execute(() -> {
+                    if (mc.player != null && mc.gameMode != null) {
+                        for (int i = 11; i < 15; i++) {
+                            if (menu0.slots.get(i).getItem().getItem() == Items.PLAYER_HEAD) {
+                                mc.gameMode.handleContainerInput(menu0.containerId, i, 0, ContainerInput.PICKUP, mc.player);
+                                break;
+                            }
                         }
                     }
+                });
+                Thread.sleep(5000);
+                if(StatusManager.get().isInSkyblock() && "dynamic".equals(StatusManager.get().getMode())) {
+                    if(!mc.player.onGround()) {
+                        long keepTime = System.currentTimeMillis();
+                        while(!mc.player.onGround() && System.currentTimeMillis() - keepTime < 6000) {
+                            InputSimulator.setShift(true);
+                            Thread.sleep(200);
+                        }
+                        InputSimulator.setShift(false);
+                    } else {
+                        Thread.sleep(200);
+                    }
+                    return null;
                 }
-            });
-            Thread.sleep(5000);
-            if(StatusManager.get().isInSkyblock() && "dynamic".equals(StatusManager.get().getMode())) return null;
+            }
             ToolList.sendChatMessage("/limbo");
             return null;
         });

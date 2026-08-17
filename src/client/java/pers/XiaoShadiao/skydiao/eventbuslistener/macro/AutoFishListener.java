@@ -260,7 +260,7 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
 
         while(true) {
             try {
-                Thread.sleep(300 + ToolList.getInstance().random.nextInt(80));
+                Thread.sleep(200 + ToolList.getInstance().random.nextInt(280));
                 Thread.sleep(ConfigManager.autofishrethrowhookdelay.getValue());
                 break;
             } catch (InterruptedException e) {
@@ -354,7 +354,7 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
             logger.info("鱼钩未抛出, 重新抛出...");
             InputSimulator.singleRightClick();
             try {
-                Thread.sleep(1000);
+                Thread.sleep(500 + ToolList.getInstance().random.nextInt(500));
             } catch (InterruptedException e) {
 
             }
@@ -366,7 +366,7 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
             logger.info("当前急停已启动, 但鱼钩处于抛出状态, 尝试收回...");
             InputSimulator.singleRightClick();
             try {
-                Thread.sleep(1000);
+                Thread.sleep(500 + ToolList.getInstance().random.nextInt(500));
             } catch (InterruptedException e) {
 
             }

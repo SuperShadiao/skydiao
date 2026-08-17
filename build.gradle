@@ -78,6 +78,9 @@ jar {
     from("LICENSE") {
         rename { "${it}_$projectName"}
     }
+    manifest.attributes(
+            "Main-Class": "pers.XiaoShadiao.HypixelHelperMainClass"
+    )
 }
 
 // configure the maven publication

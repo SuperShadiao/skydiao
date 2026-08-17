@@ -2,6 +2,7 @@ package pers.XiaoShadiao.skydiao.mixin.client;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import net.minecraft.CrashReport;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -10,6 +11,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
 import net.minecraft.server.RunningOnDifferentThreadException;
 import org.spongepowered.asm.mixin.Mixin;
+import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 @Mixin(ClientPacketListener.class)
 public abstract class MixinClientPacketListener extends ClientCommonPacketListenerImpl {
@@ -25,7 +27,8 @@ public abstract class MixinClientPacketListener extends ClientCommonPacketListen
         } catch (RunningOnDifferentThreadException e) {
             throw e;
         } catch (Throwable t) {
-            onPacketError(packet, t instanceof Exception e ? e : new RuntimeException(t));
+            // onPacketError(packet, t instanceof Exception e ? e : new RuntimeException(t));
+            ToolList.mc.delayCrash(new CrashReport("A login error occurred", t));
         }
     }
 

@@ -129,9 +129,9 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
         if (mc.level == null) return;
         for (Entity entity : mc.level.entitiesForRendering()) {
             if (entity instanceof RemotePlayer player) {
-                PlayerCapability.get(player).ifPresent(cap -> {
-                    Pair<String, String> id = name2Id.get(player.getName().getString());
-                    if (id != null) {
+                Pair<String, String> id = name2Id.get(player.getName().getString());
+                if (id != null) {
+                    PlayerCapability.get(player).ifPresent(cap -> {
                         String currentId = cap.getModelId();
                         String currentTextureName = cap.getCurrentTextureName();
                         if (ClientModelManager.getModelContext(id.first()).isPresent()) {
@@ -139,15 +139,14 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
                                 cap.initModelWithTexture(id.first(), id.second());
                             }
                         }
-                    }
-                });
+                    });
+                }
             } else if(entity instanceof Projectile projectile) {
-                ProjectileModelCapability.get(projectile).ifPresent(cap -> {
-                    Entity owner = projectile.getOwner();
-                    if(owner instanceof AbstractClientPlayer player) {
-                        Pair<String, String> id = name2Id.get(player.getName().getString());
-                        if(player == mc.player) id = Pair.of(currentModelId, currentTextureId);
-                        if(id != null) {
+                Entity owner = projectile.getOwner();
+                if(owner instanceof AbstractClientPlayer player) {
+                    Pair<String, String> id = player == mc.player ? Pair.of(currentModelId, currentTextureId) : name2Id.get(player.getName().getString());
+                    if(id != null) {
+                        ProjectileModelCapability.get(projectile).ifPresent(cap -> {
                             String mapModelId = id.first();
                             String capModelId = cap.getOwnerModelId();
                             Optional<ModelAssembly> context = ClientModelManager.getModelContext(id.first());
@@ -166,9 +165,9 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
                                     });
                                 }
                             }
-                        }
+                        });
                     }
-                });
+                };
             }
         }
 
