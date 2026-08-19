@@ -151,7 +151,7 @@ public class RenderUtils {
     }
 
     public enum SideDirection {
-        N(180), S(0), W(90),  E(270);
+        N(180), S(0), W(270),  E(90);
         private final int radius;
         SideDirection(int radius) {
             this.radius = radius;
@@ -171,11 +171,11 @@ public class RenderUtils {
         }
     }
 
-    public static void renderTextureOnBlockSide(LevelRenderContext context, BlockPos pos, Identifier texture, SideDirection direction, TopMode topMode) {
+    public static void renderTextureOnBlockSide(LevelRenderContext context, Vec3 pos, Identifier texture, SideDirection direction, TopMode topMode) {
         PoseStack poseStack = context.poseStack();
 
         poseStack.pushPose();
-        poseStack.translate(-context.levelState().cameraRenderState.pos.x + pos.getX() + 0.5, -context.levelState().cameraRenderState.pos.y + pos.getY() + 0.5, -context.levelState().cameraRenderState.pos.z + pos.getZ() + 0.5);
+        poseStack.translate(-context.levelState().cameraRenderState.pos.x + pos.x() + 0.5, -context.levelState().cameraRenderState.pos.y + pos.y() + 0.5, -context.levelState().cameraRenderState.pos.z + pos.z() + 0.5);
 
         poseStack.mulPose(Axis.YP.rotationDegrees(direction.radius));
         poseStack.mulPose(Axis.XP.rotationDegrees(topMode.angle));

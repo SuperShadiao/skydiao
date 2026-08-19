@@ -77,7 +77,7 @@ public class Gif implements AutoCloseable {
                             identifier.withSuffix("____" + i),
                             pngBytes
                     ));
-                    frameDelaysMs.add(delay);
+                    frameDelaysMs.add(delay == 0 ? 100 : delay);
                 }
                 if (!textures.isEmpty() && !frameDelaysMs.isEmpty()) break a;
             } catch (Throwable e) {

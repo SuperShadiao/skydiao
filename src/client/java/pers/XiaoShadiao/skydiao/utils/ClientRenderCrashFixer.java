@@ -1,11 +1,11 @@
 package pers.XiaoShadiao.skydiao.utils;
 
-import net.fabricmc.fabric.impl.client.rendering.level.LevelRenderContextImpl;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public class ClientRenderCrashFixer {
 
-    public static LevelRenderContextImpl wrc;
+    public static LevelRenderContext wrc;
     public static GuiGraphicsExtractor gg;
 
     public static void fix() {

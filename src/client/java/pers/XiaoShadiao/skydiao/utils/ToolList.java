@@ -508,6 +508,10 @@ public class ToolList {
         return itemStack.getComponents().getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getStringOr("uuid", "");
     }
 
+    public OptionalInt tryGetSkyblockItemAttributeAsNumber(ItemStack itemStack, String attribute) {
+        return itemStack.getComponents().getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getInt(attribute).map(OptionalInt::of).orElse(OptionalInt.empty());
+    }
+
     public void updatePartyInfo() {
         HypixelModAPI.getInstance().sendPacket(new ServerboundPartyInfoPacket());
     }
@@ -768,6 +772,7 @@ public class ToolList {
     }
 
     public List<Component> fetchScoreboardLines() {
+        if (mc.level == null) return List.of();
         Scoreboard scoreboard = mc.level.getScoreboard();
         Objective objective2 = getScoreboardObjective();
         if (objective2 != null) {

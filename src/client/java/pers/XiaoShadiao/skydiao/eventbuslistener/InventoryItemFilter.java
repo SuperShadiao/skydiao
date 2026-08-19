@@ -9,6 +9,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
@@ -28,6 +29,7 @@ import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 
 import java.awt.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -36,6 +38,7 @@ import static pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager.translate;
 public class InventoryItemFilter extends AbstractListener {
 
     private boolean enabled;
+    private final List<String> hints = List.of("搜索物品", "可使用正则表达式", "可使用\\n分割以创建多个搜索条件, 用于跨行搜索");
 
     @Override
     public String getListenerName() {
@@ -67,11 +70,12 @@ public class InventoryItemFilter extends AbstractListener {
         filterTextBox = new EditBox(mc.font, 0, 0, Component.literal("搜索框"));
         filterTextBox.setWidth(100);
         filterTextBox.setHeight(20);
-        filterTextBox.setHint(Component.literal(ToolList.getInstance().random.nextBoolean() ? "搜索物品" : "可用正则表达式"));
+        filterTextBox.setHint(Component.literal("输入搜索内容..."));
         filterTextBox.setX(10);
         filterTextBox.setY(screen.height / 2 - 20);
         filterTextBox.setMaxLength(Integer.MAX_VALUE);
         filterTextBox.setValue(ConfigManager.inventoryFilterRegex.getValue());
+        filterTextBox.setTooltip(Tooltip.create(Component.literal(String.join(", ", hints))));
 
         buttons.add(filterTextBox);
         buttons.add(Button.builder(Component.literal(translate("skydiao.gui.itemfilter.buttonentrance")), (button) -> mc.setScreen(new InventoryRegexSearcherConfigScreen(mc.screen))).bounds(10, screen.height / 2, 80, 20).build());
@@ -119,19 +123,21 @@ public class InventoryItemFilter extends AbstractListener {
 
     private boolean matchItems(Slot slot) {
         try {
-            String value0 = filterTextBox.getValue().trim();
-            String value = value0.toLowerCase();
+            String trim = filterTextBox.getValue().trim();
+            String[] value0 = trim.split("\\\\n");
+            String[] value = trim.toLowerCase().split("\\\\n");
 
             List<Component> list = slot.getItem().getTooltipLines(Item.TooltipContext.of(mc.level), mc.player, TooltipFlag.Default.NORMAL);
             boolean flag = false;
-            flag |= list.stream().anyMatch(c -> ToolList.getInstance().deleteColorCode(c.getString()).toLowerCase().contains(value));
+            flag |= Arrays.stream(value).allMatch(v -> list.stream().anyMatch(c ->ToolList.getInstance().deleteColorCode(c.getString()).toLowerCase().contains(v)));
             if(!flag) {
                 try {
-                    Pattern pattern = Pattern.compile(value0);
-                    flag = list.stream().anyMatch(c -> {
-                        String s = ToolList.getInstance().deleteColorCode(c.getString());
-                        return pattern.matcher(s).find();
-                    });
+//                    Pattern pattern = Pattern.compile(value0);
+//                    flag = list.stream().anyMatch(c -> {
+//                        String s = ToolList.getInstance().deleteColorCode(c.getString());
+//                        return pattern.matcher(s).find();
+//                    });
+                    flag = Arrays.stream(value0).map(Pattern::compile).allMatch(pattern -> list.stream().anyMatch(c -> pattern.matcher(ToolList.getInstance().deleteColorCode(c.getString())).find()));
                 } catch (Exception ignored) {}
             }
 

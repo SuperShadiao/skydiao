@@ -7,8 +7,8 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.io.FileUtils;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
@@ -26,14 +26,6 @@ import java.nio.file.Files;
 import java.util.Map;
 
 public class HiddenSomething extends AbstractListener {
-
-    private static final BlockPos pos = new BlockPos(3, 79, 3);
-    private static final BlockPos privateIslandPos = new BlockPos(7, 96, 7);
-    private static final Map<String, PosRecord> posMap = Map.of(
-            "hub", new PosRecord(pos, RenderUtils.SideDirection.N, RenderUtils.TopMode.SIDE),
-            "dynamic",  new PosRecord(privateIslandPos, RenderUtils.SideDirection.S, RenderUtils.TopMode.TOP)
-    );
-    record PosRecord(BlockPos pos, RenderUtils.SideDirection sideDirection, RenderUtils.TopMode topMode) {}
 
     private int pictureIndex = 1;
 
@@ -120,13 +112,43 @@ public class HiddenSomething extends AbstractListener {
         pictureIndex = index;
     }
 
+    record PosRecord(Vec3 pos, RenderUtils.SideDirection sideDirection, RenderUtils.TopMode topMode) {}
+
+    private static final Map<String, PosRecord> posMap = Map.ofEntries(
+            Map.entry("hub", new PosRecord(new Vec3(3, 79, 3), RenderUtils.SideDirection.N, RenderUtils.TopMode.SIDE)),
+            Map.entry("dynamic",  new PosRecord(new Vec3(7, 96, 7), RenderUtils.SideDirection.S, RenderUtils.TopMode.TOP)),
+            Map.entry("dungeon_hub", new PosRecord(new Vec3(-58, 140, 0), RenderUtils.SideDirection.W, RenderUtils.TopMode.SIDE)),
+            Map.entry("mining_3", new PosRecord(new Vec3(129, 197, 198), RenderUtils.SideDirection.N, RenderUtils.TopMode.SIDE)),
+            Map.entry("crystal_hollows", new PosRecord(new Vec3(472, 114, 513), RenderUtils.SideDirection.W, RenderUtils.TopMode.SIDE)),
+            Map.entry("foraging_2", new PosRecord(new Vec3(-665, 70, 59), RenderUtils.SideDirection.N, RenderUtils.TopMode.SIDE)),
+            Map.entry("foraging_3", new PosRecord(new Vec3(-729, 112.5, 145), RenderUtils.SideDirection.S, RenderUtils.TopMode.BOTTOM)),
+            Map.entry("combat_1", new PosRecord(new Vec3(-276, 121, -182), RenderUtils.SideDirection.E, RenderUtils.TopMode.SIDE)),
+            Map.entry("combat_3", new PosRecord(new Vec3(-583, 27, -322), RenderUtils.SideDirection.S, RenderUtils.TopMode.BOTTOM)),
+            Map.entry("fishing_1", new PosRecord(new Vec3(53, 78, 11), RenderUtils.SideDirection.E, RenderUtils.TopMode.SIDE)),
+            Map.entry("lotus_atoll", new PosRecord(new Vec3(88, 79, 27), RenderUtils.SideDirection.N, RenderUtils.TopMode.SIDE))
+    );
+
     private void onCollectSubmits(LevelRenderContext context) {
         String mode = StatusManager.get().getMode();
         if(mode == null) return;
-        PosRecord posRecord = posMap.get(mode);
+        PosRecord posRecord = (ToolList.getInstance().isDevEnvironment() ?
+                Map.ofEntries(
+                        Map.entry("hub", new PosRecord(new Vec3(3, 79, 3), RenderUtils.SideDirection.N, RenderUtils.TopMode.SIDE)),
+                        Map.entry("dynamic",  new PosRecord(new Vec3(7, 96, 7), RenderUtils.SideDirection.S, RenderUtils.TopMode.TOP)),
+                        Map.entry("dungeon_hub", new PosRecord(new Vec3(-58, 140, 0), RenderUtils.SideDirection.W, RenderUtils.TopMode.SIDE)),
+                        Map.entry("mining_3", new PosRecord(new Vec3(129, 197, 198), RenderUtils.SideDirection.N, RenderUtils.TopMode.SIDE)),
+                        Map.entry("crystal_hollows", new PosRecord(new Vec3(472, 114, 513), RenderUtils.SideDirection.W, RenderUtils.TopMode.SIDE)),
+                        Map.entry("foraging_2", new PosRecord(new Vec3(-665, 70, 59), RenderUtils.SideDirection.N, RenderUtils.TopMode.SIDE)),
+                        Map.entry("foraging_3", new PosRecord(new Vec3(-729, 112.5, 145), RenderUtils.SideDirection.S, RenderUtils.TopMode.BOTTOM)),
+                        Map.entry("combat_1", new PosRecord(new Vec3(-276, 121, -182), RenderUtils.SideDirection.E, RenderUtils.TopMode.SIDE)),
+                        Map.entry("combat_3", new PosRecord(new Vec3(-583, 27, -322), RenderUtils.SideDirection.S, RenderUtils.TopMode.BOTTOM)),
+                        Map.entry("fishing_1", new PosRecord(new Vec3(53, 78, 11), RenderUtils.SideDirection.E, RenderUtils.TopMode.SIDE)),
+                        Map.entry("lotus_atoll", new PosRecord(new Vec3(88, 79, 27), RenderUtils.SideDirection.N, RenderUtils.TopMode.SIDE))
+                )
+        : posMap).get(mode);
         if(posRecord == null) return;
 
-        if(!false && ToolList.getInstance().isDevEnvironment()) pictureIndex = 17;
+        if(false && ToolList.getInstance().isDevEnvironment()) pictureIndex = 38;
 
         Gif hiddenSomething = switch(isInitedFromRemote ? 0 : 1) {
             case 0 -> Gif.create(

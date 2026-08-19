@@ -50,7 +50,7 @@ public class SlayerTogetherListener extends AbstractListener {
     }
 
     private void onStartClientTick(Minecraft mc) {
-        if(mc.player == null) return;
+        if(mc.player == null || mc.level == null) return;
 
         boolean summonedFlag = false;
         for (String s : ToolList.getInstance().fetchScoreboardLinesNoColor()) {

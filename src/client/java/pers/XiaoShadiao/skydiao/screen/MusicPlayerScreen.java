@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager.translate;
+
 public class MusicPlayerScreen extends Screen {
 
     private static List<MusicInfo> musics = new ArrayList<>();
@@ -147,11 +149,26 @@ public class MusicPlayerScreen extends Screen {
 
     public class MusicList extends ContainerObjectSelectionList<AbstractEntry> {
 
+        private final SearchEntry searchEntry = new SearchEntry();
+
         public MusicList() {
             super(Minecraft.getInstance(), MusicPlayerScreen.this.width, MusicPlayerScreen.this.layout.getContentHeight(), MusicPlayerScreen.this.layout.getHeaderHeight(), 21);
+            updateSearchResult("", false);
+        }
+
+        private void updateSearchResult(String s) {
+            updateSearchResult(s, true);
+        }
+
+        private void updateSearchResult(String s, boolean resetScroll) {
+            clearEntries();
             for (MusicInfo music : musics) {
-                addEntry(new MusicEntry(music));
+                if(s.isBlank() || (music.name + " - " + music.singer).toLowerCase().contains(s.toLowerCase())) {
+                    addEntry(new MusicEntry(music));
+                }
             }
+            addEntryToTop(searchEntry);
+            if(resetScroll) musicList.setScrollAmount(0);
         }
 
         public static class MusicEntry extends AbstractEntry {
@@ -187,6 +204,36 @@ public class MusicPlayerScreen extends Screen {
             public @NotNull List<? extends GuiEventListener> children() {
                 return childs;
             }
+        }
+
+        public class SearchEntry extends AbstractEntry {
+
+            private final EditBox searchBox;
+
+            public SearchEntry() {
+                searchBox = new EditBox(ToolList.mc.font, 0, 0, 200, 20, Component.literal(translate("configcategory.搜索")));
+                searchBox.setValue("");
+                searchBox.setMaxLength(1000);
+                searchBox.setResponder(MusicList.this::updateSearchResult);
+            }
+
+            @Override
+            public List<? extends NarratableEntry> narratables() {
+                return List.of(searchBox);
+            }
+
+            @Override
+            public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovered, float a) {
+                searchBox.setX(getContentRight() - (getContentWidth() + searchBox.getWidth()) / 2);
+                searchBox.setY(getContentY());
+                searchBox.extractRenderState(graphics, mouseX, mouseY, a);
+            }
+
+            @Override
+            public List<? extends GuiEventListener> children() {
+                return List.of(searchBox);
+            }
+
         }
 
         @Override

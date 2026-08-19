@@ -40,6 +40,7 @@
     "MixinFishHookEntityHookedAccessor",
     "MixinFogRendererRemoveBlindness",
     "MixinFreecamFreelookCamera",
+    "MixinGuiGraphics",
     "MixinLevelRenderer",
     "MixinOption",
     "MixinPacketListener",
