@@ -28,7 +28,7 @@ public class FastClearMiningStash extends AbstractListener {
 
     @Override
     public String getListenerName() {
-        return "FastClearMiningSack";
+        return "FastClearMiningStash";
     }
 
     @Override

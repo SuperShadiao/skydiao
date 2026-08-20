@@ -21,7 +21,7 @@ public class BlindOrDying extends XSDHUD {
 
     @Override
     public void runRegister() {
-        HudElementRegistry.addLast(Objects.requireNonNull(Identifier.tryBuild("skydiao", "blind_or_dying_effect")), this);
+        HudElementRegistry.addFirst(Objects.requireNonNull(Identifier.tryBuild("skydiao", "blind_or_dying_effect")), this);
     }
 
     @Override

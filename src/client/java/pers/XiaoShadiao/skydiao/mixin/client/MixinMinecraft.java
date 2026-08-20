@@ -20,6 +20,8 @@ import net.minecraft.client.resources.SplashManager;
 import net.minecraft.client.telemetry.ClientTelemetryManager;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.server.Services;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.util.Util;
 import net.minecraft.util.profiling.ActiveProfiler;
 import net.minecraft.util.profiling.Profiler;
@@ -36,8 +38,10 @@ import pers.XiaoShadiao.skydiao.screen.MinecraftCrashedScreen;
 import pers.XiaoShadiao.skydiao.utils.ClientRenderCrashFixer;
 import pers.XiaoShadiao.skydiao.utils.MCThreadDumper;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.XSDSafeSession;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
+import pers.XiaoShadiao.skydiao.utils.screen.XSDSplashManager;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -90,19 +94,33 @@ public class MixinMinecraft {
     @Final
     @Shadow
     private Proxy proxy;
+    @Final
+    @Shadow
+    private ReloadableResourceManager resourceManager;
 
     // =========== SHADOW END =============
 
     @Unique
     private int exceptionCounter;
     @Unique
-    private final int MAX_EXCEPTION_COUNTER = 10;;
+    private final int MAX_EXCEPTION_COUNTER = 10;
     @Unique
     private MCThreadDumper dumperThread;
+    @Unique
+    private XSDSplashManager xsdSplashManager;
 
     @Inject(at = @At("HEAD"), method = "run")
     private void init(CallbackInfo info) {
         // This code is injected into the start of Minecraft.run()V
+    }
+
+    @WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/resources/ReloadableResourceManager;registerReloadListener(Lnet/minecraft/server/packs/resources/PreparableReloadListener;)V"))
+    public void initInstance(ReloadableResourceManager instance, PreparableReloadListener listener, Operation<Void> original) {
+        if(listener instanceof SplashManager && !(listener instanceof XSDSplashManager)) {
+            original.call(instance, xsdSplashManager);
+        } else {
+            original.call(instance, listener);
+        }
     }
 
     @Overwrite
@@ -110,8 +128,9 @@ public class MixinMinecraft {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(User user0) {
         Minecraft mc = (Minecraft) (Object) this;
+        XSDSafeSession user = user0 instanceof XSDSafeSession xs ? xs : new XSDSafeSession(user0);
         if (!user.equals(this.user)) {
             try { ChatClientManager.getChatClient().socket.close(); } catch (Exception ignored) {}
         }
@@ -123,7 +142,12 @@ public class MixinMinecraft {
         this.userApiService = new YggdrasilAuthenticationService(this.proxy).createUserApiService(user.getAccessToken());
         this.telemetryManager = new ClientTelemetryManager(mc, this.userApiService, this.user);
         this.profileKeyPairManager = ProfileKeyPairManager.create(this.userApiService, this.user, mc.gameDirectory.toPath());
-        this.splashManager = new SplashManager(this.user);
+
+        if(this.xsdSplashManager instanceof XSDSplashManager xsdSplashManager0) {
+            xsdSplashManager0.setUser(user);
+        } else {
+            this.xsdSplashManager = new XSDSplashManager(user);
+        }
 
         try {
             Class<?> clazz = Class.forName("de.hysky.skyblocker.utils.ApiAuthentication");
@@ -233,6 +257,11 @@ public class MixinMinecraft {
     @WrapOperation(method = "updateTitle", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;createTitle()Ljava/lang/String;"))
     public String updateTitle(Minecraft instance, Operation<String> original) {
         return AbstractListener.titleChanger.updateMCTitle(original.call(instance));
+    }
+
+    @Overwrite
+    public SplashManager getSplashManager() {
+        return this.xsdSplashManager;
     }
 
     @Inject(method = "startUseItem", at = @At("RETURN"))

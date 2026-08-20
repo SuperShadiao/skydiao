@@ -59,6 +59,8 @@ import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -825,6 +827,24 @@ public class ToolList {
             }.accept(m);
             System.out.println(m.getString());
         }
+    }
+
+    // 返回0代表为小沙雕生日, 否则返回剩余天数
+    public int getXiaoShadiaoBirthdayRemain() {
+        Calendar c = Calendar.getInstance();
+        c.setTime(new Date());
+        if(c.get(Calendar.MONTH) + 1 == 8) {
+            return 31 - c.get(Calendar.DATE);
+        } else {
+            return Integer.MAX_VALUE;
+        }
+    }
+
+    @Deprecated
+    public int getGaokaoRemainDays() {
+        LocalDate currentDate = LocalDate.now();
+        LocalDate targetDate = LocalDate.of(2025, 6, 7);
+        return (int) ChronoUnit.DAYS.between(currentDate, targetDate);
     }
 
     public volatile boolean isProxyAccessible = false;

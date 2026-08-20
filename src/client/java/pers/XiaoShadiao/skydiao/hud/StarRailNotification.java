@@ -15,7 +15,7 @@ public class StarRailNotification extends XSDHUD {
 
     @Override
     public void runRegister() {
-        HudElementRegistry.addLast(Objects.requireNonNull(Identifier.tryBuild("skydiao", "starrailtip")), this);
+        HudElementRegistry.addFirst(Objects.requireNonNull(Identifier.tryBuild("skydiao", "starrailtip")), this);
     }
 
     @Override

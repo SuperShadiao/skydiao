@@ -67,6 +67,7 @@ public class MacroManagerListener extends AbstractListener {
     private final AnimatedGifEncoder gifEncoder = new AnimatedGifEncoder();
     private File currentRecordInstance = new File(recordDir, String.valueOf(System.currentTimeMillis()));
     private int recordCycleDelay = 0;
+    private int recordInstanceCycle = 0;
     private int recordIndex = 0;
     private int recordMoreFrame = 0;
     private static final BigInteger MAX_RECORD_SIZE = new BigInteger("10737418240");
@@ -214,18 +215,36 @@ public class MacroManagerListener extends AbstractListener {
             }
         }
         if(!isRecording && enabledRecord()) {
-            try {
-                recordCycleDelay = 0;
-                recordMoreFrame = 80;
-                recordIndex = 0;
-                currentRecordInstance = new File(recordDir, String.valueOf(System.currentTimeMillis()));
+            recordCycleDelay = 0;
+            recordMoreFrame = 80;
+            recordIndex = 0;
+            isRecording = true;
+            frameTasks.offer(() -> {
+                if (ConfigManager.macroReplaySelfCleaning.getValue()) {
+                    currentRecordInstance = new File(recordDir, String.valueOf(recordInstanceCycle));
+                    recordInstanceCycle++;
+                    if(recordInstanceCycle > 9) {
+                        recordInstanceCycle = 0;
+                    }
+                    try {
+                        FileUtils.deleteDirectory(currentRecordInstance);
+                    } catch (Throwable e) {
+                        logger.catching(e);
+                    }
+                } else {
+                    currentRecordInstance = new File(recordDir, String.valueOf(System.currentTimeMillis()));
+                }
+
                 currentRecordInstance.mkdirs();
-                gifEncoder.start(new FileOutputStream(new File(currentRecordInstance, recordIndex + ".gif")));
+                try {
+                    gifEncoder.start(new FileOutputStream(new File(currentRecordInstance, recordIndex + ".gif")));
+                } catch (FileNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
                 gifEncoder.setDelay(500);
-                isRecording = true;
                 ToolList.printChatMessage(Component.literal("§a[小沙雕] §a任意脚本已启动, 实时回放已开始录制"));
                 ToolList.printChatMessage(Component.literal("§a[小沙雕] §e警告: 若客户端发生严重卡顿, 可能你的设备不是很好, 请前往设置的自动类关闭即时回放!"));
-            } catch (FileNotFoundException e) {}
+            });
         } else if(isRecording && !enabledRecord()) {
             if(recordMoreFrame > 0) {
                 recordMoreFrame--;
@@ -238,14 +257,17 @@ public class MacroManagerListener extends AbstractListener {
                     Style style = Style.EMPTY
                             .withHoverEvent(new HoverEvent.ShowText(Component.literal("点击这里打开文件夹")))
                             .withClickEvent(new ClickEvent.OpenFile(recordDir));
-                    if(isRecording) ToolList.printChatMessage(Component.literal("§a[小沙雕] §e当前没有脚本在工作, 实时回放已停止录制. 点击这里可打开文件夹").withStyle(style));
+                    if(isRecording) {
+                        ToolList.printChatMessage(Component.literal("§a[小沙雕] §e当前没有脚本在工作, 实时回放已停止录制. 点击这里可打开文件夹").withStyle(style));
+
+                        if (size.compareTo(MAX_RECORD_SIZE) > 0) {
+                            String byteString = ToolList.getInstance().numberToByteString(size);
+                            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c当前Macro回放文件夹已超过10GB (当前" + byteString + "), 你可以§e点击这里§c来按照时间顺序清理").withStyle(style));
+                            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c提示: 现在可以在设置打开自动清理, 会按照顺序自动删除回放 (如果回放因为下次脚本启动被误删除, 后果自己承担)").withStyle(style));
+                        }
+                    }
 
                     isRecording = false;
-
-                    if (size.compareTo(MAX_RECORD_SIZE) > 0) {
-                        String byteString = ToolList.getInstance().numberToByteString(size);
-                        ToolList.printChatMessage(Component.literal("§a[小沙雕] §c当前Macro回放文件夹已超过10GB (当前" + byteString + "), 你可以§e点击这里§c来按照时间顺序清理").withStyle(style));
-                    }
                 });
             }
         }
@@ -302,7 +324,7 @@ public class MacroManagerListener extends AbstractListener {
     public void run() {
         while(true) {
             try {
-                handleFrame(frameTasks.take());
+                if(frameTasks != null) handleFrame(frameTasks.take());
             } catch (Throwable e) {
                 logger.catching(e);
             }

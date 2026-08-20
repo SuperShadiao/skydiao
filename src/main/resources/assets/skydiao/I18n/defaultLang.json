@@ -870,7 +870,7 @@
     },
     "carnivalfruitdigger": {
       "configname": "§e自动Carnival Fruit Digger",
-      "description": "§e自动参与Carnival Fruit Digger活动以更快的消耗票券"
+      "description": "§e自动参与Carnival Fruit Digger活动以更快的消耗票券 (整个过程全自动, 建议玩多少局背包里准备多少票, 会在票不足时自动停止)"
     },
     "dungeonf7msgbotssleap": {
       "configname": "§e地牢F7到达Simon Says处发送Leap提示消息",
@@ -1099,6 +1099,18 @@
     "itemstarcountrender": {
       "configname": "§e物品星级渲染",
       "description": "§e在物品右下角显示物品星级, 例如地牢物品星数, Crismon星数等"
+    },
+    "carnivalautoshootzombie": {
+      "configname": "§e自动Carnival Zombie Shootout",
+      "description": "§e自动参与Carnival Zombie Shootout活动以更快的消耗票券 (整个过程全自动, 建议玩多少局背包里准备多少票, 会在票不足时自动停止)"
+    },
+    "carnivalautoshootzombieoffset": {
+      "configname": "§e自动Carnival Zombie Shootout预测位置",
+      "description": "§e自动Carnival Zombie Shootout预测位置偏移量倍率, 需要根据自己的延迟调整预测距离倍率, 值越高预测距离越大"
+    },
+    "macroreplayselfcleaning": {
+      "configname": "§e脚本实时回放自动清理",
+      "description": "§e通过复用文件夹来避免创建过多的回放文件"
     },
 
     "about1": "§e小沙雕的QQ: 3381949033",

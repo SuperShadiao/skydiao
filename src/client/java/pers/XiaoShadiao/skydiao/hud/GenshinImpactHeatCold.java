@@ -233,7 +233,7 @@ public class GenshinImpactHeatCold extends XSDHUD {
 
     @Override
     public void runRegister() {
-        HudElementRegistry.addLast(Objects.requireNonNull(Identifier.tryBuild("skydiao", "genshin_impact_heat_cold")), this);
+        HudElementRegistry.addFirst(Objects.requireNonNull(Identifier.tryBuild("skydiao", "genshin_impact_heat_cold")), this);
         ClientTickEvents.START_CLIENT_TICK.register(this::update0);
     }
 

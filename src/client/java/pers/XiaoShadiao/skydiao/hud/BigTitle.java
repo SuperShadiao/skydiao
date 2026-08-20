@@ -21,7 +21,7 @@ public class BigTitle extends XSDHUD {
 
     @Override
     public void runRegister() {
-        HudElementRegistry.addLast(Objects.requireNonNull(Identifier.tryBuild("skydiao", "big_title")), this);
+        HudElementRegistry.addFirst(Objects.requireNonNull(Identifier.tryBuild("skydiao", "big_title")), this);
         ScreenEvents.AFTER_INIT.register(this::afterScreenInit);
     }
 

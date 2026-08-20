@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import pers.XiaoShadiao.skydiao.appendage.eventbuslistener.EditingPListListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon.*;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.CarnivalFruitDigger;
+import pers.XiaoShadiao.skydiao.eventbuslistener.macro.CarnivalZombieShoot;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
 import pers.XiaoShadiao.skydiao.utils.Register;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
@@ -73,6 +74,7 @@ public abstract class AbstractListener extends Thread {
     public static final CrimsonIsleCataclysmicFinderListener crismonIsleCataclysmicFinderListener = new CrimsonIsleCataclysmicFinderListener();
     public static final MiningCommissionEntityESPListener miningCommissionEntityESPListener = new MiningCommissionEntityESPListener();
     public static final HiddenSomething hiddenSomething = new HiddenSomething();
+    public static final CarnivalZombieShoot carnivalZombieShoot = new CarnivalZombieShoot();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();

@@ -182,6 +182,8 @@ public class ConfigManager {
     public static final BooleanConfigOption miningCommissionEntityESP = new BooleanConfigOption("miningcommissionentityesp", true);
     public static final BooleanConfigOption fsTPToPest = new BooleanConfigOption("fstopopest", true);
     public static final BooleanConfigOption itemStarCountRender = new BooleanConfigOption("itemstarcountrender", false);
+    public static final BooleanConfigOption carnivalAutoShootZombie = new BooleanConfigOption("carnivalautoshootzombie", false).flagAsMacroFeature();
+    public static final DoubleConfigOption carnivalAutoShootZombieOffset = new DoubleConfigOption("carnivalautoshootzombieoffset", 1.0).flagAsMacroFeature();
 
     public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
@@ -221,6 +223,7 @@ public class ConfigManager {
     };
 
     public static final BooleanConfigOption macroReplay = new BooleanConfigOption("macroreplay", true);
+    public static final BooleanConfigOption macroReplaySelfCleaning = new BooleanConfigOption("macroreplayselfcleaning", false);
 
     public static final BooleanConfigOption chatbutton = new BooleanConfigOption("chatbutton", false).setRequiredMod(new ConfigOption.ModDepends("chatpatches", "alpha.8", "https://modrinth.com/mod/chatpatches"));
 
@@ -257,20 +260,20 @@ public class ConfigManager {
         }
     }.flagAsMacroFeature();
 
-    public static final ActionConfigOption obsidianPositionHelper = new ActionConfigOption("obsidianpositionhelper", openChat.apply("/apd recpos help"));
-    public static final StringGetterSelectConfigOption autoObsidianPositionsFile = new StringGetterSelectConfigOption("autoobsidianpositionsfile","", RecordPos::getPListFileNames);
-    public static final IntConfigOption drillSlot = new IntConfigOption("drillslot", 7);
-    public static final IntConfigOption lanternSlot = new IntConfigOption("lanternslot", 6);
-    public static final IntConfigOption obsidianPlayerCheckRange = new IntConfigOption("obsidianplayercheckrange", 15);
-    public static final BooleanConfigOption obsidianPlayerCheck = new BooleanConfigOption("obsidianplayercheck", true);
-    public static final BooleanConfigOption obsidianTheEndCheck = new BooleanConfigOption("obsidiantheendcheck", true);
-    public static final IntConfigOption obsidianCycleTicks = new IntConfigOption("obsidiancycleticks", 9);
+    public static final ActionConfigOption obsidianPositionHelper = new ActionConfigOption("obsidianpositionhelper", openChat.apply("/apd recpos help")).flagAsMacroFeature();
+    public static final StringGetterSelectConfigOption autoObsidianPositionsFile = new StringGetterSelectConfigOption("autoobsidianpositionsfile","", RecordPos::getPListFileNames).flagAsMacroFeature();
+    public static final IntConfigOption drillSlot = new IntConfigOption("drillslot", 7).flagAsMacroFeature();
+    public static final IntConfigOption lanternSlot = new IntConfigOption("lanternslot", 6).flagAsMacroFeature();
+    public static final IntConfigOption obsidianPlayerCheckRange = new IntConfigOption("obsidianplayercheckrange", 15).flagAsMacroFeature();
+    public static final BooleanConfigOption obsidianPlayerCheck = new BooleanConfigOption("obsidianplayercheck", true).flagAsMacroFeature();
+    public static final BooleanConfigOption obsidianTheEndCheck = new BooleanConfigOption("obsidiantheendcheck", true).flagAsMacroFeature();
+    public static final IntConfigOption obsidianCycleTicks = new IntConfigOption("obsidiancycleticks", 9).flagAsMacroFeature();
 
     public static final List<Map.Entry<String, List<ConfigOption<?>>>> categories = List.of(
             Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip, enableircafktip, enableircmacrochecktip, cooltitle, customTitleText)),
             Map.entry("工具类", List.of(inventoryFilter, itemStarCountRender, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodehideserverid, keepSprint, autoReconnect, afkInOtherPlace, freecamFlySpeed, openFreelookAndFreecamAction, openAutoClickAction, openAllAutoClickKeybindAction, openClearStashCommand)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
-            Map.entry("自动类", List.of(macroReplay, autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, carnivalAutoFruitDigger, skyblockautobloodfiend, skyblockautobloodfiendlowhealth, iAutoObsidian, iAutoObsidianWR, obsidianPositionHelper, autoObsidianPositionsFile, drillSlot, lanternSlot, obsidianPlayerCheckRange, obsidianPlayerCheck, obsidianTheEndCheck, obsidianCycleTicks)),
+            Map.entry("自动类", List.of(macroReplay, macroReplaySelfCleaning, autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, carnivalAutoFruitDigger, carnivalAutoShootZombie, carnivalAutoShootZombieOffset, skyblockautobloodfiend, skyblockautobloodfiendlowhealth, iAutoObsidian, iAutoObsidianWR, obsidianPositionHelper, autoObsidianPositionsFile, drillSlot, lanternSlot, obsidianPlayerCheckRange, obsidianPlayerCheck, obsidianTheEndCheck, obsidianCycleTicks)),
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareAnnounce, skyblockSafeIsland, crystalHollowHelper, crystalHollowHelperDebug, crystalHollowDupServerTipper, crystalHollowHelperDisableThreadLimit, genshinImpactHeatColdRender, miningCommissionEntityESP)),
             Map.entry("combat", List.of(slayerTogether, isleVolcanoFinder, isleVolcanoFinderCataOnlyMode, isleDupServerTip)),
             Map.entry("foraging", List.of(galateashulker, autoReel, autoReelAutoAim, torrhusCanyonHelper, safariBoardcastHotspot, safariBoardcastTradeNPC, safariRenderTargetESP, floorDroppingRender)),

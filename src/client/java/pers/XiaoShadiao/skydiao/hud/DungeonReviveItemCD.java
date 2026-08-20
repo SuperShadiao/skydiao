@@ -13,7 +13,7 @@ public class DungeonReviveItemCD extends XSDHUD {
 
     @Override
     public void runRegister() {
-        HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("skydiao", "dungeon_revive_item_cd"), this);
+        HudElementRegistry.addFirst(Identifier.fromNamespaceAndPath("skydiao", "dungeon_revive_item_cd"), this);
     }
 
     @Override

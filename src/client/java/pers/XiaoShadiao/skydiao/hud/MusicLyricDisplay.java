@@ -31,7 +31,7 @@ public class MusicLyricDisplay extends XSDHUD {
 
     @Override
     public void runRegister() {
-        HudElementRegistry.addLast(Objects.requireNonNull(Identifier.tryBuild("skydiao", "music_lyric_display")), this);
+        HudElementRegistry.addFirst(Objects.requireNonNull(Identifier.tryBuild("skydiao", "music_lyric_display")), this);
     }
 
     @Override
