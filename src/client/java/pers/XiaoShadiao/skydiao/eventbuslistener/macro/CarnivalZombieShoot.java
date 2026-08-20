@@ -185,13 +185,13 @@ public class CarnivalZombieShoot extends AbstractListener implements IMacro {
                     Thread.sleep(100);
                     InputSimulator.releaseRightClick();
 
+                    if(mc.player != null && mc.player.distanceToSqr(npcPos) > 64) return null;
                     MacroManagerListener.pathFinderExecutor.startExecution(new Vec3(-103, 70, 38), false);
 
                     do {
                         Thread.sleep(100);
                     } while(MacroManagerListener.pathFinderExecutor.isRunning());
 
-                    if(mc.player != null && mc.player.distanceToSqr(npcPos) > 64) return null;
                     AimHelper aimHelper = new AimHelper();
                     int i = 0;
                     while(i < 50) {
