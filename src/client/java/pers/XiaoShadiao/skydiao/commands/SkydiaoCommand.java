@@ -18,6 +18,7 @@ import pers.XiaoShadiao.skydiao.utils.Banned;
 import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.Wiped;
+import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.XSDSafeSession;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
 import java.util.Arrays;
@@ -61,7 +62,27 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                 getArgConstantInstance("wipe").then(getArgInstance("profile", StringArgumentType.string()).suggests(((commandContext, builder) -> {
                     Arrays.stream(Wiped.WipeProfile.values()).map(Enum::name).forEach(builder::suggest);
                     return builder.buildFuture();
-                })).executes(this::executeWipe))
+                })).executes(this::executeWipe)),
+                getArgConstantInstance("simulategettoken")
+                        .then(getArgConstantInstance("get").executes((c) -> {
+                            try {
+                                String token = mc.getUser().getAccessToken().substring(0, 5);
+                                c.getSource().sendFeedback(Component.literal("§a[小沙雕] §e获取到的Token: " + token + "..."));
+                            } catch (Throwable e) {
+                                c.getSource().sendError(Component.literal("§a[小沙雕] §c获取Token失败: " + e.getMessage()));
+                            }
+                            return 0;
+                        }))
+                        .then(getArgConstantInstance("getwithticket").executes(c -> {
+                            try {
+                                if(mc.getUser() instanceof XSDSafeSession xsdSafeSession) xsdSafeSession.openTicket();
+                                String token = mc.getUser().getAccessToken().substring(0, 5);
+                                c.getSource().sendFeedback(Component.literal("§a[小沙雕] §e获取到的Token: " + token + "..."));
+                            } catch (Throwable e) {
+                                c.getSource().sendError(Component.literal("§a[小沙雕] §c获取Token失败: " + e.getMessage()));
+                            }
+                            return 0;
+                        }))
         );
     }
 

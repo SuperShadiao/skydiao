@@ -6,6 +6,7 @@ import com.google.gson.stream.JsonReader;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class UUIDLookup {
@@ -27,6 +28,10 @@ public class UUIDLookup {
                 return CompletableFuture.failedFuture(new AssertionError());
             }
         });
+    }
+
+    public static CompletableFuture<String> getNameByUUID(UUID uuid) {
+        return getNameByUUID(uuid.toString());
     }
 
 }

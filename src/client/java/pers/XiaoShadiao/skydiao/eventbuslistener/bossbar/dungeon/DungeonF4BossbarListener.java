@@ -1,6 +1,7 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
@@ -23,22 +24,24 @@ import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.hud.CustomBossbar;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DungeonF4BossbarListener extends AbstractDungeonBossbar {
 
     public static final Identifier SCARF_ICON = Objects.requireNonNull(Identifier.tryBuild("skydiao", "textures/skyblock/boss/thorn.png"));
     public static final Component NAME = Component.literal("Thorn");
     public static final double HEALTH = 4;
-    public static final double MM_HEALTH = 8;
+    public static final double MM_HEALTH = 6;
 
     private Ghast bossEntity;
-    private E2AMappingListener.MobInfo bossMobInfo;
 
     private double bearCharging;
 
@@ -57,6 +60,16 @@ public class DungeonF4BossbarListener extends AbstractDungeonBossbar {
         ClientTickEvents.START_CLIENT_TICK.register(this::onClientTick);
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
         LevelRenderEvents.END_MAIN.register(this::onLastRender);
+        ClientReceiveMessageEvents.GAME.register(this::onChat);
+        ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
+
+    }
+
+    private void onChat(Component component, boolean b) {
+        String msg = ToolList.getInstance().deleteColorCode(component.getString());
+        if ("[BOSS] Thorn: Today you'll be our spectacle.".equals(msg)) {
+            addStarRailNotification("持续击杀Spirit造物来增加灵魂熊的生成进度!", StarRailNotification.Type.warning);
+        }
     }
 
     private void onLastRender(LevelRenderContext context) {
@@ -86,7 +99,6 @@ public class DungeonF4BossbarListener extends AbstractDungeonBossbar {
                     if(bossEntity != temp) {
                         if(temp.getName().getString().equals(NAME.getString()) || armorStandName.contains(NAME.getString())) {
                             bossEntity = (Ghast) temp;
-                            bossMobInfo = mobInfo;
                             setCurrentStarRailBossBar(this);
                             break;
                         }
@@ -126,7 +138,13 @@ public class DungeonF4BossbarListener extends AbstractDungeonBossbar {
             int centerZ = (mapBoundZ1 + mapBoundZ2) / 2;
 
             // 圆从坐标 7 77 34 开始, bearCharging为"旋转"度数, 一半圈为0.5, 回到原点为1
-            pos.stream().max(Comparator.comparingDouble(blockPos -> getProgess(blockPos, centerZ, centerX, false))).ifPresent(blockPos -> bearCharging = getProgess(blockPos, centerZ, centerX, true));
+            pos.stream().max(Comparator.comparingDouble(blockPos -> getProgess(blockPos, centerZ, centerX, false))).ifPresent(blockPos -> {
+                double temp = getProgess(blockPos, centerZ, centerX, true);
+                if(temp >= 1 && temp != bearCharging) {
+                    addStarRailNotification("灵魂熊的生成进度已满, 击杀灵魂熊来获取Spirit Bow!", StarRailNotification.Type.tip);
+                }
+                bearCharging = temp;
+            });
         }
     }
 
@@ -139,6 +157,31 @@ public class DungeonF4BossbarListener extends AbstractDungeonBossbar {
         String message = ToolList.getInstance().deleteColorCode(ic.getString());
         if(message.contains("Spirit Bow")) {
             turnItToStarRailMsg = new AbstractMap.SimpleEntry<>(message, message.contains("didn't") ? StarRailNotification.Type.warning : StarRailNotification.Type.success);
+            if(CrowdinI18nManager.getCurrentLang() == CrowdinI18nManager.LangCode.chinese) {
+                if("The Spirit Bow has dropped!".equals(message)) {
+                    turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("一把灵魂弓已掉落!", StarRailNotification.Type.success);
+                } else {
+                    Matcher matcher = Pattern.compile("(\\w+) picked up the Spirit Bow!").matcher(message);
+                    if (matcher.find()) {
+                        String playerName = matcher.group(1);
+                        if(mc.getUser().getName().equals(playerName)) {
+                            turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("你捡起了灵魂弓! 通过物品栏第9格的灵魂弓射击Thorn来消减其生命值!", StarRailNotification.Type.success);
+                        } else {
+                            turnItToStarRailMsg = new AbstractMap.SimpleEntry<>(playerName + "捡起了灵魂弓!", StarRailNotification.Type.success);
+                        }
+                    } else {
+                        matcher = Pattern.compile("(\\w+) didn't shoot the Spirit Bow fast enough!").matcher(message);
+                        if (matcher.find()) {
+                            String playerName = matcher.group(1);
+                            if(mc.getUser().getName().equals(playerName)) {
+                                turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("由于你长时间未射击, 你手中的灵魂弓消失了!", StarRailNotification.Type.warning);
+                            } else {
+                                turnItToStarRailMsg = new AbstractMap.SimpleEntry<>(playerName + "由于长时间未射击, 其手中的灵魂弓消失了!", StarRailNotification.Type.warning);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         if(turnItToStarRailMsg != null) {
@@ -182,7 +225,7 @@ public class DungeonF4BossbarListener extends AbstractDungeonBossbar {
         float health = bossEntity.getHealth();
         double scale = (health < 10 ? 0 : health) / bossEntity.getMaxHealth();
 
-        return (int) Math.min(maxHealth, maxHealth * scale * 1.3333);
+        return (int) Math.min(maxHealth, maxHealth * scale * (isInMasterDungeonFloor() ? 1.2 : 1.3333));
     }
 
     @Override

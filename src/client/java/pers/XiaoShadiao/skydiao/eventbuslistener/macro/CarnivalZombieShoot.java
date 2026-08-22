@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.monster.zombie.Zombie;
@@ -43,6 +44,8 @@ public class CarnivalZombieShoot extends AbstractListener implements IMacro {
 
     public static final String START_COMMAND = "/selectnpcoption carnival_cowboy r_2_1";
     private boolean isAlertTriggered;
+
+    private int rightClickTick = 0;
 
     private Target currentTarget = new Target(Vec3.ZERO, Type.LEATHER);
 
@@ -99,6 +102,8 @@ public class CarnivalZombieShoot extends AbstractListener implements IMacro {
     }
 
     private void onUnload(Minecraft mc, ClientLevel level) {
+        isAlertTriggered = false;
+        rightClickTick = 0;
     }
 
     private void onClientStartTick(Minecraft mc) {
@@ -125,7 +130,7 @@ public class CarnivalZombieShoot extends AbstractListener implements IMacro {
             if(entity instanceof Zombie zombie && !zombie.isInvisible() && AABB.of(area).contains(zombie.position())) {
                 Item item = zombie.getItemBySlot(EquipmentSlot.HEAD).getItem();
 
-                double multiply = (zombie.isBaby() ? 2 : 1) * 1.5 * ConfigManager.carnivalAutoShootZombieOffset.getValue();
+                double multiply = (zombie.isBaby() ? Mth.clampedLerp(ToolList.getInstance().random.nextDouble(), 1.5, 2) : 1) * 1.5 * ConfigManager.carnivalAutoShootZombieOffset.getValue();
                 Vec3 position = zombie.getEyePosition().add(zombie.getForward().horizontal().normalize().multiply(multiply, multiply, multiply)).add(0, 0.3, 0);
 
                 if(item == Items.LEATHER_HELMET) {
@@ -146,15 +151,25 @@ public class CarnivalZombieShoot extends AbstractListener implements IMacro {
             }
         }
 
-        currentTarget = list.stream().min(
+        Target temp2 = list.stream().min(
                 Comparator.<Target>comparingInt(target -> target.type.getPriority())
                         .reversed()
                         .thenComparingDouble(target -> target.pos.distanceToSqr(currentTarget.pos))
         ).orElse(currentTarget);
+        if(currentTarget.pos.distanceTo(temp2.pos) > 0.75) {
+            rightClickTick = 5;
+        }
+        currentTarget = temp2;
 
         AimHelper.getYawPitchByVec3(currentTarget.pos).updateToAimHelper(new AimHelper(3));
 
-        InputSimulator.pressRightClick();
+        if(rightClickTick > 0) rightClickTick--;
+        if(rightClickTick == 0) {
+            InputSimulator.pressRightClick();
+        } else {
+            InputSimulator.releaseRightClick();
+        }
+
     }
 
     private void onLastRender(LevelRenderContext context) {

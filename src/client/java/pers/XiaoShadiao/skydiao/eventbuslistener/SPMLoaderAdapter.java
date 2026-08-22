@@ -314,8 +314,13 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
         modelId = parseModelId(modelId);
         String finalModelId = modelId;
 
-        if(ClientModelManager.getModelContext(modelId).isPresent()) {
-            ClientModelManager.getLocalModelSourcePath(modelId).ifPresent(path -> {
+        Optional<ModelAssembly> opt = ClientModelManager.getModelContext(modelId);
+        String possibleModelId;
+        if(!opt.isPresent()) {
+            Map<String, ModelAssembly> map = ClientModelManager.getModelAssemblyMap();
+        }
+        opt.ifPresentOrElse(context -> {
+            ClientModelManager.getLocalModelSourcePath(finalModelId).ifPresentOrElse(path -> {
                 try {
                     byte[] bytes = Files.readAllBytes(path);
                     String base64 = Base64.getEncoder().encodeToString(bytes);
@@ -323,10 +328,11 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
                     trySendToIRC(packet);
                     switchToModel(currentModelId, currentTextureId);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.catching(e);
+                    ToolList.printChatMessage(Component.literal("§a[小沙雕] §c同步§e" + finalModelId + "§c时发生错误. 请将此问题反馈给小沙雕."));
                 }
-            });
-        }
+            }, () -> ToolList.printChatMessage(Component.literal("§a[小沙雕] §c无法定位到模型文件§e" + finalModelId + "§c, 无法进行同步上传. 请将此问题反馈给小沙雕.")));
+        }, () -> ToolList.printChatMessage(Component.literal("§a[小沙雕] §c无法找到模型§e" + finalModelId + "§c, 无法进行同步上传. 请将此问题反馈给小沙雕.")));
     }
 
     public void resendSwitchPacket() {
@@ -410,7 +416,7 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
     }
 
     private String parseModelId(String modelId) {
-        return getFileName(stripImportExtension(normalizeLocalModelId(modelId)));
+        return modelId;// getFileName(stripImportExtension(normalizeLocalModelId(modelId)));
     }
 
     private String getFileName(String modelId) {

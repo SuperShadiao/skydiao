@@ -147,7 +147,7 @@ public class ClientboundPartyInfoPacket extends ClientboundVersionedPacket {
 
         @Override
         public String toString() {
-            return "PartyMember{" +
+            return "Member{" +
                     "uuid=" + uuid +
                     ", role=" + role +
                     '}';

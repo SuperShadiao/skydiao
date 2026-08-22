@@ -44,7 +44,7 @@ public class FastClearMiningStash extends AbstractListener {
     }
 
 
-    private List<String> getStashItemIdsAndPickup() throws InterruptedException {
+    private List<String> getStashItemIdsAndPickup(List<String> blackListIds, List<String> nonBlackListIds) throws InterruptedException {
         ToolList.printChatMessage(Component.literal("§a[小沙雕] §e如果任务陷入死循环, 请在viewstash页面拼手速手动关闭页面即可停止"));
         ToolList.sendChatMessage("/viewstash material");
         PageSwitchCallback pageSwitchCallback = this.pageSwitchCallback = new PageSwitchCallback();
@@ -63,7 +63,7 @@ public class FastClearMiningStash extends AbstractListener {
             ItemStack item = slot.getItem();
             String id = ToolList.getInstance().tryGetSkyblockItemId(item);
             if (!id.isEmpty()) {
-                list.add(id);
+                if(!blackListIds.contains(id) || nonBlackListIds.contains(id)) list.add(id);
             } else {
                 if (item.getItem() == Items.EMERALD || item.getItem() == Items.CHEST) {
                     clickTargets.add(i);
@@ -85,13 +85,17 @@ public class FastClearMiningStash extends AbstractListener {
         return list;
     }
 
-    private boolean executeSupercraft(List<String> ids) throws InterruptedException {
+    private boolean executeSupercraft(List<String> ids, List<String> blackListIds, List<String> nonBlackListIds) throws InterruptedException {
         for (String id : ids) {
             String enchantedItemId = handleId(id);
             ToolList.sendChatMessage("/viewrecipe " + enchantedItemId);
 
             PageSwitchCallback pageSwitchCallback = this.pageSwitchCallback = new PageSwitchCallback();
-            if (!(pageSwitchCallback.getScreen(1500) instanceof ContainerScreen containerScreen)) continue;
+            if (!(pageSwitchCallback.getScreen(1500) instanceof ContainerScreen containerScreen)) {
+                blackListIds.add(id);
+                continue;
+            }
+            nonBlackListIds.add(id);
             ChestMenu menu0 = containerScreen.getMenu();
             Container container0 = menu0.getContainer();
             if (!(container0 instanceof SimpleContainer)) return false;
@@ -125,10 +129,12 @@ public class FastClearMiningStash extends AbstractListener {
     public void startClearTask() {
         if(task != null && !task.future.isDone()) return;
         task = ToolList.addThreadedTask(() -> {
+            List<String> blackListIds = new ArrayList<>();
+            List<String> nonBlackListIds = new ArrayList<>();
             while (true) {
-                List<String> ids = getStashItemIdsAndPickup();
+                List<String> ids = getStashItemIdsAndPickup(blackListIds, nonBlackListIds);
                 if (ids.isEmpty()) return null;
-                if (!executeSupercraft(ids)) return null;
+                if (!executeSupercraft(ids, blackListIds, nonBlackListIds)) return null;
             }
         });
     }

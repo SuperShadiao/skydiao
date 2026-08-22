@@ -283,6 +283,8 @@ public class BasicListener extends AbstractListener {
                     MutableComponent ic2 = Component.literal(" §e" + translate("features.antiscammer.click")).setStyle(cs);
 
                     ToolList.printChatMessage(ic.append(ic2));
+
+                    ToolList.printChatMessage(Component.literal(b + ": " + message));
                     break;
                 }
             }
@@ -423,6 +425,7 @@ public class BasicListener extends AbstractListener {
             cp.message = jo.toString();
             cp.initSender();
             ChatClientManager.trySendOrWarning(cp);
+            PartyManager.updatePartyMembers(partyInfoPacket.isInParty() ? new ArrayList<>(partyInfoPacket.getMemberMap().values()) : List.of());
         }
     }
 

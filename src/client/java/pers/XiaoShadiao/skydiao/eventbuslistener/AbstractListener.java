@@ -75,6 +75,7 @@ public abstract class AbstractListener extends Thread {
     public static final MiningCommissionEntityESPListener miningCommissionEntityESPListener = new MiningCommissionEntityESPListener();
     public static final HiddenSomething hiddenSomething = new HiddenSomething();
     public static final CarnivalZombieShoot carnivalZombieShoot = new CarnivalZombieShoot();
+    public static final AutoBoardcastBliveDankmu autoBoardcastBliveDankmu = new AutoBoardcastBliveDankmu();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();

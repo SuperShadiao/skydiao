@@ -3,9 +3,14 @@ package pers.XiaoShadiao.skydiao.utils.mircosoftaccount;
 import com.mojang.authlib.exceptions.InvalidCredentialsException;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.util.UndashedUuid;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
+import net.fabricmc.loader.impl.FabricLoaderImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
+import net.minecraft.network.chat.Component;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +18,8 @@ import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class XSDSafeSession extends User {
@@ -69,8 +76,8 @@ public class XSDSafeSession extends User {
         String stack = (String) objects[1];
 
         if (allow || ticket) {
-            ticket = false;
             printGetterStack("getAccessToken", stack);
+            ticket = false;
             return ToolList.getInstance().decodeString(super.getAccessToken());
         }
 
@@ -98,11 +105,11 @@ public class XSDSafeSession extends User {
         String stack = (String) objects[1];
 
         if (allow || ticket) {
-            ticket = false;
             // public String getSessionId() {
             //		return "token:" + this.accessToken + ":" + UndashedUuid.toString(this.uuid);
             //	}
             printGetterStack("getSessionId", stack);
+            ticket = false;
             return "token:" + ToolList.getInstance().decodeString(super.getAccessToken()) + ":" + UndashedUuid.toString(this.getProfileId());
         }
 
@@ -124,9 +131,15 @@ public class XSDSafeSession extends User {
 
     private void printGetterStack(String str, String stack) {
         log.warn("椎栈" + stack + "在刚才调用了" + str + "()");
+        ToolList.printChatMessage(Component.literal("§a[小沙雕] §e椎栈" + stack + "在刚才通过" + str + "()获取了你的Token"));
+        ToolList.printChatMessage(Component.literal("§a[小沙雕] §e可能来自于Mod: §6" + getSuspiciousInfo(stack)));
+        if(ticket) ToolList.printChatMessage(Component.literal("§a[小沙雕] §e该椎栈通过Ticket成功获取了Token, 但如果你不认识该mod, 请检查你的mod列表"));
     }
 
     private void throwException(String str, String stack) {
+        ToolList.printChatMessage(Component.literal("§a[小沙雕] §c未经授权的椎栈" + stack + "尝试通过" + str + "()获取你的Token, 已进行拦截"));
+        ToolList.printChatMessage(Component.literal("§a[小沙雕] §c可能来自于Mod: §6" + getSuspiciousInfo(stack)));
+        ToolList.printChatMessage(Component.literal("§a[小沙雕] §c如果你不认识该Mod, 可能为恶意模组, 请立即删除"));
         if(!Minecraft.getInstance().isSameThread()) {
             new Throwable().printStackTrace();
             log.fatal("调用者来自非主线程, 已尝试强制冻结该线程");
@@ -249,6 +262,25 @@ public class XSDSafeSession extends User {
                 return false;
             }
         });
+    }
+
+    public String getSuspiciousInfo(String stack) {
+        List<EntrypointContainer<?>> list = new ArrayList<>();
+        list.addAll(FabricLoaderImpl.INSTANCE.getEntrypointContainers("main", ModInitializer.class));
+        list.addAll(FabricLoaderImpl.INSTANCE.getEntrypointContainers("client", ClientModInitializer.class));
+
+        for (EntrypointContainer<?> container : list) {
+            String entryPoint = container.getDefinition();
+            Matcher matcher = Pattern.compile(".*?\\..*?\\..*?\\.").matcher(entryPoint);
+            String packageName = matcher.find() ? matcher.group() : null;
+            if(packageName != null) {
+                if(stack.startsWith(packageName)) {
+                    return container.getProvider().getMetadata().getName();
+                }
+            }
+        }
+
+        return "Unknown";
     }
 
 }

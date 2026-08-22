@@ -46,12 +46,13 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.util.*;
 
+@Deprecated
 public class FoxModelLoaderAdapter extends AbstractListener implements ICustomSkinModelLoader {
 
     private final boolean support = FabricLoader.getInstance().isModLoaded("yes_steve_model");
 
     public boolean isSupportYSM() {
-        return support;
+        return false && support;
     }
 
     private String currentModelId;

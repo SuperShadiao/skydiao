@@ -4,6 +4,7 @@ import net.minecraft.network.chat.Component;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
+import pers.XiaoShadiao.skydiao.utils.PartyManager;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
@@ -35,7 +36,7 @@ public interface IDungeonListener {
             } else {
                 ToolList.getInstance().log.info(message);
             }
-            if(ToolList.mc.player != null && !message.trim().isEmpty() && !isSoloingDungeon()) ToolList.mc.player.connection.sendChat((ToolList.getInstance().isDevEnvironment() ? "/achat" : "/pc") + " [SkyDiao] " + message);
+            if(ToolList.mc.player != null && !message.trim().isEmpty() && PartyManager.isInParty()) ToolList.mc.player.connection.sendChat((ToolList.getInstance().isDevEnvironment() ? "/achat" : "/pc") + " [SkyDiao] " + message);
         }
     }
 

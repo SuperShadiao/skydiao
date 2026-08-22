@@ -1,7 +1,6 @@
 package pers.XiaoShadiao.skydiao.utils;
 
 import com.mojang.authlib.properties.Property;
-import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
 import net.hypixel.modapi.HypixelModAPI;
 import net.hypixel.modapi.packet.impl.serverbound.ServerboundPartyInfoPacket;
@@ -654,8 +653,6 @@ public class ToolList {
             ToolList.mc.execute(() -> ToolList.mc.gui.getChat().addClientSystemMessage(msg));
         }
     }
-
-    private final Long2LongOpenHashMap timeToLoad = new Long2LongOpenHashMap();
 
     public boolean isChunkLoaded(ClientLevel level, BlockPos pos) {
         if (level == null) return false;

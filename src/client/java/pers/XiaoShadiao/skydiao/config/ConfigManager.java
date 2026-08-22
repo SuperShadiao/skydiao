@@ -139,6 +139,8 @@ public class ConfigManager {
     public static final BooleanConfigOption blivemodetab = new BooleanConfigOption("blivemodetab", false);
     public static final BooleanConfigOption blivemodeentityname = new BooleanConfigOption("blivemodeentityname", false);
     public static final BooleanConfigOption blivemodechat = new BooleanConfigOption("blivemodechat", false);
+    public static final BooleanConfigOption blivemodescoreboard = new BooleanConfigOption("blivemodescoreboard", false);
+    public static final BooleanConfigOption bliveboardcastdankumu = new BooleanConfigOption("bliveboardcastdankumu", false);
     public static final BooleanConfigOption blivemodehideserverid = new BooleanConfigOption("blivemodehideserverid", false);
     public static final BooleanConfigOption carnivalAutoFruitDigger = new BooleanConfigOption("carnivalfruitdigger", false).flagAsMacroFeature();
     public static final BooleanConfigOption keepSprint = new BooleanConfigOption("sprint", true) {
@@ -271,7 +273,7 @@ public class ConfigManager {
 
     public static final List<Map.Entry<String, List<ConfigOption<?>>>> categories = List.of(
             Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip, enableircafktip, enableircmacrochecktip, cooltitle, customTitleText)),
-            Map.entry("工具类", List.of(inventoryFilter, itemStarCountRender, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodehideserverid, keepSprint, autoReconnect, afkInOtherPlace, freecamFlySpeed, openFreelookAndFreecamAction, openAutoClickAction, openAllAutoClickKeybindAction, openClearStashCommand)),
+            Map.entry("工具类", List.of(inventoryFilter, itemStarCountRender, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodescoreboard, blivemodehideserverid, bliveboardcastdankumu, keepSprint, autoReconnect, afkInOtherPlace, freecamFlySpeed, openFreelookAndFreecamAction, openAutoClickAction, openAllAutoClickKeybindAction, openClearStashCommand)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
             Map.entry("自动类", List.of(macroReplay, macroReplaySelfCleaning, autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, carnivalAutoFruitDigger, carnivalAutoShootZombie, carnivalAutoShootZombieOffset, skyblockautobloodfiend, skyblockautobloodfiendlowhealth, iAutoObsidian, iAutoObsidianWR, obsidianPositionHelper, autoObsidianPositionsFile, drillSlot, lanternSlot, obsidianPlayerCheckRange, obsidianPlayerCheck, obsidianTheEndCheck, obsidianCycleTicks)),
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareAnnounce, skyblockSafeIsland, crystalHollowHelper, crystalHollowHelperDebug, crystalHollowDupServerTipper, crystalHollowHelperDisableThreadLimit, genshinImpactHeatColdRender, miningCommissionEntityESP)),

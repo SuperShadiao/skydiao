@@ -32,6 +32,7 @@ import pers.XiaoShadiao.skydiao.hud.CustomBossbar;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinBossbarEventGetter;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 
@@ -187,6 +188,14 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         if(stage == 3) {
             remainTerminal = terminals = 29;
             visitedTerminalMsg.clear();
+            stage3BreakGateFlag = true;
+            ToolList.addThreadedTask(() -> {
+                Thread.sleep(2000);
+                addStarRailNotification("通过完成所有Terminal, Device和拉杆来解除Goldor的免疫状态!", StarRailNotification.Type.warning);
+                Thread.sleep(3000);
+                addStarRailNotification("靠近Goldor将受到大量伤害, 通过攻击Goldor可延缓其移动速度!", StarRailNotification.Type.warning);
+                return null;
+            });
         }
 
         if(currentStage == 2) {
@@ -228,6 +237,9 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     private boolean passWatcherFlag;
 
     private boolean masterFloorFlag;
+
+    private boolean stage3BreakGateFlag;
+    private boolean stage3InGateCD;
 
     @Override
     public String getListenerName() {
@@ -317,9 +329,17 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                 stage1LaserFlag = false;
                 currentWeakness = 0;
             }
+            if(stormThunderAfterTipTick > 0) {
+                stormThunderAfterTipTick--;
+                if(stormThunderAfterTipTick == 1) {
+                    if(currentStage == 2) {
+                        addStarRailNotification("通过踩下对应压板使柱子下落压中Storm使其眩晕!", StarRailNotification.Type.warning);
+                    }
+                }
+            }
             if(currentStage == 2) {
                 Vec3 position = f7BossTarget.position();
-                if(position.equals(stage2LastPosition)) {
+                if(!position.equals(stage2LastPosition)) {
                     stopTick = 0;
                     stormThunderFlagTime = 0;
                 } else {
@@ -329,9 +349,10 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
                 if(stopTick >= 5) {
                     if(f7BossTarget.distanceToSqr(72, 179, 53) <= 5 * 5) {
-                        if(System.currentTimeMillis() - stormThunderFlagTime >= 1000) {
+                        if(System.currentTimeMillis() - stormThunderFlagTime >= 1500) {
                             stormThunderFlagTime = System.currentTimeMillis();
-                            addStarRailNotification("Storm正在准备释放致命攻击, 站在完整的柱子下以避免死亡!", StarRailNotification.Type.warning);
+                            stormThunderAfterTipTick = 50;
+                            addStarRailNotification("Storm正在准备释放致命落雷, 站在完整的柱子下以避免死亡!", StarRailNotification.Type.warning);
                         }
                     }
                 }
@@ -344,10 +365,10 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             } else {
                 stage4PlatformTip = false;
             }
-            if(currentStage == 4) {
-                if (mc.player.hasEffect(MobEffects.BLINDNESS)) {
-                    isNecronUsingUltimateSkill = true;
-                }
+        }
+        if (currentStage == 4) {
+            if (mc.player.hasEffect(MobEffects.BLINDNESS)) {
+                isNecronUsingUltimateSkill = true;
             }
         }
 
@@ -441,9 +462,17 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         if(message.contains(">") && message.contains("[SkyDiao]") && message.contains("(SS Leap)")) {
             stage3LeapTip = true;
         }
+
+        if("[BOSS] Maxor: DON'T DISAPPOINT ME, I HAVEN'T HAD A GOOD FIGHT IN A WHILE.".equals(message)) {
+            addStarRailNotification("通过反复获取两个能量水晶并分别置于两个充能台上激活激光!", StarRailNotification.Type.warning);
+        }
+        if((mc.getUser().getName() + " picked up an Energy Crystal!").equals(message)) {
+            addStarRailNotification("你获取了一个水晶! 将其放置在充能台上!", StarRailNotification.Type.success);
+        }
     }
 
     private long stormThunderFlagTime = 0;
+    private int stormThunderAfterTipTick = 0;
 
     private boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
         Map.Entry<String, StarRailNotification.Type> turnItToStarRailMsg = null;
@@ -455,12 +484,46 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         if(message.contains("enraged")) {
             turnItToStarRailMsg = new AbstractMap.SimpleEntry<>(message, StarRailNotification.Type.warning);
             currentWeakness = getMaxWeakness();
+            if(CrowdinI18nManager.getCurrentLang() == CrowdinI18nManager.LangCode.chinese) {
+                if (message.contains("Maxor")) {
+                    turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("Maxor陷入了狂暴, 其附近所有玩家将受到大量伤害!", StarRailNotification.Type.warning);
+                } else if (message.contains("Storm")) {
+                    turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("Storm陷入了狂暴, 其附近所有玩家将受到大量伤害!", StarRailNotification.Type.warning);
+                }
+            }
         }
         if(
                 message.contains("Energy") ||
                         message.contains("activated a terminal") || message.contains("activated a lever") || message.contains("completed a device") || message.contains("The gate") || message.contains("The Core entrance")
         ) {
             turnItToStarRailMsg = new AbstractMap.SimpleEntry<>(message, StarRailNotification.Type.success);
+            if(CrowdinI18nManager.getCurrentLang() == CrowdinI18nManager.LangCode.chinese) {
+                if(message.contains("1/2 Energy Crystals are now active!")) {
+                    turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("一个水晶已激活!", StarRailNotification.Type.success);
+                } else if(message.contains("2/2 Energy Crystals are now active!")) {
+                    turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("两个水晶已激活!", StarRailNotification.Type.success);
+                } else if(message.contains("The Energy Laser is charging up!")) {
+                    turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("激光已激活, 将Maxor牵引至红色信标柱处使其眩晕!", StarRailNotification.Type.success);
+                } else if(message.contains("The Core entrance")) {
+                    turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("Goldor的金色核心入口已开启, 进入以解除Goldor的免疫状态!", StarRailNotification.Type.success);
+                } else if(message.contains("The gate will open in 5 seconds!")) {
+                    if(stage3BreakGateFlag) {
+                        turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("门将在5秒后开启, 可使用Superboom TNT或Archer的爆炸箭技能提前炸开...", StarRailNotification.Type.success);
+                    } else {
+                        turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("门将在5秒后开启!", StarRailNotification.Type.success);
+                    }
+                    stage3BreakGateFlag = false;
+                    stage3InGateCD = true;
+                } else if(message.contains("The gate has been destroyed!")) {
+                    if(stage3InGateCD) {
+                        turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("通往下一个区域的门已开启!", StarRailNotification.Type.success);
+                    } else {
+                        turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("通往下一个区域的门已被摧毁, 完成当前区域所有终端来开启大门!", StarRailNotification.Type.success);
+                    }
+                    stage3BreakGateFlag = false;
+                    stage3InGateCD = false;
+                }
+            }
         }
         if(message.contains("The Core entrance")) {
             ToolList.addThreadedTask(() -> {
@@ -473,7 +536,8 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             if(message.trim().matches("[2-7]")) {
                 if(System.currentTimeMillis() - stormThunderFlagTime >= 1000) {
                     stormThunderFlagTime = System.currentTimeMillis();
-                    turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("Storm正在准备释放致命攻击, 站在完整的柱子下以避免死亡!", StarRailNotification.Type.warning);
+                    stormThunderAfterTipTick = 50;
+                    turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("Storm正在准备释放致命落雷, 站在完整的柱子下以避免死亡!", StarRailNotification.Type.warning);
                     cancelFlag = false;
                 }
             } else if(message.trim().equals("1")) {

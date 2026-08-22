@@ -11,6 +11,7 @@ import net.minecraft.world.scores.Team;
 import org.spongepowered.asm.mixin.Mixin;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
+import pers.XiaoShadiao.skydiao.utils.blivesensitiveword.ComponentHelper;
 import pers.XiaoShadiao.skydiao.utils.blivesensitiveword.ServerIdSpoofer;
 
 @Mixin(PlayerTeam.class)
@@ -60,6 +61,15 @@ public class MixinScoreboardRender {
         }
 
         return empty;
+    }
+
+    @WrapMethod(method = "formatNameForTeam")
+    private static MutableComponent sensitive(Team team, Component component, Operation<MutableComponent> original2) {
+        MutableComponent call = original2.call(team, component);
+
+        if(!ConfigManager.blivemodescoreboard.getValue()) return call;
+
+        return ComponentHelper.wrapAsSensitive(call, true, true).copy();
     }
 
 }
