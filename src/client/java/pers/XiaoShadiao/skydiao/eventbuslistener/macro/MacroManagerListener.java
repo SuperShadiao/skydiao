@@ -53,6 +53,9 @@ public class MacroManagerListener extends AbstractListener {
     public static final AutoDojo autoDojo = new AutoDojo();
     public static final EasyFarmingScriptListener farmingScript = new EasyFarmingScriptListener();
     public static final AutoBloodfiendListener autoBloodfiendListener = new AutoBloodfiendListener();
+    public static final AutoBeachBall autoBeachBall = new AutoBeachBall();
+    public static final CarnivalFruitDigger carnvialFruitDigger = new CarnivalFruitDigger();
+    public static final CarnivalZombieShoot carnivalZombieShoot = new CarnivalZombieShoot();
 
     public static final ObsidianListener obsidianListener = new ObsidianListener();
     public static final ObsidianWRListener obsidianWRListener = new ObsidianWRListener();

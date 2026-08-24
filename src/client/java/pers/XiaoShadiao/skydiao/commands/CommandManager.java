@@ -15,6 +15,8 @@ public interface CommandManager {
     public static final HHMCommand HHM_COMMAND = new HHMCommand();
     public static final JoinMineshaftCommand JOIN_MINESHAFT_COMMAND = new JoinMineshaftCommand();
     public static final JoinMineshaft2Command JOIN_MINESHAFT2_COMMAND = new JoinMineshaft2Command();
+    public static final HHCalcCommand HH_CALC_COMMAND = new HHCalcCommand();
+    public static final SkydiaoCalcCommand SKYDIAO_CALC_COMMAND = new SkydiaoCalcCommand();
     public static final HHTCommand HHT_COMMAND = new HHTCommand();
     public static final SkydiaoTCommand SKYDIAO_T_COMMAND = new SkydiaoTCommand();
     public static final HHSCCommand HHSC_COMMAND = new HHSCCommand();

@@ -13,6 +13,8 @@ import net.minecraft.world.entity.HumanoidArm;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
+import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
+import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
 import pers.XiaoShadiao.skydiao.utils.Banned;
 import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
@@ -82,8 +84,20 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                                 c.getSource().sendError(Component.literal("§a[小沙雕] §c获取Token失败: " + e.getMessage()));
                             }
                             return 0;
-                        }))
+                        })),
+                getArgConstantInstance("请输入文本1").executes(this::黑潮),
+                getArgConstantInstance("calc").redirect(HH_CALC_COMMAND.getCommandNode())
         );
+    }
+
+    private int 黑潮(CommandContext<FabricClientCommandSource> context) {
+        ToolList.addThreadedTask(() -> {
+            XSDHUD.starRailNotification.updateMessage("黑潮蚀斧感受到友军被消灭，发动【仇心忿火】！", StarRailNotification.Type.warning);
+            Thread.sleep(2500);
+            XSDHUD.starRailNotification.updateMessage("受到致命攻击，战斗倒计时减少！", StarRailNotification.Type.warning);
+            return null;
+        });
+        return 0;
     }
 
     private int executeWipe(CommandContext<FabricClientCommandSource> context) {

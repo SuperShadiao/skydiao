@@ -69,7 +69,7 @@ public class DungeonMiscMessageListener extends AbstractListener implements IDun
     private boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
         if(packet instanceof ClientboundAddEntityPacket addEntityPacket) {
             if (addEntityPacket.getType() == EntityType.ARMOR_STAND) {
-                armorStandDungeonKey.enqueue(addEntityPacket.getId());
+                delayTickExecutor.delayExec(() -> armorStandDungeonKey.enqueue(addEntityPacket.getId()), 2);
             }
         }
         return false;

@@ -5,8 +5,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pers.XiaoShadiao.skydiao.appendage.eventbuslistener.EditingPListListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon.*;
-import pers.XiaoShadiao.skydiao.eventbuslistener.macro.CarnivalFruitDigger;
-import pers.XiaoShadiao.skydiao.eventbuslistener.macro.CarnivalZombieShoot;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
 import pers.XiaoShadiao.skydiao.utils.Register;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
@@ -56,7 +54,6 @@ public abstract class AbstractListener extends Thread {
     public static final BliveModeChatHandler bliveModeChatHandler = new BliveModeChatHandler();
     public static final TPSListener tpsListener = new TPSListener();
     public static final DungeonTrashTPSListener dungeonTrashTPSListener = new DungeonTrashTPSListener();
-    public static final CarnivalFruitDigger carnvialFruitDigger = new CarnivalFruitDigger();
     public static final BlacklistRenderer blacklistRenderer = new BlacklistRenderer();
     public static final CrystalHollowHelperListener crystalHollowHelperListener = new CrystalHollowHelperListener();
     public static final DungeonTTTFailListener dungeonTTTFailListener = new DungeonTTTFailListener();
@@ -74,8 +71,10 @@ public abstract class AbstractListener extends Thread {
     public static final CrimsonIsleCataclysmicFinderListener crismonIsleCataclysmicFinderListener = new CrimsonIsleCataclysmicFinderListener();
     public static final MiningCommissionEntityESPListener miningCommissionEntityESPListener = new MiningCommissionEntityESPListener();
     public static final HiddenSomething hiddenSomething = new HiddenSomething();
-    public static final CarnivalZombieShoot carnivalZombieShoot = new CarnivalZombieShoot();
     public static final AutoBoardcastBliveDankmu autoBoardcastBliveDankmu = new AutoBoardcastBliveDankmu();
+    public static final EndIslandDragonESPListener endIslandDragonESPListener = new EndIslandDragonESPListener();
+    public static final AutoPickupPhoneRingListener autoPickupPhoneRingListener = new AutoPickupPhoneRingListener();
+    public static final DelayTickExecutor delayTickExecutor = new DelayTickExecutor();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();

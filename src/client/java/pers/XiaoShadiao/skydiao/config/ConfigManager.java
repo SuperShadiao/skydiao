@@ -160,7 +160,8 @@ public class ConfigManager {
         @Override
         public void setValue(Boolean value) {
             super.setValue(value);
-            ToolList.mc.schedule(AbstractListener.crystalHollowHelperListener::updateThreadLimit);
+
+            ToolList.mc.schedule(() -> Objects.requireNonNull(AbstractListener.crystalHollowHelperListener).updateThreadLimit());
         }
     };
     public static final BooleanConfigOption dungeonf7InactiveTerminalRender = new BooleanConfigOption("skyblockdungeonf7inactiveterminaldisplay", true);
@@ -186,6 +187,10 @@ public class ConfigManager {
     public static final BooleanConfigOption itemStarCountRender = new BooleanConfigOption("itemstarcountrender", false);
     public static final BooleanConfigOption carnivalAutoShootZombie = new BooleanConfigOption("carnivalautoshootzombie", false).flagAsMacroFeature();
     public static final DoubleConfigOption carnivalAutoShootZombieOffset = new DoubleConfigOption("carnivalautoshootzombieoffset", 1.0).flagAsMacroFeature();
+    public static final BooleanConfigOption endIslandDragonESPListener = new BooleanConfigOption("endislanddragonesplistener", true);
+    public static final BooleanConfigOption autoPickupPhoneRing = new BooleanConfigOption("autopickupphonering", true);
+    public static final BooleanConfigOption autoPlayBeachBall = new BooleanConfigOption("autoplaybeachball", false).flagAsMacroFeature();
+    public static final BooleanConfigOption autoPlayBeachBallAutoStopAt40 = new BooleanConfigOption("autoplaybeachballautostopat40", false).flagAsMacroFeature();
 
     public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
@@ -230,7 +235,7 @@ public class ConfigManager {
     public static final BooleanConfigOption chatbutton = new BooleanConfigOption("chatbutton", false).setRequiredMod(new ConfigOption.ModDepends("chatpatches", "alpha.8", "https://modrinth.com/mod/chatpatches"));
 
     public static final StringConfigOption hypixelhelpermusicfolder = new StringConfigOption("hypixelhelpermusicfolder", "");
-    public static final BooleanConfigOption musicplayer = new BooleanConfigOption("musicplayer", true);
+    public static final BooleanConfigOption musicplayer = new BooleanConfigOption("musicplayer", false);
     public static final SelectConfigOption musicplayermode = new SelectConfigOption("musicplayermode", 0, List.of("顺序播放", "有序随机", "无序随机", "while(true)"));
     public static final IntConfigOption musiclastmusic = new IntConfigOption("musiclastmusic", 0);
     public static final IntConfigOption xsdmusicvolume = new IntConfigOption("xsdmusicvolume", 100);
@@ -275,9 +280,9 @@ public class ConfigManager {
             Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip, enableircafktip, enableircmacrochecktip, cooltitle, customTitleText)),
             Map.entry("工具类", List.of(inventoryFilter, itemStarCountRender, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodescoreboard, blivemodehideserverid, bliveboardcastdankumu, keepSprint, autoReconnect, afkInOtherPlace, freecamFlySpeed, openFreelookAndFreecamAction, openAutoClickAction, openAllAutoClickKeybindAction, openClearStashCommand)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
-            Map.entry("自动类", List.of(macroReplay, macroReplaySelfCleaning, autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, carnivalAutoFruitDigger, carnivalAutoShootZombie, carnivalAutoShootZombieOffset, skyblockautobloodfiend, skyblockautobloodfiendlowhealth, iAutoObsidian, iAutoObsidianWR, obsidianPositionHelper, autoObsidianPositionsFile, drillSlot, lanternSlot, obsidianPlayerCheckRange, obsidianPlayerCheck, obsidianTheEndCheck, obsidianCycleTicks)),
+            Map.entry("自动类", List.of(macroReplay, macroReplaySelfCleaning, autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, carnivalAutoFruitDigger, carnivalAutoShootZombie, carnivalAutoShootZombieOffset, skyblockautobloodfiend, skyblockautobloodfiendlowhealth, iAutoObsidian, iAutoObsidianWR, obsidianPositionHelper, autoObsidianPositionsFile, drillSlot, lanternSlot, obsidianPlayerCheckRange, obsidianPlayerCheck, obsidianTheEndCheck, obsidianCycleTicks, autoPickupPhoneRing, autoPlayBeachBall, autoPlayBeachBallAutoStopAt40)),
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareAnnounce, skyblockSafeIsland, crystalHollowHelper, crystalHollowHelperDebug, crystalHollowDupServerTipper, crystalHollowHelperDisableThreadLimit, genshinImpactHeatColdRender, miningCommissionEntityESP)),
-            Map.entry("combat", List.of(slayerTogether, isleVolcanoFinder, isleVolcanoFinderCataOnlyMode, isleDupServerTip)),
+            Map.entry("combat", List.of(slayerTogether, isleVolcanoFinder, isleVolcanoFinderCataOnlyMode, isleDupServerTip, endIslandDragonESPListener)),
             Map.entry("foraging", List.of(galateashulker, autoReel, autoReelAutoAim, torrhusCanyonHelper, safariBoardcastHotspot, safariBoardcastTradeNPC, safariRenderTargetESP, floorDroppingRender)),
             Map.entry("farming", List.of(openFsCommandAction, openFsKeyBind, hubratesp, autoSprayonator, autoChangeLo, halfAutoKillPests, gardenTrapPrompt, gardenBonusPrompt, fsGardenMoonFlowerMode, fsGardenMoonFlowerModeKeepNightFarming, fsTPToPest)),
             Map.entry("fishing", List.of(hotspotrender, autogg, lotusAtollHelper, fishingBigFishRender, fishingBigFishTip)),

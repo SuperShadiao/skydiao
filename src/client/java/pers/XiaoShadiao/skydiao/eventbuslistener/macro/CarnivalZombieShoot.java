@@ -1,5 +1,7 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener.macro;
 
+import it.unimi.dsi.fastutil.ints.Int2IntLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
@@ -46,6 +48,7 @@ public class CarnivalZombieShoot extends AbstractListener implements IMacro {
     private boolean isAlertTriggered;
 
     private int rightClickTick = 0;
+    private final Int2IntMap babyZombieTotalDeltaYaw = new Int2IntLinkedOpenHashMap();
 
     private Target currentTarget = new Target(Vec3.ZERO, Type.LEATHER);
 
@@ -104,6 +107,7 @@ public class CarnivalZombieShoot extends AbstractListener implements IMacro {
     private void onUnload(Minecraft mc, ClientLevel level) {
         isAlertTriggered = false;
         rightClickTick = 0;
+        babyZombieTotalDeltaYaw.clear();
     }
 
     private void onClientStartTick(Minecraft mc) {
@@ -126,11 +130,22 @@ public class CarnivalZombieShoot extends AbstractListener implements IMacro {
         activeThisMacro();
         List<Target> list = new ArrayList<>();
 
+        for (Int2IntMap.Entry entry : babyZombieTotalDeltaYaw.int2IntEntrySet()) {
+            entry.setValue(entry.getIntValue() - 10);
+        }
+        babyZombieTotalDeltaYaw.int2IntEntrySet().removeIf(entry -> entry.getIntValue() <= 0);
+
         for (Entity entity : mc.level.entitiesForRendering()) {
             if(entity instanceof Zombie zombie && !zombie.isInvisible() && AABB.of(area).contains(zombie.position())) {
                 Item item = zombie.getItemBySlot(EquipmentSlot.HEAD).getItem();
 
-                double multiply = (zombie.isBaby() ? Mth.clampedLerp(ToolList.getInstance().random.nextDouble(), 1.5, 2) : 1) * 1.5 * ConfigManager.carnivalAutoShootZombieOffset.getValue();
+                if(zombie.isBaby()) {
+                    int i = babyZombieTotalDeltaYaw.putIfAbsent(zombie.getId(), 0);
+                    int j = i + (int) Math.abs(zombie.getYRot() - zombie.yRotO);
+                    babyZombieTotalDeltaYaw.put(zombie.getId(), Math.min(j, 400));
+                }
+
+                double multiply = (zombie.isBaby() ? (babyZombieTotalDeltaYaw.get(zombie.getId()) > 250 ? 0 : Mth.clampedLerp(ToolList.getInstance().random.nextDouble(), 1.5, 2)) : 1) * 1.5 * ConfigManager.carnivalAutoShootZombieOffset.getValue();
                 Vec3 position = zombie.getEyePosition().add(zombie.getForward().horizontal().normalize().multiply(multiply, multiply, multiply)).add(0, 0.3, 0);
 
                 if(item == Items.LEATHER_HELMET) {
@@ -147,7 +162,7 @@ public class CarnivalZombieShoot extends AbstractListener implements IMacro {
 
         for (BlockPos lampPos : lampPoses) {
             if (isRedstoneLampLit(lampPos)) {
-                list.add(new Target(new Vec3(lampPos.getX() + 0.5, lampPos.getY() + 0.8, lampPos.getZ() + 0.5), Type.LAMP));
+                list.add(new Target(new Vec3(lampPos.getX() + 0.5, lampPos.getY() + 1, lampPos.getZ() + 0.5), Type.LAMP));
             }
         }
 

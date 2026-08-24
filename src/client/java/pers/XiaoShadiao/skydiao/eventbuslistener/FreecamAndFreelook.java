@@ -102,7 +102,7 @@ public class FreecamAndFreelook extends AbstractListener {
         if(cameraEntity != null) {
             if(cameraEntity.cameraType == CameraEntity.CameraType.FREECAM) {
                 Vec3 offset = Vec3.ZERO;
-                Vec3 forward = cameraEntity.getForward().horizontal().normalize();
+                Vec3 forward = /*cameraEntity.getForward()*/Vec3.directionFromRotation(0, cameraEntity.getYRot()).horizontal().normalize();
                 if(mc.options.keyUp.isDown()) {
                     offset = offset.add(forward);
                 }

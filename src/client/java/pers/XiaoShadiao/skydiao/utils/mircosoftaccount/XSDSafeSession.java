@@ -11,6 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -23,6 +24,15 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class XSDSafeSession extends User {
+
+    private final String randToken = Util.make(() -> {
+        StringBuilder tk = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < 20; i++) {
+            tk.append(Math.abs(random.nextInt()));
+        }
+        return tk.toString();
+    });
 
     private static final List<UUID> requestedBypassList = List.of(
             // UUID.fromString("3f448a12-a2b3-46ef-9a46-ca145b2c9550")
@@ -82,7 +92,7 @@ public class XSDSafeSession extends User {
         }
 
         throwException("getAccessToken", stack);
-        return "";
+        return randToken;
     }
 
     @Override
@@ -115,7 +125,7 @@ public class XSDSafeSession extends User {
 
 
         throwException("getSessionId", stack);
-        return "";
+        return "token:" + randToken + ":" + UndashedUuid.toString(this.getProfileId());
     }
 
     public void openTicket() {
@@ -140,18 +150,22 @@ public class XSDSafeSession extends User {
         ToolList.printChatMessage(Component.literal("§a[小沙雕] §c未经授权的椎栈" + stack + "尝试通过" + str + "()获取你的Token, 已进行拦截"));
         ToolList.printChatMessage(Component.literal("§a[小沙雕] §c可能来自于Mod: §6" + getSuspiciousInfo(stack)));
         ToolList.printChatMessage(Component.literal("§a[小沙雕] §c如果你不认识该Mod, 可能为恶意模组, 请立即删除"));
+
         if(!Minecraft.getInstance().isSameThread()) {
             new Throwable().printStackTrace();
-            log.fatal("调用者来自非主线程, 已尝试强制冻结该线程");
-            while(true) {
-                try {
-                    Thread.sleep(Long.MAX_VALUE);
-                } catch (InterruptedException e) {
-                    continue;
+            if(!Boolean.parseBoolean(System.getProperty("xiaoshadiao_return_fake_accesstoken"))) {
+                log.fatal("调用者来自非主线程, 已尝试强制冻结该线程");
+                while(true) {
+                    try {
+                        Thread.sleep(Long.MAX_VALUE);
+                    } catch (InterruptedException e) {
+                        continue;
+                    }
                 }
             }
         }
-        throw new IllegalAccessError(str + "() is not allowed in " + stack);
+        IllegalAccessError illegalAccessError = new IllegalAccessError(str + "() is not allowed in " + stack);
+        if(!Boolean.parseBoolean(System.getProperty("xiaoshadiao_return_fake_accesstoken"))) throw illegalAccessError; else illegalAccessError.printStackTrace();
     }
 
     public String toString() {

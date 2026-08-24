@@ -13,6 +13,7 @@ import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -101,9 +102,38 @@ public class ConfigScreen extends Screen {
         this.tabNavigationBar.selectTab(0, false);
 
         LinearLayout linearLayout = this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
+
+        linearLayout.addChild(Button.builder(Component.literal("§c" + translate("gui.configsettings.disableall")), (button) -> {
+            minecraft.setScreen(new ConfirmScreen(result -> {
+                if(result) {
+                    List<ConfigOption<?>> list = ConfigManager.categories.stream().flatMap(entry -> entry.getValue().stream()).toList();
+                    for (ConfigOption<?> option : list) {
+                        if (option instanceof BooleanConfigOption bool) {
+                            bool.setValue(false);
+                        }
+                    }
+                    saveConfig();
+                }
+                minecraft.setScreen(new ConfigScreen(lastScreen));
+            }, Component.literal("§c" + translate("gui.configsettings.disableall")), Component.literal("§c" + translate("gui.configsettings.disableallconfirm"))));
+        }).size(100, 20).build());
+
         linearLayout.addChild(Button.builder(Component.literal("§eQQ | Discord"), (button) -> Util.getPlatform().openUri("https://xiaoshadiao.club/about")).size(100, 20).build());
-        linearLayout.addChild(Button.builder(Component.literal("§6" + translate("gui.configsettings.buttonsaveback")), this::onClose).size(150, 20).build());
+        linearLayout.addChild(Button.builder(Component.literal("§6" + translate("gui.configsettings.buttonsaveback")), this::onClose).size(100, 20).build());
         linearLayout.addChild(Button.builder(Component.literal("§a" + translate("gui.configsettings.buttonfriendlink")), (button) -> Util.getPlatform().openUri("https://xiaoshadiao.club/friendlinks")).size(100, 20).build());
+
+        linearLayout.addChild(Button.builder(Component.literal("§c" + translate("gui.configsettings.resetalltodefault")), (button) -> {
+            minecraft.setScreen(new ConfirmScreen(result -> {
+                if(result) {
+                    List<ConfigOption<?>> list = ConfigManager.categories.stream().flatMap(entry -> entry.getValue().stream()).toList();
+                    for (ConfigOption<?> option : list) {
+                        option.resetToDefault();
+                    }
+                    saveConfig();
+                }
+                minecraft.setScreen(new ConfigScreen(lastScreen));
+            }, Component.literal("§c" + translate("gui.configsettings.resetalltodefault")), Component.literal("§c" + translate("gui.configsettings.resetalltodefaultconfirm"))));
+        }).size(100, 20).build());
 
         this.layout.visitWidgets(abstractWidget -> {
             abstractWidget.setTabOrderGroup(1);
@@ -287,11 +317,6 @@ public class ConfigScreen extends Screen {
         }
 
         public void updateConfigList() {
-            // configList.setX(20);
-//            configList.setY(ConfigScreen.this.layout.getHeaderHeight());
-//            configList.setWidth(ConfigScreen.this.width);
-//            configList.setHeight(ConfigScreen.this.layout.getContentHeight());
-
             configList.updateSize(ConfigScreen.this.width, ConfigScreen.this.layout);
         }
 
