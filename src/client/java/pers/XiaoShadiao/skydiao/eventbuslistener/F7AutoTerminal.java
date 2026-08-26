@@ -2,6 +2,8 @@ package pers.XiaoShadiao.skydiao.eventbuslistener;
 
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
@@ -35,6 +37,8 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
             Items.RED_STAINED_GLASS_PANE
     );
 
+    private int clickedCounter = 0;
+
     private int calcChangeColorLowestDistance(Item from, Item to) {
         // AI生成。
         int fromIndex = CHANGE_COLOR_LIST.indexOf(from);
@@ -66,9 +70,9 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
 
     private long openScreenTime;
 
-    private record Click(int containerId, Slot slot, boolean rightClick) {
-        public Click(int containerId, Slot slot) {
-            this(containerId, slot, false);
+    private record Click(boolean addBlacklistAfterClick, int containerId, Slot slot, boolean rightClick) {
+        public Click(boolean addBlacklistAfterClick, int containerId, Slot slot) {
+            this(addBlacklistAfterClick, containerId, slot, false);
         }
     }
 
@@ -105,6 +109,8 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
             if(currentTerminal == TerminalType.MELODY && mc.screen == null) {
                 if(currentMelodyLine == 2) {
                     sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotmelody[3].getValue());
+                } else if(currentMelodyLine == 1 && enableNoForceDelayClick()) {
+                    sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotmelody[2].getValue());
                 }
             }
             blacklistedSlots.clear();
@@ -118,10 +124,12 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
         ItemStack carriedItem = menu.getCarried();      // 牢地服务器喜欢Lag, 所以判断这个东西避免频繁发包
 
         if(currentTerminal != null) {
-            Slot[][] slots = ToolList.getInstance().mapSlotsToArray(menu);
-            List<Slot> slots1 = menu.slots.stream().filter(slot -> slot.container != mc.player.getInventory()).toList();
-
             if (carriedItem.isEmpty()) {
+                clickedCounter = 0;
+            }
+            if (carriedItem.isEmpty() || (clickedCounter <= 1 && enableNoForceDelayClick())) {
+                Slot[][] slots = ToolList.getInstance().mapSlotsToArray(menu);
+                List<Slot> slots1 = menu.slots.stream().filter(slot -> slot.container != mc.player.getInventory()).toList();
                 switch (currentTerminal) {
                     case MELODY -> {
                         int col = -1;
@@ -138,7 +146,7 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                                 Slot slot = slots[col][i];
                                 if (slot.getItem().getItem() == Items.LIME_STAINED_GLASS_PANE) {
                                     if (slots[7][i].getItem().getItem() == Items.LIME_TERRACOTTA) {
-                                        pendingClick = new Click(menu.containerId, slots[7][i]);
+                                        pendingClick = new Click(false, menu.containerId, slots[7][i]);
                                         breakFlag = true;
                                     }
                                 }
@@ -156,8 +164,8 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                     }
                     case ON_OFF -> {
                         for (Slot slot : slots1) {
-                            if (slot.getItem().getItem() == Items.RED_STAINED_GLASS_PANE) {
-                                pendingClick = new Click(menu.containerId, slot);
+                            if (slot.getItem().getItem() == Items.RED_STAINED_GLASS_PANE && !blacklistedSlots.contains(slot.index)) {
+                                pendingClick = new Click(true, menu.containerId, slot);
                                 break;
                             }
                         }
@@ -169,10 +177,10 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                                 if (item.getHoverName() != null) {
                                     String s = ToolList.getInstance().deleteColorCode(item.getHoverName().getString());
                                     if (s.toLowerCase().startsWith(currentTerminal.arg.toLowerCase())
-                                            && !ToolList.hasGlint(item)
+                                            && (enableNoForceDelayClick() || !ToolList.hasGlint(item))
                                             && !blacklistedSlots.contains(slot.index)
                                     ) {
-                                        pendingClick = new Click(menu.containerId, slot);
+                                        pendingClick = new Click(true, menu.containerId, slot);
                                         break;
                                     }
                                 }
@@ -180,7 +188,9 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                         }
                     }
                     case CLICK_ORDER -> {
-                        slots1.stream().filter(slot -> slot.getItem().getItem() == Items.RED_STAINED_GLASS_PANE).min(Comparator.comparingInt(slot -> slot.getItem().getCount())).ifPresent(slot -> pendingClick = new Click(menu.containerId, slot));
+                        slots1.stream().filter(slot -> slot.getItem().getItem() == Items.RED_STAINED_GLASS_PANE && (!enableNoForceDelayClick() || !blacklistedSlots.contains(slot.index))).min(Comparator.comparingInt(slot -> slot.getItem().getCount())).ifPresent(slot -> {
+                            pendingClick = new Click(true, menu.containerId, slot);
+                        });
                     }
                     case CHANGE_COLOR -> {
                         List<Slot> changeColorSlots = new ArrayList<>();
@@ -191,12 +201,21 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                         }
                         Optional<Item> minColor = CHANGE_COLOR_LIST.stream().min(Comparator.comparingInt(v -> changeColorSlots.stream().mapToInt(slot -> Math.abs(calcChangeColorLowestDistance(slot.getItem().getItem(), v))).sum()));
                         if (minColor.isPresent()) {
+                            Object2IntMap<Slot> pendingClicks = new Object2IntArrayMap<>();
                             for (Slot slot : slots1) {
                                 int count = calcChangeColorLowestDistance(slot.getItem().getItem(), minColor.get());
                                 if (count != 0) {
-                                    pendingClick = new Click(menu.containerId, slot, count < 0);
-                                    break;
+//                                    pendingClick = new Click(menu.containerId, slot, count < 0);
+//                                    break;
+                                    pendingClicks.put(slot, count);
                                 }
+                            }
+                            if(pendingClicks.size() > 1 && pendingClick != null) {
+                                pendingClicks.removeInt(pendingClick.slot);
+                            }
+                            if(!pendingClicks.isEmpty()) {
+                                Slot next = pendingClicks.keySet().iterator().next();
+                                pendingClick = new Click(false, menu.containerId, next, pendingClicks.getInt(next) < 0);
                             }
                         }
                     }
@@ -213,12 +232,12 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                                     String s = ToolList.getInstance().deleteColorCode(item.getHoverName().getString());
                                     String itemUpCase = s.toUpperCase();
 
-                                    if (!ToolList.hasGlint(item)
+                                    if ((enableNoForceDelayClick() || !ToolList.hasGlint(item))
                                             && !blacklistedSlots.contains(slot.index)
                                             && item.getItem() != Items.BLACK_STAINED_GLASS_PANE
                                             && (itemUpCase.startsWith(colorUpperCase) || itemUpCase.endsWith(colorUpperCase) || (item.getItem().getDescriptionId().contains(colorItemID.toLowerCase()) && !item.getItem().getDescriptionId().contains("_" + colorItemID.toLowerCase()))
                                             || matchesSpecialCase(dye.get(), item))) {
-                                        pendingClick = new Click(menu.containerId, slot);
+                                        pendingClick = new Click(true, menu.containerId, slot);
                                         break;
                                     }
                                 }
@@ -228,6 +247,10 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                 }
             }
         }
+    }
+
+    private boolean enableNoForceDelayClick() {
+        return true || ToolList.getInstance().isInHypixelAlpha();
     }
 
     private boolean matchesSpecialCase(DyeColor color, ItemStack item) {
@@ -246,7 +269,7 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
     private void afterScreenInit(Minecraft mc, Screen screen, int scaledWidth, int scaledHeight) {
         a:{
             for (TerminalType value : TerminalType.values()) {
-                if (value.testScreen(screen)) {
+                if (value.testScreen(this, screen)) {
                     if(currentTerminal != value) {
                         openScreenTime = System.currentTimeMillis();
                         if(value == TerminalType.MELODY) {
@@ -268,13 +291,26 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
     private void afterScreenRender(Screen screen, GuiGraphicsExtractor guiGraphics, int width, int height, float deltaTick) {
         if (!ConfigManager.dungeonf7autoterm.getValue()) return;
         if (currentTerminal == TerminalType.MELODY && System.currentTimeMillis() - lastClickTime < 1000 &&
-                Optional.ofNullable(lastClick).map(Click::slot).map(s -> s.index).equals(Optional.ofNullable(pendingClick).map(Click::slot).map(s -> s.index))) return;
-        if (System.currentTimeMillis() - lastClickTime > ToolList.getInstance().random.nextInt(31) + ConfigManager.dungeonf7autotermclickdelay.getValue() && pendingClick != null) {
-            Click temp = lastClick = pendingClick;
+                Optional.ofNullable(lastClick).map(Click::slot).map(s -> s.index).equals(Optional.ofNullable(pendingClick).map(Click::slot).map(s -> s.index))) {
             pendingClick = null;
-            lastClickTime = System.currentTimeMillis();
+            return;
+        }
+        if (System.currentTimeMillis() - lastClickTime > ToolList.getInstance().random.nextInt(100) + ConfigManager.dungeonf7autotermclickdelay.getValue()) {
+            if(pendingClick != null) {
+                Click temp = lastClick = pendingClick;
+                pendingClick = null;
+                lastClickTime = System.currentTimeMillis();
 
-            mc.gameMode.handleContainerInput(temp.containerId, temp.slot.index, temp.rightClick ? 1 : 0, ContainerInput.PICKUP, mc.player);
+                clickedCounter++;
+                logger.info("Clicked Slot " + temp.slot.index);
+                if(mc.gameMode != null && mc.player != null) mc.gameMode.handleContainerInput(temp.containerId, temp.slot.index, temp.rightClick ? 1 : 0, ContainerInput.PICKUP, mc.player);
+                if(temp.addBlacklistAfterClick) blacklistedSlots.add(temp.slot.index);
+            } else {
+                if(enableNoForceDelayClick() && System.currentTimeMillis() - lastClickTime > 500 + ConfigManager.dungeonf7autotermclickdelay.getValue() && !blacklistedSlots.isEmpty()) {
+                    blacklistedSlots.clear();
+                    logger.info("Cleared click blp cause no pending clicks");
+                }
+            }
         }
     }
 
@@ -300,11 +336,12 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
             this.regex = Pattern.compile(regex);
         }
 
-        public boolean testScreen(Screen screen) {
+        public boolean testScreen(F7AutoTerminal _this, Screen screen) {
             if(!(screen instanceof ContainerScreen containerScreen)) return false;
             Matcher matcher = regex.matcher(containerScreen.getTitle().getString());
             if(matcher.find()) {
                 if(matcher.groupCount() == 1) arg = matcher.group(1);
+                _this.logger.info("Screen Container " + containerScreen.getMenu().containerId);
                 return true;
             } else {
                 return false;

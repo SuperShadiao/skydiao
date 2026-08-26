@@ -142,7 +142,7 @@ public class StatusManager extends Thread {
         return serverID != null && serverID.startsWith("mega");
     }
     public boolean isInDungeon() {
-        return "DUNGEON".equalsIgnoreCase(gameMode);
+        return "DUNGEON".equalsIgnoreCase(gameMode) || (ToolList.getInstance().isDevEnvironment() && "dynamic".equalsIgnoreCase(gameMode));
     }
     public boolean isInSkyblock() {
         return "SkyBlock".equals(gameType);

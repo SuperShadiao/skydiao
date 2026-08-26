@@ -283,8 +283,6 @@ public class BasicListener extends AbstractListener {
                     MutableComponent ic2 = Component.literal(" §e" + translate("features.antiscammer.click")).setStyle(cs);
 
                     ToolList.printChatMessage(ic.append(ic2));
-
-                    ToolList.printChatMessage(Component.literal(b + ": " + message));
                     break;
                 }
             }

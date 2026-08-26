@@ -98,6 +98,10 @@ public class ToolList {
         return "SkyBlock".equals(StatusManager.get().getType());
     }
 
+    public boolean isInHypixelAlpha() {
+        return fetchScoreboardLinesNoColor().stream().anyMatch(scoreboardLines -> scoreboardLines.contains("alpha.hypixel.net"));
+    }
+
     public boolean isXiaoShadiao() {
         return imXiaoShadiao;
     }
