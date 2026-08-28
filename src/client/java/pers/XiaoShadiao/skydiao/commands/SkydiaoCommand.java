@@ -100,25 +100,29 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
 
     private int executeListenShareMusic(CommandContext<FabricClientCommandSource> context) {
         int id = IntegerArgumentType.getInteger(context, "id");
-        MusicInfo music0 = MusicListManager.getSharingMusic(id);
-        if(music0 != null) {
-            int index = MusicListManager.getMusics().indexOf(music0);
-            if(index != -1) {
-                MusicInfo music1 = MusicListManager.getMusics().get(index);
-                if(music1.canPlay()) music0 = music1;
-            }
+        MusicListManager.ensureMusicFolderVaildAndRun(() -> {
+            MusicInfo music0 = MusicListManager.getSharingMusic(id);
+            if(music0 != null) {
+                int index = MusicListManager.getMusics().indexOf(music0);
+                if(index != -1) {
+                    MusicInfo music1 = MusicListManager.getMusics().get(index);
+                    if(music1.canPlay()) music0 = music1;
+                }
 
-            if(music0.canPlay()) {
-                MusicInfo music = music0;
-                MusicListManager.addFixQueue(music0, b -> {
-                    if (b) {
-                        if(index == -1) MusicListManager.add(music);
-                        PlayerThread.playMI(music);
-                    }
-                });
+                if(!music0.canPlay()) {
+                    MusicInfo music = music0;
+                    MusicListManager.addFixQueue(music0, b -> {
+                        if (b) {
+                            if(index == -1) MusicListManager.add(music);
+                            PlayerThread.playMI(music);
+                        }
+                    });
+                } else {
+                    PlayerThread.playMI(music0);
+                }
+                context.getSource().sendFeedback(Component.literal("§a[小沙雕] 操作成功, 音乐下载后将自动播放. 可使用/skydiaomusic关闭音乐."));
             }
-            context.getSource().sendFeedback(Component.literal("§a[小沙雕] 操作成功, 音乐下载后将自动播放. 可使用/skydiaomusic关闭音乐."));
-        }
+        });
         return 0;
     }
 

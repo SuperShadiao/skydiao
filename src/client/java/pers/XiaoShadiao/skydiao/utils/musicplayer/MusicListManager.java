@@ -3,6 +3,9 @@ package pers.XiaoShadiao.skydiao.utils.musicplayer;
 import com.google.gson.*;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import org.apache.commons.io.FileUtils;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
@@ -197,6 +200,37 @@ public class MusicListManager {
             }
         }
         if(removed) save();
+    }
+
+    public static boolean isMusicFolderVaild() {
+        return ConfigManager.hypixelhelpermusicfolder.getValue().isBlank() || !new File(ConfigManager.hypixelhelpermusicfolder.getValue()).exists();
+    }
+
+    public static void ensureMusicFolderVaildAndRun(Runnable run) {
+        Screen screen = ToolList.mc.screen;
+        ensureMusicFolderVaildAndRun(run, () -> ToolList.mc.setScreen(screen));
+    }
+
+    public static void ensureMusicFolderVaildAndRun(Runnable run, Runnable cancelled) {
+        if(MusicListManager.isMusicFolderVaild()) {
+            ToolList.mc.schedule(() -> ToolList.mc.setScreen(new ConfirmScreen(flag -> {
+                if(flag) {
+                    File folder = new File(ToolList.mc.gameDirectory, "XSDKGMusic");
+                    if(folder.mkdirs() || folder.isDirectory()) {
+                        ConfigManager.hypixelhelpermusicfolder.setValue(folder.getAbsolutePath());
+                        MusicListManager.loadMusicFromFolder();
+                        ToolList.mc.setScreen(null);
+                        run.run();
+                    } else {
+                        cancelled.run();
+                    }
+                } else {
+                    cancelled.run();
+                }
+            }, Component.literal("指定的文件夹目录不存在"), Component.literal("你想要设置为默认文件夹并创建吗?"))));
+        } else {
+            run.run();
+        }
     }
 
     public record SharingData(MusicInfo musicInfo, int randomId, long time) {

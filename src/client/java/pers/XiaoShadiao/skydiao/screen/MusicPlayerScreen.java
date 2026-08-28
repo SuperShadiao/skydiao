@@ -8,7 +8,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -23,7 +22,6 @@ import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 import pers.XiaoShadiao.skydiao.utils.screen.XSDSliderButton;
 
 import java.awt.*;
-import java.io.File;
 import java.util.List;
 
 import static pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager.translate;
@@ -77,24 +75,7 @@ public class MusicPlayerScreen extends Screen {
             b.setMessage(Component.literal(ConfigManager.musicplayermode.getCurrentDisplayString()));
             PlayerThread.clearQueue();
         }).size(70, 20).build());
-        linearLayout.addChild(Button.builder(Component.literal("下载音乐"), b -> {
-            if(ConfigManager.hypixelhelpermusicfolder.getValue().isBlank() || !new File(ConfigManager.hypixelhelpermusicfolder.getValue()).exists()) {
-                minecraft.setScreen(new ConfirmScreen(flag -> {
-                    if(flag) {
-                        File folder = new File(minecraft.gameDirectory, "XSDKGMusic");
-                        if(folder.mkdirs() || folder.isDirectory()) {
-                            ConfigManager.hypixelhelpermusicfolder.setValue(folder.getAbsolutePath());
-                            MusicListManager.loadMusicFromFolder();
-                            minecraft.setScreen(new MusicSearchScreen(this));
-                        } else {
-                            minecraft.setScreen(MusicPlayerScreen.this);
-                        }
-                    }
-                }, Component.literal("指定的文件夹目录不存在"), Component.literal("你想要设置为默认文件夹并创建吗?")));
-            } else {
-                minecraft.setScreen(new MusicSearchScreen(this));
-            }
-        }).size(70, 20).build());
+        linearLayout.addChild(Button.builder(Component.literal("下载音乐"), b -> MusicListManager.ensureMusicFolderVaildAndRun(() -> minecraft.setScreen(new MusicSearchScreen(this)), () -> minecraft.setScreen(this))).size(70, 20).build());
         linearLayout.addChild(
                 new XSDSliderButton(0, 0, 120, 20, Component.literal("音量"), 0.5)
                         .valueGetter(() -> ConfigManager.xsdmusicvolume.getValue() / 200.0d)

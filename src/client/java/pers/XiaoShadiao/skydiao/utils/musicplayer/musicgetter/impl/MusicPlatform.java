@@ -35,23 +35,31 @@ public abstract class MusicPlatform implements IMusicSearcher, IMusicDownloader,
 
     public abstract String getDisplayName();
 
-    public static int invokeFetchCount = 0;
-
     protected InputStream fetchMusic(String url) {
-        invokeFetchCount++;
-        if(invokeFetchCount % 2 == 0) {
+        try {
             return ToolList.getInstance().makeReqToURL_E(url);
-        } else {
-            return ToolList.getInstance().makeReqToURL(url);
+        } catch (Throwable t) {
+            t.printStackTrace();
+            try {
+                return ToolList.getInstance().makeReqToURL(url);
+            } catch (Throwable t2) {
+                t2.addSuppressed(t);
+                throw t2;
+            }
         }
     }
 
     protected InputStream fetchMusic(String url, boolean allowErrorStream, Consumer<URLConnection> ucin, Consumer<String> onRedirect) {
-        invokeFetchCount++;
-        if(invokeFetchCount % 2 == 0) {
+        try {
             return ToolList.getInstance().makeReqToURL_E(url);
-        } else {
-            return ToolList.getInstance().makeReqToURL(url, allowErrorStream, ucin, onRedirect);
+        } catch (Throwable t) {
+            t.printStackTrace();
+            try {
+                return ToolList.getInstance().makeReqToURL(url, allowErrorStream, ucin, onRedirect);
+            } catch (Throwable t2) {
+                t2.addSuppressed(t);
+                throw t2;
+            }
         }
     }
 

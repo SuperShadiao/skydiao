@@ -110,7 +110,7 @@ public class CustomBossbar extends XSDHUD {
     }
 
     private void onLastRender(LevelRenderContext context) {
-        if(starRailBossBar != null) {
+        if(starRailBossBar != null && mc.level != null && mc.player != null && ConfigManager.bossDrawESP.getValue()) {
             LivingEntity entity = starRailBossBar.getTargetEntity();
             RenderUtils.WorldRender worldRender = RenderUtils.createWorldRenderInstance(context, starRailBossBar.shouldXRayBoss() ? CustomRenderPipeline.THROUGH_WALLS_LINE : CustomRenderPipeline.NO_THROUGH_WALLS_LINE);
             if(entity != null) {
