@@ -22,6 +22,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.inventory.ChestMenu;
@@ -39,18 +40,17 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.*;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
+import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinEntityCloneableAccessor;
 
 import javax.net.ssl.HttpsURLConnection;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -83,7 +83,7 @@ public class ToolList {
     public Random random = new Random();
     private DevelopmentEnvironmentDetector devDetectorInstance;
     public Logger log = LogManager.getLogger("XSD Utils");
-
+    private static File musicgetterFolder;
 
     public static ToolList getInstance() {
         if (instance == null) instance = new ToolList();
@@ -91,6 +91,11 @@ public class ToolList {
     }
 
     public static void destroy() {
+        try {
+            if(musicgetterFolder != null) FileUtils.deleteDirectory(musicgetterFolder);
+        } catch (Throwable e) {
+            instance.log.warn("musicgetterFolder delete failed!", e);
+        }
         instance = null;
     }
 
@@ -170,7 +175,7 @@ public class ToolList {
 //			else if(e.toString().contains("unable to find valid certification path to requested target")) {
 //				log.warn("出现了非常逆天的问题: " + url + " -> " + e);
 //				log.warn("使用外置程序请求网站!");
-//				return 请求网站E(url);
+//				return makeReqToURL_E(url);
 //			}
             if (e instanceof javax.net.ssl.SSLException) {
                 if (e.toString().contains("plaintext connection")) {
@@ -189,6 +194,66 @@ public class ToolList {
             throw new RuntimeException("Exception in visiting \"" + url + "\" because " + e, e);
         }
 
+    }
+
+    public InputStream makeReqToURL_E(String url) {
+        try {
+
+            if(Util.getPlatform() == Util.OS.WINDOWS) {
+                new URL(url);
+            } else {
+                throw new UnsupportedOperationException("非Windows系统上无法运行外置程序发起网络请求");
+            }
+
+            int tries = 0;
+            int rand = random.nextInt();
+            Process process;
+
+            synchronized (this) {
+                if(!verifyFileWithMD5(ConfigManager.musicGetter, "29acb841701512cca08d3abd54d92a7b")) {
+                    log.info("下载musicgetter");
+                    ConfigManager.musicGetter.createNewFile();
+                    boolean downloaded = false;
+                    for(String url1 : new String[] {"https://xiaoshadiao.club/musicgetter.exe", "https://www.gitlink.org.cn/api/SuperShadiao/hypixelhelper/raw/musicgetter.exe?ref=main"}) {
+                        try {
+                            FileUtils.writeByteArrayToFile(ConfigManager.musicGetter, downloadFileWithMD5(url1, "29acb841701512cca08d3abd54d92a7b"));
+                            downloaded = true;
+                            break;
+                        } catch(IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if(!downloaded) throw new RuntimeException("下载musicgetter失败");
+                }
+            }
+
+            log.info("执行CMD: " + ConfigManager.musicGetter.getAbsolutePath() + " <- " + url + " (" + tries + "/30)");
+            process = Runtime.getRuntime().exec(new String[] {ConfigManager.musicGetter.getAbsolutePath(), url, String.valueOf(rand)});
+
+            if(musicgetterFolder == null) musicgetterFolder = new File(mc.gameDirectory, "musicgetter");
+            File randFile = new File(musicgetterFolder, String.valueOf(rand));
+            File callback = new File(randFile, "callbackinfo.txt");
+
+            while(true) {
+                tries++;
+                log.info("尝试获得callback (" + tries + "/60)");
+                Thread.sleep(1000);
+
+                if(musicgetterFolder.exists() && randFile.exists() && callback.exists()) {
+                    return new ByteArrayInputStream(FileUtils.readFileToByteArray(callback));
+                } else if(process != null && !process.isAlive()) {
+                    log.info("process.isAlive()返回了false, 尝试取结果");
+                    return new ByteArrayInputStream(FileUtils.readFileToByteArray(callback));
+                }
+                if(tries > 60) throw new RuntimeException("请求超时");
+            }
+
+        } catch (IOException e) {
+            // TODO 自动生成的 catch 块
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            return makeReqToURL_E(url);
+        }
     }
 
     public boolean stringHasContext(String str) {

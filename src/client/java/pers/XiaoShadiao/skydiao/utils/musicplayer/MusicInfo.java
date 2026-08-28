@@ -8,7 +8,7 @@ import pers.XiaoShadiao.skydiao.utils.renderutils.ImageTexture;
 import java.io.File;
 import java.util.Objects;
 
-public class MusicInfo {
+public class MusicInfo implements Cloneable {
 
     public String name;
     public String singer;
@@ -77,6 +77,10 @@ public class MusicInfo {
         return isBroken > 5;
     }
 
+    public boolean canPlay() {
+        return musicFile != null && musicLyric != null && musicFile.exists() && musicLyric.exists() && !isBroken();
+    }
+
     public int errCount() {
         return isBroken;
     }
@@ -93,12 +97,24 @@ public class MusicInfo {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof MusicInfo musicInfo)) return false;
-        return Objects.equals(hashOrID, musicInfo.hashOrID);
+        return Objects.equals(hashOrID, musicInfo.hashOrID) && Objects.equals(type, musicInfo.type);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(hashOrID);
+    }
+
+    public void fixMIFileVeriable() {
+        PlayerThread.fixMIFileVeriable(this);
+    }
+
+    public MusicInfo clone() {
+        try {
+            return (MusicInfo) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 
 }

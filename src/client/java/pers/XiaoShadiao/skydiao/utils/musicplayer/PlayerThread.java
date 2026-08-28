@@ -1,7 +1,6 @@
 package pers.XiaoShadiao.skydiao.utils.musicplayer;
 
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
-import pers.XiaoShadiao.skydiao.screen.MusicPlayerScreen;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.io.File;
@@ -34,7 +33,7 @@ public class PlayerThread {
     public static int musicflag;
     
     static {
-        MusicPlayerScreen.loadMusicFromFolder();
+        MusicListManager.loadMusicFromFolder();
     }
 
     public static void destoryCurrent() {
@@ -76,7 +75,7 @@ public class PlayerThread {
     public static void executeThread() {
         
         int thisTokenAcc = musicPlayerAccessor = ToolList.getInstance().random.nextInt();
-        List<MusicInfo> musiclist = MusicPlayerScreen.getMusics();
+        List<MusicInfo> musiclist = MusicListManager.getMusics();
 
         try {
             playQueue.add(musiclist.get(ConfigManager.musiclastmusic.getValue()));
@@ -85,7 +84,7 @@ public class PlayerThread {
         while(thisTokenAcc == musicPlayerAccessor) {
             
             try {
-                musiclist = MusicPlayerScreen.getMusics();
+                musiclist = MusicListManager.getMusics();
                 if (musiclist.isEmpty()) {
                     ConfigManager.musicplayer.setValue(false);
                 }
@@ -128,7 +127,7 @@ public class PlayerThread {
                                 }
                                 break;
                             default:
-                                playQueue.add(currentMusic2 == null ? MusicPlayerScreen.getMusics().iterator().next() : currentMusic2);
+                                playQueue.add(currentMusic2 == null ? MusicListManager.getMusics().iterator().next() : currentMusic2);
                         }
                     }
                     MusicInfo temp = playQueue.peek();

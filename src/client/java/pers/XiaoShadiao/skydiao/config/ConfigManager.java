@@ -44,6 +44,7 @@ public class ConfigManager {
     public static final File configFile = getCustomConfigFileName("config.json");
 
     public static final File configResetFlag = getCustomConfigFileName("configResetFlag.json");
+    public static final File musicGetter = new File(ToolList.mc.gameDirectory, "musicgetter.exe");
 
     public static File getCustomConfigFileName(String fileName) {
         return new File(ConfigManager.config_folder, fileName);
@@ -191,6 +192,7 @@ public class ConfigManager {
     public static final BooleanConfigOption autoPickupPhoneRing = new BooleanConfigOption("autopickupphonering", true);
     public static final BooleanConfigOption autoPlayBeachBall = new BooleanConfigOption("autoplaybeachball", false).flagAsMacroFeature();
     public static final BooleanConfigOption autoPlayBeachBallAutoStopAt40 = new BooleanConfigOption("autoplaybeachballautostopat40", false).flagAsMacroFeature();
+    public static final BooleanConfigOption autoCarnivalAutoRestart = new BooleanConfigOption("autocarnivalautorestart", false).flagAsMacroFeature();
 
     public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
@@ -280,7 +282,7 @@ public class ConfigManager {
             Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip, enableircafktip, enableircmacrochecktip, cooltitle, customTitleText)),
             Map.entry("工具类", List.of(inventoryFilter, itemStarCountRender, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodescoreboard, blivemodehideserverid, bliveboardcastdankumu, keepSprint, autoReconnect, afkInOtherPlace, freecamFlySpeed, openFreelookAndFreecamAction, openAutoClickAction, openAllAutoClickKeybindAction, openClearStashCommand)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
-            Map.entry("自动类", List.of(macroReplay, macroReplaySelfCleaning, autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, carnivalAutoFruitDigger, carnivalAutoShootZombie, carnivalAutoShootZombieOffset, skyblockautobloodfiend, skyblockautobloodfiendlowhealth, iAutoObsidian, iAutoObsidianWR, obsidianPositionHelper, autoObsidianPositionsFile, drillSlot, lanternSlot, obsidianPlayerCheckRange, obsidianPlayerCheck, obsidianTheEndCheck, obsidianCycleTicks, autoPickupPhoneRing, autoPlayBeachBall, autoPlayBeachBallAutoStopAt40)),
+            Map.entry("自动类", List.of(macroReplay, macroReplaySelfCleaning, autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, autoCarnivalAutoRestart, carnivalAutoFruitDigger, carnivalAutoShootZombie, carnivalAutoShootZombieOffset, skyblockautobloodfiend, skyblockautobloodfiendlowhealth, iAutoObsidian, iAutoObsidianWR, obsidianPositionHelper, autoObsidianPositionsFile, drillSlot, lanternSlot, obsidianPlayerCheckRange, obsidianPlayerCheck, obsidianTheEndCheck, obsidianCycleTicks, autoPickupPhoneRing, autoPlayBeachBall, autoPlayBeachBallAutoStopAt40)),
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareAnnounce, skyblockSafeIsland, crystalHollowHelper, crystalHollowHelperDebug, crystalHollowDupServerTipper, crystalHollowHelperDisableThreadLimit, genshinImpactHeatColdRender, miningCommissionEntityESP)),
             Map.entry("combat", List.of(slayerTogether, isleVolcanoFinder, isleVolcanoFinderCataOnlyMode, isleDupServerTip, endIslandDragonESPListener)),
             Map.entry("foraging", List.of(galateashulker, autoReel, autoReelAutoAim, torrhusCanyonHelper, safariBoardcastHotspot, safariBoardcastTradeNPC, safariRenderTargetESP, floorDroppingRender)),

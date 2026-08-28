@@ -13,6 +13,8 @@ import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.ICustomSkinModelLoader;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
+import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicInfo;
+import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicListManager;
 
 public class ClientReceiveHandler {
 
@@ -78,6 +80,15 @@ public class ClientReceiveHandler {
                 for (ICustomSkinModelLoader modelLoaderAdapter : AbstractListener.modelLoaderAdapters) {
                     if(modelLoaderAdapter.isSupportYSM()) modelLoaderAdapter.handleIRCPacket(packet);
                 }
+                break;
+            case "sharemusic":
+                MusicInfo musicInfo = MusicListManager.jsonToMI(JsonParser.parseString(packet.message).getAsJsonObject());
+                int shareId = MusicListManager.storeTempSharingMusic(musicInfo);
+                MutableComponent component = Component.literal("§a[XSDChat] " + packet.getRank(true) + "§d" + packet.sender + " §a分享了音乐 §6" + musicInfo.name + " - " + musicInfo.singer + "§a, §e点击这里§a可以收听!");
+                Style style1 = Style.EMPTY
+                        .withClickEvent(new ClickEvent.RunCommand("/skydiao listensharemusic " + shareId))
+                        .withHoverEvent(new HoverEvent.ShowText(Component.literal("/skydiao listensharemusic " + shareId)));
+                ToolList.printChatMessage(component.withStyle(style1));
                 break;
         }
     }

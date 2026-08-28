@@ -20,6 +20,14 @@ public class AutoBoardcastBliveDankmu extends AbstractListener {
         BLiveEvent.ON_RECEIVED_DANMAKU.register(this::onReceivedDanmu);
         BLiveEvent.ON_RECEIVED_GIFT.register(this::onReceivedGift);
         BLiveEvent.ON_RECEIVED_GUARD.register(this::onReceivedGuard);
+        BLiveEvent.ON_RECEIVED_MEMBER_JOIN_LIVE.register(this::onMemberJoin);
+    }
+
+    private boolean onMemberJoin(BLiveEvent.MemberJoinLive memberJoinLive) {
+        if(!ConfigManager.bliveboardcastdankumu.getValue() || !PartyManager.isInParty()) return false;
+
+        ToolList.sendChatMessage("/pc " + "[BLive] " + memberJoinLive.name() + " 进入了直播间!");
+        return false;
     }
 
     private boolean onReceivedGuard(Guard guard) {

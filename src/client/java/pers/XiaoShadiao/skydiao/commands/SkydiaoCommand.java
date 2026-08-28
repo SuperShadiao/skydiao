@@ -15,12 +15,17 @@ import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
+import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
+import pers.XiaoShadiao.skydiao.irc.ChatPacket;
 import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
 import pers.XiaoShadiao.skydiao.utils.Banned;
 import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.Wiped;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.XSDSafeSession;
+import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicInfo;
+import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicListManager;
+import pers.XiaoShadiao.skydiao.utils.musicplayer.PlayerThread;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
 import java.util.Arrays;
@@ -85,9 +90,59 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                             }
                             return 0;
                         })),
+                getArgConstantInstance("calc").redirect(HH_CALC_COMMAND.getCommandNode()),
+                getArgConstantInstance("sharemusic").executes(this::executeShareMusic),
+                getArgConstantInstance("listensharemusic").then(getArgInstance("id", IntegerArgumentType.integer()).executes(this::executeListenShareMusic)),
                 getArgConstantInstance("请输入文本1").executes(this::黑潮),
-                getArgConstantInstance("calc").redirect(HH_CALC_COMMAND.getCommandNode())
+                getArgConstantInstance("请输入文本2").executes(this::敌方目标陷入了狂暴造成的伤害大幅提高)
         );
+    }
+
+    private int executeListenShareMusic(CommandContext<FabricClientCommandSource> context) {
+        int id = IntegerArgumentType.getInteger(context, "id");
+        MusicInfo music0 = MusicListManager.getSharingMusic(id);
+        if(music0 != null) {
+            int index = MusicListManager.getMusics().indexOf(music0);
+            if(index != -1) {
+                MusicInfo music1 = MusicListManager.getMusics().get(index);
+                if(music1.canPlay()) music0 = music1;
+            }
+
+            if(music0.canPlay()) {
+                MusicInfo music = music0;
+                MusicListManager.addFixQueue(music0, b -> {
+                    if (b) {
+                        if(index == -1) MusicListManager.add(music);
+                        PlayerThread.playMI(music);
+                    }
+                });
+            }
+            context.getSource().sendFeedback(Component.literal("§a[小沙雕] 操作成功, 音乐下载后将自动播放. 可使用/skydiaomusic关闭音乐."));
+        }
+        return 0;
+    }
+
+    private int executeShareMusic(CommandContext<FabricClientCommandSource> context) {
+        if(PlayerThread.currentMusic != null) {
+            ChatPacket packet = new ChatPacket();
+            packet.initSender();
+            packet.message = MusicListManager.MIToJson(PlayerThread.currentMusic).toString();
+            packet.packetType = "sharemusic";
+            ChatClientManager.trySendOrWarning(packet);
+        }
+        return 0;
+    }
+
+    private int 敌方目标陷入了狂暴造成的伤害大幅提高(CommandContext<FabricClientCommandSource> context) {
+        ToolList.addThreadedTask(() -> {
+            XSDHUD.starRailNotification.updateMessage("敌方目标即将陷入狂暴, 造成的伤害将大幅提高...", StarRailNotification.Type.warning);
+            Thread.sleep(2500);
+            XSDHUD.starRailNotification.updateMessage("敌方目标陷入了狂暴, 造成的伤害大幅提高！", StarRailNotification.Type.warning);
+            Thread.sleep(2500);
+            XSDHUD.starRailNotification.updateMessage("丰饶玄鹿行动提前...", StarRailNotification.Type.warning);
+            return null;
+        });
+        return 0;
     }
 
     private int 黑潮(CommandContext<FabricClientCommandSource> context) {

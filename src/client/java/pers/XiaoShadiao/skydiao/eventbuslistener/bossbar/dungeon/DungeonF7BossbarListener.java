@@ -397,9 +397,9 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             }
             simonSaysButtonCount = temp;
 
-            if (isDoingSimonSays && simonSaysButtonCount != 16 && lastSimonSaysButtonCount == 16 && (hasLantern || targetsimonSaysButton.size() == 5)) {
+            if (isDoingSimonSays && simonSaysButtonCount != 16 && lastSimonSaysButtonCount == 16 && (hasLantern || targetsimonSaysButton.size() >= 4)) {
                 sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotsimonsays[Mth.clamp(targetsimonSaysButton.size() - 1, 0, 4)].getValue());
-                if(targetsimonSaysButton.size() == 5) {
+                if(targetsimonSaysButton.size() >= 4) {
                     isDoingSimonSays = false;
                 }
                 targetsimonSaysButton.clear();

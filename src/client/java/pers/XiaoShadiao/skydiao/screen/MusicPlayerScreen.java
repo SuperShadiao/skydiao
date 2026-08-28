@@ -1,9 +1,5 @@
 package pers.XiaoShadiao.skydiao.screen;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.*;
@@ -12,41 +8,34 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicInfo;
+import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicListManager;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.PlayerThread;
+import pers.XiaoShadiao.skydiao.utils.musicplayer.musicgetter.impl.MusicPlatform;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 import pers.XiaoShadiao.skydiao.utils.screen.XSDSliderButton;
 
 import java.awt.*;
 import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager.translate;
 
 public class MusicPlayerScreen extends Screen {
-
-    private static List<MusicInfo> musics = new ArrayList<>();
-
-    public static List<MusicInfo> getMusics() {
-        return musics;
-    }
 
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
     private LinearLayout footerButtonLayout;
     private MusicList musicList;
 
     public MusicPlayerScreen() {
-        super(Component.literal("小沙雕点歌台"));
+        super(Component.literal("小沙雕点歌台 - 歌单"));
     }
 
     private static double scroll;
@@ -55,11 +44,12 @@ public class MusicPlayerScreen extends Screen {
     public void onClose() {
         scroll = musicList.scrollAmount();
         super.onClose();
+        ConfigManager.saveConfig();
     }
 
     @Override
     protected void init() {
-        loadMusicFromFolder();
+        MusicListManager.loadMusicFromFolder();
         LinearLayout linearLayout = footerButtonLayout =  this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
         linearLayout.addChild(LinearLayout.horizontal().spacing(8));
         EditBox editBox = new EditBox(ToolList.mc.font, 0, 0, 100, 20, Component.literal("音乐目录"));
@@ -69,7 +59,7 @@ public class MusicPlayerScreen extends Screen {
         editBox.setValue(ConfigManager.hypixelhelpermusicfolder.getValue());
         editBox.setResponder((text) -> {
             ConfigManager.hypixelhelpermusicfolder.setValue(text);
-            loadMusicFromFolder();
+            MusicListManager.loadMusicFromFolder();
         });
         linearLayout.addChild(editBox);
         linearLayout.addChild(Button.builder(Component.literal("返回"), b -> onClose()).size(50, 20).build());
@@ -87,30 +77,30 @@ public class MusicPlayerScreen extends Screen {
             b.setMessage(Component.literal(ConfigManager.musicplayermode.getCurrentDisplayString()));
             PlayerThread.clearQueue();
         }).size(70, 20).build());
+        linearLayout.addChild(Button.builder(Component.literal("下载音乐"), b -> {
+            if(ConfigManager.hypixelhelpermusicfolder.getValue().isBlank() || !new File(ConfigManager.hypixelhelpermusicfolder.getValue()).exists()) {
+                minecraft.setScreen(new ConfirmScreen(flag -> {
+                    if(flag) {
+                        File folder = new File(minecraft.gameDirectory, "XSDKGMusic");
+                        if(folder.mkdirs() || folder.isDirectory()) {
+                            ConfigManager.hypixelhelpermusicfolder.setValue(folder.getAbsolutePath());
+                            MusicListManager.loadMusicFromFolder();
+                            minecraft.setScreen(new MusicSearchScreen(this));
+                        } else {
+                            minecraft.setScreen(MusicPlayerScreen.this);
+                        }
+                    }
+                }, Component.literal("指定的文件夹目录不存在"), Component.literal("你想要设置为默认文件夹并创建吗?")));
+            } else {
+                minecraft.setScreen(new MusicSearchScreen(this));
+            }
+        }).size(70, 20).build());
         linearLayout.addChild(
                 new XSDSliderButton(0, 0, 120, 20, Component.literal("音量"), 0.5)
                         .valueGetter(() -> ConfigManager.xsdmusicvolume.getValue() / 200.0d)
                         .valueSetter(value -> ConfigManager.xsdmusicvolume.setValue((int) (200 * value)))
                         .stringMsgGetter(() -> "音量: " + ConfigManager.xsdmusicvolume.getValue())
         );
-
-//        {
-//            {
-//                updateMessage();
-//                setValue(ConfigManager.xsdmusicvolume.getValue() / 200.0d);
-//            }
-//
-//            @Override
-//            protected void updateMessage() {
-//            setMessage(Component.literal("音量: " + ConfigManager.xsdmusicvolume.getValue()));
-//        }
-//
-//            @Override
-//            protected void applyValue() {
-//            ConfigManager.xsdmusicvolume.setValue((int) (200 * value));
-//            updateMessage();
-//        }
-//        }
 
         linearLayout.setX(width / 2);
         musicList = new MusicList();
@@ -156,13 +146,18 @@ public class MusicPlayerScreen extends Screen {
             updateSearchResult("", false);
         }
 
+        @Override
+        public int getRowWidth() {
+            return 305;
+        }
+
         private void updateSearchResult(String s) {
             updateSearchResult(s, true);
         }
 
         private void updateSearchResult(String s, boolean resetScroll) {
             clearEntries();
-            for (MusicInfo music : musics) {
+            for (MusicInfo music : MusicListManager.getMusics()) {
                 if(s.isBlank() || (music.name + " - " + music.singer).toLowerCase().contains(s.toLowerCase())) {
                     addEntry(new MusicEntry(music));
                 }
@@ -171,15 +166,37 @@ public class MusicPlayerScreen extends Screen {
             if(resetScroll) musicList.setScrollAmount(0);
         }
 
-        public static class MusicEntry extends AbstractEntry {
+        public class MusicEntry extends AbstractEntry {
 
             private final MusicInfo musicInfo;
             private final List<AbstractWidget> childs;
             private final Button playButton;
+            private final Button disableButton;
+            private final Button deleteButton;
+            private final Button fixButton;
 
             public MusicEntry(MusicInfo musicInfo) {
                 this.musicInfo = musicInfo;
-                childs = List.of(playButton = Button.builder(Component.literal("P"), (b) -> PlayerThread.playMI(musicInfo)).size(20, 20).build());
+                playButton = Button.builder(Component.literal("P"), (b) -> PlayerThread.playMI(musicInfo)).size(20, 20).build();
+                disableButton = Button.builder(Component.literal("D"), (b) -> {
+                    musicInfo.isDisabled = !musicInfo.isDisabled;
+                    MusicListManager.save();
+                }).size(20, 20).build();
+                deleteButton = Button.builder(Component.literal("-"), (b) -> {
+                    MusicListManager.removeMusic(musicInfo);
+                    minecraft.setScreen(new MusicPlayerScreen());
+                }).size(20, 20).build();
+                fixButton = Button.builder(Component.literal("F"), (b) -> {
+                    musicInfo.fixMIFileVeriable();
+                    MusicPlatform platform = MusicPlatform.getMusicPlatform(musicInfo);
+                    if(platform != null) {
+                        musicInfo.musicFile.delete();
+                        musicInfo.musicLyric.delete();
+                        musicInfo.setNotBroken();
+                        MusicListManager.addFixQueue(musicInfo);
+                    }
+                }).size(20, 20).build();
+                childs = List.of(disableButton, fixButton, playButton, deleteButton);
             }
 
             @Override
@@ -189,15 +206,28 @@ public class MusicPlayerScreen extends Screen {
 
             @Override
             public void extractContent(GuiGraphicsExtractor guiGraphics, int left, int top, boolean bl, float f) {
-                RenderUtils.renderScrollingString(guiGraphics, ToolList.mc.font, Component.literal((musicInfo.equals(PlayerThread.currentMusic) ? "§a" : "") + musicInfo.name + " - " + musicInfo.singer), getContentX(), getContentX(), getContentY() - 25, getContentX() + 180, getContentY() + 44, 0xFFFFFFFF);
+                RenderUtils.renderScrollingString(guiGraphics, ToolList.mc.font, Component.literal(MusicListManager.getDisplayName(musicInfo, false)), getContentX(), getContentX(), getContentY() - 25, getContentX() + 210, getContentY() + 44, 0xFFFFFFFF);
+
+                playButton.active = musicInfo.canPlay();
 
                 if(musicInfo.getTexture() != null) {
                     guiGraphics.blit(RenderPipelines.GUI_TEXTURED,  musicInfo.getTexture(), getContentX() - 25, getContentY(), 0, 0,  20, 20, 20, 20, 0xFFFFFFFF);
                 }
+                fixButton.active = MusicPlatform.getMusicPlatform(musicInfo) != null;
+                deleteButton.active = musicInfo.isDisabled;
 
-                playButton.setX(getContentRight() - playButton.getWidth());
+                deleteButton.setX(getContentRight() - deleteButton.getWidth());
+                deleteButton.setY(getContentY());
+                deleteButton.extractRenderState(guiGraphics, left, top, f);
+                playButton.setX(getContentRight() - deleteButton.getWidth() - playButton.getWidth());
                 playButton.setY(getContentY());
                 playButton.extractRenderState(guiGraphics, left, top, f);
+                fixButton.setX(getContentRight() - deleteButton.getWidth() - playButton.getWidth() - fixButton.getWidth());
+                fixButton.setY(getContentY());
+                fixButton.extractRenderState(guiGraphics, left, top, f);
+                disableButton.setX(getContentRight() - deleteButton.getWidth() - fixButton.getWidth() - playButton.getWidth() -  disableButton.getWidth());
+                disableButton.setY(getContentY());
+                disableButton.extractRenderState(guiGraphics, left, top, f);
             }
 
             @Override
@@ -244,84 +274,6 @@ public class MusicPlayerScreen extends Screen {
         public List<AbstractEntry> getEntries() {
             return children();
         }
-    }
-
-    public static MusicInfo jsonToMI(JsonObject jo) {
-        MusicInfo mi = new MusicInfo();
-        try {
-            Objects.requireNonNull(mi.name = jo.get("name").getAsString());
-        } catch(Exception e) {
-            mi.name = "";
-        }
-        try {
-            Objects.requireNonNull(mi.singer = jo.get("singer").getAsString());
-        } catch(Exception e) {
-            mi.singer = "";
-        }
-        try {
-            Objects.requireNonNull(mi.hashOrID = jo.get("hashorid").getAsString());
-        } catch(Exception e) {
-            mi.hashOrID = "";
-        }
-        try {
-            Objects.requireNonNull(mi.imgURL = jo.get("imgurl").getAsString());
-        } catch(Exception e) {
-            mi.imgURL = "";
-        }
-        try {
-            Objects.requireNonNull(mi.lyricURL = jo.get("lyricurl").getAsString());
-        } catch(Exception e) {
-            mi.lyricURL = "";
-        }
-        try {
-            Objects.requireNonNull(mi.URL = jo.get("url").getAsString());
-        } catch(Exception e) {
-            mi.URL = "";
-        }
-        try {
-            Objects.requireNonNull(mi.albumID = jo.get("albumid").getAsString());
-        } catch(Exception e) {
-            mi.albumID = "";
-        }
-        try {
-            Objects.requireNonNull(mi.type = jo.get("type").getAsString());
-        } catch(Exception e) {
-            mi.type = "CUSTOM";
-        }
-        try {
-            mi.isDisabled = jo.get("disabled").getAsBoolean();
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-
-        PlayerThread.fixMIFileVeriable(mi);
-        return mi;
-    }
-
-    public static List<MusicInfo> loadMusicFromFolder() {
-        List<MusicInfo> list = new ArrayList<>();
-        try {
-            JsonArray ja = JsonParser.parseString(FileUtils.readFileToString(new File(ConfigManager.hypixelhelpermusicfolder.getValue(), "musicList.json"), StandardCharsets.UTF_8)).getAsJsonArray();
-            for (JsonElement je : ja) {
-                JsonObject jo = je.getAsJsonObject();
-                list.add(jsonToMI(jo));
-            }
-        } catch(Throwable e) {
-            list.clear();
-        }
-
-        if(musics != null) {
-            list.replaceAll((newMI) -> {
-                int index = musics.indexOf(newMI);
-                if(index != -1) {
-                    return musics.get(index);
-                }
-                return newMI;
-            });
-            list.forEach(MusicInfo::getTexture);
-        }
-
-        return musics = list;
     }
 
 }

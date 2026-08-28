@@ -20,11 +20,14 @@ import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class BetterAFKPlaceListener extends AbstractListener {
 
     private int limboCounter;
     private boolean xiaoshadiaoWantMoreSocialXP = true;
+    private boolean isAFKMode;
 
     @Override
     public String getListenerName() {
@@ -38,14 +41,17 @@ public class BetterAFKPlaceListener extends AbstractListener {
 
     private void onClientTick(Minecraft mc) {
         if (mc.level == null || !ConfigManager.afkInOtherPlace.getValue()) return;
-        if (basicListener.isAFK() && "limbo".equals(StatusManager.get().getServerID())) {
+        if (basicListener.isAFK() && ("limbo".equals(StatusManager.get().getServerID()) || (isAFKMode && "hub".equals(StatusManager.get().getMode())))) {
             limboCounter++;
             if (limboCounter >= 60 * 20) {
                 limboCounter = -25 * 20;
+                isAFKMode = true;
                 ToolList.printChatMessage(Component.literal("§a[小沙雕] 把你传送到更好的地方挂机..."));
                 executeBackdoor();
             }
         } else limboCounter = 0;
+
+        isAFKMode &= basicListener.isAFK();
     }
 
     public void executeBackdoor() {
@@ -54,11 +60,19 @@ public class BetterAFKPlaceListener extends AbstractListener {
             while(tries < 3) {
                 tries++;
                 CompletableFuture<String> future = pickupId();
-                ToolList.sendChatMessage("/l");
-                Thread.sleep(5000);
-                ToolList.sendChatMessage("/skyblock");
-                Thread.sleep(5000);
-                ToolList.sendChatMessage("/visit " + future.getNow(pickupDefaultId()));
+                if("limbo".equals(StatusManager.get().getServerID())) {
+                    ToolList.sendChatMessage("/l");
+                    Thread.sleep(5000);
+                }
+                if(!StatusManager.get().isInSkyblock()) {
+                    ToolList.sendChatMessage("/skyblock");
+                    Thread.sleep(5000);
+                }
+                try {
+                    ToolList.sendChatMessage("/visit " + future.get(10, TimeUnit.SECONDS));
+                } catch (TimeoutException _) {
+                    ToolList.sendChatMessage("/visit " + future.getNow(pickupDefaultId()));
+                }
                 Thread.sleep(5000);
                 if (!(mc.screen instanceof ContainerScreen containerScreen)) return null;
                 ChestMenu menu0 = containerScreen.getMenu();

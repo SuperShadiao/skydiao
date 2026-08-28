@@ -1136,6 +1136,10 @@
       "configname": "§e自动顶球自动终止",
       "description": "§e开启后, 自动顶球将在顶球40次之后自动停止"
     },
+    "autocarnivalautorestart": {
+      "configname": "§eCarnival自动重玩",
+      "description": "§e开启后, 当自动类Carnival活动工作结束时, 自动回到NPC旁边并点击继续"
+    },
 
     "about1": "§e小沙雕的QQ: 3381949033",
     "about2": "§e小沙雕の狗窝: https://xiaoshadiao.club/qqg",

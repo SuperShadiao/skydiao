@@ -363,7 +363,17 @@ public class BasicListener extends AbstractListener {
                 lastCheckSessionTime = System.currentTimeMillis();
                 MinecraftLogin.checkSessionExpiredAndLogin();
             }
-            currentServerData = null;
+            if(mc.level == null) currentServerData = null;
+            if(Util.getPlatform() == Util.OS.WINDOWS) {
+                List<AbstractWidget> buttons = Screens.getWidgets(mpscreen);
+                int left = buttons.stream()
+                        .filter(widget -> widget instanceof Button)
+                        .min(Comparator.comparingInt(AbstractWidget::getX)).get().getX();
+                buttons.add(Button.builder(
+                        AccountSelectScreen.getTitle0(),
+                        (button) -> ToolList.mc.setScreen(new AccountSelectScreen(mpscreen))
+                ).bounds(10, scaledHeight - (25),Math.min(100, left - 15), 20).build());
+            }
         } else if(screen instanceof DeathScreen deathScreen) {
             List<AbstractWidget> buttons = Screens.getWidgets(deathScreen);
             int left = buttons.stream().min(Comparator.comparingInt(AbstractWidget::getX)).get().getX();

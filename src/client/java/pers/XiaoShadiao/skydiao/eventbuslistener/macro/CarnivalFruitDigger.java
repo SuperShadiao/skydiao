@@ -155,19 +155,21 @@ public class CarnivalFruitDigger extends AbstractListener implements IMacro, Pat
         if(!ConfigManager.carnivalAutoFruitDigger.getValue()) return;
         if(msg.contains("You earned") && msg.contains("Carnival Tokens!")) {
             if(!isAlertTriggered) {
-                ToolList.addThreadedTask(() -> {
-                    Thread.sleep(100);
-                    if(mc.player != null && mc.player.distanceToSqr(npcPos) > 64) return null;
-                    AimHelper aimHelper = new AimHelper();
-                    int i = 0;
-                    while(i < 50) {
-                        AimHelper.getYawPitchByDoublePos(npcPos.x, npcPos.y, npcPos.z).updateToAimHelper(aimHelper);
-                        i++;
-                        Thread.sleep(10);
-                    }
-                    InputSimulator.singleLeftClick();
-                    return null;
-                });
+                if(ConfigManager.autoCarnivalAutoRestart.getValue()) {
+                    ToolList.addThreadedTask(() -> {
+                        Thread.sleep(100);
+                        if(mc.player != null && mc.player.distanceToSqr(npcPos) > 64) return null;
+                        AimHelper aimHelper = new AimHelper();
+                        int i = 0;
+                        while(i < 50) {
+                            AimHelper.getYawPitchByDoublePos(npcPos.x, npcPos.y, npcPos.z).updateToAimHelper(aimHelper);
+                            i++;
+                            Thread.sleep(10);
+                        }
+                        InputSimulator.singleLeftClick();
+                        return null;
+                    });
+                }
             } else {
                 isAlertTriggered = false;
             }
