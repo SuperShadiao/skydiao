@@ -23,9 +23,9 @@ public class ClientReceiveHandler {
             case "chat":
                 Style style = Style.EMPTY.withHoverEvent(new HoverEvent.ShowText(Component.literal("点击来@" + packet.sender))).withClickEvent(new ClickEvent.SuggestCommand("/xsdc @" + packet.sender));
                 ToolList.printChatMessage(Component.literal("§a[XSDChat] " + packet.getRank(true) + "§d" + packet.sender + "§7: §f" + packet.message).withStyle(style));
-                if(packet.message.contains("@" + ToolList.mc.getUser().getName()) && !packet.getRank(false).contains("[离线]")) {
+                if((packet.message.toLowerCase().contains("@" + ToolList.mc.getUser().getName().toLowerCase()) || (packet.message.toLowerCase().contains("@all") && packet.sender.equals("5i_XiaoShadiao"))) && !packet.getRank(false).contains("[离线]")) {
                     ToolList.getInstance().playSound(SoundEvents.EXPERIENCE_ORB_PICKUP);
-                    ToolList.printChatMessage(Component.literal("§a[XSDChat] §e有人@了你, 快看一眼吧!"));
+                    ToolList.printChatMessage(Component.literal("§a[XSDChat] §e" + CrowdinI18nManager.translate("xsdchat.at")));
                 }
                 if(ConfigManager.enablexsdccommandtip.getValue()) ToolList.printChatMessage(Component.literal("§a[XSDChat] " + CrowdinI18nManager.translate("xsdchat.xsdctip")));
                 break;

@@ -66,7 +66,7 @@ public class RavengardHelper extends AbstractListener {
             List<Slot> slots = caches.get(slotFilter);
             if(slots.isEmpty()) return;
             for (Slot slot : slots) {
-                RenderUtils.renderSlot(guiGraphics, abstractContainerScreen, slot, slotFilter.renderColor.getRGB() & 0x44FFFFFF);
+                RenderUtils.renderSlot(guiGraphics, abstractContainerScreen, slot, slotFilter.renderColor.getRGB() & 0x88FFFFFF);
             }
         });
     }
@@ -89,7 +89,7 @@ public class RavengardHelper extends AbstractListener {
     }
 
     enum SlotFilter {
-        VALUE(Color.YELLOW, (menu) -> {
+        VALUE(Color.orange, (menu) -> {
             if(mc.player == null || mc.level == null) return List.of();
             return menu.slots.stream().map(slot -> {
                         double value = 0;
@@ -109,7 +109,7 @@ public class RavengardHelper extends AbstractListener {
                     .map(Object2DoubleMap.Entry::getKey)
                     .limit(31).toList();
         }, screen -> screen instanceof AbstractContainerScreen<?> && !(screen instanceof InventoryScreen)),
-        DEFENSE(Color.GREEN, (menu) -> {
+        DEFENSE(Color.cyan, (menu) -> {
             if(mc.player == null || mc.level == null) return List.of();
             List<Slot> list1 = menu.slots.stream()
                     .sorted(Comparator.comparingDouble((Slot slot) -> {
@@ -155,16 +155,23 @@ public class RavengardHelper extends AbstractListener {
             List<Slot> list1 = menu.slots.stream()
                     .sorted(Comparator.comparingDouble((Slot slot) -> {
                         List<Component> list = slot.getItem().getTooltipLines(Item.TooltipContext.of(mc.level), mc.player, TooltipFlag.Default.NORMAL);
+                        double rawDamage = 0;
+                        double abilityDamageBoost = 0;
                         for (Component component : list) {
                             String message = ToolList.getInstance().deleteColorCode(component.getString());
                             if (message.contains(" Damage")) {
-                                Matcher matcher = Pattern.compile("([\\d.]+) Damage").matcher(message);
+                                Matcher matcher = Pattern.compile("([\\d.]+) ?(Ranged Attack )?Damage").matcher(message);
                                 if (matcher.find()) {
-                                    return Double.parseDouble(matcher.group(1));
+                                    rawDamage = Double.parseDouble(matcher.group(1));
+                                } else {
+                                    matcher = Pattern.compile("([\\d.]+)% Ability Damage Boost").matcher(message);
+                                    if (matcher.find()) {
+                                        abilityDamageBoost = Double.parseDouble(matcher.group(1));
+                                    }
                                 }
                             }
                         }
-                        return 0;
+                        return rawDamage + abilityDamageBoost / 10 * 6;
                     }).reversed().thenComparing(slot -> slot.container != mc.player.getInventory()))
                     .filter(AbstractListener.ravengardHelper::itemCanUse)
                     .toList();
