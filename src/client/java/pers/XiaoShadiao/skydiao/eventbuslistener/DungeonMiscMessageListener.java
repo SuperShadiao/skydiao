@@ -1,7 +1,9 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener;
 
 import it.unimi.dsi.fastutil.ints.IntArrayFIFOQueue;
+import it.unimi.dsi.fastutil.ints.IntLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntPriorityQueue;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
@@ -25,10 +27,13 @@ import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.utils.HeadTextures;
+import pers.XiaoShadiao.skydiao.utils.PartyManager;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
+
+import java.util.List;
 
 public class DungeonMiscMessageListener extends AbstractListener implements IDungeonListener {
 
@@ -88,6 +93,7 @@ public class DungeonMiscMessageListener extends AbstractListener implements IDun
             currentArmorStandDungeonKey = null;
         }
 
+        IntSet delayCheckAgain = new IntLinkedOpenHashSet();
         while(!armorStandDungeonKey.isEmpty()) {
             int armorStandId = armorStandDungeonKey.dequeueInt();
             Entity entity = mc.level.getEntity(armorStandId);
@@ -95,12 +101,30 @@ public class DungeonMiscMessageListener extends AbstractListener implements IDun
                 ItemStack slot = armorStand.getItemBySlot(EquipmentSlot.HEAD);
                 if (slot.getItem() == Items.PLAYER_HEAD) {
                     String base64 = ToolList.getInstance().getSkullBase64(slot);
-                    if(HeadTextures.WITHER_KEY.equals(base64) || HeadTextures.BLOOD_KEY.equals(base64)) {
+                    boolean isKey = HeadTextures.WITHER_KEY.equals(base64);
+
+                    boolean bloodKeySus = HeadTextures.BLOOD_KEY.equals(base64);
+
+                    if(bloodKeySus) {
+                        if (mc.player.distanceTo(armorStand) > 20) {
+                            delayCheckAgain.add(armorStandId);
+                        } else {
+                            List<ArmorStand> entitiesOfClass = mc.level.getEntitiesOfClass(ArmorStand.class, armorStand.getBoundingBox().inflate(2, 2, 2));
+                            if (entitiesOfClass.stream().noneMatch(a -> a.getName().getString().contains("Overflux"))) {
+                                isKey = true;
+                            }
+                        }
+                    }
+
+                    if (isKey) {
                         addStarRailNotification("一个钥匙掉落了!", StarRailNotification.Type.success);
                         currentArmorStandDungeonKey = armorStand;
                     }
                 }
             }
+        }
+        for(int armorStandId : delayCheckAgain) {
+            armorStandDungeonKey.enqueue(armorStandId);
         }
     }
 
@@ -119,6 +143,28 @@ public class DungeonMiscMessageListener extends AbstractListener implements IDun
             sendDungeonF7ChatMessage(ConfigManager.dungeonDrinkPotion.getValue());
         } else if(msg.startsWith("PUZZLE FAIL!") || msg.equals("[STATUE] Oruo the Omniscient: Yikes")) {
             addStarRailNotification("好像有人PUZZLE FAIL了呢, Yikes!", StarRailNotification.Type.warning);
+        } else if(
+                msg.equals("RIGHT CLICK on the BLOOD DOOR to open it. This key can only be used to open 1 door!") ||
+                        msg.equals("RIGHT CLICK on a WITHER door to open it. This key can only be used to open 1 door!")
+        ) {
+            addStarRailNotification("成功拾取钥匙! 右键门来打开它...",  StarRailNotification.Type.success);
+        } else if(PartyManager.isInParty() && msg.matches("Starting in \\d seconds?\\.")) {
+            List<String> playerList = ToolList.getInstance().fetchScoreboardLinesNoColor();
+            List<String> missingPlayers = PartyManager.getPartyMembers().stream().map(PartyManager.Member::name).filter(member -> {
+                for (String s : playerList) {
+                    if (s.contains(member)) {
+                        return false;
+                    }
+                }
+                return true;
+            }).toList();
+            if(!missingPlayers.isEmpty()) {
+                String value = ConfigManager.dungeonMissingPlayer.getValue();
+                if(!value.isBlank()) {
+                    addStarRailNotification("有玩家未进入当前服务器!", StarRailNotification.Type.warning);
+                    sendDungeonF7ChatMessage(value.replace("[players]", String.join(", ", missingPlayers)));
+                }
+            }
         }
         // sendDungeonF7ChatMessage(ConfigManager.dungeonBloodRoomTime.getValue());;
     }

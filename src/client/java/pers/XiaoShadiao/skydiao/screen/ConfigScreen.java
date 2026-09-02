@@ -327,7 +327,7 @@ public class ConfigScreen extends Screen {
             public ConfigList(ConfigTab tab) {
                 super(Minecraft.getInstance(), ConfigScreen.this.width, ConfigScreen.this.layout.getContentHeight(), ConfigScreen.this.layout.getHeaderHeight(), 20);
                 for (ConfigOption<?> configOption : configOptions) {
-                    addEntry(configOption instanceof ColorConfigOption ? new ColorConfigEntry(configOption, tab) : new ConfigEntry(configOption, tab));
+                    addEntry(configOption instanceof ColorConfigOption colorConfigOption ? new ColorConfigEntry(colorConfigOption, tab) : new ConfigEntry(configOption, tab));
                 }
                 this.tab = tab;
             }
@@ -340,6 +340,7 @@ public class ConfigScreen extends Screen {
             public static class ConfigEntry extends AbstractConfigEntry {
                 protected final ConfigOption<?> option;
                 protected final AbstractWidget widget;
+                protected final Button resetConfigButton;
                 protected final ConfigTab tab;
                 public ConfigEntry(ConfigOption<?> option, ConfigTab tab) {
                     this.option = option;
@@ -420,6 +421,10 @@ public class ConfigScreen extends Screen {
                         ).bounds(0, 0, 100, 20).build();
                         default -> throw new UnsupportedOperationException(option.getClass().getName());
                     };
+                    resetConfigButton = Button.builder(
+                            Component.literal("R"),
+                            b -> option.resetToDefault()
+                    ).bounds(0, 0, 20, 20).build();
                     MutableComponent component = Component.literal(option.getI18nDesc());
                     if(option.isMacroFeature()) {
                         component.append("\n\n");
@@ -439,7 +444,7 @@ public class ConfigScreen extends Screen {
 
                 @Override
                 public @NotNull List<? extends NarratableEntry> narratables() {
-                    return List.of(widget);
+                    return List.of(resetConfigButton, widget);
                 }
 
                 @Override
@@ -450,11 +455,23 @@ public class ConfigScreen extends Screen {
                     widget.setX(getContentRight() - widget.getWidth() + 5);
                     widget.setY(getContentY());
                     widget.extractRenderState(guiGraphics, left, top, f);
+
+                    resetConfigButton.active = !option.isDefaultValue();
+                    resetConfigButton.setX(widget.getX() - resetConfigButton.getWidth());
+                    resetConfigButton.setY(getContentY());
+                    resetConfigButton.extractRenderState(guiGraphics, left, top, f);
+
+                    if(widget instanceof Button button) {
+                        button.setMessage(Component.literal(option.getI18nValue()));
+                    } else if(widget instanceof EditBox editBox) {
+                        String temp = option.getI18nValue();
+                        if(!editBox.getValue().equals(temp)) editBox.setValue(temp);
+                    }
                 }
 
                 @Override
                 public @NotNull List<? extends GuiEventListener> children() {
-                    return List.of(widget);
+                    return List.of(resetConfigButton, widget);
                 }
             }
 
@@ -462,39 +479,45 @@ public class ConfigScreen extends Screen {
                 private final XSDSliderButton r;
                 private final XSDSliderButton g;
                 private final XSDSliderButton b;
+                protected final Button resetConfigButton;
                 private Color color;
-                public ColorConfigEntry(ConfigOption<?> option, ConfigTab tab) {
-                    super(option, tab);
-                    switch(option) {
-                        case ColorConfigOption colorOption -> {
+                public ColorConfigEntry(ColorConfigOption colorOption, ConfigTab tab) {
+                    super(colorOption, tab);
 
-                            color = new Color(colorOption.getValue());
-                            DoubleSupplier rSupplier = () -> color.getRed() / 255d;
-                            DoubleSupplier gSupplier = () -> color.getGreen() / 255d;
-                            DoubleSupplier bSupplier = () -> color.getBlue() / 255d;
-                            DoubleConsumer rSetter = (r) -> colorOption.setValue((color = new Color((int) (r * 255), color.getGreen(), color.getBlue())).getRGB());
-                            DoubleConsumer gSetter = (g) -> colorOption.setValue((color = new Color(color.getRed(), (int) (g * 255), color.getBlue())).getRGB());
-                            DoubleConsumer bSetter = (b) -> colorOption.setValue((color = new Color(color.getRed(), color.getGreen(), (int) (b * 255))).getRGB());
-                            Supplier<String> rMsg = () -> "§c" + color.getRed();
-                            Supplier<String> gMsg = () -> "§a" + color.getGreen();
-                            Supplier<String> bMsg = () -> "§1" + color.getBlue();
+                    color = new Color(colorOption.getValue());
+                    DoubleSupplier rSupplier = () -> color.getRed() / 255d;
+                    DoubleSupplier gSupplier = () -> color.getGreen() / 255d;
+                    DoubleSupplier bSupplier = () -> color.getBlue() / 255d;
+                    DoubleConsumer rSetter = (r) -> colorOption.setValue((color = new Color((int) (r * 255), color.getGreen(), color.getBlue())).getRGB());
+                    DoubleConsumer gSetter = (g) -> colorOption.setValue((color = new Color(color.getRed(), (int) (g * 255), color.getBlue())).getRGB());
+                    DoubleConsumer bSetter = (b) -> colorOption.setValue((color = new Color(color.getRed(), color.getGreen(), (int) (b * 255))).getRGB());
+                    Supplier<String> rMsg = () -> "§c" + color.getRed();
+                    Supplier<String> gMsg = () -> "§a" + color.getGreen();
+                    Supplier<String> bMsg = () -> "§1" + color.getBlue();
 
-                            r = new XSDSliderButton(0, 0, 33, 20, Component.empty(), 1)
-                                    .valueGetter(rSupplier)
-                                    .valueSetter(rSetter)
-                                    .stringMsgGetter(rMsg);
-                            g = new XSDSliderButton(0, 0, 33, 20, Component.empty(), 1)
-                                    .valueGetter(gSupplier)
-                                    .valueSetter(gSetter)
-                                    .stringMsgGetter(gMsg);
-                            b = new XSDSliderButton(0, 0, 33, 20, Component.empty(), 1)
-                                    .valueGetter(bSupplier)
-                                    .valueSetter(bSetter)
-                                    .stringMsgGetter(bMsg);
+                    r = new XSDSliderButton(0, 0, 33, 20, Component.empty(), 1)
+                            .valueGetter(rSupplier)
+                            .valueSetter(rSetter)
+                            .stringMsgGetter(rMsg);
+                    g = new XSDSliderButton(0, 0, 33, 20, Component.empty(), 1)
+                            .valueGetter(gSupplier)
+                            .valueSetter(gSetter)
+                            .stringMsgGetter(gMsg);
+                    b = new XSDSliderButton(0, 0, 33, 20, Component.empty(), 1)
+                            .valueGetter(bSupplier)
+                            .valueSetter(bSetter)
+                            .stringMsgGetter(bMsg);
 
-                        }
-                        default -> throw new UnsupportedOperationException(option.getClass().getName());
-                    };
+                    resetConfigButton = Button.builder(
+                            Component.literal("R"),
+                            _ -> {
+                                option.resetToDefault();
+                                color = new Color(colorOption.getValue());
+                                r.valueGetter(rSupplier);
+                                g.valueGetter(gSupplier);
+                                b.valueGetter(bSupplier);
+                            }
+                    ).bounds(0, 0, 20, 20).build();
                     MutableComponent component = Component.literal(option.getI18nDesc());
                     if(option.isMacroFeature()) {
                         component.append("\n\n");
@@ -518,7 +541,7 @@ public class ConfigScreen extends Screen {
 
                 @Override
                 public @NotNull List<? extends NarratableEntry> narratables() {
-                    return List.of(r, g, b);
+                    return List.of(resetConfigButton, r, g, b);
                 }
 
                 @Override
@@ -535,12 +558,16 @@ public class ConfigScreen extends Screen {
                     b.setX(getContentRight() - b.getWidth() + 5);
                     b.setY(getContentY());
                     b.extractRenderState(guiGraphics, left, top, f);
-                    if(r.isHoveredOrFocused() || g.isHoveredOrFocused() || b.isHoveredOrFocused()) guiGraphics.fill(getContentRight() - r.getWidth() + 5 - 33 - 33 - 21, getContentY(), getContentRight() - r.getWidth() + 5 - 33 - 33 - 1, getContentY() + 20, color.getRGB());
+                    resetConfigButton.active = !option.isDefaultValue();
+                    resetConfigButton.setX(r.getX() - resetConfigButton.getWidth());
+                    resetConfigButton.setY(getContentY());
+                    resetConfigButton.extractRenderState(guiGraphics, left, top, f);
+                    if(r.isHoveredOrFocused() || g.isHoveredOrFocused() || b.isHoveredOrFocused()) guiGraphics.fill(getContentRight() - r.getWidth() + 5 - 33 - 33 - 20 - 21, getContentY(), getContentRight() - r.getWidth() + 5 - 33 - 33 - 20 - 1, getContentY() + 20, color.getRGB());
                 }
 
                 @Override
                 public @NotNull List<? extends GuiEventListener> children() {
-                    return List.of(r, g, b);
+                    return List.of(resetConfigButton, r, g, b);
                 }
             }
 

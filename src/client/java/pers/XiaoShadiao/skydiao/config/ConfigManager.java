@@ -171,6 +171,7 @@ public class ConfigManager {
     public static final BooleanConfigOption afkInOtherPlace = new BooleanConfigOption("afkinotherplace", true);
     public static final DoubleConfigOption freecamFlySpeed = new DoubleConfigOption("freecamflyspeed", 1.0);
     public static final BooleanConfigOption ravengardHelper = new BooleanConfigOption("ravengardhelper", true);
+    public static final StringConfigOption ravengardQueueMessage = new StringConfigOption("ravengardqueuemessage", "列车即将跃迁, 请大家坐稳扶好!");
     public static final BooleanConfigOption dungeonKeyRender = new BooleanConfigOption("dungeonkeyrender", true);
     public static final BooleanConfigOption autoReel = new BooleanConfigOption("autoreel", false);
     public static final BooleanConfigOption autoReelAutoAim = new BooleanConfigOption("autoreelautoaim", false);
@@ -215,6 +216,7 @@ public class ConfigManager {
     public static final StringConfigOption dungeonDrinkPotion = new StringConfigOption("dungeondrinkpotion", "能量饮料真好喝! 我为Dungeon Potion代言!");
     public static final StringConfigOption dungeonTrashTPS = new StringConfigOption("dungeontrashtps", "太强了喵, 我们服务器有很高的[tps] TPS喵!");
     public static final StringConfigOption dungeonf7msgbotssleap = new StringConfigOption("dungeonf7msgbotssleap", "已安全到达Simon Says处, 准许Leap!");
+    public static final StringConfigOption dungeonMissingPlayer = new StringConfigOption("dungeonmissingplayer", "玩家[players]未进入服务器!");
 
     public static final StringConfigOption hudOffsetAndScale = new StringConfigOption("hudoffsetandscale", "{}");
 
@@ -289,10 +291,10 @@ public class ConfigManager {
             Map.entry("foraging", List.of(galateashulker, autoReel, autoReelAutoAim, torrhusCanyonHelper, safariBoardcastHotspot, safariBoardcastTradeNPC, safariRenderTargetESP, floorDroppingRender)),
             Map.entry("farming", List.of(openFsCommandAction, openFsKeyBind, hubratesp, autoSprayonator, autoChangeLo, halfAutoKillPests, gardenTrapPrompt, gardenBonusPrompt, fsGardenMoonFlowerMode, fsGardenMoonFlowerModeKeepNightFarming, fsTPToPest)),
             Map.entry("fishing", List.of(hotspotrender, autogg, lotusAtollHelper, fishingBigFishRender, fishingBigFishTip)),
-            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonKeyRender, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7InactiveTerminalRender, dungeonReviveItemCDRender, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered, dungeonDrinkPotion, dungeonBloodRoomTime, dungeonTrashTPS, dungeonf7msgbotssleap)),
+            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonKeyRender, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7InactiveTerminalRender, dungeonReviveItemCDRender, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered, dungeonDrinkPotion, dungeonBloodRoomTime, dungeonTrashTPS, dungeonf7msgbotssleap, dungeonMissingPlayer)),
             Map.entry("rift", List.of(rifttimegunhelper)),
             Map.entry("界面类", List.of(openHud, bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, bossDrawESP, dyingtip, noblind, nosuffoverlay, fireOverlay, lyricColor1, lyricColor2)),
-            Map.entry("ravengard", List.of(ravengardHelper))
+            Map.entry("ravengard", List.of(ravengardHelper, ravengardQueueMessage))
     );
 
 

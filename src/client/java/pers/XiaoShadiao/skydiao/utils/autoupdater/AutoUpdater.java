@@ -3,6 +3,7 @@ package pers.XiaoShadiao.skydiao.utils.autoupdater;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.fabricmc.loader.api.FabricLoader;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -14,6 +15,8 @@ import pers.XiaoShadiao.skydiao.utils.ToolList;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.*;
@@ -30,12 +33,7 @@ public class AutoUpdater {
     public static final File modsFolder;
 
     static {
-//        File modsFolder1;
-//        modsFolder1 = new File(ToolList.mc.gameDirectory, "mods");
-//        File f = new File(modsFolder1, SharedConstants.getCurrentVersion().name());
-//        if(f.exists()) modsFolder1 = f;
-//        modsFolder = modsFolder1;
-        modsFolder = new File(ToolList.mc.gameDirectory, "mods");
+        modsFolder = FabricLoader.getInstance() instanceof net.fabricmc.loader.FabricLoader impl ? impl.getModsDirectory() : new File(ToolList.mc.gameDirectory, "mods");
     }
 
     private static CountDownLatch locker = new CountDownLatch(1);
@@ -220,16 +218,22 @@ public class AutoUpdater {
 
                 oldFile = new File(modsFolder, "skydiao-" + SkyDiaoModClient.VERSION + ".jar");
                 if(!oldFile.exists()) {
-                    String string = URLDecoder.decode(AutoUpdater.class.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8");
-                    log.info(string);
-                    File oldFile1 = oldFile;
-                    Matcher matcher = Pattern.compile("([^\\/]+\\.jar)").matcher(string);
-                    if(matcher.find()) oldFile1 = new File(modsFolder, matcher.group());
-                    log.info(oldFile1);
-                    if(oldFile1.exists()) {
-                        oldFile = oldFile1;
+                    File file = tryLocateOldFile();
+                    log.info(file);
+                    if(file != null) {
+                        oldFile = file;
                     } else {
-                        log.warn("无法定位到旧文件! 请尝试手动更新文件!");
+                        String string = URLDecoder.decode(AutoUpdater.class.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8");
+                        log.info(string);
+                        File oldFile1 = oldFile;
+                        Matcher matcher = Pattern.compile("([^\\/]+\\.jar)").matcher(string);
+                        if (matcher.find()) oldFile1 = new File(modsFolder, matcher.group());
+                        log.info(oldFile1);
+                        if (oldFile1.exists()) {
+                            oldFile = oldFile1;
+                        } else {
+                            log.warn("无法定位到旧文件! 请尝试手动更新文件!");
+                        }
                     }
                 }
                 log.info("旧文件 -> " + oldFile.getAbsolutePath());
@@ -256,4 +260,23 @@ public class AutoUpdater {
     public String toString() {
         return "URLs: [" + StringUtils.join(URL," | ") + "], ver: " + newVer + ", downloaded:" + downlanded;
     }
+
+    private static File tryLocateOldFile() {
+        URL location = AutoUpdater.class.getProtectionDomain().getCodeSource().getLocation();
+        File file = null;
+
+        if (location != null && "file".equals(location.getProtocol())) {
+            try {
+                // 使用 URI 转换，避免空格等字符被转义问题
+                URI uri = location.toURI();
+                file = new File(uri);
+            } catch (Exception e) {
+                // 如果 URI 格式不合法，可降级使用 getFile()
+                file = new File(location.getFile());
+            }
+        }
+        if (file != null && !file.isFile()) return null;
+        return file;
+    }
+
 }

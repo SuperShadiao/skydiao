@@ -84,11 +84,14 @@ public class ClientReceiveHandler {
             case "sharemusic":
                 MusicInfo musicInfo = MusicListManager.jsonToMI(JsonParser.parseString(packet.message).getAsJsonObject());
                 int shareId = MusicListManager.storeTempSharingMusic(musicInfo);
-                MutableComponent component = Component.literal("§a[XSDChat] " + packet.getRank(true) + "§d" + packet.sender + " §a分享了音乐 §6" + musicInfo.name + " - " + musicInfo.singer + "§a, §e点击这里§a可以收听!");
+                MutableComponent component = Component.literal("§a[XSDChat] " + packet.getRank(true) + "§d" + packet.sender + " §a分享了音乐 §6" + musicInfo.name + " - " + musicInfo.singer);
+                MutableComponent component2 = Component.literal("§a[XSDChat] §e点击这里§a可以收听!");
+
                 Style style1 = Style.EMPTY
                         .withClickEvent(new ClickEvent.RunCommand("/skydiao listensharemusic " + shareId))
                         .withHoverEvent(new HoverEvent.ShowText(Component.literal("/skydiao listensharemusic " + shareId)));
                 ToolList.printChatMessage(component.withStyle(style1));
+                ToolList.printChatMessage(component2.withStyle(style1));
                 break;
         }
     }

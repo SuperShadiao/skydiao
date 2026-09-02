@@ -1149,6 +1149,14 @@
       "configname": "§e遇到Autofishe时触发警报",
       "description": "§eAutofishe是一个高危玩家, 开启后, 当你遇到Autofishe时, 会触发警报"
     },
+    "ravengardqueuemessage": {
+      "configname": "§eRavengard开始排队消息",
+      "description": "§e点击Ravengard开始游戏按钮时, 发送一条组队消息 (留空禁用该消息)"
+    },
+    "dungeonmissingplayer": {
+      "configname": "§e地牢缺失玩家消息",
+      "description": "§e当有玩家未进入当前服务器时, 发送一条组队消息, 使用[players]替换为未进入玩家的列表, 留空禁用该消息"
+    },
 
     "about1": "§e小沙雕的QQ: 3381949033",
     "about2": "§e小沙雕の狗窝: https://xiaoshadiao.club/qqg",

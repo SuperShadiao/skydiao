@@ -3,6 +3,7 @@ package pers.XiaoShadiao.skydiao.eventbuslistener;
 import it.unimi.dsi.fastutil.objects.Object2BooleanFunction;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
@@ -19,6 +20,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
+import pers.XiaoShadiao.skydiao.utils.PartyManager;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
@@ -44,6 +46,16 @@ public class RavengardHelper extends AbstractListener {
     public void registerListeners() {
         CustomFabricEvents.ON_SLOT_RENDER.register(this::renderSlots);
         ClientTickEvents.START_CLIENT_TICK.register(this::onClientTick);
+        ClientReceiveMessageEvents.GAME.register(this::onChat);
+    }
+
+    private void onChat(Component component, boolean b) {
+        if("Successfully queued for Ravengard Dungeon Trios!".equals(ToolList.getInstance().deleteColorCode(component.getString()))) {
+            String value = ConfigManager.ravengardQueueMessage.getValue();
+            if(!value.isBlank()) {
+                if(PartyManager.isInParty()) ToolList.sendChatMessage("/pc [SkyDiao] " + value);
+            }
+        }
     }
 
     private void onClientTick(Minecraft mc) {

@@ -10,9 +10,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
+import pers.XiaoShadiao.skydiao.commands.args.ClientBlockPosArgument;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
@@ -94,8 +96,22 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                 getArgConstantInstance("sharemusic").executes(this::executeShareMusic),
                 getArgConstantInstance("listensharemusic").then(getArgInstance("id", IntegerArgumentType.integer()).executes(this::executeListenShareMusic)),
                 getArgConstantInstance("请输入文本1").executes(this::黑潮),
-                getArgConstantInstance("请输入文本2").executes(this::敌方目标陷入了狂暴造成的伤害大幅提高)
+                getArgConstantInstance("请输入文本2").executes(this::敌方目标陷入了狂暴造成的伤害大幅提高),
+                getArgConstantInstance("autofillbottle")
+                        .then(getArgConstantInstance("water").then(getArgInstance("pos", ClientBlockPosArgument.blockPos()).executes(context -> executeAutoFillBottlePos(context, 0))))
+                        .then(getArgConstantInstance("chest").then(getArgInstance("pos", ClientBlockPosArgument.blockPos()).executes(context -> executeAutoFillBottlePos(context, 1))))
+                        .then(getArgConstantInstance("start").executes(c -> owo(() -> MacroManagerListener.autoFillBottleOfWater.enabled = true)))
+                        .then(getArgConstantInstance("stop").executes(c -> owo(() -> MacroManagerListener.autoFillBottleOfWater.enabled = false)))
         );
+    }
+
+    private int executeAutoFillBottlePos(CommandContext<FabricClientCommandSource> context, int type) {
+        switch(type) {
+            case 0 -> MacroManagerListener.autoFillBottleOfWater.waterPos = ClientBlockPosArgument.getBlockPos(context, "pos");
+            case 1 -> MacroManagerListener.autoFillBottleOfWater.chestPos = ClientBlockPosArgument.getBlockPos(context, "pos");
+        }
+        context.getSource().sendFeedback(Component.literal("§a[小沙雕] 设置成功!"));
+        return 0;
     }
 
     private int executeListenShareMusic(CommandContext<FabricClientCommandSource> context) {

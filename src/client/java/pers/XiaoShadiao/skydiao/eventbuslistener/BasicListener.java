@@ -78,6 +78,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -169,21 +170,24 @@ public class BasicListener extends AbstractListener {
                         if(disableHashCheck || !target.isFile() || !hashFunction.hashBytes(FileUtils.readFileToByteArray(target)).equals(hashCode)) {
                             XSDHUD.bigTitle.updateTitleMsg("§e正在获取Hypixel官材...如果长时间未完成, 请检查网络", 120000);
                             InputStream source = ToolList.getInstance().makeReqToURL(packet2.url());
-                            URLFetchProcess process = new URLFetchProcess(source);
-                            titleChanger.downloadProcess.addProcess(process);
-                            FileUtils.writeByteArrayToFile(temp, process.readAllBytes());
+                            URLFetchProcess process = new URLFetchProcess(source).addToTitle();
+                            FileUtils.copyInputStreamToFile(process, temp);
                             // System.out.println(mc.getResourcePackRepository().getAvailableIds());
                             // [cardinal-components-base, cardinal-components-entity, dandelion, fabric-api, fabric-api-base, fabric-api-lookup-api-v1, fabric-biome-api-v1, fabric-block-api-v1, fabric-block-getter-api-v2, fabric-client-gametest-api-v1, fabric-command-api-v2, fabric-content-registries-v0, fabric-convention-tags-v2, fabric-crash-report-info-v1, fabric-creative-tab-api-v1, fabric-creative-tab-api-v1_programmer_art, fabric-data-attachment-api-v1, fabric-data-generation-api-v1, fabric-debug-api-v1, fabric-dimensions-v1, fabric-entity-events-v1, fabric-events-interaction-v0, fabric-game-rule-api-v1, fabric-gametest-api-v1, fabric-item-api-v1, fabric-key-mapping-api-v1, fabric-language-kotlin, fabric-lifecycle-events-v1, fabric-loot-api-v3, fabric-menu-api-v1, fabric-message-api-v1, fabric-model-loading-api-v1, fabric-networking-api-v1, fabric-object-builder-api-v1, fabric-particles-v1, fabric-permission-api-v1, fabric-recipe-api-v1, fabric-registry-sync-v0, fabric-renderer-api-v1, fabric-renderer-indigo, fabric-rendering-fluids-v1, fabric-rendering-v1, fabric-resource-conditions-api-v1, fabric-resource-loader-v0, fabric-resource-loader-v1, fabric-screen-api-v1, fabric-serialization-api-v1, fabric-sound-api-v1, fabric-tag-api-v1, fabric-transfer-api-v1, fabric-transitive-access-wideners-v1, fabricloader, file/hypixel_resoucepack.zip, forgeconfigapiport, high_contrast, hm-api, hypixel-mod-api, iris, modmenu, modmenu_high_contrast, modmenu_programmer_art, org_apache_commons_commons-math3, placeholder-api, programmer_art, skyblockaddons, skyblocker, skyblocker:recolored_dungeon_items, skydiao, skyhanni, sodium, sparkle_morpher, vanilla, yet_another_config_lib_v3]
                             if (!FileUtils.contentEquals(temp, target)) {
                                 boolean executedRemove = false;
                                 if(mc.getResourcePackRepository().removePack("file/hypixel_resoucepack.zip")) {
-                                    mc.reloadResourcePacks().get();
+                                    CompletableFuture<CompletableFuture<Void>> future = new CompletableFuture<>();
+                                    mc.execute(() -> future.complete(mc.reloadResourcePacks()));
+                                    future.get().get();
                                     executedRemove = true;
                                 }
                                 Files.move(temp.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
                                 if(executedRemove) {
                                     mc.getResourcePackRepository().addPack("file/hypixel_resoucepack.zip");
-                                    mc.reloadResourcePacks().get();
+                                    CompletableFuture<CompletableFuture<Void>> future = new CompletableFuture<>();
+                                    mc.execute(() -> future.complete(mc.reloadResourcePacks()));
+                                    future.get().get();
                                 }
                             }
                             XSDHUD.bigTitle.updateTitleMsg("§eHyp官材获取成功, 请前往材质包页面查看", 3000);
@@ -197,9 +201,8 @@ public class BasicListener extends AbstractListener {
                         File temp = File.createTempFile("pack2", ".zip");
                         File target = new File(mc.getResourcePackDirectory().toFile(), "SkyBlock Legacy.zip");
                         InputStream source = ToolList.getInstance().makeReqToURL("https://xiaoshadiao.club/3rd_lib/pack/SkyBlockLegacy.zip");
-                        URLFetchProcess process = new URLFetchProcess(source);
-                        titleChanger.downloadProcess.addProcess(process);
-                        FileUtils.writeByteArrayToFile(temp, process.readAllBytes());
+                        URLFetchProcess process = new URLFetchProcess(source).addToTitle();
+                        FileUtils.copyInputStreamToFile(process, temp);
                         if(!FileUtils.contentEquals(temp, target)) {
                             Files.move(temp.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
                             XSDHUD.bigTitle.updateTitleMsg("§eLegacy (原版) 材质包获取成功, 请前往材质包页面查看", 3000);

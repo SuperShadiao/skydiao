@@ -124,7 +124,7 @@ public class MusicListManager {
         }
         for (MusicInfo musicInfo : list) {
             if(!musicInfo.canPlay()) {
-                musics.add(musicInfo);
+                addFixQueue(musicInfo);
             }
         }
 
@@ -152,7 +152,7 @@ public class MusicListManager {
     public static void add(MusicInfo musicInfo) {
         musics.add(musicInfo);
         musicInfo.fixMIFileVeriable();
-        if(musicInfo.canPlay()) addFixQueue(musicInfo);
+        if(!musicInfo.canPlay()) addFixQueue(musicInfo);
         save();
     }
 

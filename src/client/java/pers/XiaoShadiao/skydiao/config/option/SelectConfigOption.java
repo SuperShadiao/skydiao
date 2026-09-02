@@ -26,6 +26,11 @@ public class SelectConfigOption extends IntConfigOption {
         return translate(displayOptions.get(value));
     }
 
+    @Override
+    public String getI18nValue() {
+        return getCurrentDisplayString();
+    }
+
     public void switchOption() {
         value++;
         if (value >= displayOptions.size()) value = 0;

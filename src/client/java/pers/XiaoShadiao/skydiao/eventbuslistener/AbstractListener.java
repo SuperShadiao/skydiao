@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pers.XiaoShadiao.skydiao.appendage.eventbuslistener.EditingPListListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon.*;
+import pers.XiaoShadiao.skydiao.eventbuslistener.macro.AutoFillBottleOfWater;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
 import pers.XiaoShadiao.skydiao.utils.Register;
 import pers.XiaoShadiao.skydiao.utils.ToolList;

@@ -506,7 +506,7 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
                 if(failedToSimulateTick > 5) {
                     failedToSimulateCounter++;
                     if(ToolList.getInstance().isXiaoShadiao()) ToolList.printChatMessage(Component.literal("§a[小沙雕] §e鱼钩脱离正常的轨迹, 尝试第" + failedToSimulateCounter + "次校正..."));
-                    if(failedToSimulateCounter > 1) {
+                    if(failedToSimulateCounter > 2) {
                         if (isThisMacroEnabled()) {
                             AbstractListener.mml.triggerAlert("鱼钩脱离正常的轨迹, 疑似马口检查!");
                         } else {

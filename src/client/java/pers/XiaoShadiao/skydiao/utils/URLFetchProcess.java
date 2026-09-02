@@ -1,5 +1,7 @@
 package pers.XiaoShadiao.skydiao.utils;
 
+import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
+
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,6 +80,11 @@ public class URLFetchProcess extends FilterInputStream {
 
     public boolean isFailed() {
         return failed;
+    }
+
+    public URLFetchProcess addToTitle() {
+        AbstractListener.titleChanger.downloadProcess.addProcess(this);
+        return this;
     }
 
 }

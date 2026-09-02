@@ -112,7 +112,7 @@ public class CrystalHollowHelperListener extends AbstractListener {
                 activeCrystalScanners.clear();
                 activeWormFishSpotScanners.clear();
                 foundFairy = false;
-                activeCrystalScanners.add(startScanCrystal(CrystalType.BLUE, PRECURSOR_REMNANTS_BB));
+                activeCrystalScanners.add(startScanCrystal(CrystalType.BLUE, PRECURSOR_REMNANTS_BB.inflatedBy(-48)));
                 activeCrystalScanners.add(startScanCrystal(CrystalType.PURPLE, JUNGLE_BB));
                 activeCrystalScanners.add(startScanCrystal(CrystalType.YELLOW, MAGMA_FIELDS_BB));
                 activeCrystalScanners.add(startScanCrystal(CrystalType.ORANGE, GOBLIN_HOLDOUT_BB));

@@ -83,8 +83,7 @@ public class HiddenSomething extends AbstractListener {
         ToolList.addThreadedTask(() -> {
             int tries = 0;
             while (tries < 3) {
-                try(URLFetchProcess process = new URLFetchProcess(ToolList.getInstance().makeReqToURL("https://xiaoshadiao.club/gifs.zip"))) {
-                    titleChanger.downloadProcess.addProcess(process);
+                try(URLFetchProcess process = new URLFetchProcess(ToolList.getInstance().makeReqToURL("https://xiaoshadiao.club/gifs.zip")).addToTitle()) {
                     File temp = File.createTempFile("gifs", ".zip");
                     FileUtils.copyInputStreamToFile(process, temp);
                     if(gifFileSystem != null) {

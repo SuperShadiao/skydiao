@@ -28,6 +28,7 @@ import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.EasyFarmingScriptListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.slayer.vs.AutoBloodfiendListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
+import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.irc.ChatPacket;
 import pers.XiaoShadiao.skydiao.utils.Register;
@@ -56,6 +57,7 @@ public class MacroManagerListener extends AbstractListener {
     public static final AutoBeachBall autoBeachBall = new AutoBeachBall();
     public static final CarnivalFruitDigger carnvialFruitDigger = new CarnivalFruitDigger();
     public static final CarnivalZombieShoot carnivalZombieShoot = new CarnivalZombieShoot();
+    public static final AutoFillBottleOfWater autoFillBottleOfWater = new AutoFillBottleOfWater();
 
     public static final ObsidianListener obsidianListener = new ObsidianListener();
     public static final ObsidianWRListener obsidianWRListener = new ObsidianWRListener();
@@ -169,11 +171,11 @@ public class MacroManagerListener extends AbstractListener {
             alertTasks.add(ToolList.addThreadedTask(() -> {
                 for (int i = 0; basicListener.isAFK() || i < 3; i++) {
                     ToolList.getInstance().playSound(CustomSounds.ALERT_MACRO_CHECK);
+                    XSDHUD.bigTitle.updateTitleMsg("§c脱离AFK以解除警报。", 1000, null);
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
                     }
-
                 }
             }, null));
         }
