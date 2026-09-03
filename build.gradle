@@ -111,4 +111,43 @@ tasks.register('processTextFiles', Copy) {
         Base64.encoder.encodeToString(reader.getBytes('UTF-8'))
     }
 }
-tasks.classes.dependsOn(processTextFiles)
+
+tasks.register('zipGifs', Zip) {
+    // 要打包的源目录
+    from 'D:/JavaDevelop/skydiao/hiddensomething/gifs'
+
+    // 包含目录下所有文件
+    include '**'
+
+    // 不指定 into，避免把 gifs 文件夹本身打进去
+
+    // 输出的 zip 文件路径
+    destinationDirectory.set(file('D:/JavaDevelop/skydiao/hiddensomething'))
+    archiveFileName.set('gifs.zip')
+}
+
+tasks.register('checkGifsZipSize') {
+    doLast {
+        def zipFile = file('D:/JavaDevelop/skydiao/hiddensomething/gifs.zip')
+        if (!zipFile.exists()) {
+            throw new GradleException("gifs.zip 不存在")
+        }
+
+        def sizeInMb = zipFile.length() / 1024 / 1024
+        println "gifs.zip 大小: ${sizeInMb} MB"
+
+        if (sizeInMb > 25) {
+            throw new GradleException("gifs.zip 超过 25MB，当前大小: ${sizeInMb} MB")
+        }
+    }
+}
+
+tasks.named('classes') {
+    dependsOn tasks.named('processTextFiles', Copy)
+}
+tasks.named('classes') {
+    dependsOn tasks.named('checkGifsZipSize')
+}
+tasks.named('checkGifsZipSize') {
+    dependsOn tasks.named('zipGifs', Zip)
+}
