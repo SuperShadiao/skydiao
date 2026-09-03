@@ -114,7 +114,7 @@ tasks.register('processTextFiles', Copy) {
 
 tasks.register('zipGifs', Zip) {
     // 要打包的源目录
-    from 'D:/JavaDevelop/skydiao/hiddensomething/gifs'
+    from 'hiddensomething/gifs'
 
     // 包含目录下所有文件
     include '**'
@@ -122,13 +122,13 @@ tasks.register('zipGifs', Zip) {
     // 不指定 into，避免把 gifs 文件夹本身打进去
 
     // 输出的 zip 文件路径
-    destinationDirectory.set(file('D:/JavaDevelop/skydiao/hiddensomething'))
+    destinationDirectory.set(file('hiddensomething'))
     archiveFileName.set('gifs.zip')
 }
 
 tasks.register('checkGifsZipSize') {
     doLast {
-        def zipFile = file('D:/JavaDevelop/skydiao/hiddensomething/gifs.zip')
+        def zipFile = file('hiddensomething/gifs.zip')
         if (!zipFile.exists()) {
             throw new GradleException("gifs.zip 不存在")
         }
