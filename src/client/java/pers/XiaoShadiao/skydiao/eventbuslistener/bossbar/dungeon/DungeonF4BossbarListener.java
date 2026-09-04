@@ -62,7 +62,6 @@ public class DungeonF4BossbarListener extends AbstractDungeonBossbar {
         LevelRenderEvents.END_MAIN.register(this::onLastRender);
         ClientReceiveMessageEvents.GAME.register(this::onChat);
         ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
-
     }
 
     private void onChat(Component component, boolean b) {
@@ -225,7 +224,9 @@ public class DungeonF4BossbarListener extends AbstractDungeonBossbar {
         float health = bossEntity.getHealth();
         double scale = (health < 10 ? 0 : health) / bossEntity.getMaxHealth();
 
-        return (int) Math.min(maxHealth, maxHealth * scale * (isInMasterDungeonFloor() ? 1.2 : 1.3333));
+        int ret = (int) Math.min(maxHealth, maxHealth * scale * (isInMasterDungeonFloor() ? 1.2 : 1.3333));
+        if(scale > 0 && ret == 0) ret = 1;
+        return ret;
     }
 
     @Override

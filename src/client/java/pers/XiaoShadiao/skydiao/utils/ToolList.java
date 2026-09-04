@@ -48,6 +48,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinEntityCloneableAccessor;
+import pers.XiaoShadiao.skydiao.utils.blivesensitiveword.ComponentHelper;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
@@ -865,7 +866,8 @@ public class ToolList {
                         Component componentx = playerScoreEntry.ownerName();
                         Component component2 = PlayerTeam.formatNameForTeam(playerTeam2, componentx);
                         Component component3 = playerScoreEntry.formatValue(numberFormat);
-                        lines.add(Component.empty().append(componentx).append(component2).append(component3));
+                        MutableComponent result = Component.empty().append(componentx).append(component2).append(component3);
+                        lines.add(ComponentHelper.unwrapSensitive(result));
                     });
             return lines;
         }

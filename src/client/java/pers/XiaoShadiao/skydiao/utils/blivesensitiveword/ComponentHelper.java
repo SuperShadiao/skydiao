@@ -20,6 +20,18 @@ public class ComponentHelper {
         return component1;
     }
 
+    public static Component unwrapSensitive(Component component) {
+        MutableComponent component1;
+        if(component.getContents() instanceof SensitiveWordLiteralContents plainTextContents) {
+            component1 = MutableComponent.create(new PlainTextContents.LiteralContents(plainTextContents.getOriginalText()));
+        } else {
+            component1 = MutableComponent.create(component.getContents());
+        }
+        component1.setStyle(component.getStyle());
+        component.getSiblings().forEach(component2 -> component1.append(unwrapSensitive(component2)));
+        return component1;
+    }
+
     public static Component wrapAsServerIdSpoof(Component component) {
         MutableComponent component1;
         if(component.getContents() instanceof PlainTextContents plainTextContents) {

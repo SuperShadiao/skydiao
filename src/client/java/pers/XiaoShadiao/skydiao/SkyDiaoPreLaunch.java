@@ -189,7 +189,7 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
                 log.info("成功添加" + libs.size() + "个jar文件到" + urlClassLoader);
             };
         } else {
-            throw new RuntimeException("Can't lookup the URLClassLoader");
+            throw new AssertionError("Can't lookup the URLClassLoader");
         }
     }
 
@@ -235,11 +235,11 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
             for (CompletableFuture<Throwable> downloadFuture : downloadFutures) {
                 Throwable throwable = downloadFuture.get();
                 if (throwable != null) {
-                    throw new RuntimeException("初次使用SkyDiao，lib库文件下载失败，SkyDiao感到非常生气。请检查网络状态并尝试重启游戏！", throwable);
+                    throw new RuntimeException("初次使用SkyDiao，lib库文件下载失败，小沙雕感到非常生气。请检查网络状态并尝试重启游戏！", throwable);
                 }
             }
         } catch (Throwable e) {
-            RuntimeException runtimeException = new RuntimeException("初次使用SkyDiao，lib库文件下载失败，SkyDiao感到非常生气。请检查网络状态并尝试重启游戏！", e);
+            RuntimeException runtimeException = new RuntimeException("初次使用SkyDiao，lib库文件下载失败，小沙雕感到非常生气。请检查网络状态并尝试重启游戏！", e);
             log.catching(runtimeException);
             throw runtimeException;
         }

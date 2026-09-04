@@ -23,11 +23,14 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3x2fStack;
 import org.joml.Vector3f;
+import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.FreecamAndFreelook;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinAbstractContainerScreenPosGetter;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.awt.*;
 import java.util.List;
+import java.util.Objects;
 
 public class RenderUtils {
 
@@ -305,9 +308,10 @@ public class RenderUtils {
     public static void renderTrace(WorldRender worldRender, double x, double y, double z, float r, float g, float b, float a) {
         checkAccess(_3d_line, worldRender.pipeline, "renderTrace()");
 
-        Vec3 vec3 = mc().player.getPosition(ToolList.mc.getDeltaTracker().getGameTimeDeltaPartialTick(true)).add(mc().player.getForward().add(0, mc().getCameraEntity().getEyeHeight(), 0));
+        FreecamAndFreelook.CameraEntity cameraEntity1 = AbstractListener.freecamAndFreelook.getCameraEntity();
+        Entity cameraEntity = cameraEntity1 == null ? Objects.requireNonNull(mc().getCameraEntity(), "Camera Entity") : cameraEntity1;
+        Vec3 vec3 = cameraEntity.getPosition(ToolList.mc.getDeltaTracker().getGameTimeDeltaPartialTick(true)).add(cameraEntity.getForward().add(0, cameraEntity.getEyeHeight(), 0));
 
-        // Vec3 forward = mc().getCameraEntity().getForward().add(0, mc().getCameraEntity().getEyeHeight(), 0);
         worldRender.crpl.renderTrace(worldRender.context, worldRender.pipeline, (float) (vec3.x), (float) (vec3.y), (float) (vec3.z), (float) (x - vec3.x), (float) (y - vec3.y), (float) (z - vec3.z), r, g, b, a);
     }
 

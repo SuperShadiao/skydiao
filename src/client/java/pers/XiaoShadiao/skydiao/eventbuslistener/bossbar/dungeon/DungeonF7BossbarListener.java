@@ -15,12 +15,16 @@ import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
+import net.minecraft.world.entity.projectile.hurtingprojectile.Fireball;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -31,12 +35,16 @@ import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.hud.CustomBossbar;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinBossbarEventGetter;
+import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
+import java.util.stream.Stream;
 
 public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
@@ -68,6 +76,48 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     private final BlockPos stage3LeapPositionCorn2 = new BlockPos(102, 120, 99);
 
     private boolean isNecronUsingUltimateSkill;
+
+    private int stage5DragonCount = 0;
+
+    private record WitherDragonData(int entityId, ColorType colorType) {
+        private enum ColorType {
+            GREEN(new BlockPos(26, 6, 94), new BlockPos(32, 23, 94), Color.GREEN),
+            RED(new BlockPos(26, 6, 59), new BlockPos(32, 22, 59), Color.RED),
+            ORANGE(new BlockPos(86, 6, 56), new BlockPos(80, 23, 56), Color.ORANGE),
+            BLUE(new BlockPos(85, 6, 94), new BlockPos(79, 23, 94), Color.BLUE),
+            PURPLE(new BlockPos(56, 8, 126), new BlockPos(56, 22, 120), Color.MAGENTA),
+            ;
+            private final BlockPos spawnPos;
+            private final BlockPos deathDetection;
+            private final Color color;
+            ColorType(BlockPos pos, BlockPos deathDetection, Color color) {
+                this.spawnPos = pos;
+                this.deathDetection = deathDetection;
+                this.color = color;
+            }
+
+            private double horizontalSpawnDistanceSqrToEntity(Entity entity) {
+                return entity.position().horizontal().distanceToSqr(spawnPos.getX() + 0.5, 0, spawnPos.getZ() + 0.5);
+            }
+
+            private boolean isDragonInSpawnArea(EnderDragon dragon) {
+                return horizontalSpawnDistanceSqrToEntity(dragon) < 100;
+            }
+
+            private boolean isDragonNearbySpawnArea(EnderDragon dragon) {
+                return horizontalSpawnDistanceSqrToEntity(dragon) < 529;
+            }
+
+            private boolean isDragonDead() {
+                return mc.level != null && mc.level.getBlockState(deathDetection).isAir();
+            }
+
+            public static ColorType guessColor(EnderDragon dragon) {
+                return Stream.of(values()).min(Comparator.comparingDouble(type -> type.horizontalSpawnDistanceSqrToEntity(dragon))).orElseThrow(AssertionError::new);
+            }
+        }
+    }
+    private final List<WitherDragonData> witherDragons = new ArrayList<>();
 
     @Override
     public int getStage() {
@@ -115,26 +165,29 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
     @Override
     public boolean isImmune() {
-        return (currentStage <= 2 && getWeakness() > 0) || (currentStage == 3 && remainTerminal > 0) || (currentStage == 4 && isNecronUsingUltimateSkill);
+        return (currentStage <= 2 && getWeakness() > 0) || (currentStage == 3 && remainTerminal > 0) || (currentStage == 4 && isNecronUsingUltimateSkill) || (currentStage == 5 && stage5DragonCount == 5);
     }
 
     @Override
     public boolean isPowerUpAvaliable() {
-        return currentStage == 3 || currentStage == 4;
+        return currentStage >= 3;
     }
 
     @Override
     public boolean isPowerUp() {
-        return (currentStage == 3 && remainTerminal > 0) || (currentStage == 4 && isNecronUsingUltimateSkill);
+        return (currentStage == 3 && remainTerminal > 0) ||
+                (currentStage == 4 && isNecronUsingUltimateSkill) ||
+                (currentStage == 5 && stage5DragonCount == 5);
     }
 
     @Override
     public Identifier getPowerUpPotionIcon() {
-        return Gui.getMobEffectSprite(currentStage == 4 ? MobEffects.STRENGTH : MobEffects.RESISTANCE);
+        return Gui.getMobEffectSprite(currentStage >= 4 ? MobEffects.STRENGTH : MobEffects.RESISTANCE);
     }
 
     @Override
     public int getPowerUp() {
+        if(currentStage == 5) return stage5DragonCount;
         return remainTerminal;
     }
 
@@ -145,6 +198,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
     @Override
     public int getMaxPowerUp() {
+        if(currentStage == 5) return 5;
         return terminals;
     }
 
@@ -155,6 +209,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
     @Override
     public boolean isBattleOver() {
+        if(masterFloorFlag) return false;
         return currentStage == 4 && f7Boss == null;
     }
 
@@ -209,6 +264,11 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         }
         if(currentStage == 5) {
             addStarRailNotification("最终阶段", StarRailNotification.Type.warning);
+            ToolList.addThreadedTask(() -> {
+                Thread.sleep(8000);
+                addStarRailNotification("在对应凋零龙生成点击杀对应凋零龙即可削减凋零王生命值!", StarRailNotification.Type.warning);
+                return null;
+            });
         }
     }
 
@@ -257,12 +317,13 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register((a,b) -> {
             passWatcherFlag = false;
             masterFloorFlag = false;
+            witherDragons.clear();
         });
         LevelRenderEvents.END_MAIN.register(this::onLastRender);
     }
 
     private void onLastRender(LevelRenderContext context) {
-        if(mc.level == null || !isInCorrectDungeon()) return;
+        if(mc.level == null || (!masterFloorFlag && !isInCorrectDungeon())) return;
 
         RenderUtils.WorldRender wr1 = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.NO_THROUGH_WALLS_LINE);
         RenderUtils.WorldRender wr2 = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.NO_THROUGH_WALLS_FILL);
@@ -272,6 +333,46 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                 RenderUtils.renderESP(wr2, pos, 200 / 255f, 0, 1f, 1f, true);
                 RenderUtils.renderESP(wr1, pos, 200 / 255f, 0, 1f, 1f, false);
                 flag = true;
+            }
+        }
+        if(currentStage == 2 && ConfigManager.f7DrawStormFireballTarget.getValue()) {
+            for (Entity entity : mc.level.entitiesForRendering()) {
+                if(!(entity instanceof Fireball fireball)) continue;
+
+                Vec3 fireballEyePos = fireball.getEyePosition();
+                HitResult hitResult = ToolList.getInstance().predictPlayerAimBlock(fireballEyePos, fireballEyePos.add(fireball.getDeltaMovement().multiply(70, 70, 70)));
+                if(hitResult.getType() == HitResult.Type.BLOCK && hitResult instanceof BlockHitResult blockHitResult) {
+                    BlockPos target = blockHitResult.getBlockPos();
+                    Vec3 location = blockHitResult.getLocation();
+                    for (BlockPos pos : BlockPos.betweenClosed(target.offset(-4, -4, -4), target.offset(4, 4, 4))) {
+                        if(!mc.level.getBlockState(pos).isAir()) {
+                            RenderUtils.renderESP(wr2, pos, 1, 0, 0f, 1f, true);
+                            RenderUtils.renderESP(wr1, pos, 1, 0, 0f, 1f, false);
+                        }
+                    }
+                    RenderUtils.renderWorldLine(wr1, fireballEyePos, location, 1, 0, 0, 1);
+                }
+            }
+        }
+        if(ConfigManager.f7DrawWitherDragonESP.getValue()) {
+            Iterator<WitherDragonData> it = witherDragons.iterator();
+            while(it.hasNext()) {
+                WitherDragonData data = it.next();
+                Entity entity = mc.level.getEntity(data.entityId);
+                if (!(entity instanceof EnderDragon enderDragon) || data.colorType.isDragonDead()) continue;
+                if (enderDragon.getHealth() <= 0) {
+                    it.remove();
+                    continue;
+                }
+                if (data.colorType.isDragonNearbySpawnArea(enderDragon)) {
+                    RenderUtils.renderESP(wr1, enderDragon, data.colorType.color.getRed() / 255f, data.colorType.color.getGreen() / 255f, data.colorType.color.getBlue() / 255f, 1f, false);
+                    if (data.colorType.isDragonInSpawnArea(enderDragon)) {
+                        RenderUtils.renderESP(wr2, enderDragon, data.colorType.color.getRed() / 255f, data.colorType.color.getGreen() / 255f, data.colorType.color.getBlue() / 255f, 1f, true);
+                    }
+                    RenderUtils.renderTrace(wr1, enderDragon, data.colorType.color.getRed() / 255f, data.colorType.color.getGreen() / 255f, data.colorType.color.getBlue() / 255f, 1f);
+                } else if (enderDragon.getHealth() / enderDragon.getMaxHealth() > 0.2) {
+                    RenderUtils.renderESP(wr1, enderDragon, 1, 1, 1, 1f, false);
+                }
             }
         }
         wr2.finishDraw();
@@ -412,6 +513,13 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                 enteredGoldorCoreTunnel = false;
             }
         }
+        if(currentStage == 5) {
+            int tempCount = 0;
+            for (String s : ToolList.getInstance().fetchScoreboardLinesNoColor()) {
+                if(s.contains("Dragon")) tempCount++;
+            }
+            stage5DragonCount = tempCount;
+        }
 
     }
 
@@ -475,6 +583,28 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     private int stormThunderAfterTipTick = 0;
 
     private boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
+        if(mc.level == null || !StatusManager.get().isInDungeon()) {
+            return false;
+        }
+        if(packet instanceof ClientboundAddEntityPacket addEntityPacket) {
+            if (addEntityPacket.getType() == EntityType.ENDER_DRAGON) {
+                delayTickExecutor.delayExec(() -> {
+                    int id = addEntityPacket.getId();
+                    for (WitherDragonData witherDragon : witherDragons) {
+                        if(witherDragon.entityId == id) {
+                            return;
+                        }
+                    }
+                    Entity entity = mc.level.getEntity(id);
+                    if(entity instanceof EnderDragon dragon) {
+                        WitherDragonData.ColorType colorType = WitherDragonData.ColorType.guessColor(dragon);
+                        witherDragons.removeIf(data -> data.colorType == colorType);
+                        witherDragons.add(new WitherDragonData(id, colorType));
+                    }
+                }, 2);
+            }
+        }
+
         Map.Entry<String, StarRailNotification.Type> turnItToStarRailMsg = null;
         boolean cancelFlag = true;
 

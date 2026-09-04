@@ -40,5 +40,9 @@ public class SensitiveWordLiteralContents implements PlainTextContents {
     public @NotNull String text() {
         return sensitiveWord;
     }
+
+    public String getOriginalText() {
+        return text;
+    }
 }
 
