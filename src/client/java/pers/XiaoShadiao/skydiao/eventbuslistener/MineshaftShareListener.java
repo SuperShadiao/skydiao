@@ -10,6 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.irc.ChatPacket;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
@@ -122,6 +123,22 @@ public class MineshaftShareListener extends AbstractListener {
             flagFoundShaft();
         } else if(message.equals("The mineshaft entrance has caved in... it doesn't look like anyone else will be able to get in here.")) {
             mineshaftClosed = true;
+        } else if(message.contains("[SkyDiao] [ANNOUNCE] ")) {
+            ToolList.addThreadedTask(() -> {
+                Thread.sleep(4500);
+                String announce = message.split("\\[SkyDiao] \\[ANNOUNCE] ")[1];
+                if(!announce.isBlank() && isInMineshaft()) {
+                    ToolList.printChatMessage(Component.literal("§b"));
+                    ToolList.printChatMessage(Component.literal("§b========[§aXSD§bMS §eAnnounce§b]========="));
+                    ToolList.printChatMessage(Component.literal("§7此§bShaft§7包含下面的公告信息:"));
+                    ToolList.printChatMessage(Component.literal("§e"));
+                    ToolList.printChatMessage(Component.literal("§e* " + announce));
+                    ToolList.printChatMessage(Component.literal("§b====================================="));
+                    ToolList.printChatMessage(Component.literal("§b"));
+                    XSDHUD.bigTitle.updateTitleMsg("§c留意§bShaft§c公告!", 2000);
+                }
+                return null;
+            });
         }
     }
 
@@ -203,18 +220,43 @@ public class MineshaftShareListener extends AbstractListener {
                             }
                         }
                         try { Thread.sleep(3300); } catch (InterruptedException e) {}
-                        runCommand("/p warp");
-                        String announceMsg = ConfigManager.mineshaftShareAnnounce.getValue().trim();
-                        if(announceMsg.isEmpty()) {
-                            try { Thread.sleep(5500);  } catch (InterruptedException e) {}
-                        } else {
-                            try { Thread.sleep(4500);  } catch (InterruptedException e) {}
-                            runCommand("/pc [SkyDiao] " + announceMsg);
-                            try { Thread.sleep(1000);  } catch (InterruptedException e) {}
-                        }
-                        runCommand("/p warp");
-                        try { Thread.sleep(1500);  } catch (InterruptedException e) {}
 
+                        boolean isLeaveEarly = false;
+                        if (isInMineshaft()) {
+                            runCommand("/p warp");
+                            String announceMsg = ConfigManager.mineshaftShareAnnounce.getValue().trim();
+                            if (announceMsg.isEmpty()) {
+                                try {
+                                    Thread.sleep(5500);
+                                } catch (InterruptedException e) {
+                                }
+                            } else {
+                                try {
+                                    Thread.sleep(4500);
+                                } catch (InterruptedException e) {
+                                }
+                                runCommand("/pc [SkyDiao] [ANNOUNCE] " + announceMsg);
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException e) {
+                                }
+                            }
+                            if(isInMineshaft()) {
+                                runCommand("/p warp");
+                                try {
+                                    Thread.sleep(1500);
+                                } catch (InterruptedException e) {
+                                }
+                            } else isLeaveEarly = true;
+                        } else isLeaveEarly = true;
+
+                        if(isLeaveEarly) {
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                            }
+                            runCommand("/pc [SkyDiao] 由于我不小心提前离开了Mineshaft, 后续的warp无法进行");
+                        }
                         runCommand("/p disband");
                     }
                     try { Thread.sleep(500); } catch (InterruptedException e) {}

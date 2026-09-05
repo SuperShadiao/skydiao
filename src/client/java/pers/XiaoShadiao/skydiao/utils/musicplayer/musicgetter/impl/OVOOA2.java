@@ -99,7 +99,7 @@ public class OVOOA2 extends MusicPlatform {
 
             try (InputStream is = new FileInputStream(musicFile)) {
                 if (is.available() < 16384) {
-                    mi.albumID = "";
+                    mi.albumID = null;
                     throw new RuntimeException("Bad music file");
                 }
             }

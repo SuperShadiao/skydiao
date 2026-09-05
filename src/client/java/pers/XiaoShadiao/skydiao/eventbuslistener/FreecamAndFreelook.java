@@ -1,6 +1,7 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener;
 
 import com.mojang.authlib.GameProfile;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -23,6 +24,8 @@ public class FreecamAndFreelook extends AbstractListener {
 
     private boolean isHoldingFreelook = false;
 
+    private boolean levelChanged = false;
+
     private CameraEntity cameraEntity;
 
     @Override
@@ -33,10 +36,12 @@ public class FreecamAndFreelook extends AbstractListener {
     @Override
     public void registerListeners() {
         ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
+        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register((_, _) -> levelChanged = true);
     }
 
     private void onClientTick(Minecraft mc) {
-        if(mc.player == null || mc.level == null) {
+        if(mc.player == null || mc.level == null || levelChanged) {
+            levelChanged = false;
             cameraEntity = null;
             isFreelook = false;
             isFreecam = false;

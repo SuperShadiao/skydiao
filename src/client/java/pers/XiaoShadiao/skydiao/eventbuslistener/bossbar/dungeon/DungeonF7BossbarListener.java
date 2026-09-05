@@ -105,7 +105,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             }
 
             private boolean isDragonNearbySpawnArea(EnderDragon dragon) {
-                return horizontalSpawnDistanceSqrToEntity(dragon) < 529;
+                return horizontalSpawnDistanceSqrToEntity(dragon) < 784;
             }
 
             private boolean isDragonDead() {
@@ -193,7 +193,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
     @Override
     public CustomBossbar.PowerUpStyle getPowerUpStyle() {
-        return CustomBossbar.PowerUpStyle.READY;
+        return currentStage == 5 && stage5DragonCount < 5 ? CustomBossbar.PowerUpStyle.CHARGING : CustomBossbar.PowerUpStyle.READY;
     }
 
     @Override
@@ -204,7 +204,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
     @Override
     public CustomBossbar.PowerUpTextState getPowerUpTextState() {
-        return currentStage == 3 ? CustomBossbar.PowerUpTextState.NUMBER_WITH_MAX : CustomBossbar.PowerUpTextState.NONE;
+        return currentStage == 3 || currentStage == 5 ? CustomBossbar.PowerUpTextState.NUMBER_WITH_MAX : CustomBossbar.PowerUpTextState.NONE;
     }
 
     @Override
@@ -516,9 +516,14 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         if(currentStage == 5) {
             int tempCount = 0;
             for (String s : ToolList.getInstance().fetchScoreboardLinesNoColor()) {
-                if(s.contains("Dragon")) tempCount++;
+                if(s.contains("Dragon") && !s.contains("Dragons")) tempCount++;
             }
-            stage5DragonCount = tempCount;
+            if(stage5DragonCount != tempCount) {
+                if(tempCount == 5) {
+                    addStarRailNotification("五条凋零龙已生成! 请尽快击杀一条龙, 否则此次地牢将直接失败!", StarRailNotification.Type.warning);
+                }
+            }
+            if(!(stage5DragonCount == 5 && tempCount == 0)) stage5DragonCount = tempCount;
         }
 
     }
