@@ -256,6 +256,10 @@ public class MineshaftShareListener extends AbstractListener {
                             } catch (InterruptedException e) {
                             }
                             runCommand("/pc [SkyDiao] 由于我不小心提前离开了Mineshaft, 后续的warp无法进行");
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                            }
                         }
                         runCommand("/p disband");
                     }
