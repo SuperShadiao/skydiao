@@ -237,7 +237,7 @@ public class ConfigManager {
     };
 
     public static final BooleanConfigOption macroReplay = new BooleanConfigOption("macroreplay", true);
-    public static final BooleanConfigOption macroReplaySelfCleaning = new BooleanConfigOption("macroreplayselfcleaning", false);
+    public static final BooleanConfigOption macroReplaySelfCleaning = new BooleanConfigOption("macroreplayselfcleaning", true);
 
     public static final BooleanConfigOption chatbutton = new BooleanConfigOption("chatbutton", false).setRequiredMod(new ConfigOption.ModDepends("chatpatches", "alpha.8", "https://modrinth.com/mod/chatpatches"));
 
@@ -335,7 +335,8 @@ public class ConfigManager {
 
     private static final Int2ObjectMap<List<ConfigOption<?>>> tryToResetToDefaultMap = Int2ObjectMap.ofEntries(
             Int2ObjectMap.entry(0, List.of(bossbar, bossbarShowHealth, bossbarAddTargetEntity)),
-            Int2ObjectMap.entry(1, List.of(dungeonRenderDangerousEnemy, dungeonKeyRender))
+            Int2ObjectMap.entry(1, List.of(dungeonRenderDangerousEnemy, dungeonKeyRender)),
+            Int2ObjectMap.entry(2, List.of(macroReplay, macroReplaySelfCleaning))
     );
 
     static {

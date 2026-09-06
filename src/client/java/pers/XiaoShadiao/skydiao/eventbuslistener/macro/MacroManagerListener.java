@@ -6,7 +6,6 @@ import com.mojang.text2speech.Narrator;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
@@ -32,6 +31,7 @@ import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.irc.ChatPacket;
 import pers.XiaoShadiao.skydiao.utils.Register;
+import pers.XiaoShadiao.skydiao.utils.ScreenshotUtils;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.WindowsUtils;
 
@@ -228,7 +228,7 @@ public class MacroManagerListener extends AbstractListener {
                 if (ConfigManager.macroReplaySelfCleaning.getValue()) {
                     currentRecordInstance = new File(recordDir, String.valueOf(recordInstanceCycle));
                     recordInstanceCycle++;
-                    if(recordInstanceCycle > 9) {
+                    if(recordInstanceCycle > 4) {
                         recordInstanceCycle = 0;
                     }
                     try {
@@ -279,7 +279,7 @@ public class MacroManagerListener extends AbstractListener {
 
         if(isRecording || recordMoreFrame > 0) {
             if(frameTasks.remainingCapacity() > 1) {
-                Screenshot.takeScreenshot(mc.getMainRenderTarget(), image0 -> {
+                ScreenshotUtils.takeScreenshot(mc.getMainRenderTarget(), image0 -> {
                     int delay = Math.clamp(System.currentTimeMillis() - lastFrameTime, 1, 750);
                     if (frameTasks.offer(() -> {
                         try(NativeImage image = image0) {

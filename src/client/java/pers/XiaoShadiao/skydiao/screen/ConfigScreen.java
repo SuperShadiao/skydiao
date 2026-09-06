@@ -465,7 +465,7 @@ public class ConfigScreen extends Screen {
                         button.setMessage(Component.literal(option.getI18nValue()));
                     } else if(widget instanceof EditBox editBox) {
                         String temp = option.getI18nValue();
-                        if(!editBox.getValue().equals(temp)) editBox.setValue(temp);
+                        if(!editBox.getValue().equals(temp) && !editBox.isFocused()) editBox.setValue(temp);
                     }
                 }
 
