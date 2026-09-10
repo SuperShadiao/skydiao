@@ -427,13 +427,13 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                     while (FarmingUtils.hasPests()) {
                         try {
                             SleepActions.flagAntiMacro();
-                            Thread.sleep(100);
+                            Thread.sleep(10);
                         } catch (InterruptedException _) {}
                     }
                 }, 0, true)
-                .addAction(() -> XSDHUD.bigTitle.updateTitleMsg("§e即将返回原来的点位...", 4000), 500, true)
+                .addAction(() -> XSDHUD.bigTitle.updateTitleMsg("§e即将返回原来的点位...", 4000), 100, true)
 
-                .addAction(ctx -> InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")), 300)
+                .addAction(ctx -> InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")), 200)
                 .addAction(() -> ToolList.sendChatMessage("/warp garden"), 500, true);
 
 

@@ -143,7 +143,11 @@ public class XSDSafeSession extends User {
         log.warn("椎栈" + stack + "在刚才调用了" + str + "()");
         ToolList.printChatMessage(Component.literal("§a[小沙雕] §e椎栈" + stack + "在刚才通过" + str + "()获取了你的Token"));
         ToolList.printChatMessage(Component.literal("§a[小沙雕] §e可能来自于Mod: §6" + getSuspiciousInfo(stack)));
-        if(ticket) ToolList.printChatMessage(Component.literal("§a[小沙雕] §e该椎栈通过Ticket成功获取了Token, 但如果你不认识该mod, 请检查你的mod列表"));
+        if(ticket) {
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §e该椎栈通过Ticket成功获取了Token, 但如果你不认识该mod, 请检查你的mod列表"));
+        } else {
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §e该椎栈位于小沙雕白名单内, 你无需过多担心"));
+        }
     }
 
     private void throwException(String str, String stack) {

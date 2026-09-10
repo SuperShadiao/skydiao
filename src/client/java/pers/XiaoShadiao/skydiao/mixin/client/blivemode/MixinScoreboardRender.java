@@ -32,7 +32,7 @@ public class MixinScoreboardRender {
             int i = 0;
             for (Component ele : call.getSiblings()) {
                 if(!ele.getSiblings().isEmpty()) return call;
-                ComponentContents contents = replacedServerId ? PlainTextContents.EMPTY : ele.getContents();
+                ComponentContents contents = ele.getContents();
                 ComponentContents original = contents;
                 if(i == 0) {
                     if (contents instanceof PlainTextContents plainTextContents) {
@@ -46,6 +46,21 @@ public class MixinScoreboardRender {
                                 } else if(StatusManager.get().isMegaServer()) {
                                     contents = PlainTextContents.create(text.substring(0, lastSpace) + ServerIdSpoofer.getSmallMegaServerId());
                                 }
+                            }
+                        }
+                    }
+                }
+                if(replacedServerId && i == 2) {
+                    if (contents instanceof PlainTextContents plainTextContents) {
+                        String text = plainTextContents.text();
+                        int space = text.indexOf(' ');
+                        if(space == -1) {
+                            contents = PlainTextContents.EMPTY;
+                        } else {
+                            String prefix = "";
+                            if(text.startsWith("§")) prefix = text.substring(0, 2);
+                            if(smallServerId.endsWith(text.substring(prefix.isBlank() ? 0 : 2, space))) {
+                                contents = PlainTextContents.create(prefix + text.substring(space));
                             }
                         }
                     }

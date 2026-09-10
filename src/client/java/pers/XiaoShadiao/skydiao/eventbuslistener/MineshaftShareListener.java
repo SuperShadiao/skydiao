@@ -1,5 +1,11 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
@@ -15,6 +21,7 @@ import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.irc.ChatPacket;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.tab.TabReader;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -32,10 +39,78 @@ public class MineshaftShareListener extends AbstractListener {
 
     public boolean inMineshaftDebug;
 
+    private final List<CorpseType> corpses = new ArrayList<>();
+    private MineshaftType currentShaftType;
+    private boolean isShaftTypeCorpseInited;
+
     private boolean allowShare;
     private boolean mineshaftClosed;
 
     private boolean inviteThreadRunning;
+
+    enum CorpseType {
+        UMBER("§6"),
+        TUNGSTEN("§7"),
+        LAPIS("§9"),
+        ;
+        public final String color;
+
+        CorpseType(String color) {
+            this.color = color;
+        }
+    }
+
+    enum MineshaftType {
+        TOPA_1("§e", "Topaz 1"),
+        TOPA_2("§e", "Topaz 2"),
+        SAPP_1("§d", "Sapphire 1"),
+        SAPP_2("§d", "Sapphire 2"),
+        AMET_1("§5", "Amethyst 1"),
+        AMET_2("§5", "Amethyst 2"),
+        AMBE_1("§6", "Amber 1"),
+        AMBE_2("§6", "Amber 2"),
+        JADE_1("§a", "Jade 1"),
+        JADE_2("§a", "Jade 2"),
+        TITA_1("§7", "Titanium"),
+        UMBE_1("§6", "Umber"),
+        TUNG_1("§7", "Tungsten"),
+        FAIR_1("§f", "Vanguard"),
+        RUBY_1("§c", "Ruby 1"),
+        RUBY_2("§c", "Ruby 2"),
+        RUBY_C("§c", "Ruby Crystal"),
+        ONYX_1("§0", "Onyx 1"),
+        ONYX_2("§0", "Onyx 2"),
+        ONYX_C("§0", "Onyx Crystal"),
+        AQUA_1("§9", "Aquamarine 1"),
+        AQUA_2("§9", "Aquamarine 2"),
+        AQUA_C("§9", "Aquamarine Crystal"),
+        CITR_1("§4", "Citrine 1"),
+        CITR_2("§4", "Citrine 2"),
+        CITR_C("§4", "Citrine Crystal"),
+        PERI_1("§2", "Peridot 1"),
+        PERI_2("§2", "Peridot 2"),
+        PERI_C("§2", "Peridot Crystal"),
+        JASP_1("§b", "Jasper"),
+        JASP_C("§b", "Jasper Crystal"),
+        OPAL_1("§f", "Opal"),
+        OPAL_C("§f", "Opal Crystal"),
+        LITT_L("§d", "Littlefoot's Den"),
+                ;
+
+        public final String color;
+        public final String rawName;
+        MineshaftType(String s, String s1) {
+            color = s;
+            rawName = s1;
+        }
+        public String displayName() {
+            return color + rawName;
+        }
+        @Override
+        public String toString() {
+            return displayName();
+        }
+    }
 
     @Override
     public String getListenerName() {
@@ -75,6 +150,52 @@ public class MineshaftShareListener extends AbstractListener {
             }
 
             availableShaftPlayerNames.put(System.currentTimeMillis(), p.sender);
+        } else if(p.message.startsWith("2_") && ConfigManager.mineshaftSharing.getValue()) {
+
+            StringBuilder extraShaftInfo = new StringBuilder();
+            MineshaftType type = null;
+            try {
+                JsonObject jo = JsonParser.parseString(p.message.substring(2)).getAsJsonObject();
+                type = MineshaftType.valueOf(jo.get("shaft").getAsString());
+
+                JsonArray ja = jo.get("corpses").getAsJsonArray();
+                Object2IntMap<CorpseType> count = new Object2IntLinkedOpenHashMap<>();
+                for (JsonElement jsonElement : ja) {
+                    String string = jsonElement.getAsString();
+                    CorpseType corpseType = CorpseType.valueOf(string);
+                    count.put(corpseType, count.getOrDefault(corpseType, 0) + 1);
+                }
+                if(!count.isEmpty()) {
+                    extraShaftInfo.append("§a尸体: ");
+                    for (Object2IntMap.Entry<CorpseType> entry : count.object2IntEntrySet()) {
+                        extraShaftInfo.append(entry.getKey().color).append(entry.getIntValue()).append(" ").append(entry.getKey().name()).append(" ");
+                    }
+                    extraShaftInfo.append("\n\n");
+                }
+            } catch (Exception e) {
+                logger.error("Fail to parse shaft extra info");
+                logger.catching(e);
+                type = null;
+                extraShaftInfo = new StringBuilder();
+            }
+
+            if(shouldPopMessage()) {
+                Style cs = Style.EMPTY
+                        .withClickEvent(new ClickEvent.RunCommand("/hhjoinmineshaft " + p.sender))
+                        .withHoverEvent(new HoverEvent.ShowText(Component.literal(extraShaftInfo + "§a点击后会立即加入§bGlacite Mineshaft§a, 请确保你手里的工作都完成了哦!\n§6注意! 点击后你当前的组队队伍会自动退出!\n§6如果响应后你没能成功进入Mineshaft, 请再点击试一次!\n§c若你没收到组队邀请, 使用/settings检查组队权限设置 (例如可能是禁止非好友和你组队)")));
+
+                ToolList.printChatMessage(Component.literal("").withStyle(cs));
+                ToolList.printChatMessage(Component.literal("§b===============[§aXSD§bMS]===============").withStyle(cs));
+                ToolList.printChatMessage(Component.literal("§e" + p.sender + "§a的" + (type == null ? "§bGlacite" : type.displayName()) + " §bMineshaft§a可以加入! §e[点击这里]").withStyle(cs));
+                ToolList.printChatMessage(Component.literal("§b=====================================").withStyle(cs));
+                ToolList.printChatMessage(Component.literal("§b").withStyle(cs));
+            } else {
+                Style cs = Style.EMPTY
+                        .withClickEvent(new ClickEvent.SuggestCommand("/hhjoinmineshaft " + p.sender))
+                        .withHoverEvent(new HoverEvent.ShowText(Component.literal(extraShaftInfo + "§a点击这条消息快速填充指令")));
+
+                ToolList.printChatMessage(Component.literal("§a[XSD§bMS§a] §e" + p.sender + "§a的" + (type == null ? "§bGlacite" : type.displayName()) + " §bMineshaft§a可以加入, 但你可能不在对应的环境, 为了防止误触, 你可以输入§e/skydiaojoinmineshaft " + p.sender + "§a加入.").withStyle(cs));
+            }
         } else {
             String selfName = mc.getUser().getName();
             if(("1_" + selfName).equals(p.message)) {
@@ -114,6 +235,9 @@ public class MineshaftShareListener extends AbstractListener {
         mineshaftClosed = false;
         if(isInMineshaft()) allowShare = false;
         inMineshaftDebug = false;
+        isShaftTypeCorpseInited = false;
+        currentShaftType = null;
+        corpses.clear();
     }
 
     public void onChat(Component component, boolean b) {
@@ -146,7 +270,7 @@ public class MineshaftShareListener extends AbstractListener {
         if(ConfigManager.mineshaftSharing.getValue()) {
             allowShare = true;
             playerList.clear();
-            sendMineshaftSharePacket("0");
+            // sendMineshaftSharePacket("0");
             ToolList.printChatMessage(Component.literal("§a[XSD§bMS§a] §a你的§bGlacite Mineshaft§a已被广播!"));
         } else {
             allowShare = false;
@@ -165,6 +289,41 @@ public class MineshaftShareListener extends AbstractListener {
         }
 
         availableShaftPlayerNames.entrySet().removeIf(entry -> System.currentTimeMillis() - entry.getKey() > 60000);
+
+        if(isInMineshaft() && !isShaftTypeCorpseInited) {
+            if(currentShaftType == null) {
+                for (MineshaftType value : MineshaftType.values()) {
+                    if (ToolList.getInstance().fetchScoreboardLinesNoColor().stream().anyMatch(line -> line.contains(value.name()))) {
+                        currentShaftType = value;
+                        break;
+                    }
+                }
+            }
+            if(corpses.isEmpty()) {
+                for (String line : TabReader.getLines()) {
+                    if(line.contains("Tungsten:")) {
+                        corpses.add(CorpseType.TUNGSTEN);
+                    } else if(line.contains("Lapis:")) {
+                        corpses.add(CorpseType.LAPIS);
+                    } else if(line.contains("Umber:")) {
+                        corpses.add(CorpseType.UMBER);
+                    }
+                }
+            }
+            if(currentShaftType != null && (!corpses.isEmpty() || currentShaftType == MineshaftType.FAIR_1)) {
+                isShaftTypeCorpseInited = true;
+                if(allowShare) {
+                    JsonObject object = new JsonObject();
+                    object.addProperty("shaft", currentShaftType.name());
+                    JsonArray cs = new JsonArray();
+                    for (CorpseType corps : corpses) {
+                        cs.add(corps.name());
+                    }
+                    object.add("corpses", cs);
+                    sendMineshaftSharePacket("2_" + object);
+                }
+            }
+        }
     }
 
     public void run() {
