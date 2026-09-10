@@ -53,6 +53,41 @@ public class OVOOA2 extends MusicPlatform {
         return Collections.singletonList(mi);
     }
 
+    private List<MusicInfo> regenByID(String id0) throws Exception {
+        String id = URLEncoder.encode(id0, StandardCharsets.UTF_8);
+        String result;
+        try (InputStream is = fetchMusic("https://oiapi.net/API/Music_163?id=" + id + "&n=1&key=oiapi-27e1b651-bc89-5a56-b840-1a738fb3baf8")) {
+            result = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+        }
+        System.out.println(result);
+
+        MusicInfo mi = new MusicInfo();
+        JsonObject joo = JsonParser.parseString(result).getAsJsonObject().getAsJsonArray("data").get(0).getAsJsonObject();
+
+        mi.name = joo.get("name").getAsString();
+        mi.singer = Collections.list(new Enumeration<JsonElement>() {
+            private final Iterator<JsonElement> iterator = joo.get("singers").getAsJsonArray().iterator();
+
+            @Override
+            public boolean hasMoreElements() {
+                return iterator.hasNext();
+            }
+
+            @Override
+            public JsonElement nextElement() {
+                return iterator.next();
+            }
+        }).stream().map(a -> a.getAsJsonObject().get("name").getAsString()).collect(Collectors.joining(", "));
+
+        mi.URL = joo.get("url").getAsString();
+        mi.type = "OVOOA2";
+        mi.albumID = joo.toString();
+        mi.hashOrID = joo.get("id").getAsString();
+        mi.imgURL = joo.get("picurl").getAsString() + "?param=400y400";
+
+        return Collections.singletonList(mi);
+    }
+
     @Override
     public void downloadMusic(MusicInfo mi) throws Exception {
         downloadMusic(mi, null);
@@ -66,9 +101,9 @@ public class OVOOA2 extends MusicPlatform {
             ToolList.getInstance().log.info("文件存在, 跳过下载");
         } else {
             if (!ToolList.getInstance().stringHasContext(mi.URL) || mi.albumID == null) {
-                String name = URLEncoder.encode(mi.name + " " + mi.singer, StandardCharsets.UTF_8);
+                // String name = URLEncoder.encode(mi.name + " " + mi.singer, StandardCharsets.UTF_8);
 
-                mi.replace(search(name).getFirst());
+                mi.replace(regenByID(mi.hashOrID).getFirst());
 
                 downloadMusic(mi, jooInfo);
                 return;

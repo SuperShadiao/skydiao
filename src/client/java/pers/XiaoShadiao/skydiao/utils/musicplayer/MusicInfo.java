@@ -58,13 +58,13 @@ public class MusicInfo implements Cloneable {
     }
     
     public MusicInfo replace(MusicInfo mi) {
-        if(ToolList.getInstance().stringHasContext(name)) name = mi.name;
-        if(ToolList.getInstance().stringHasContext(singer)) singer = mi.singer;
-        if(ToolList.getInstance().stringHasContext(hashOrID)) hashOrID = mi.hashOrID;
-        if(ToolList.getInstance().stringHasContext(imgURL)) imgURL = mi.imgURL;
-        if(ToolList.getInstance().stringHasContext(URL)) URL = mi.URL;
-        if(ToolList.getInstance().stringHasContext(lyricURL)) lyricURL = mi.lyricURL;
-        if(ToolList.getInstance().stringHasContext(albumID)) albumID = mi.albumID;
+        if(ToolList.getInstance().stringHasContext(mi.name)) name = mi.name;
+        if(ToolList.getInstance().stringHasContext(mi.singer)) singer = mi.singer;
+        if(ToolList.getInstance().stringHasContext(mi.hashOrID)) hashOrID = mi.hashOrID;
+        if(ToolList.getInstance().stringHasContext(mi.imgURL)) imgURL = mi.imgURL;
+        if(ToolList.getInstance().stringHasContext(mi.URL)) URL = mi.URL;
+        if(ToolList.getInstance().stringHasContext(mi.lyricURL)) lyricURL = mi.lyricURL;
+        if(ToolList.getInstance().stringHasContext(mi.albumID)) albumID = mi.albumID;
 
         return this;
     }

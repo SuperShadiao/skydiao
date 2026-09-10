@@ -63,7 +63,7 @@ public class LyricParser {
         } catch (IOException e) {
             // TODO 自动生成的 catch 块
             e.printStackTrace();
-            // lyricMap.clear();
+            lyricStrings = new StringLyric[0];
             return new StringLyric[0];
         }
     }
