@@ -16,6 +16,7 @@ import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 public class AutoReelListener extends AbstractListener {
 
     private final AimHelper aimHelper = new AimHelper(1.75);
+    private final AimHelper aimHelperSlow = new AimHelper(0.35);
     private long lastRightClickTime;
     private int delayTick;
     private boolean shouldAimGround;
@@ -41,13 +42,14 @@ public class AutoReelListener extends AbstractListener {
                         for (Entity entity2 : mc.level.getEntities(entity, entity.getBoundingBox().inflate(2, 10, 2))) {
                             if(entity2 instanceof ArmorStand armorStand) {
                                 if(entity2.getName().getString().equals("                    ")) {
-                                    if (ConfigManager.autoReelAutoAim.getValue()) (shouldAimGround ? AimHelper.getYawPitchByVec3(mc.player.position().add(mc.player.getForward().horizontal().normalize().scale(0.2))) : AimHelper.getYawPitchByEntityEye(entity)).updateToAimHelper(aimHelper);
+                                    int m = System.currentTimeMillis() - lastRightClickTime > 1100 ? 3 : -1;
+                                    if (ConfigManager.autoReelAutoAim.getValue()) (shouldAimGround ? AimHelper.getYawPitchByVec3(mc.player.position().add(mc.player.getForward().horizontal().normalize().scale(0.2))) : AimHelper.getYawPitchByVec3(entity.getEyePosition().add(entity.position().subtract(entity.oldPosition()).multiply(m, m, m)))).updateToAimHelper(System.currentTimeMillis() - lastRightClickTime > 1100 ? aimHelper : aimHelperSlow);
                                 }
                                 if(armorStand.getName().getString().contains("REEL")) {
-                                    if(System.currentTimeMillis() - lastRightClickTime > 2000) {
+                                    if(System.currentTimeMillis() - lastRightClickTime > 1100) {
                                         delayTick++;
                                         shouldAimGround = mc.hitResult instanceof EntityHitResult && mc.hitResult.getType() == HitResult.Type.ENTITY;
-                                        if(delayTick > (shouldAimGround ? 18 : 8)) {
+                                        if(delayTick > (shouldAimGround ? 10 : 3)) {
                                             delayTick = 0;
                                             lastRightClickTime = System.currentTimeMillis();
                                             InputSimulator.singleRightClick();

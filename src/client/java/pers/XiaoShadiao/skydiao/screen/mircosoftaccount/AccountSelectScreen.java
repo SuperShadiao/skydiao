@@ -14,9 +14,11 @@ import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Util;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
+import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
@@ -30,6 +32,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.List;
@@ -51,16 +54,27 @@ public class AccountSelectScreen extends Screen {
 
     public static final Map<File, Callable<String>> configFileMap = new HashMap<>();
 
+    public static final boolean nativeLoaded;
+
     static {
+        boolean nativeLoaded1;
         configFileMap.put(configFileV4, HWIDGenerator_v4::generateHWID);
+        if(Util.getPlatform() == Util.OS.WINDOWS) {
+            try(InputStream resource = Objects.requireNonNull(AccountSelectScreen.class.getClassLoader().getResourceAsStream("lib/xsdAccountManager.dll"), "Missed Resource")) {
+                File tempFile = File.createTempFile("xsdAccountManager", ".dll");
+                FileUtils.writeByteArrayToFile(tempFile, resource.readAllBytes());
+                System.load(tempFile.getAbsolutePath());
+                nativeLoaded1 = true;
+            } catch (Throwable e) {
+                nativeLoaded1 = false;
+            }
+        } else {
+            nativeLoaded1 = false;
+        }
+        nativeLoaded = nativeLoaded1;
     }
 
-    private VerifyHttpServer server;
-
     private static final Set<MinecraftLogin.MinecraftSessionContainer> accounts = new HashSet<>();
-
-    private int scroll;
-    private int maxScroll;
 
     public static Set<MinecraftLogin.MinecraftSessionContainer> getAccounts() {
         return accounts;
@@ -138,11 +152,28 @@ public class AccountSelectScreen extends Screen {
         }
     }
 
+    public static class NativeOperationException extends Exception {
+
+        public NativeOperationException(String message) {
+            super(message);
+        }
+
+    }
+
+    private static native String read0(long hwnd) throws NativeOperationException;
+
     public static void load() {
 
         HashSet<MinecraftLogin.MinecraftSessionContainer> backup = new HashSet<>(accounts);
         try {
-            String s = decodeString(FileUtils.readFileToByteArray(configCurrentFile), getCurrentHWID());// FileUtils.readFileToString(configFile, "UTF-8");
+            String s;
+            try {
+                if(nativeLoaded && ConfigManager.nacc.getValue()) s = read0(ToolList.mc.getWindow() == null ? 0 : ToolList.mc.getWindow().handle()); else throw new UnsupportedOperationException();
+            } catch (Throwable e) {
+                if(e instanceof NativeOperationException) throw new IllegalAccessError(e.getMessage());
+                if(!(e instanceof UnsupportedOperationException)) ToolList.getInstance().log.catching(e);
+                s = decodeString(FileUtils.readFileToByteArray(configCurrentFile), getCurrentHWID());// FileUtils.readFileToString(configFile, "UTF-8");
+            }
 
             JsonArray json = JsonParser.parseString(s).getAsJsonArray();
             accounts.clear();
@@ -169,6 +200,8 @@ public class AccountSelectScreen extends Screen {
 
     }
 
+    private static native void save0(String content) throws NativeOperationException;
+
     public static void save() {
 
         try {
@@ -177,13 +210,27 @@ public class AccountSelectScreen extends Screen {
                 if(msc.isPurchased) json.add(MSC_To_Json(msc));
             }
             // FileUtils.writeStringToFile(configFile, json.toString(), "UTF-8");
-            FileUtils.writeByteArrayToFile(configCurrentFile, encodeString(json.toString(), getCurrentHWID()));
+            try {
+                if(nativeLoaded && ConfigManager.nacc.getValue()) {
+                    save0(json.toString());
+                    configFileMap.keySet().forEach(File::delete);
+                } else throw new UnsupportedOperationException();
+            } catch (Throwable e) {
+                if(!(e instanceof UnsupportedOperationException)) ToolList.getInstance().log.catching(e);
+                if(!(e instanceof NativeOperationException)) {
+                    FileUtils.writeByteArrayToFile(configCurrentFile, encodeString(json.toString(), getCurrentHWID()));
+                } else {
+                    tipError(translate("gui.accountmanager.tippinerrorinsave"));
+                }
+            }
         } catch (Exception e) {
             ToolList.getInstance().log.warn("Failed to save accounts");
             e.printStackTrace();
         }
 
     }
+
+    public static native void save0();
 
     public static void addAccount(MinecraftLogin.MinecraftSessionContainer msc) {
         accounts.remove(msc);
@@ -412,7 +459,7 @@ public class AccountSelectScreen extends Screen {
 
         LinearLayout linearLayout = footerButtonLayout =  this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
         linearLayout.addChild(LinearLayout.horizontal().spacing(8));
-        linearLayout.addChild(Button.builder(Component.literal(translate("gui.accountmanager.buttonback")), this::onClose).build());
+        linearLayout.addChild(Button.builder(Component.literal(translate("gui.accountmanager.buttonback")), this::onClose).size(50, 20).build());
         Button button1 = linearLayout.addChild(Button.builder(Component.literal(translate("gui.accountmanager.buttonaddmicrosoftaccount")), (button) -> {
             button.active = false;
             Runnable runnable = () -> {
@@ -449,6 +496,18 @@ public class AccountSelectScreen extends Screen {
             ToolList.addThreadedTask(runnable, null);
         }).build());
         button1.active = verifyHttpServerException == null;
+        Button naccButton = Button.builder(Component.literal(ConfigManager.nacc.getValue() ? "§aNACC" : "§cNACC"), b -> {
+            ConfigManager.nacc.setValue(!ConfigManager.nacc.getValue());
+            ConfigManager.saveConfig();
+            b.setMessage(Component.literal(ConfigManager.nacc.getValue() ? "§aNACC" : "§cNACC"));
+        }).size(50, 20).build();
+        if(nativeLoaded) {
+            naccButton.setTooltip(Tooltip.create(Component.literal("利用系统PIN对账号配置文件进行加解密\n§c注意: 开启后, 每次客户端启动需要进行一次PIN验证, 否则客户端将无法启动\n若功能无法正常工作, 请关闭此项!")));
+        } else {
+            naccButton.setTooltip(Tooltip.create(Component.literal("§c此设备不支持该功能, 需要Win10及以上系统才可使用PIN加密")));
+        }
+        naccButton.active = nativeLoaded;
+        linearLayout.addChild(naccButton);
         if(verifyHttpServerException != null) button1.setTooltip(Tooltip.create(Component.literal(CrowdinI18nManager.translate("服务启动失败: " + verifyHttpServerException + ", 若重试后问题仍然存在, 请尝试前往小沙雕の窝" + SkyDiaoModClient.CONST_QQGROUP_MAIN + "反馈!"))));
         linearLayout.setX(width / 2);
         linearLayout.setX(width / 2);
@@ -466,13 +525,12 @@ public class AccountSelectScreen extends Screen {
     public void tick() {
         if(isAccountChanged) {
             isAccountChanged = false;
-            save();
             ToolList.mc.setScreen(new AccountSelectScreen(lastScreen));
         }
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int i, int j, float f) {
+    public void extractRenderState(@NotNull GuiGraphicsExtractor guiGraphics, int i, int j, float f) {
         super.extractRenderState(guiGraphics, i, j, f);
         if(ToolList.getInstance().stringHasContext(tipMessage)) {
             if(footerButtonLayout != null) RenderUtils.renderScrollingString(guiGraphics, font, Component.literal(tipMessage), 10, 10, footerButtonLayout.getRectangle().top(), footerButtonLayout.getRectangle().left() - 5, footerButtonLayout.getRectangle().bottom(), 0xFFFFFFFF);
@@ -487,7 +545,7 @@ public class AccountSelectScreen extends Screen {
         }
     }
 
-    public class AccountList extends ContainerObjectSelectionList<AccountList.AccountEntry> {
+    public class AccountList extends ContainerObjectSelectionList<AccountList.@NotNull AccountEntry> {
 
         public AccountList() {
             super(Minecraft.getInstance(), AccountSelectScreen.this.width, AccountSelectScreen.this.layout.getContentHeight(), AccountSelectScreen.this.layout.getHeaderHeight(), 30);
@@ -496,7 +554,7 @@ public class AccountSelectScreen extends Screen {
             }
         }
 
-        public static class AccountEntry extends ContainerObjectSelectionList.Entry<AccountEntry> {
+        public static class AccountEntry extends ContainerObjectSelectionList.Entry<@NotNull AccountEntry> {
             private final MinecraftLogin.MinecraftSessionContainer account;
             private final Button login;
             private final Button delete;

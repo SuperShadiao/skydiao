@@ -63,17 +63,17 @@ public class MineshaftShareListener extends AbstractListener {
     enum MineshaftType {
         TOPA_1("§e", "Topaz 1"),
         TOPA_2("§e", "Topaz 2"),
-        SAPP_1("§d", "Sapphire 1"),
-        SAPP_2("§d", "Sapphire 2"),
+        SAPP_1("§b", "Sapphire 1"),
+        SAPP_2("§b", "Sapphire 2"),
         AMET_1("§5", "Amethyst 1"),
         AMET_2("§5", "Amethyst 2"),
         AMBE_1("§6", "Amber 1"),
         AMBE_2("§6", "Amber 2"),
         JADE_1("§a", "Jade 1"),
         JADE_2("§a", "Jade 2"),
-        TITA_1("§7", "Titanium"),
-        UMBE_1("§6", "Umber"),
-        TUNG_1("§7", "Tungsten"),
+        TITA_1("§7", "Titanium 1"),
+        UMBE_1("§6", "Umber 1"),
+        TUNG_1("§7", "Tungsten 1"),
         FAIR_1("§f", "Vanguard"),
         RUBY_1("§c", "Ruby 1"),
         RUBY_2("§c", "Ruby 2"),
@@ -90,9 +90,9 @@ public class MineshaftShareListener extends AbstractListener {
         PERI_1("§2", "Peridot 1"),
         PERI_2("§2", "Peridot 2"),
         PERI_C("§2", "Peridot Crystal"),
-        JASP_1("§b", "Jasper"),
-        JASP_C("§b", "Jasper Crystal"),
-        OPAL_1("§f", "Opal"),
+        JASP_1("§d", "Jasper 1"),
+        JASP_C("§d", "Jasper Crystal"),
+        OPAL_1("§f", "Opal 1"),
         OPAL_C("§f", "Opal Crystal"),
         LITT_L("§d", "Littlefoot's Den"),
                 ;
@@ -299,18 +299,19 @@ public class MineshaftShareListener extends AbstractListener {
                     }
                 }
             }
-            if(corpses.isEmpty()) {
+            List<MineshaftShareListener.CorpseType> tempCorpses = new ArrayList<>();
+
                 for (String line : TabReader.getLines()) {
                     if(line.contains("Tungsten:")) {
-                        corpses.add(CorpseType.TUNGSTEN);
+                        tempCorpses.add(CorpseType.TUNGSTEN);
                     } else if(line.contains("Lapis:")) {
-                        corpses.add(CorpseType.LAPIS);
+                        tempCorpses.add(CorpseType.LAPIS);
                     } else if(line.contains("Umber:")) {
-                        corpses.add(CorpseType.UMBER);
+                        tempCorpses.add(CorpseType.UMBER);
                     }
                 }
-            }
-            if(currentShaftType != null && (!corpses.isEmpty() || currentShaftType == MineshaftType.FAIR_1)) {
+
+            if(currentShaftType != null && ((!corpses.isEmpty() && tempCorpses.equals(corpses)) || currentShaftType == MineshaftType.FAIR_1)) {
                 isShaftTypeCorpseInited = true;
                 if(allowShare) {
                     JsonObject object = new JsonObject();
@@ -323,6 +324,8 @@ public class MineshaftShareListener extends AbstractListener {
                     sendMineshaftSharePacket("2_" + object);
                 }
             }
+            corpses.clear();
+            corpses.addAll(tempCorpses);
         }
     }
 

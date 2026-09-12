@@ -1266,6 +1266,7 @@
       "tipimportsuccess": "载入成功!",
       "tipexportsuccess": "导出成功!",
       "tipexporterror": "导出失败!",
+      "tippinerrorinsave": "请完成PIN挑战以保存账号!",
       "tipaccountloginsuccess": "登录成功!",
       "tipaccountloginerror": {
         "exception": "登录失败! 请重试! 如果此问题频繁发生, 尝试删除该账号重新登录! 错误信息详见日志...",

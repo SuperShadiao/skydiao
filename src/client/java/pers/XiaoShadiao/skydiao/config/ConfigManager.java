@@ -68,6 +68,7 @@ public class ConfigManager {
         }
     };
     public static final StringConfigOption customTitleText = new StringConfigOption("customtitletext", "");
+    public static final BooleanConfigOption nacc = new BooleanConfigOption("nacc", false);
 
     public static final ColorConfigOption lyricColor1 = new ColorConfigOption("lyriccolor1", new Color(0x00, 0xFF, 0x00).getRGB());
     public static final ColorConfigOption lyricColor2 = new ColorConfigOption("lyriccolor2", new Color(0xFF, 0xFF, 0xFF).getRGB());
