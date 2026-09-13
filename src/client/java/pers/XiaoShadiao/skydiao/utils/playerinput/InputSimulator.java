@@ -67,7 +67,7 @@ public class InputSimulator {
     }
 
     public static void pressLeftClick() {
-        if(CustomFabricEvents.ON_SIMULATOR_CLICK.invoker().onSimulatorClick(CustomFabricEvents.SimulatorClickType.LEFT)) return;
+        if(CustomFabricEvents.ON_SIMULATOR_CLICK.invoker().onSimulatorClick(CustomFabricEvents.ClickType.LEFT)) return;
 
         if(isInventoryOpen()) return;
 
@@ -76,7 +76,7 @@ public class InputSimulator {
     }
 
     public static void pressRightClick() {
-        if(CustomFabricEvents.ON_SIMULATOR_CLICK.invoker().onSimulatorClick(CustomFabricEvents.SimulatorClickType.RIGHT)) return;
+        if(CustomFabricEvents.ON_SIMULATOR_CLICK.invoker().onSimulatorClick(CustomFabricEvents.ClickType.RIGHT)) return;
 
         if(isInventoryOpen()) return;
 

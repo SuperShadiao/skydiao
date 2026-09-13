@@ -547,8 +547,8 @@ public class AutoBloodfiendListener extends AbstractListener implements IMacro {
         return false;
     }
 
-    private boolean onSimulatorClick(CustomFabricEvents.SimulatorClickType simulatorClickType) {
-        if(simulatorClickType == CustomFabricEvents.SimulatorClickType.LEFT) {
+    private boolean onSimulatorClick(CustomFabricEvents.ClickType simulatorClickType) {
+        if(simulatorClickType == CustomFabricEvents.ClickType.LEFT) {
             if(mc.hitResult instanceof EntityHitResult result && result.getEntity() == bloodfiendEntityInstance) {
                 if(currentTask instanceof BFTaskClotgoyleAttacker) {
                     ToolList.printChatMessage(Component.literal("§a[小沙雕] §c已防止你在攻击Clotgoyle时攻击Bloodfiend!"));

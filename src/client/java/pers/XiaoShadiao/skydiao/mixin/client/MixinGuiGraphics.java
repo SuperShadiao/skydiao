@@ -25,7 +25,7 @@ public class MixinGuiGraphics {
             }
 
             if(stars.isPresent()) {
-                original.call(instance, font, itemStack, x, y, (stars.getAsInt() > 5 ? "§c" : "§e") + stars.getAsInt());
+                original.call(instance, font, itemStack, x, y, ((stars.getAsInt() > 5 ? ConfigManager.itemStarCountRenderColor2 : ConfigManager.itemStarCountRenderColor1).getCurrentDisplayString().replace("&", "§")) + stars.getAsInt());
             } else {
                 original.call(instance, font, itemStack, x, y, countText);
             }

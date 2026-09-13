@@ -105,7 +105,7 @@ public final class CustomFabricEvents {
         public void update(double tps, String formattedTPS);
     }
 
-    public enum SimulatorClickType {
+    public enum ClickType {
         LEFT,
         RIGHT,
     }
@@ -119,7 +119,19 @@ public final class CustomFabricEvents {
     });
 
     public interface SimulatorClickEvent {
-        public boolean onSimulatorClick(SimulatorClickType type);
+        public boolean onSimulatorClick(ClickType type);
+    }
+
+    public static final Event<@NotNull IngameClickEvent> ON_INGAME_CLICK = EventFactory.createArrayBacked(IngameClickEvent.class, callbacks -> (type) -> {
+        boolean cancelled = false;
+        for (IngameClickEvent callback : callbacks) {
+            cancelled |= callback.onIngameClick(type);
+        }
+        return cancelled;
+    });
+
+    public interface IngameClickEvent {
+        public boolean onIngameClick(ClickType type);
     }
 
     public static final Event<@NotNull SlotRender> ON_SLOT_RENDER = EventFactory.createArrayBacked(SlotRender.class, callbacks -> (screen, guiGraphics, mouseX, mouseY, tickDelta) -> {

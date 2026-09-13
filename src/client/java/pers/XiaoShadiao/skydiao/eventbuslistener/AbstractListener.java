@@ -5,7 +5,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pers.XiaoShadiao.skydiao.appendage.eventbuslistener.EditingPListListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon.*;
-import pers.XiaoShadiao.skydiao.eventbuslistener.macro.AutoFillBottleOfWater;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
 import pers.XiaoShadiao.skydiao.utils.Register;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
@@ -76,6 +75,8 @@ public abstract class AbstractListener extends Thread {
     public static final EndIslandDragonESPListener endIslandDragonESPListener = new EndIslandDragonESPListener();
     public static final AutoPickupPhoneRingListener autoPickupPhoneRingListener = new AutoPickupPhoneRingListener();
     public static final DelayTickExecutor delayTickExecutor = new DelayTickExecutor();
+    public static final TreeGiftProgressListener treeGiftProgressListener = new TreeGiftProgressListener();
+    public static final F7ArrowAlignListener f7ArrowAlignListener = new F7ArrowAlignListener();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();

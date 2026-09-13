@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
 import net.minecraft.network.chat.Component;
@@ -188,6 +189,8 @@ public class ConfigManager {
     public static final BooleanConfigOption miningCommissionEntityESP = new BooleanConfigOption("miningcommissionentityesp", true);
     public static final BooleanConfigOption fsTPToPest = new BooleanConfigOption("fstopopest", true);
     public static final BooleanConfigOption itemStarCountRender = new BooleanConfigOption("itemstarcountrender", false);
+    public static final SelectConfigOption itemStarCountRenderColor1 = new SelectConfigOption("itemstarcountrendercolor1", 14, Arrays.stream(ChatFormatting.values()).map(cf -> cf.toString() + cf.toString().replace("§", "&")).toList());
+    public static final SelectConfigOption itemStarCountRenderColor2 = new SelectConfigOption("itemstarcountrendercolor2", 12, Arrays.stream(ChatFormatting.values()).map(cf -> cf.toString() + cf.toString().replace("§", "&")).toList());
     public static final BooleanConfigOption carnivalAutoShootZombie = new BooleanConfigOption("carnivalautoshootzombie", false).flagAsMacroFeature();
     public static final DoubleConfigOption carnivalAutoShootZombieOffset = new DoubleConfigOption("carnivalautoshootzombieoffset", 1.0).flagAsMacroFeature();
     public static final BooleanConfigOption endIslandDragonESPListener = new BooleanConfigOption("endislanddragonesplistener", true);
@@ -198,6 +201,13 @@ public class ConfigManager {
     public static final BooleanConfigOption bossDrawESP = new BooleanConfigOption("bossdrawesp", true);
     public static final BooleanConfigOption f7DrawWitherDragonESP = new BooleanConfigOption("f7drawwitherdragonesp", true);
     public static final BooleanConfigOption f7DrawStormFireballTarget = new BooleanConfigOption("f7drawstormfireballtarget", true);
+    public static final BooleanConfigOption treeProgress = new BooleanConfigOption("treeprogress", true).addDependFeature(bossbar);
+    public static final BooleanConfigOption f7ArrowAlignSolver = new BooleanConfigOption("f7arrowalignsolver", true);
+    public static final BooleanConfigOption f7ArrowAlignSolverBlockWrongClicks = new BooleanConfigOption("f7arrowalignsolverblockwrongclicks", true);
+    public static final BooleanConfigOption f7SimonSaysSolver = new BooleanConfigOption("f7simonsayssolver", true);
+    public static final BooleanConfigOption f7SimonSaysSolverBlockWrongClicks = new BooleanConfigOption("f7simonsayssolverblockwrongclicks", true);
+    public static final BooleanConfigOption f7TerminalESPTracer = new BooleanConfigOption("f7terminalesptracer", true);
+    public static final BooleanConfigOption customBossESPTracer = new BooleanConfigOption("custombossesptracer", true);
 
     public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
@@ -286,17 +296,17 @@ public class ConfigManager {
 
     public static final List<Map.Entry<String, List<ConfigOption<?>>>> categories = List.of(
             Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip, enableircafktip, enableircmacrochecktip, cooltitle, customTitleText)),
-            Map.entry("工具类", List.of(inventoryFilter, itemStarCountRender, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodescoreboard, blivemodehideserverid, bliveboardcastdankumu, keepSprint, autoReconnect, afkInOtherPlace, freecamFlySpeed, openFreelookAndFreecamAction, openAutoClickAction, openAllAutoClickKeybindAction, openClearStashCommand)),
+            Map.entry("工具类", List.of(inventoryFilter, itemStarCountRender, itemStarCountRenderColor1, itemStarCountRenderColor2, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodescoreboard, blivemodehideserverid, bliveboardcastdankumu, keepSprint, autoReconnect, afkInOtherPlace, freecamFlySpeed, openFreelookAndFreecamAction, openAutoClickAction, openAllAutoClickKeybindAction, openClearStashCommand)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
             Map.entry("自动类", List.of(macroReplay, macroReplaySelfCleaning, autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, autoCarnivalAutoRestart, carnivalAutoFruitDigger, carnivalAutoShootZombie, carnivalAutoShootZombieOffset, skyblockautobloodfiend, skyblockautobloodfiendlowhealth, iAutoObsidian, iAutoObsidianWR, obsidianPositionHelper, autoObsidianPositionsFile, drillSlot, lanternSlot, obsidianPlayerCheckRange, obsidianPlayerCheck, obsidianTheEndCheck, obsidianCycleTicks, autoPickupPhoneRing, autoPlayBeachBall, autoPlayBeachBallAutoStopAt40)),
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareAnnounce, skyblockSafeIsland, crystalHollowHelper, crystalHollowHelperDebug, crystalHollowDupServerTipper, crystalHollowHelperDisableThreadLimit, genshinImpactHeatColdRender, miningCommissionEntityESP)),
             Map.entry("combat", List.of(slayerTogether, isleVolcanoFinder, isleVolcanoFinderCataOnlyMode, isleDupServerTip, endIslandDragonESPListener)),
-            Map.entry("foraging", List.of(galateashulker, autoReel, autoReelAutoAim, torrhusCanyonHelper, safariBoardcastHotspot, safariBoardcastTradeNPC, safariRenderTargetESP, floorDroppingRender)),
+            Map.entry("foraging", List.of(galateashulker, treeProgress, autoReel, autoReelAutoAim, torrhusCanyonHelper, safariBoardcastHotspot, safariBoardcastTradeNPC, safariRenderTargetESP, floorDroppingRender)),
             Map.entry("farming", List.of(openFsCommandAction, openFsKeyBind, hubratesp, autoSprayonator, autoChangeLo, halfAutoKillPests, gardenTrapPrompt, gardenBonusPrompt, fsGardenMoonFlowerMode, fsGardenMoonFlowerModeKeepNightFarming, fsTPToPest)),
             Map.entry("fishing", List.of(hotspotrender, autogg, lotusAtollHelper, fishingBigFishRender, fishingBigFishTip)),
-            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonKeyRender, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7InactiveTerminalRender, dungeonReviveItemCDRender, f7DrawWitherDragonESP, f7DrawStormFireballTarget, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered, dungeonDrinkPotion, dungeonBloodRoomTime, dungeonTrashTPS, dungeonf7msgbotssleap, dungeonMissingPlayer)),
+            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonKeyRender, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7InactiveTerminalRender, f7TerminalESPTracer, f7ArrowAlignSolver, f7ArrowAlignSolverBlockWrongClicks, f7SimonSaysSolver, f7SimonSaysSolverBlockWrongClicks, dungeonReviveItemCDRender, f7DrawWitherDragonESP, f7DrawStormFireballTarget, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered, dungeonDrinkPotion, dungeonBloodRoomTime, dungeonTrashTPS, dungeonf7msgbotssleap, dungeonMissingPlayer)),
             Map.entry("rift", List.of(rifttimegunhelper)),
-            Map.entry("界面类", List.of(openHud, bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, bossDrawESP, dyingtip, noblind, nosuffoverlay, fireOverlay, lyricColor1, lyricColor2)),
+            Map.entry("界面类", List.of(openHud, bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, bossDrawESP, customBossESPTracer, dyingtip, noblind, nosuffoverlay, fireOverlay, lyricColor1, lyricColor2)),
             Map.entry("ravengard", List.of(ravengardHelper, ravengardQueueMessage))
     );
 

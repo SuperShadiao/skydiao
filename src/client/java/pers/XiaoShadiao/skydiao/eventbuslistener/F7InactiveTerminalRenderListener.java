@@ -26,10 +26,10 @@ public class F7InactiveTerminalRenderListener extends AbstractListener implement
         RenderUtils.WorldRender wr = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.NO_THROUGH_WALLS_LINE);
         for (Entity e : mc.level.entitiesForRendering()) {
             if(e instanceof ArmorStand) {
-                if(e.getName().getString().contains("Inactive")) {
+                if(e.getName().getString().contains("Inactive") || e.getName().getString().contains("Not Activated")) {
                     BlockPos pos = e.blockPosition().above(1);
                     RenderUtils.renderESP(wr, pos, 1, 0, 1, 1, false);
-                    RenderUtils.renderTrace(wr, pos, 1, 0, 1, 1);
+                    if(ConfigManager.f7TerminalESPTracer.getValue()) RenderUtils.renderTrace(wr, pos, 1, 0, 1, 1);
                 }
             }
         }

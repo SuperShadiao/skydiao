@@ -10,7 +10,6 @@ import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.LerpingBossEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -51,6 +50,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -116,7 +116,7 @@ public class CustomBossbar extends XSDHUD {
             if(entity != null) {
                 Color c = starRailBossBar.getRenderBossColor();
                 RenderUtils.renderESP(worldRender, entity, c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, 1,  false);
-                if(starRailBossBar.shouldXRayBoss()) RenderUtils.renderTrace(worldRender, entity, c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, 1);
+                if(starRailBossBar.shouldXRayBoss() && ConfigManager.customBossESPTracer.getValue()) RenderUtils.renderTrace(worldRender, entity, c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, 1);
             }
             worldRender.finishDraw();
         }
@@ -195,12 +195,18 @@ public class CustomBossbar extends XSDHUD {
             } else if (entity != null) {
                 am = animationMap.computeIfAbsent(finalActuallyUUID, k -> new AnimationManager(null, entity.getId()));
             } else {
-                am = animationMap.computeIfAbsent(finalActuallyUUID, k -> new AnimationManager(null, null));
-                am.setHealthUpdater((am2) -> {
+                am = animationMap.computeIfAbsent(finalActuallyUUID, k -> new AnimationManager(null, null)).setHealthUpdater((am2) -> {
                     am2.maxHealth = 1000;
                     am2.currentHealth = 1000 * lerpingBossEvent.getProgress();
                     am2.bossName = lerpingBossEvent.getName();
                 });
+            }
+            BossEvent.BossBarColor color1 = lerpingBossEvent.getColor();
+            if (!color1.equals(BossEvent.BossBarColor.RED)) {
+                Integer color2 = color1.getFormatting().getColor();
+                if(null != color2) am.setHealthColor(new Color(color2));
+            } else {
+                am.setHealthColor(AnimationManager.commonHealthColor);
             }
             am.setMobInfo(mobInfo);
             am.flagActive();
@@ -269,15 +275,15 @@ public class CustomBossbar extends XSDHUD {
                 context.fill(x, 12 + yOffset, (int) (x + length * am.trueScale), 15 + yOffset, color.getRGB());
                 context.fill(x - (am.trueScale != 0 ? 1 : 0), 13 + yOffset, (int) (x + length * am.trueScale + (am.trueScale == 1 ? 1 : 0)), 14 + yOffset, color.getRGB());
 
-                Color healthColor = AnimationManager.commonHealthColor;
-                LerpingBossEvent bossEvent = bossbarEventGetter.getEvents().get(entry.getKey());
-                if(bossEvent != null) {
-                    BossEvent.BossBarColor color1 = bossEvent.getColor();
-                    if (!color1.equals(BossEvent.BossBarColor.RED)) {
-                        Integer color2 = color1.getFormatting().getColor();
-                        if(null != color2) healthColor = new Color(color2);
-                    }
-                }
+                Color healthColor = am.getHealthColor();
+//                LerpingBossEvent bossEvent = bossbarEventGetter.getEvents().get(entry.getKey());
+//                if(bossEvent != null) {
+//                    BossEvent.BossBarColor color1 = bossEvent.getColor();
+//                    if (!color1.equals(BossEvent.BossBarColor.RED)) {
+//                        Integer color2 = color1.getFormatting().getColor();
+//                        if(null != color2) healthColor = new Color(color2);
+//                    }
+//                }
 
                 Color immuneStateHealthColor = AnimationManager.immuneStateHealthColor;
                 Color immuneStateHealthColorSwitch = AnimationManager.immuneStateHealthColorSwitch;
@@ -363,6 +369,12 @@ public class CustomBossbar extends XSDHUD {
         am.flagActive();
     }
 
+    public void addCustomElement(UUID uuid, Function<UUID, AnimationManager> ifMissing) {
+        AnimationManager am = animationMap.computeIfAbsent(uuid, ifMissing);
+
+        am.flagActive();
+    }
+
     public static class AnimationManager {
 
         public static final Color
@@ -394,7 +406,7 @@ public class CustomBossbar extends XSDHUD {
         public float armorstandpartHealth;
         public float armorstandpartMaxHealth;
         public double renderFlagImmuneDmg;
-        public Color color = new Color(0xFFEF2A25);
+        public Color healthColor = commonHealthColor;
 
         private static int indexId = Integer.MIN_VALUE;
 
@@ -431,8 +443,9 @@ public class CustomBossbar extends XSDHUD {
             updateTick();
         }
 
-        public void setHealthUpdater(Consumer<AnimationManager> healthUpdater) {
+        public AnimationManager setHealthUpdater(Consumer<AnimationManager> healthUpdater) {
             this.healthUpdater = healthUpdater;
+            return this;
         }
 
         public void updateAnimation(float animationDeltaTick) {
@@ -560,8 +573,12 @@ public class CustomBossbar extends XSDHUD {
             }
         }
 
-        public void setColor(Color color) {
-            this.color = color;
+        public void setHealthColor(Color color) {
+            this.healthColor = color;
+        }
+
+        public Color getHealthColor() {
+            return healthColor;
         }
 
         public void setMobInfo(E2AMappingListener.MobInfo mobInfo) {

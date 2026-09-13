@@ -8,8 +8,10 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.keybinds.KeyBindsManager;
@@ -175,6 +177,15 @@ public class FreecamAndFreelook extends AbstractListener {
         @Override
         public @NonNull Inventory getInventory() {
             return player.getInventory();
+        }
+
+        @Override
+        public @NotNull AttributeMap getAttributes() {
+            return player == null ? super.getAttributes() : player.getAttributes();
+        }
+
+        @Override
+        protected void pushEntities() {
         }
 
         @Override

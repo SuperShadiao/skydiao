@@ -41,6 +41,7 @@
     "MixinFogRendererRemoveBlindness",
     "MixinFreecamFreelookCamera",
     "MixinGuiGraphics",
+    "MixinIngameClick",
     "MixinLevelRenderer",
     "MixinOption",
     "MixinPacketListener",

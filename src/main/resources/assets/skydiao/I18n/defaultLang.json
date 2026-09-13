@@ -1165,6 +1165,42 @@
       "configname": "§eF7渲染Storm火球落点",
       "description": "§e标记出Storm火球的飞行路径和其落地点"
     },
+    "treeprogress": {
+      "configname": "§e树岛砍树进度",
+      "description": "§e开启后, 在自定义Bossbar上显示Tree Gift的进度 (需要开启自定义Bossbar功能)"
+    },
+    "f7arrowalignsolver": {
+      "configname": "§eF7转箭Device解密器",
+      "description": "§e开启后将在对应箭头显示要转的次数"
+    },
+    "f7arrowalignsolverblockwrongclicks": {
+      "configname": "§e转箭阻止错误点击",
+      "description": "§e开启后, 阻止你点击已经转好的箭头, 以及防止箭头转过头"
+    },
+    "f7simonsayssolver": {
+      "configname": "§eF7 Simon Says Device解密器",
+      "description": "§e开启后将按顺序标记出按钮顺序"
+    },
+    "f7simonsayssolverblockwrongclicks": {
+      "configname": "§eF7 Simon Says 阻止错误点击",
+      "description": "§e开启后, 阻止你点击错误的按钮防止Device重置"
+    },
+    "f7terminalesptracer": {
+      "configname": "§eF7未完成终端ESP Tracer",
+      "description": "§e绘制准心线到未完成终端"
+    },
+    "custombossesptracer": {
+      "configname": "§e自定义Boss ESP Tracer",
+      "description": "§e绘制准心线到Boss"
+    },
+    "itemstarcountrendercolor1": {
+      "configname": "§e物品星数渲染颜色1",
+      "description": "§e物品星数低于等于5星时渲染的文字颜色"
+    },
+    "itemstarcountrendercolor2": {
+      "configname": "§e物品星数渲染颜色2",
+      "description": "§e物品星数高于5星时渲染的文字颜色"
+    },
 
     "about1": "§e小沙雕的QQ: 3381949033",
     "about2": "§e小沙雕の狗窝: https://xiaoshadiao.club/qqg",

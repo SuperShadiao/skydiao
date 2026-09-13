@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.components.LerpingBossEvent;
-import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.PacketListener;
@@ -22,10 +21,12 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.projectile.hurtingprojectile.Fireball;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -78,6 +79,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     private boolean isNecronUsingUltimateSkill;
 
     private int stage5DragonCount = 0;
+    private int ssCursor;
 
     private record WitherDragonData(int entityId, ColorType colorType) {
         private enum ColorType {
@@ -313,13 +315,39 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         ClientReceiveMessageEvents.GAME.register(this::onChat);
         ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
-        CustomFabricEvents.MOUSE_BUTTON_EVENT.register(this::onMouseClick);
         ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register((a,b) -> {
             passWatcherFlag = false;
             masterFloorFlag = false;
             witherDragons.clear();
         });
         LevelRenderEvents.END_MAIN.register(this::onLastRender);
+        CustomFabricEvents.ON_INGAME_CLICK.register(this::onIngameClick);
+    }
+
+    private boolean onIngameClick(CustomFabricEvents.ClickType clickType) {
+
+        if(mc.player == null || mc.level == null /*|| isInMasterDungeonFloor() */|| (!passWatcherFlag && !isInCorrectDungeon())) return false;
+        if(clickType == CustomFabricEvents.ClickType.RIGHT && mc.hitResult instanceof BlockHitResult blockHitResult && blockHitResult.getType() == HitResult.Type.BLOCK && blockHitResult.getBlockPos().equals(simonSaysStartButton)) {
+            sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotsimonsaysstart.getValue());
+            targetsimonSaysButton.clear();
+            ssCursor = 0;
+            isDoingSimonSays = true;
+        }
+
+        if(clickType == CustomFabricEvents.ClickType.RIGHT) {
+            if (mc.hitResult instanceof BlockHitResult hitResult) {
+                BlockPos pos = hitResult.getBlockPos();
+                int index = targetsimonSaysButton.indexOf(pos.offset(1, 0, 0));
+
+                boolean sneak = mc.player.hasPose(Pose.CROUCHING);
+                if (((index != ssCursor && index != -1) || (index == -1 && BoundingBox.fromCorners(new BlockPos(110, 123, 92), new BlockPos(110, 120, 95)).isInside(pos))) && !sneak) {
+                    return ConfigManager.f7SimonSaysSolverBlockWrongClicks.getValue();
+                } else if (index != -1) {
+                    ssCursor++;
+                }
+            }
+        }
+        return false;
     }
 
     private void onLastRender(LevelRenderContext context) {
@@ -375,19 +403,33 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                 }
             }
         }
+        if(currentStage == 3 && isDoingSimonSays && ConfigManager.f7SimonSaysSolver.getValue()) {
+            int i = 0;
+            int skip = ssCursor;
+            for (BlockPos pos0 : targetsimonSaysButton) {
+                if(skip > 0) {
+                    skip--;
+                    continue;
+                }
+                BlockPos pos = pos0.offset(-1, 0, 0);
+                Color c = switch(i) {
+                    case 0 -> Color.green;
+                    case 1 -> Color.yellow;
+                    default -> Color.red;
+                };
+                if(!mc.level.getBlockState(pos).isAir()) {
+                    RenderUtils.renderESP(wr2, pos, c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, 1f, true, true);
+                    RenderUtils.renderESP(wr1, pos, c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, 1f, false, true);
+                } else {
+                    RenderUtils.renderESP(wr2, pos0, c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, 1f, true, true);
+                    RenderUtils.renderESP(wr1, pos0, c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, 1f, false, true);
+                }
+                i++;
+            }
+        }
         wr2.finishDraw();
         wr1.finishDraw();
         stage4PlatformHasBlock = flag;
-    }
-
-    private boolean onMouseClick(long windowsHandle, MouseButtonInfo mouseButtonInfo, int pressState) {
-        if(mc.player == null || mc.level == null /*|| isInMasterDungeonFloor() */|| (!passWatcherFlag && !isInCorrectDungeon())) return false;
-        if(mouseButtonInfo.button() == 1 && pressState == 1 && mc.hitResult instanceof BlockHitResult blockHitResult && blockHitResult.getType() == HitResult.Type.BLOCK && blockHitResult.getBlockPos().equals(simonSaysStartButton)) {
-            sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotsimonsaysstart.getValue());
-            targetsimonSaysButton.clear();
-            isDoingSimonSays = true;
-        }
-        return false;
     }
 
     private void onClientTick(Minecraft mc) {
@@ -500,10 +542,11 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
             if (isDoingSimonSays && simonSaysButtonCount != 16 && lastSimonSaysButtonCount == 16 && (hasLantern || targetsimonSaysButton.size() >= 4)) {
                 sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotsimonsays[Mth.clamp(targetsimonSaysButton.size() - 1, 0, 4)].getValue());
-                if(targetsimonSaysButton.size() >= 4) {
+                if(targetsimonSaysButton.size() >= 4 && !hasLantern) {
                     isDoingSimonSays = false;
                 }
                 targetsimonSaysButton.clear();
+                ssCursor = 0;
             }
             boolean inArea = ToolList.getInstance().isEntityInArea(mc.player, new BlockPos(50, 115, 54), new BlockPos(58, 122, 57));
             if (inArea && !enteredGoldorCoreTunnel) {
@@ -535,6 +578,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         visitedTerminalMsg.clear();
         isDoingSimonSays = false;
         targetsimonSaysButton.clear();
+        ssCursor = 0;
     }
 
     private boolean stage1LaserFlag = false;

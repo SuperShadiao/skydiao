@@ -18,7 +18,10 @@ import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3x2fStack;
@@ -153,6 +156,13 @@ public class RenderUtils {
         guiGraphics.fill(getter.getLeftPos() + slot.x, getter.getTopPos() + slot.y, getter.getLeftPos() + slot.x + 16, getter.getTopPos() + slot.y + 16, rgb);
     }
 
+    public static void renderNameTag(LevelRenderContext context, Vec3 pos, Component name) {
+        FreecamAndFreelook.CameraEntity cameraEntity1 = AbstractListener.freecamAndFreelook.getCameraEntity();
+        Entity cameraEntity0 = cameraEntity1 == null ? Objects.requireNonNull(mc().getCameraEntity(), "Camera Entity") : cameraEntity1;
+        LivingEntity cameraEntity = Objects.requireNonNull(cameraEntity0.asLivingEntity() == null ? ToolList.mc.player : cameraEntity0.asLivingEntity());
+        context.submitNodeCollector().submitNameTag(context.poseStack(), pos.subtract(cameraEntity.getEyePosition(ToolList.mc.getDeltaTracker().getGameTimeDeltaPartialTick(true))).subtract(0, 0.35, 0), 0, name, true, 15, 1000, context.levelState().cameraRenderState);
+    }
+
     public enum SideDirection {
         N(180), S(0), W(270),  E(90);
         private final int radius;
@@ -231,6 +241,17 @@ public class RenderUtils {
     public static void renderESP(WorldRender worldRender, double x1, double y1, double z1, double x2, double y2, double z2, float r, float g, float b, float a, boolean fillBox) {
         checkAccess(fillBox ? _3d : _3d_line, worldRender.pipeline, "renderESP()");
         worldRender.crpl.renderESP(worldRender.context, worldRender.pipeline, (float) x1, (float) y1, (float) z1, (float) x2, (float) y2, (float) z2, r, g, b, a, fillBox);
+    }
+
+    public static void renderESP(WorldRender worldRender, BlockPos pos, float r, float g, float b, float a, boolean fillBox, boolean followBlockOutline) {
+        BlockState blockState = ToolList.mc.level == null ? Blocks.AIR.defaultBlockState() : ToolList.mc.level.getBlockState(pos);
+        if(blockState.isAir() || !followBlockOutline) {
+            renderESP(worldRender, pos.getX() - 0.01, pos.getY() - 0.01, pos.getZ() - 0.01 , pos.getX() + 1.01, pos.getY() + 1.01, pos.getZ() + 1.01, r, g, b, a, fillBox);
+        } else {
+            blockState.getShape(ToolList.mc.level, pos).forAllBoxes((x1, y1, z1, x2, y2, z2) -> {
+                renderESP(worldRender, pos.getX() + x1 - 0.01, pos.getY() + y1 - 0.01, pos.getZ() + z1 - 0.01, pos.getX() + x2 + 0.01, pos.getY() + y2 + 0.01, pos.getZ() + z2 + 0.01, r, g, b, a, fillBox);
+            });
+        }
     }
 
     public static void renderESP(WorldRender worldRender, BlockPos pos, float r, float g, float b, float a, boolean fillBox) {
