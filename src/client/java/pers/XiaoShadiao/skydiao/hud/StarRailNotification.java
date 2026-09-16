@@ -5,6 +5,7 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
+import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
@@ -12,6 +13,8 @@ import java.awt.*;
 import java.util.Objects;
 
 public class StarRailNotification extends XSDHUD {
+
+    private boolean forceDisplay;
 
     @Override
     public void runRegister() {
@@ -32,6 +35,7 @@ public class StarRailNotification extends XSDHUD {
 
     @Override
     public void render(GuiGraphicsExtractor context, DeltaTracker tickCounter, boolean force) {
+        forceDisplay = force;
         if(animationFadeOut != 0 && force) updateMessage("test", Type.tip);
         boolean flag = !force && System.currentTimeMillis() - updateTime > 3000 + message.length() * 100L;
 
@@ -73,13 +77,15 @@ public class StarRailNotification extends XSDHUD {
         return "star_rail_notification";
     }
 
-    public void updateMessage(String s, Type type0)  {
+    public boolean updateMessage(String s, Type type0)  {
+        if(!forceDisplay && !ConfigManager.starrailNotification.getValue()) return false;
         message = s;
         animationFadeIn = 400;
         animationFadeOut = 0;
         updateTime = System.currentTimeMillis();
         type = type0;
-        ToolList.getInstance().playSound(CustomSounds.STAR_RAIL_NOTIFICATION);
+        if(ConfigManager.starrailNotificationSound.getValue()) ToolList.getInstance().playSound(CustomSounds.STAR_RAIL_NOTIFICATION);
+        return true;
     }
 
     public enum Type {

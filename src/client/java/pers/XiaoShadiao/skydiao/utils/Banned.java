@@ -44,7 +44,7 @@ public class Banned {
         CHEATING("Cheating through the use of unfair game advantages."),
         BOOSTING("Boosting your account to improve your stats."),
         SBBOOSTING("Boosting detected on one or multiple Skyblock profiles."),
-        LOSTTTT("Lost Tic Tac Toc in Dungeon."),
+        LOSTTTT("Lost Tic Tac Toe in Dungeon."),
         ;
 
         public final String reason;

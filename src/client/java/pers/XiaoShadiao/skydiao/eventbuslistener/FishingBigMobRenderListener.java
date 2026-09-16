@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -18,6 +19,7 @@ import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 public class FishingBigMobRenderListener extends AbstractFishingListener {
 
     public IntSet bigMobEntities = new IntOpenHashSet();
+    public IntSet notBigMobEntities = new IntOpenHashSet();
 
     @Override
     public String getListenerName() {
@@ -31,7 +33,7 @@ public class FishingBigMobRenderListener extends AbstractFishingListener {
     }
 
     private void onLastRender(LevelRenderContext context) {
-        if(!ConfigManager.fishingBigFishRender.getValue() || mc.level == null || mc.player == null || !isInWaterFishingArea()) return;
+        if(!ConfigManager.fishingBigFishRender.getValue() || mc.level == null || mc.player == null || (!isInWaterFishingArea() && !isInLavaFishingArea())) return;
 
         RenderUtils.WorldRender wr1 = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_LINE);
 
@@ -49,10 +51,17 @@ public class FishingBigMobRenderListener extends AbstractFishingListener {
     }
 
     private void onStartTick(Minecraft mc) {
-        if(!ConfigManager.fishingBigFishRender.getValue() || mc.level == null || mc.player == null || !isInWaterFishingArea()) return;
+        if(!ConfigManager.fishingBigFishRender.getValue() || mc.level == null || mc.player == null || (!isInWaterFishingArea() && !isInLavaFishingArea())) return;
 
         for (Entity entity : mc.level.entitiesForRendering()) {
             if(isBigMob(entity)) {
+                if (isInLavaFishingArea()) {
+                    if(mc.player.fishing == null) continue;
+                    if(entity.distanceTo(mc.player) > 20 || notBigMobEntities.contains(entity.getId())) {
+                        notBigMobEntities.add(entity.getId());
+                        continue;
+                    }
+                }
                 if (!bigMobEntities.contains(entity.getId())) {
                     String value = ConfigManager.fishingBigFishTip.getValue().trim();
                     if(!value.isEmpty()) XSDHUD.bigTitle.updateTitleMsg(value.replace("&", "§"), 3000, SoundEvents.ANVIL_USE);
@@ -60,7 +69,8 @@ public class FishingBigMobRenderListener extends AbstractFishingListener {
                 }
             }
         }
-        bigMobEntities.removeIf(this::isNotBigMob);
+        bigMobEntities.removeIf(isInLavaFishingArea() ? e -> mc.level.getEntity(e) == null : this::isNotBigMob);
+        notBigMobEntities.removeIf(e -> mc.level.getEntity(e) == null);
     }
 
     private boolean isNotBigMob(int entityId) {
@@ -77,8 +87,14 @@ public class FishingBigMobRenderListener extends AbstractFishingListener {
             E2AMappingListener.MobInfo mobInfo = e2AMappingListener.getMobInfo(livingEntity);
             if(mobInfo != null) {
                 String name = mobInfo.armorStand.getName().getString();
-                if (name.contains("/") && (name.contains("M❤") || name.contains("k❤"))) {
-                    return true;
+                if(isInWaterFishingArea()) {
+                    if (name.contains("/") && (name.contains("M❤") || name.contains("k❤"))) {
+                        return true;
+                    }
+                } else if(isInLavaFishingArea()) {
+                    if (livingEntity.getMaxHealth() >= 10_000_000 && livingEntity.getMaxHealth() <= 500_000_000 && !(livingEntity instanceof RemotePlayer)) {
+                        return true;
+                    }
                 }
             }
         }

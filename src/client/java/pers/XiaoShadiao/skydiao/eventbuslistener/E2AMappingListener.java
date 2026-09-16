@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 public class E2AMappingListener extends AbstractListener {
 
     public static final Pattern timeMatcher = Pattern.compile("[\\d]+:[\\d]+");
+    public boolean toggleRecord = true;
 
     private int tickCount = 0;
     private final E2AMapping e2aMapping = new E2AMapping();
@@ -34,11 +35,12 @@ public class E2AMappingListener extends AbstractListener {
 
     private void onWorldUnload(Minecraft minecraft, ClientLevel clientLevel) {
         e2aMapping.clear();
+        toggleRecord = true;
     }
 
     private void onClientTick(Minecraft mc) {
         e2aMapping.selfCleaningAndUpdate();
-        if(mc.level != null) {
+        if(mc.level != null && toggleRecord) {
 
             // 获取所有盔甲架实体
             java.util.List<ArmorStand> armorStands = new java.util.ArrayList<>();
@@ -75,6 +77,9 @@ public class E2AMappingListener extends AbstractListener {
                         info = getMobInfo(livingEntity);
                         if (info != null) {
                             break infoLabel;
+                        }
+                        if (Double.isInfinite(livingEntity.getMaxHealth())) {
+                            continue;
                         }
                     }
 

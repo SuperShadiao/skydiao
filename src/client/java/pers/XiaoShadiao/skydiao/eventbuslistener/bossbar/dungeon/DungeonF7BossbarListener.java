@@ -723,6 +723,14 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                 stormThunderFlagTime = 0;
             }
         }
+        if(currentStage == 5) {
+            if(message.contains("TNT")) {
+                turnItToStarRailMsg = new AbstractMap.SimpleEntry<>(message, StarRailNotification.Type.warning);
+                if (CrowdinI18nManager.getCurrentLang() == CrowdinI18nManager.LangCode.chinese) {
+                    turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("红色凋零龙正在准备释放超大TNT, 造成足够伤害以阻止TNT蓄力完成!", StarRailNotification.Type.warning);
+                }
+            }
+        }
 
         if(turnItToStarRailMsg != null) {
             if (addStarRailNotification(turnItToStarRailMsg.getKey(), turnItToStarRailMsg.getValue())) {

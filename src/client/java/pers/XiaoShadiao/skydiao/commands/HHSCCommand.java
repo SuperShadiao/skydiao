@@ -177,7 +177,8 @@ public class HHSCCommand extends SkydiaoCommand {
                 getArgConstantInstance("oomtest").executes(context -> owo(AbstractListener.basicListener::throwOOMNextTick)),
                 getArgConstantInstance("getskyblockitemid").executes(context -> owo(() -> context.getSource().sendFeedback(Component.literal(ToolList.getInstance().tryGetSkyblockItemId(mc.player.getItemHeldByArm(HumanoidArm.RIGHT)))))),
                 getArgConstantInstance("printscoreboard").executes(this::executePrintScoreboard),
-                getArgConstantInstance("sethiddensomethingindex").then(getArgInstance("index", IntegerArgumentType.integer(0, 36)).executes(this::setHiddenSomethingIndex)),
+                getArgConstantInstance("sethiddensomethingindex").then(getArgInstance("index", IntegerArgumentType.integer(0, AbstractListener.hiddenSomething.getTotalGifCount())).executes(this::setHiddenSomethingIndex)),
+                getArgConstantInstance("togglee2arecord").executes(_ -> owo(() -> AbstractListener.e2AMappingListener.toggleRecord = !AbstractListener.e2AMappingListener.toggleRecord)),
                 devcommand
         );
     }

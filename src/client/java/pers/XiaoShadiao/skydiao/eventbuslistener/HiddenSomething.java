@@ -111,6 +111,10 @@ public class HiddenSomething extends AbstractListener {
         pictureIndex = index;
     }
 
+    public int getTotalGifCount() {
+        return remoteGifs;
+    }
+
     record PosRecord(Vec3 pos, RenderUtils.SideDirection sideDirection, RenderUtils.TopMode topMode) {}
 
     private static final Map<String, PosRecord> posMap = Map.ofEntries(

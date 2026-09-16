@@ -41,9 +41,7 @@ public interface IDungeonListener {
     }
 
     public default boolean addStarRailNotification(String msg, StarRailNotification.Type type) {
-        if(!ConfigManager.bossbar.getValue()) return false;
-        XSDHUD.starRailNotification.updateMessage(msg, type);
-        return true;
+        return XSDHUD.starRailNotification.updateMessage(msg, type);
     }
 
 }

@@ -94,7 +94,7 @@ public class MineshaftShareListener extends AbstractListener {
         JASP_C("§d", "Jasper Crystal"),
         OPAL_1("§f", "Opal 1"),
         OPAL_C("§f", "Opal Crystal"),
-        LITT_L("§d", "Littlefoot's Den"),
+        LITT_L("§b", "Littlefoot's Den"),
                 ;
 
         public final String color;

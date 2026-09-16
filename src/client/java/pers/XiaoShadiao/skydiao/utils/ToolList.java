@@ -1,5 +1,6 @@
 package pers.XiaoShadiao.skydiao.utils;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import net.fabricmc.loader.api.FabricLoader;
 import net.hypixel.modapi.HypixelModAPI;
@@ -593,8 +594,14 @@ public class ToolList {
 
     public String getSkullBase64(ItemStack itemStack) {
         if(itemStack.getItem() != Items.PLAYER_HEAD) return null;
-        Property property = itemStack.getComponents().getOrDefault(DataComponents.PROFILE, ResolvableProfile.createUnresolved("")).partialProfile().properties().get("textures").iterator().next();
-        return Optional.of(property.value()).orElse(null); // 返回 Base64 皮肤信息;
+        return Optional.ofNullable(itemStack.getComponents().get(DataComponents.PROFILE))
+                .map(ResolvableProfile::partialProfile)
+                .map(GameProfile::properties)
+                .map(m -> m.get("textures"))
+                .map(Collection::iterator)
+                .filter(Iterator::hasNext)
+                .map(Iterator::next)
+                .map(Property::value).orElse(null); // 返回 Base64 皮肤信息;
     }
 
     public String numberToByteString(long l) {
@@ -720,7 +727,11 @@ public class ToolList {
     @SuppressWarnings("ConstantConditions")
     public static void printChatMessage(Component msg) {
         if (ToolList.mc != null && ToolList.mc.gui != null && ToolList.mc.gui.getChat() != null) {
-            ToolList.mc.execute(() -> ToolList.mc.gui.getChat().addClientSystemMessage(msg));
+            ToolList.mc.execute(() -> {
+                Component msg1 = msg;
+                if(ConfigManager.blivemodechat.getValue()) msg1 = ComponentHelper.wrapAsSensitive(msg1, true, true);
+                ToolList.mc.gui.getChat().addClientSystemMessage(msg1);
+            });
         }
     }
 

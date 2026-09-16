@@ -208,6 +208,8 @@ public class ConfigManager {
     public static final BooleanConfigOption f7SimonSaysSolverBlockWrongClicks = new BooleanConfigOption("f7simonsayssolverblockwrongclicks", true);
     public static final BooleanConfigOption f7TerminalESPTracer = new BooleanConfigOption("f7terminalesptracer", true);
     public static final BooleanConfigOption customBossESPTracer = new BooleanConfigOption("custombossesptracer", true);
+    public static final BooleanConfigOption starrailNotification = new BooleanConfigOption("starrailnotification", true);
+    public static final BooleanConfigOption starrailNotificationSound = new BooleanConfigOption("starrailnotificationsound", true);
 
     public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
@@ -306,7 +308,7 @@ public class ConfigManager {
             Map.entry("fishing", List.of(hotspotrender, autogg, lotusAtollHelper, fishingBigFishRender, fishingBigFishTip)),
             Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonKeyRender, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7InactiveTerminalRender, f7TerminalESPTracer, f7ArrowAlignSolver, f7ArrowAlignSolverBlockWrongClicks, f7SimonSaysSolver, f7SimonSaysSolverBlockWrongClicks, dungeonReviveItemCDRender, f7DrawWitherDragonESP, f7DrawStormFireballTarget, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered, dungeonDrinkPotion, dungeonBloodRoomTime, dungeonTrashTPS, dungeonf7msgbotssleap, dungeonMissingPlayer)),
             Map.entry("rift", List.of(rifttimegunhelper)),
-            Map.entry("界面类", List.of(openHud, bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, bossDrawESP, customBossESPTracer, dyingtip, noblind, nosuffoverlay, fireOverlay, lyricColor1, lyricColor2)),
+            Map.entry("界面类", List.of(openHud, bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, bossDrawESP, customBossESPTracer, starrailNotification, starrailNotificationSound, dyingtip, noblind, nosuffoverlay, fireOverlay, lyricColor1, lyricColor2)),
             Map.entry("ravengard", List.of(ravengardHelper, ravengardQueueMessage))
     );
 
@@ -347,8 +349,9 @@ public class ConfigManager {
     private static final Int2ObjectMap<List<ConfigOption<?>>> tryToResetToDefaultMap = Int2ObjectMap.ofEntries(
             Int2ObjectMap.entry(0, List.of(bossbar, bossbarShowHealth, bossbarAddTargetEntity)),
             Int2ObjectMap.entry(1, List.of(dungeonRenderDangerousEnemy, dungeonKeyRender)),
-            Int2ObjectMap.entry(2, List.of(macroReplay, macroReplaySelfCleaning))
-    );
+            Int2ObjectMap.entry(2, List.of(macroReplay, macroReplaySelfCleaning)),
+            Int2ObjectMap.entry(3, List.of(bossbar, starrailNotification, starrailNotificationSound))
+            );
 
     static {
         readConfig();

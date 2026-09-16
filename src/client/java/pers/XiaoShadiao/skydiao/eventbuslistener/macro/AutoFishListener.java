@@ -17,6 +17,7 @@ import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.ItemStack;
@@ -479,7 +480,7 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
             // class_1531['[Lv65] ⚓☮♃ gorF 33,000/40,000❤'/924037, l='ClientLevel', x=16.45, y=64.48, z=3.47]
             if(hooked instanceof ArmorStand carrier) fishHookCarrier = carrier;
             E2AMappingListener.MobInfo mobInfo = e2AMappingListener.getMobInfo(hooked.asLivingEntity());
-            if (mobInfo != null && mobInfo.armorStand.getName().getString().contains("❤") /* 包含❤符号证明是海怪, 自动重抛 */) {
+            if ((mobInfo != null && mobInfo.armorStand.getName().getString().contains("❤") /* 包含❤符号证明是海怪, 自动重抛 */) || (hooked instanceof LivingEntity livingEntity && livingEntity.getMaxHealth() >= 500_000_000)) {
                 lockedHookedEntity = hooked;
                 triggerFishHook();
             }

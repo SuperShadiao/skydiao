@@ -16,4 +16,12 @@ public abstract class AbstractFishingListener extends AbstractListener {
         return isInLotusAtoll() || isInBayou();
     }
 
+    public boolean isInIsle() {
+        return "crimson_isle".equals(StatusManager.get().getMode());
+    }
+
+    public boolean isInLavaFishingArea() {
+        return isInIsle();
+    }
+
 }
