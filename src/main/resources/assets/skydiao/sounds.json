@@ -42,5 +42,11 @@
     "sounds": [
       "skydiao:getchecked/lap_finish"
     ]
+  },
+  "manbaout": {
+    "subtitle": "Manba Out",
+    "sounds": [
+      "skydiao:autohypetrain/manbaout"
+    ]
   }
 }

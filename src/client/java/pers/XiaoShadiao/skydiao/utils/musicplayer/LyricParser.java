@@ -1,6 +1,8 @@
 package pers.XiaoShadiao.skydiao.utils.musicplayer;
 
 import org.apache.commons.io.FileUtils;
+import pers.XiaoShadiao.skydiao.eventbuslistener.bilibili.BilibiliMusicInfo;
+import pers.XiaoShadiao.skydiao.utils.blivesensitiveword.IDetectorAccessor;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,13 +22,14 @@ public class LyricParser {
     
     public int lyricLocIndex = 0;
 
-    public LyricParser(File lyric) {
+    public LyricParser(File lyric, MusicInfo musicInfo) {
         this.lyric = lyric;
-        orderedString = parse();
+        orderedString = parse(musicInfo);
     }
 
-    private StringLyric[] parse() {
+    private StringLyric[] parse(MusicInfo musicInfo) {
 
+        boolean flag = musicInfo instanceof BilibiliMusicInfo;
         List<StringLyric> lyricList = new ArrayList<>();
         try {
             String[] lines = FileUtils.readFileToString(lyric, "UTF-8").replace("\r", "").split("\n");
@@ -49,6 +52,11 @@ public class LyricParser {
                     }
                     String lyricString = matcher.group(2).trim().replace(" ", " ");
                     if(lyricString.isEmpty()) continue;
+
+                    if(flag) {
+                        if(lyricString.contains("\u6bdb\u6cfd") || lyricString.contains("\u4e60\u8fd1")) throw new UnsupportedOperationException();
+                        lyricString = IDetectorAccessor.getInstance().scanIllegalWords(lyricString, true, true).transfered;
+                    }
 
                     lyricStrings[i] = new StringLyric(lyricString);
                     lasttime = lyricTimes[i] = time;

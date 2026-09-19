@@ -22,6 +22,7 @@ public class PlayerThread {
     private static boolean playing;
 
     private static Queue<MusicInfo> playQueue = new ConcurrentLinkedQueue<>();
+    private static Queue<MusicInfo> biliLivePlayQueue = new ConcurrentLinkedQueue<>();
 
     public static MusicInfo currentMusic;
     private static MusicInfo currentMusic2;
@@ -37,6 +38,11 @@ public class PlayerThread {
     }
 
     public static void destoryCurrent() {
+        if(!biliLivePlayQueue.isEmpty()) {
+            clearQueue();
+            playQueue.add(currentMusic2);
+            playQueue.add(currentMusic2);
+        }
         switchMusicFlag = true;
     }
 
@@ -130,13 +136,16 @@ public class PlayerThread {
                                 playQueue.add(currentMusic2 == null ? MusicListManager.getMusics().iterator().next() : currentMusic2);
                         }
                     }
+                    MusicInfo temp1 = biliLivePlayQueue.poll();
                     MusicInfo temp = playQueue.peek();
                     playQueue.removeIf(a -> a.isDisabled);
 
                     if((currentMusic = currentMusic2 = playQueue.poll()) == null && (currentMusic = currentMusic2 = temp) == null) {
                         stopPlay();
                     } else {
-                        ConfigManager.musiclastmusic.setValue(musiclist.indexOf(currentMusic));
+                        if(temp1 != null) currentMusic = temp1;
+                        int index = musiclist.indexOf(currentMusic);
+                        if(index != -1) ConfigManager.musiclastmusic.setValue(index);
                         play(currentMusic);
                     }
                 } else {
@@ -152,6 +161,18 @@ public class PlayerThread {
                 }
             }
         }
+    }
+
+    public static Queue<MusicInfo> getBiliLiveMusics() {
+        return biliLivePlayQueue;
+    }
+
+    public static void removeBiliLiveMusic(MusicInfo mi) {
+        biliLivePlayQueue.remove(mi);
+    }
+
+    public static void addBiliLiveMusic(MusicInfo mi) {
+        biliLivePlayQueue.add(mi);
     }
 
     public static void createThread() {
@@ -204,7 +225,7 @@ public class PlayerThread {
             String musicInfo1 = musicInfo;
             musicInfo1 = musicInfo1.length() > 20 ? musicInfo1.substring(0, 20) + "..." : musicInfo1;
             try {
-                current = ms == null ? new MusicStatus(music, lyric) : ms;
+                current = ms == null ? new MusicStatus(music, lyric, mi) : ms;
                 current.getPlayer().play();
             } catch (Throwable e) {
                 e.printStackTrace();

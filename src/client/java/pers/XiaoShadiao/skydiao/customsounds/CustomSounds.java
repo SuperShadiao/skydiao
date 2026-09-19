@@ -6,6 +6,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 
 public class CustomSounds {
+
     private CustomSounds() {
         // private empty constructor to avoid accidental instantiation
     }
@@ -19,6 +20,7 @@ public class CustomSounds {
     public static final SoundEvent YSENTER = registerSound("ysenter");
     public static final SoundEvent YSWARNING = registerSound("yswarning");
     public static final SoundEvent NPC = registerSound("nearby_player_check");
+    public static final SoundEvent MANBA_OUT = registerSound("manbaout");
 
 
 

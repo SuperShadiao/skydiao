@@ -20,6 +20,11 @@ public class KeyBindsManager {
     public static final KeyMapping pressFreelook = new KeyMapping("key.freelook", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
     public static final KeyMapping toggleFreecam = new KeyMapping("key.toggleFreecam", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
 
+    public static final KeyMapping musicPlayStop = new KeyMapping("key.musicPlayStop", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
+    public static final KeyMapping musicSwitch = new KeyMapping("key.musicSwitch", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
+
+    public static final KeyMapping fastMenu = new KeyMapping("key.fastMenu", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
+
     public static void registerKeyBinds() {
         Register.execRegister(KeyBindsManager.class, KeyMapping.class, KeyMappingHelper::registerKeyMapping);
     }

@@ -687,7 +687,8 @@ public class CustomBossbar extends XSDHUD {
             STAGE_PASSED = new Color(0, 0, 0, 150),
             IMMUNE = new Color(255, 242, 100, 255),
             POWERUP = new Color(255, 80, 80, 255),
-            NO_POWERUP = new Color(119, 119, 119, 255),
+            NO_POWERUP = new Color(0, 0, 0, 255),
+            POWERUP_CHARGE_ROUNDED_BACKGROUND = new Color(51, 51, 51, 100),
             ICON_ROUNDED = new Color(255, 255, 255, 100),
             ICON_BACKGROUND = new Color(0, 0, 0, 100);
 
@@ -886,7 +887,7 @@ public class CustomBossbar extends XSDHUD {
                     RenderUtils.drawCircle(context, x1, y1, 0, 360, radius, NO_POWERUP.getRGB());
                     context.blitSprite(RenderPipelines.GUI_TEXTURED, bossBar.getPowerUpPotionIcon(), (int) (x1 - potionWidth / 2), (int) (y1 - potionHeight / 2), (int) potionWidth + 2, (int) potionHeight + 2);
                     if(bossBar.getPowerUpStyle() == PowerUpStyle.CHARGING) {
-                        RenderUtils.drawRoundedCircle(context, x1, y1, 0, 360, radius - 2, 2, ICON_BACKGROUND.getRGB());
+                        RenderUtils.drawRoundedCircle(context, x1, y1, 0, 360, radius - 2, 2, POWERUP_CHARGE_ROUNDED_BACKGROUND.getRGB());
                         RenderUtils.drawRoundedCircle(context, x1, y1, -90, -91 + 361 * bossBar.getPowerUp() / bossBar.getMaxPowerUp(), radius - 2, 2, bossBar.getPwoerUpColor().getRGB());
                     }
                 }

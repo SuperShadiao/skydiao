@@ -14,12 +14,14 @@ import pers.XiaoShadiao.skydiao.commands.args.ClientBlockPosArgument;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.AutoSwitchPetListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.irc.ChatPacket;
 import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
+import pers.XiaoShadiao.skydiao.screen.FastCommandMenuScreen;
 import pers.XiaoShadiao.skydiao.utils.Banned;
 import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
@@ -61,6 +63,7 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                 getArgConstantInstance("想看看盔甲架的世界").executes(this::executeArmorStandWorld),
                 getArgConstantInstance("autoclick").then(getArgInstance("action", StringArgumentType.string()).suggests((c, b) -> b.suggest("addleft").suggest("addright").suggest("addleftright").suggest("remove").buildFuture()).executes(this::executeAutoClicker)),
                 getArgConstantInstance("loto").then(getArgInstance("index", IntegerArgumentType.integer()).executes(this::openAndChangeLoadout)),
+                getArgConstantInstance("petto").then(getArgInstance("petName", StringArgumentType.greedyString()).executes(this::openAndChangePet)),
                 getArgConstantInstance("fastclearminingstash").executes(_ -> awa(AbstractListener.fastClearMiningStash::startClearTask)),
                 getArgConstantInstance("apd").redirect(APD_COMMAND.getCommandNode()),
                 getArgConstantInstance("isleautofindvolcano")
@@ -101,8 +104,14 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                         .then(getArgConstantInstance("water").then(getArgInstance("pos", ClientBlockPosArgument.blockPos()).executes(context -> executeAutoFillBottlePos(context, 0))))
                         .then(getArgConstantInstance("chest").then(getArgInstance("pos", ClientBlockPosArgument.blockPos()).executes(context -> executeAutoFillBottlePos(context, 1))))
                         .then(getArgConstantInstance("start").executes(c -> owo(() -> MacroManagerListener.autoFillBottleOfWater.enabled = true)))
-                        .then(getArgConstantInstance("stop").executes(c -> owo(() -> MacroManagerListener.autoFillBottleOfWater.enabled = false)))
+                        .then(getArgConstantInstance("stop").executes(c -> owo(() -> MacroManagerListener.autoFillBottleOfWater.enabled = false))),
+                getArgConstantInstance("editfastcommand").executes(this::executeEditFastCommand)
         );
+    }
+
+    private int executeEditFastCommand(CommandContext<FabricClientCommandSource> context) {
+        mc.schedule(() -> mc.setScreen(new FastCommandMenuScreen(true)));
+        return 0;
     }
 
     private int executeAutoFillBottlePos(CommandContext<FabricClientCommandSource> context, int type) {
@@ -321,6 +330,20 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
             return 1;
         }
         AbstractListener.autoLoadoutListener.switchLoadout(index, null);
+        return 0;
+    }
+
+    private int openAndChangePet(CommandContext<FabricClientCommandSource> context) {
+        String petName = StringArgumentType.getString(context, "petName");
+        AbstractListener.autoSwitchPetListener.switchPet(petName, result -> {
+            if (result == AutoSwitchPetListener.CallbackResult.DONE) {
+                context.getSource().sendFeedback(Component.literal("§a[小沙雕] 成功切换到§e" + petName));
+            } else if (result == AutoSwitchPetListener.CallbackResult.NOT_FOUND) {
+                context.getSource().sendError(Component.literal("§a[小沙雕] §c未找到§e" + petName));
+            } else {
+                context.getSource().sendError(Component.literal("§a[小沙雕] §c切换失败 :("));
+            }
+        });
         return 0;
     }
 }

@@ -65,6 +65,7 @@ public class MusicInfo implements Cloneable {
         if(ToolList.getInstance().stringHasContext(mi.URL)) URL = mi.URL;
         if(ToolList.getInstance().stringHasContext(mi.lyricURL)) lyricURL = mi.lyricURL;
         if(ToolList.getInstance().stringHasContext(mi.albumID)) albumID = mi.albumID;
+        if(ToolList.getInstance().stringHasContext(mi.type)) type = mi.type;
 
         return this;
     }

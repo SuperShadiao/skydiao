@@ -32,6 +32,7 @@ import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.irc.ChatPacket;
+import pers.XiaoShadiao.skydiao.screen.FastCommandMenuScreen;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.WindowsUtils;
 import pers.XiaoShadiao.skydiao.utils.playerinput.AimHelper;
@@ -163,6 +164,10 @@ public class HHSCCommand extends SkydiaoCommand {
                 Narrator.getNarrator().say(StringArgumentType.getString(context, "msg"), false, 1);
                 return 0;
             })));
+            devcommand.then(getArgConstantInstance("testfastmenuload").executes(context -> {
+                FastCommandMenuScreen.load();
+                return 0;
+            }));
         } else {
             devcommand.executes((context) -> owo(() -> context.getSource().sendFeedback(Component.literal("§a[小沙雕] §c当前不是Dev环境..."))));
         }
@@ -208,12 +213,12 @@ public class HHSCCommand extends SkydiaoCommand {
 
             @Override
             public double getHealth() {
-                return 100;
+                return mc.player.getHealth() * 50 * 100000000000000000d;
             }
 
             @Override
             public double getMaxHealth() {
-                return 100;
+                return mc.player.getMaxHealth() * 50 * 100000000000000000d;
             }
 
             @Override
@@ -248,7 +253,7 @@ public class HHSCCommand extends SkydiaoCommand {
 
             @Override
             public boolean isPowerUp() {
-                return false;
+                return getMaxPowerUp() == getPowerUp();
             }
 
             @Override
@@ -258,12 +263,12 @@ public class HHSCCommand extends SkydiaoCommand {
 
             @Override
             public int getPowerUp() {
-                return 2;
+                return (int) (1 + 4 * getHealth() / getMaxHealth());
             }
 
             @Override
             public CustomBossbar.PowerUpStyle getPowerUpStyle() {
-                return CustomBossbar.PowerUpStyle.CHARGING;
+                return getMaxPowerUp() == getPowerUp() ? CustomBossbar.PowerUpStyle.READY : CustomBossbar.PowerUpStyle.CHARGING;
             }
 
             @Override
@@ -273,7 +278,7 @@ public class HHSCCommand extends SkydiaoCommand {
 
             @Override
             public CustomBossbar.PowerUpTextState getPowerUpTextState() {
-                return CustomBossbar.PowerUpTextState.NUMBER_WITH_MAX;
+                return getPowerUp() == 2 ? CustomBossbar.PowerUpTextState.PERCENT : getMaxPowerUp() == getPowerUp() ? CustomBossbar.PowerUpTextState.NUMBER : CustomBossbar.PowerUpTextState.NUMBER_WITH_MAX;
             }
 
             @Override

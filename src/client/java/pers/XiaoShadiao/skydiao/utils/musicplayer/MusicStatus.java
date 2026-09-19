@@ -23,13 +23,15 @@ public class MusicStatus extends PlaybackListener {
     @SuppressWarnings("unused")
     private double startPlayTime;
     private FloatControl volumeCtrl;
+    private final MusicInfo musicInfo;
     
-    public MusicStatus(File f, File lyric) {
+    public MusicStatus(File f, File lyric, MusicInfo mi) {
         try {
             MusicFileReader is = new MusicFileReader(f);
             this.player = new MusicPlayer(is, this);
             this.player.setPlayBackListener(this);
-            this.lyric = new LyricParser(lyric);
+            this.musicInfo = mi;
+            this.lyric = new LyricParser(lyric, musicInfo);
         } catch (JavaLayerException | IOException e) {
             throw new RuntimeException(e);
         }

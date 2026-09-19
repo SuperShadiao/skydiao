@@ -24,6 +24,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -57,6 +58,7 @@ import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.irc.ChatPacket;
 import pers.XiaoShadiao.skydiao.keybinds.KeyBindsManager;
+import pers.XiaoShadiao.skydiao.screen.FastCommandMenuScreen;
 import pers.XiaoShadiao.skydiao.screen.mircosoftaccount.AccountSelectScreen;
 import pers.XiaoShadiao.skydiao.utils.*;
 import pers.XiaoShadiao.skydiao.utils.autoupdater.AutoUpdater;
@@ -93,6 +95,7 @@ public class BasicListener extends AbstractListener {
     private boolean testOOM;
 
     public PlayerSkin selfPlayerSkin;
+    private int instaReconnect = 200;
 
     public static final Identifier customCape = Identifier.fromNamespaceAndPath("skydiao", "custom_cape");
     private ServerData currentServerData;
@@ -410,6 +413,18 @@ public class BasicListener extends AbstractListener {
             ).bounds(5, scaledHeight - 25, 100, 20).build());
 
             reconnectCountDown = 60;
+
+            buttons.stream().filter(widget3 -> widget3 instanceof MultiLineTextWidget)
+                    .findFirst().ifPresentOrElse((widget3) -> {
+                        if (widget3.getMessage().getString().equals("连接中断")) {
+                            if(instaReconnect > 0) {
+                                instaReconnect--;
+                                reconnectCountDown = 1;
+                            } else {
+                                instaReconnect = 200;
+                            }
+                        }
+                    }, () -> instaReconnect = 0);
         }
     }
 
@@ -479,6 +494,16 @@ public class BasicListener extends AbstractListener {
         }
         while(KeyBindsManager.toggleKeepSprint.consumeClick()) {
             ConfigManager.keepSprint.setValue(!ConfigManager.keepSprint.getValue());
+        }
+        while (KeyBindsManager.musicPlayStop.consumeClick()) {
+            ConfigManager.musicplayer.setValue(!ConfigManager.musicplayer.getValue());
+            if(!ConfigManager.musicplayer.getValue()) PlayerThread.destoryCurrent();
+        }
+        while (KeyBindsManager.musicSwitch.consumeClick()) {
+            if(ConfigManager.musicplayer.getValue()) PlayerThread.destoryCurrent();
+        }
+        if(KeyBindsManager.fastMenu.isDown() && mc.screen == null) {
+            mc.setScreen(new FastCommandMenuScreen(false));
         }
         if((!(mc.screen instanceof ChatScreen) || mc.screen.getClass().getName().startsWith("pers.XiaoShadiao")) && Arrays.stream(mc.options.keyMappings).anyMatch(KeyMapping::isDown))  {
             if(afkHoldTick++ > 20) {

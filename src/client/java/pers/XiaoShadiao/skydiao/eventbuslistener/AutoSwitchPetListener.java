@@ -9,17 +9,18 @@ import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.Slot;
 import pers.XiaoShadiao.skydiao.utils.PageSwitchCallback;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
-public class AutoLoadoutListener extends AbstractListener {
+public class AutoSwitchPetListener extends AbstractListener {
 
     @Override
     public String getListenerName() {
-        return "AutoLoadoutListener";
+        return "AutoSwitchPetListener";
     }
 
     @Override
@@ -27,7 +28,7 @@ public class AutoLoadoutListener extends AbstractListener {
         ScreenEvents.AFTER_INIT.register(this::onLoadoutGuiOpen);
     }
 
-    public int loadout = 0;
+    public String petName;
     public Consumer<CallbackResult> callback;
     private PageSwitchCallback pageSwitchCallback;
 
@@ -36,9 +37,9 @@ public class AutoLoadoutListener extends AbstractListener {
         Container container = containerScreen.getMenu().getContainer();
         if (container instanceof SimpleContainer) {
             String chestName = ToolList.getInstance().deleteColorCode(containerScreen.getTitle().getString());
-            if (chestName.contains("Loadouts")) {
+            if (chestName.endsWith("Pets")) {
                 if(pageSwitchCallback == null) {
-                    ScreenEvents.afterExtract(screen).register(this::onLoadoutGuiDraw);
+                    ScreenEvents.afterExtract(screen).register(this::onPetGuiDraw);
                 } else {
                     pageSwitchCallback.setScreen(screen);
                     pageSwitchCallback = null;
@@ -50,86 +51,52 @@ public class AutoLoadoutListener extends AbstractListener {
     public enum CallbackResult {
         DONE,
         TERMINATED,
-        EXCEPTION
+        EXCEPTION,
+        NOT_FOUND;
     }
 
-    public void onLoadoutGuiDraw(Screen screen0, GuiGraphicsExtractor drawContext, int mouseX, int mouseY, float tickDelta) {
-        if (loadout == 0) return;
+    public void onPetGuiDraw(Screen screen0, GuiGraphicsExtractor drawContext, int mouseX, int mouseY, float tickDelta) {
+        if (petName == null) return;
 
         if (!(screen0 instanceof ContainerScreen)) return;
         ChestMenu menu0 = ((ContainerScreen) screen0).getMenu();
         Container container0 = menu0.getContainer();
         if (!(container0 instanceof SimpleContainer)) return;
 
-        int page = (loadout - 1) / 12;
-
-        // index table
-        // 14 15 16 lastp
-        // 23 24 25
-        // 32 33 34
-        // 41 42 43 nextp
-        
-        int slot = switch(loadout) {
-            case 1, 13, 25 -> 14;
-            case 2, 14, 26 -> 15;
-            case 3, 15, 27 -> 16;
-            case 4, 16 -> 23;
-            case 5, 17 -> 24;
-            case 6, 18 -> 25;
-            case 7, 19 -> 32;
-            case 8, 20 -> 33;
-            case 9, 21 -> 34;
-            case 10, 22 -> 41;
-            case 11, 23 -> 42;
-            case 12, 24 -> 43;
-            default -> throw new IllegalStateException("Unexpected value: " + loadout);
-        };
         Consumer<CallbackResult> callback = this.callback;
         this.callback = null;
 
-        loadout = 0;
+        String petName0 = petName;
+        petName = null;
 
         ToolList.addThreadedTask(new Callable<Void>() {
             public Void call() {
-                Screen screen;
                 ChestMenu menu = menu0;
                 try {
                     Thread.sleep(200 + ToolList.getInstance().random.nextInt(200));
-                    PageSwitchCallback pageSwitchCallback = page > 0 ? new PageSwitchCallback() : null;
-                    for (int i = 0; i < page; i++) {
-                        ChestMenu finalMenu = menu;
-                        mc.execute(() -> {
-                            if (mc.player != null && mc.gameMode != null) {
-                                AutoLoadoutListener.this.pageSwitchCallback = pageSwitchCallback;
-                                mc.gameMode.handleContainerInput(finalMenu.containerId, 44, 0, ContainerInput.PICKUP, mc.player);
-                            }
-                        });
-                        if(mc.screen == null) {
-                            call(CallbackResult.TERMINATED);
-                            return null;
-                        }
-                        Thread.sleep(600 + ToolList.getInstance().random.nextInt(200));
-                        screen = pageSwitchCallback.getScreen();
-                        if(screen == null) {
-                            call(CallbackResult.TERMINATED);
-                            return null;
-                        }
-                        menu = ((ContainerScreen) screen).getMenu();
-                    }
                     if(mc.screen == null) {
                         call(CallbackResult.TERMINATED);
                         return null;
                     }
                     ChestMenu finalMenu1 = menu;
-                    mc.execute(() -> {
-                        if (mc.player != null && mc.gameMode != null) {
-                            mc.gameMode.handleContainerInput(finalMenu1.containerId, slot, 0, ContainerInput.PICKUP, mc.player);
+                    boolean found = false;
+                    for (int i = 0; i < finalMenu1.slots.size(); i++) {
+                        Slot slot = finalMenu1.slots.get(i);
+                        if(ToolList.getInstance().deleteColorCode(slot.getItem().getHoverName().getString()).toLowerCase().contains(petName0.toLowerCase())) {
+                            found = true;
+                            mc.execute(() -> {
+                                if (mc.player != null && mc.gameMode != null) {
+                                    mc.gameMode.handleContainerInput(finalMenu1.containerId, slot.index, 0, ContainerInput.PICKUP, mc.player);
+                                }
+                            });
+                            break;
                         }
-                    });
+                    }
                     Thread.sleep(500 + ToolList.getInstance().random.nextInt(150));
+                    CallbackResult result = found ? CallbackResult.DONE : CallbackResult.NOT_FOUND;
                     mc.execute(() -> {
                         if (mc.screen != null) mc.screen.onClose();
-                        call(CallbackResult.DONE);
+                        call(result);
                     });
                 } catch (Throwable e) {
                     e.printStackTrace();
@@ -142,7 +109,7 @@ public class AutoLoadoutListener extends AbstractListener {
 
             private void call(CallbackResult result) {
                 if(called) return;
-                logger.info("Loadout returned " + result);
+                logger.info("SwitchPet returned " + result);
                 if(callback == null) return;
                 called = true;
                 callback.accept(result);
@@ -150,35 +117,35 @@ public class AutoLoadoutListener extends AbstractListener {
         });
     }
 
-    public void switchLoadout(int index, Consumer<CallbackResult> callback) {
+    public void switchPet(String petName, Consumer<CallbackResult> callback) {
         // 终止前一个未完成的任务
         if (this.callback != null) {
             this.callback.accept(CallbackResult.TERMINATED);
         }
 
-        this.loadout = index;
+        this.petName = petName;
         this.callback = callback;
 
         // 使用原子操作确保线程安全
-        final int expectedIndex = index;
+        final String expectedPetName = petName;
 
         ToolList.addThreadedTask(() -> {
             Thread.sleep(7000);
 
             // 检查是否仍未处理
-            if (AutoLoadoutListener.this.loadout == expectedIndex) {
+            if (AutoSwitchPetListener.this.petName.equals(expectedPetName)) {
                 // 使用 call 方法确保线程安全和防止重复调用
-                Consumer<CallbackResult> cb = AutoLoadoutListener.this.callback;
+                Consumer<CallbackResult> cb = AutoSwitchPetListener.this.callback;
                 if (cb != null) {
                     cb.accept(CallbackResult.TERMINATED);  // 超时应返回 TERMINATED
                 }
-                AutoLoadoutListener.this.loadout = 0;
-                AutoLoadoutListener.this.callback = null;
+                AutoSwitchPetListener.this.petName = null;
+                AutoSwitchPetListener.this.callback = null;
             }
             return null;
         });
 
-        ToolList.sendChatMessage("/loadout");
+        ToolList.sendChatMessage("/pet");
     }
 
 }

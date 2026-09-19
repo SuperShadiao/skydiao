@@ -439,6 +439,19 @@ public class ToolList {
         };
     }
 
+    //    public String numberToEZString(double d) {
+//        String[] sl = {"", "k", "M", "B", "T"};
+//        double d2 = d;
+//
+//        for (String s : sl) {
+//            d2 /= 1000;
+//            if (d2 < 1) {
+//                return (Math.round(d2 * 1000d * 100d) / 100d) + s;
+//            }
+//        }
+//
+//        return (Math.round(d2 * 1000d * 100d) / 100d) + sl[sl.length - 1];
+//    }
     public String numberToEZString(double d) {
         String[] sl = {"", "k", "M", "B", "T"};
         double d2 = d;
@@ -450,7 +463,22 @@ public class ToolList {
             }
         }
 
-        return (Math.round(d2 * 1000d * 100d) / 100d) + sl[sl.length - 1];
+        // 原逻辑这里会拼 T。tValue 就是原本 T 前面要显示的数字，即 d / 1e12
+        double tValue = d2 * 1000d;
+
+        // Java double 转字符串时，绝对值 >= 1e7 通常会变成科学计数法。
+        // 这时不要 T，直接对原数 d 做科学计数法并保留两位小数。
+        if (Math.abs(tValue) >= 1e7) {
+            return String.format(Locale.US, "%.2E", d);
+        }
+
+        // 处理四舍五入后刚好变成科学计数法的情况，例如 9999999.999 -> 1.0E7
+        String tStr = (Math.round(tValue * 100d) / 100d) + "";
+        if (tStr.indexOf('E') >= 0 || tStr.indexOf('e') >= 0) {
+            return String.format(Locale.US, "%.2E", d);
+        }
+
+        return tStr + sl[sl.length - 1];
     }
 
     @Nullable

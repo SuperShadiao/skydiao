@@ -210,6 +210,8 @@ public class ConfigManager {
     public static final BooleanConfigOption customBossESPTracer = new BooleanConfigOption("custombossesptracer", true);
     public static final BooleanConfigOption starrailNotification = new BooleanConfigOption("starrailnotification", true);
     public static final BooleanConfigOption starrailNotificationSound = new BooleanConfigOption("starrailnotificationsound", true);
+    public static final BooleanConfigOption fastCommandMenuSavePageState = new BooleanConfigOption("fastcommandmenusavepagestate", false);
+    public static final IntConfigOption fastCommandMenuDefaultPage = new IntConfigOption("fastcommandmenudefaultpage", 0);
 
     public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
@@ -260,6 +262,8 @@ public class ConfigManager {
     public static final IntConfigOption musiclastmusic = new IntConfigOption("musiclastmusic", 0);
     public static final IntConfigOption xsdmusicvolume = new IntConfigOption("xsdmusicvolume", 100);
 
+    public static final BooleanConfigOption autoHypeTrain = new BooleanConfigOption("autolobbytrain", true);
+    public static final BooleanConfigOption autoHypeTrainManbaOut = new BooleanConfigOption("autolobbytrainplaysoundaftercrash", true);
 
     public static final Function<String, Runnable> openChat = (msg) -> () -> ToolList.mc.setScreenAndShow(new ChatScreen(msg, false, true));
     public static final Runnable openControl = () -> ToolList.mc.setScreenAndShow(new KeyBindsScreen(ToolList.mc.screen, ToolList.mc.options));
@@ -271,6 +275,7 @@ public class ConfigManager {
     public static final ActionConfigOption openFsKeyBind = new ActionConfigOption("openfskeybind", openControl);
     public static final ActionConfigOption openClearStashCommand = new ActionConfigOption("openclearstashcommand", openChat.apply("/skydiao fastclearminingstash"));
     public static final ActionConfigOption openHud = new ActionConfigOption("openhud", () -> ToolList.mc.setScreenAndShow(new HudConfigScreen(ToolList.mc.screen)));
+    public static final ActionConfigOption openfastcommandmenukeybinds = new ActionConfigOption("openfastcommandmenukeybinds", openControl);
 
     public static final BooleanConfigOption iAutoObsidian = new BooleanConfigOption("iautoobsidian", false) {
         @Override
@@ -297,8 +302,8 @@ public class ConfigManager {
     public static final IntConfigOption obsidianCycleTicks = new IntConfigOption("obsidiancycleticks", 9).flagAsMacroFeature();
 
     public static final List<Map.Entry<String, List<ConfigOption<?>>>> categories = List.of(
-            Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip, enableircafktip, enableircmacrochecktip, cooltitle, customTitleText)),
-            Map.entry("工具类", List.of(inventoryFilter, itemStarCountRender, itemStarCountRenderColor1, itemStarCountRenderColor2, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodescoreboard, blivemodehideserverid, bliveboardcastdankumu, keepSprint, autoReconnect, afkInOtherPlace, freecamFlySpeed, openFreelookAndFreecamAction, openAutoClickAction, openAllAutoClickKeybindAction, openClearStashCommand)),
+            Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip, enableircafktip, enableircmacrochecktip, cooltitle, customTitleText, autoHypeTrain, autoHypeTrainManbaOut)),
+            Map.entry("工具类", List.of(inventoryFilter, itemStarCountRender, itemStarCountRenderColor1, itemStarCountRenderColor2, openfastcommandmenukeybinds, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodescoreboard, blivemodehideserverid, bliveboardcastdankumu, keepSprint, autoReconnect, afkInOtherPlace, freecamFlySpeed, openFreelookAndFreecamAction, openAutoClickAction, openAllAutoClickKeybindAction, openClearStashCommand)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
             Map.entry("自动类", List.of(macroReplay, macroReplaySelfCleaning, autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, autoCarnivalAutoRestart, carnivalAutoFruitDigger, carnivalAutoShootZombie, carnivalAutoShootZombieOffset, skyblockautobloodfiend, skyblockautobloodfiendlowhealth, iAutoObsidian, iAutoObsidianWR, obsidianPositionHelper, autoObsidianPositionsFile, drillSlot, lanternSlot, obsidianPlayerCheckRange, obsidianPlayerCheck, obsidianTheEndCheck, obsidianCycleTicks, autoPickupPhoneRing, autoPlayBeachBall, autoPlayBeachBallAutoStopAt40)),
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareAnnounce, skyblockSafeIsland, crystalHollowHelper, crystalHollowHelperDebug, crystalHollowDupServerTipper, crystalHollowHelperDisableThreadLimit, genshinImpactHeatColdRender, miningCommissionEntityESP)),
