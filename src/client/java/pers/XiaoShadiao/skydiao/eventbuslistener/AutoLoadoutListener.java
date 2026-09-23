@@ -126,7 +126,7 @@ public class AutoLoadoutListener extends AbstractListener {
                             mc.gameMode.handleContainerInput(finalMenu1.containerId, slot, 0, ContainerInput.PICKUP, mc.player);
                         }
                     });
-                    Thread.sleep(500 + ToolList.getInstance().random.nextInt(150));
+                    Thread.sleep(100 + ToolList.getInstance().random.nextInt(50));
                     mc.execute(() -> {
                         if (mc.screen != null) mc.screen.onClose();
                         call(CallbackResult.DONE);

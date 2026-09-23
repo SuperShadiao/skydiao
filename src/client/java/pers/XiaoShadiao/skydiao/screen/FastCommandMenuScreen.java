@@ -364,8 +364,16 @@ public class FastCommandMenuScreen extends Screen {
     }
 
     @Override
-    public boolean keyReleased(KeyEvent event) {
-        System.out.println(event.isDown());
+    public boolean mouseReleased(@NotNull MouseButtonEvent event) {
+        if (KeyBindsManager.fastMenu.matchesMouse(event) && !editMode) {
+            onClose();
+            return true;
+        }
+        return super.mouseReleased(event);
+    }
+
+    @Override
+    public boolean keyReleased(@NotNull KeyEvent event) {
         if (KeyBindsManager.fastMenu.matches(event) && !editMode) {
             onClose();
             return true;

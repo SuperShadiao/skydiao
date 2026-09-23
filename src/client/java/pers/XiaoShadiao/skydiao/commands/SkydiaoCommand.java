@@ -6,10 +6,16 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.Vec3;
 import pers.XiaoShadiao.skydiao.commands.args.ClientBlockPosArgument;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
@@ -32,6 +38,8 @@ import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicListManager;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.PlayerThread;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
@@ -105,8 +113,42 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                         .then(getArgConstantInstance("chest").then(getArgInstance("pos", ClientBlockPosArgument.blockPos()).executes(context -> executeAutoFillBottlePos(context, 1))))
                         .then(getArgConstantInstance("start").executes(c -> owo(() -> MacroManagerListener.autoFillBottleOfWater.enabled = true)))
                         .then(getArgConstantInstance("stop").executes(c -> owo(() -> MacroManagerListener.autoFillBottleOfWater.enabled = false))),
-                getArgConstantInstance("editfastcommand").executes(this::executeEditFastCommand)
+                getArgConstantInstance("editfastcommand").executes(this::executeEditFastCommand),
+                getArgConstantInstance("changetocreativemode").executes(this::executeChangeCreativeMode)
         );
+    }
+
+    private int executeChangeCreativeMode(CommandContext<FabricClientCommandSource> context) {
+        if (
+                BlockPos.betweenClosedStream(new BlockPos(-21, 31, 20), new BlockPos(-21, 33, 22))
+                        .allMatch(pos -> {
+                            System.out.println(pos);
+                            System.out.println(mc.level.getBlockState(pos).is(Blocks.OAK_WALL_SIGN));
+                            return mc.level.getBlockState(pos).is(Blocks.OAK_WALL_SIGN) && mc.player.distanceToSqr(Vec3.atCenterOf(pos)) < 100;
+                        })
+                &&
+                        mc.level.dimension().identifier().equals(Identifier.parse("minecraft:the_end"))
+        ) {
+            PlayerInfo playerInfoInstance = mc.getConnection().getPlayerInfo(mc.player.getUUID());
+            Method setGameModeMethod = null;
+            try {
+                setGameModeMethod = PlayerInfo.class.getDeclaredMethod("setGameMode", GameType.class);
+                setGameModeMethod.setAccessible(true);
+                setGameModeMethod.invoke(playerInfoInstance, GameType.CREATIVE);
+
+                mc.player.getAbilities().flying = true;
+                mc.player.getAbilities().mayfly = true;
+                mc.player.getAbilities().instabuild = true;
+                mc.player.getAbilities().invulnerable = true;
+                context.getSource().sendFeedback(Component.literal("§a[小沙雕] 已切换到创造模式, 在limbo里狂欢吧。"));
+            } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                e.printStackTrace();
+                context.getSource().sendError(Component.literal("§a[小沙雕] §c切换到创造模式失败: " + e.getMessage()));
+            }
+        } else {
+            context.getSource().sendError(Component.literal("§a[小沙雕] §c你需要在Limbo内使用此指令"));
+        }
+        return 0;
     }
 
     private int executeEditFastCommand(CommandContext<FabricClientCommandSource> context) {
@@ -143,6 +185,7 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                         }
                     });
                 } else {
+                    if(index == -1) MusicListManager.add(music0);
                     PlayerThread.playMI(music0);
                 }
                 context.getSource().sendFeedback(Component.literal("§a[小沙雕] 操作成功, 音乐下载后将自动播放. 可使用/skydiaomusic关闭音乐."));

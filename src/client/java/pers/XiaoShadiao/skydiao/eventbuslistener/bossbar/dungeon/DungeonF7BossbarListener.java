@@ -83,19 +83,21 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
     private record WitherDragonData(int entityId, ColorType colorType) {
         private enum ColorType {
-            GREEN(new BlockPos(26, 6, 94), new BlockPos(32, 23, 94), Color.GREEN),
-            RED(new BlockPos(26, 6, 59), new BlockPos(32, 22, 59), Color.RED),
-            ORANGE(new BlockPos(86, 6, 56), new BlockPos(80, 23, 56), Color.ORANGE),
-            BLUE(new BlockPos(85, 6, 94), new BlockPos(79, 23, 94), Color.BLUE),
-            PURPLE(new BlockPos(56, 8, 126), new BlockPos(56, 22, 120), Color.MAGENTA),
+            GREEN(new BlockPos(26, 6, 94), new BlockPos(32, 23, 94), Color.GREEN, "Apex Dragon"),
+            RED(new BlockPos(26, 6, 59), new BlockPos(32, 22, 59), Color.RED, "Power Dragon"),
+            ORANGE(new BlockPos(86, 6, 56), new BlockPos(80, 23, 56), Color.ORANGE, "Flame Dragon"),
+            BLUE(new BlockPos(85, 6, 94), new BlockPos(79, 23, 94), Color.BLUE, "Ice Dragon"),
+            PURPLE(new BlockPos(56, 8, 126), new BlockPos(56, 22, 120), Color.MAGENTA, "Soul Dragon"),
             ;
             private final BlockPos spawnPos;
             private final BlockPos deathDetection;
             private final Color color;
-            ColorType(BlockPos pos, BlockPos deathDetection, Color color) {
+            private final String name;
+            ColorType(BlockPos pos, BlockPos deathDetection, Color color, String name) {
                 this.spawnPos = pos;
                 this.deathDetection = deathDetection;
                 this.color = color;
+                this.name = name;
             }
 
             private double horizontalSpawnDistanceSqrToEntity(Entity entity) {
@@ -114,8 +116,12 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                 return mc.level != null && mc.level.getBlockState(deathDetection).isAir();
             }
 
-            public static ColorType guessColor(EnderDragon dragon) {
-                return Stream.of(values()).min(Comparator.comparingDouble(type -> type.horizontalSpawnDistanceSqrToEntity(dragon))).orElseThrow(AssertionError::new);
+            public static ColorType guessColor(EnderDragon dragon, List<WitherDragonData> excludeDragons) {
+                return Stream.of(values()).filter(ColorType::existOnScoreboard).filter(type -> excludeDragons.stream().noneMatch(exclude -> exclude.colorType == type)).min(Comparator.comparingDouble(type -> type.horizontalSpawnDistanceSqrToEntity(dragon))).orElse(null);
+            }
+
+            public boolean existOnScoreboard() {
+                return ToolList.getInstance().fetchScoreboardLinesNoColor().stream().anyMatch(line -> line.contains(name));
             }
         }
     }
@@ -646,11 +652,13 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                     }
                     Entity entity = mc.level.getEntity(id);
                     if(entity instanceof EnderDragon dragon) {
-                        WitherDragonData.ColorType colorType = WitherDragonData.ColorType.guessColor(dragon);
-                        witherDragons.removeIf(data -> data.colorType == colorType);
-                        witherDragons.add(new WitherDragonData(id, colorType));
+                        WitherDragonData.ColorType colorType = WitherDragonData.ColorType.guessColor(dragon, witherDragons);
+                        if(colorType != null) {
+                            witherDragons.removeIf(data -> data.colorType == colorType);
+                            witherDragons.add(new WitherDragonData(id, colorType));
+                        }
                     }
-                }, 2);
+                }, 30);
             }
         }
 

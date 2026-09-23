@@ -10,6 +10,8 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.TooltipFlag;
 import pers.XiaoShadiao.skydiao.utils.PageSwitchCallback;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
@@ -84,15 +86,17 @@ public class AutoSwitchPetListener extends AbstractListener {
                         Slot slot = finalMenu1.slots.get(i);
                         if(ToolList.getInstance().deleteColorCode(slot.getItem().getHoverName().getString()).toLowerCase().contains(petName0.toLowerCase())) {
                             found = true;
-                            mc.execute(() -> {
-                                if (mc.player != null && mc.gameMode != null) {
-                                    mc.gameMode.handleContainerInput(finalMenu1.containerId, slot.index, 0, ContainerInput.PICKUP, mc.player);
-                                }
-                            });
+                            if(slot.getItem().getTooltipLines(Item.TooltipContext.of(mc.level), mc.player, TooltipFlag.NORMAL).stream().noneMatch(line -> ToolList.getInstance().deleteColorCode(line.getString()).equals("Click to despawn!")))  {
+                                mc.execute(() -> {
+                                    if (mc.player != null && mc.gameMode != null) {
+                                        mc.gameMode.handleContainerInput(finalMenu1.containerId, slot.index, 0, ContainerInput.PICKUP, mc.player);
+                                    }
+                                });
+                            }
                             break;
                         }
                     }
-                    Thread.sleep(500 + ToolList.getInstance().random.nextInt(150));
+                    Thread.sleep(100 + ToolList.getInstance().random.nextInt(50));
                     CallbackResult result = found ? CallbackResult.DONE : CallbackResult.NOT_FOUND;
                     mc.execute(() -> {
                         if (mc.screen != null) mc.screen.onClose();

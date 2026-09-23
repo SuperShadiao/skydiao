@@ -126,18 +126,44 @@ tasks.register('zipGifs', Zip) {
     archiveFileName.set('gifs.zip')
 }
 
+import groovy.json.JsonSlurper
+
 tasks.register('checkGifsZipSize') {
     doLast {
+        // 1. 读取 JSON 配置
+        def jsonFile = file('hiddensomething/gifs/data.json')
+        if (!jsonFile.exists()) {
+            throw new GradleException("data.json 不存在: ${jsonFile}")
+        }
+        def json = new JsonSlurper().parse(jsonFile)
+        def gifCount = (json.gif as Number).intValue()
+
+        // 2. 遍历检查每个 gif 是否存在
+        // 注意: 原代码用 0..<63 表示 [0, 63)，即 0..62 共 63 个文件
+        // 如果你的语义是"包含 63"，请改成 0..gifCount
+        def gifDir = file('hiddensomething/gifs')
+        def missing = []
+        for (int i = 0; i < gifCount; i++) {
+            def gifFile = new File(gifDir, "${i + 1}.gif")
+            if (!gifFile.exists()) {
+                missing << gifFile.name
+            }
+        }
+        if (!missing.isEmpty()) {
+            throw new GradleException("缺失 ${missing.size()} 个 gif 文件: ${missing.join(', ')}")
+        }
+
+        // 3. 检查 zip 大小
         def zipFile = file('hiddensomething/gifs.zip')
         if (!zipFile.exists()) {
             throw new GradleException("gifs.zip 不存在")
         }
 
-        def sizeInMb = zipFile.length() / 1024 / 1024
-        println "gifs.zip 大小: ${sizeInMb} MB"
+        def sizeInMb = zipFile.length() / 1024.0 / 1024.0  // 用 1024.0 避免整数除法
+        println "gifs.zip 大小: ${String.format('%.2f', sizeInMb)} MB"
 
         if (sizeInMb > 25) {
-            throw new GradleException("gifs.zip 超过 25MB，当前大小: ${sizeInMb} MB")
+            throw new GradleException("gifs.zip 超过 25MB，当前大小: ${String.format('%.2f', sizeInMb)} MB")
         }
     }
 }

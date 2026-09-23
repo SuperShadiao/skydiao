@@ -92,7 +92,7 @@ public class FarmingUtils {
         if ("kpest".equals(wait))
             return withPet("Hedgehog") || withPet("Rose Dragon");
         if ("farm".equals(wait))
-            return withPet("Mooshroom Cow") || withPet("Rose Dragon");
+            return withPet("Mooshroom Cow") || withPet("Rose Dragon") || withPet("Elephant");
         return false;
     }
 
