@@ -17,6 +17,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
+import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 
 import java.util.ArrayList;
@@ -50,6 +51,8 @@ public class F7ArrowAlignListener extends AbstractListener implements IDungeonLi
         CustomFabricEvents.ON_INGAME_CLICK.register(this::onIngameClick);
     }
 
+    private long lastMsgTime = 0;
+
     private boolean onIngameClick(CustomFabricEvents.ClickType clickType) {
         if (mc.player == null || mc.level == null || !ConfigManager.f7ArrowAlignSolver.getValue()) return false;
         if(clickType == CustomFabricEvents.ClickType.RIGHT) {
@@ -57,8 +60,12 @@ public class F7ArrowAlignListener extends AbstractListener implements IDungeonLi
                 if (remainClicks.containsKey(itemFrame)) {
                     int remainClick = remainClicks.getInt(itemFrame);
                     boolean sneak = mc.player.hasPose(Pose.CROUCHING);
-                    if(remainClick == 0 && !sneak && ConfigManager.f7ArrowAlignSolverBlockWrongClicks.getValue()) {
-                        return true;
+                    if(remainClick == 0 && ConfigManager.f7ArrowAlignSolverBlockWrongClicks.getValue()) {
+                        if(System.currentTimeMillis() - lastMsgTime > 1000) {
+                            lastMsgTime = System.currentTimeMillis();
+                            ToolList.printChatMessage(Component.literal("§a[小沙雕] §e小沙雕阻止了你错误的点击, 若要绕过限制, 保持潜行后点击即可"));
+                        }
+                        if(!sneak) return true;
                     }
                     remainClicks.put(itemFrame, (remainClick - 1 + 8) % 8);
                     solveAfterTick = 40;

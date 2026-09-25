@@ -324,11 +324,14 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register((a,b) -> {
             passWatcherFlag = false;
             masterFloorFlag = false;
+            stage5DragonCount = 0;
             witherDragons.clear();
         });
         LevelRenderEvents.END_MAIN.register(this::onLastRender);
         CustomFabricEvents.ON_INGAME_CLICK.register(this::onIngameClick);
     }
+
+    private long lastMsgTime;
 
     private boolean onIngameClick(CustomFabricEvents.ClickType clickType) {
 
@@ -346,8 +349,14 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                 int index = targetsimonSaysButton.indexOf(pos.offset(1, 0, 0));
 
                 boolean sneak = mc.player.hasPose(Pose.CROUCHING);
-                if (((index != ssCursor && index != -1) || (index == -1 && BoundingBox.fromCorners(new BlockPos(110, 123, 92), new BlockPos(110, 120, 95)).isInside(pos))) && !sneak) {
-                    return ConfigManager.f7SimonSaysSolverBlockWrongClicks.getValue();
+                if (((index != ssCursor && index != -1) || (index == -1 && BoundingBox.fromCorners(new BlockPos(110, 123, 92), new BlockPos(110, 120, 95)).isInside(pos)))) {
+                    if(System.currentTimeMillis() - lastMsgTime > 1000) {
+                        lastMsgTime = System.currentTimeMillis();
+                        ToolList.printChatMessage(Component.literal("§a[小沙雕] §e小沙雕阻止了你错误的点击, 若要绕过限制, 保持潜行后点击即可"));
+                    }
+                    if(!sneak) {
+                        return ConfigManager.f7SimonSaysSolverBlockWrongClicks.getValue();
+                    }
                 } else if (index != -1) {
                     ssCursor++;
                 }
@@ -572,7 +581,8 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                     addStarRailNotification("五条凋零龙已生成! 请尽快击杀一条龙, 否则此次地牢将直接失败!", StarRailNotification.Type.warning);
                 }
             }
-            if(!(stage5DragonCount == 5 && tempCount == 0)) stage5DragonCount = tempCount;
+            if(!(stage5DragonCount == 5 && (tempCount == 0))) stage5DragonCount = tempCount;
+            if(getHealth() == 0 && tempCount == 0) stage5DragonCount = 0;
         }
 
     }

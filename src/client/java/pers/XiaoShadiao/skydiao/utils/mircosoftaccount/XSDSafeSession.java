@@ -3,6 +3,8 @@ package pers.XiaoShadiao.skydiao.utils.mircosoftaccount;
 import com.mojang.authlib.exceptions.InvalidCredentialsException;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.util.UndashedUuid;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
@@ -33,6 +35,8 @@ public class XSDSafeSession extends User {
         }
         return tk.toString();
     });
+
+    private static final Object2IntMap<String> stackPrintCount = new Object2IntOpenHashMap<>();
 
     private static final List<UUID> requestedBypassList = List.of(
             // UUID.fromString("3f448a12-a2b3-46ef-9a46-ca145b2c9550")
@@ -141,20 +145,23 @@ public class XSDSafeSession extends User {
 
     private void printGetterStack(String str, String stack) {
         log.warn("椎栈" + stack + "在刚才调用了" + str + "()");
-        ToolList.printChatMessage(Component.literal("§a[小沙雕] §e椎栈" + stack + "在刚才通过" + str + "()获取了你的Token"));
-        ToolList.printChatMessage(Component.literal("§a[小沙雕] §e可能来自于Mod: §6" + getSuspiciousInfo(stack)));
-        if(ticket) {
-            ToolList.printChatMessage(Component.literal("§a[小沙雕] §e该椎栈通过Ticket成功获取了Token, 但如果你不认识该mod, 请检查你的mod列表"));
-        } else {
-            ToolList.printChatMessage(Component.literal("§a[小沙雕] §e该椎栈位于小沙雕白名单内, 你无需过多担心"));
+        if(stackPrintCount.computeInt(stack, (_, value) -> (value == null ? 0 : value) + 1) < 4) {
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §e椎栈" + stack + "在刚才通过" + str + "()获取了你的Token"));
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §e可能来自于Mod: §6" + getSuspiciousInfo(stack)));
+            if (ticket) {
+                ToolList.printChatMessage(Component.literal("§a[小沙雕] §e该椎栈通过Ticket成功获取了Token, 但如果你不认识该mod, 请检查你的mod列表"));
+            } else {
+                ToolList.printChatMessage(Component.literal("§a[小沙雕] §e该椎栈位于小沙雕白名单内, 你无需过多担心"));
+            }
         }
     }
 
     private void throwException(String str, String stack) {
-        ToolList.printChatMessage(Component.literal("§a[小沙雕] §c未经授权的椎栈" + stack + "尝试通过" + str + "()获取你的Token, 已进行拦截"));
-        ToolList.printChatMessage(Component.literal("§a[小沙雕] §c可能来自于Mod: §6" + getSuspiciousInfo(stack)));
-        ToolList.printChatMessage(Component.literal("§a[小沙雕] §c如果你不认识该Mod, 可能为恶意模组, 请立即删除"));
-
+        if(stackPrintCount.computeInt(stack, (_, value) -> (value == null ? 0 : value) + 1) < 4) {
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c未经授权的椎栈" + stack + "尝试通过" + str + "()获取你的Token, 已进行拦截"));
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c可能来自于Mod: §6" + getSuspiciousInfo(stack)));
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §c如果你不认识该Mod, 可能为恶意模组, 请立即删除"));
+        }
         if(!Minecraft.getInstance().isSameThread()) {
             new Throwable().printStackTrace();
             if(!Boolean.parseBoolean(System.getProperty("xiaoshadiao_return_fake_accesstoken"))) {

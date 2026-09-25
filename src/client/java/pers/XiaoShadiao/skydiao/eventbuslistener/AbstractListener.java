@@ -81,6 +81,7 @@ public abstract class AbstractListener extends Thread {
     public static final BLiveReqMusicListener bliveReqMusicListener = new BLiveReqMusicListener();
     public static final AutoHypeTrainInLobby autoHypeTrainInLobby = new AutoHypeTrainInLobby();
     public static final AutoSwitchPetListener autoSwitchPetListener = new AutoSwitchPetListener();
+    public static final AutoSwapReviveHeadListener autoSwapReviveHeadListener = new AutoSwapReviveHeadListener();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();

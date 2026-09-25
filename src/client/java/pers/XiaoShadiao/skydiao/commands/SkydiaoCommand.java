@@ -20,6 +20,7 @@ import pers.XiaoShadiao.skydiao.commands.args.ClientBlockPosArgument;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.AutoSwapReviveHeadListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AutoSwitchPetListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
@@ -114,8 +115,22 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                         .then(getArgConstantInstance("start").executes(c -> owo(() -> MacroManagerListener.autoFillBottleOfWater.enabled = true)))
                         .then(getArgConstantInstance("stop").executes(c -> owo(() -> MacroManagerListener.autoFillBottleOfWater.enabled = false))),
                 getArgConstantInstance("editfastcommand").executes(this::executeEditFastCommand),
-                getArgConstantInstance("changetocreativemode").executes(this::executeChangeCreativeMode)
+                getArgConstantInstance("changetocreativemode").executes(this::executeChangeCreativeMode),
+                getArgConstantInstance("swaprevivehead").executes(this::executeSwapReviveHead)
         );
+    }
+
+    private int executeSwapReviveHead(CommandContext<FabricClientCommandSource> context) {
+        AbstractListener.autoSwapReviveHeadListener.switchReviveHead((callbackResult -> {
+            if(callbackResult == AutoSwapReviveHeadListener.CallbackResult.DONE) {
+                context.getSource().sendFeedback(Component.literal("§a[小沙雕] 已完成切换"));
+            } else if(callbackResult == AutoSwapReviveHeadListener.CallbackResult.NOT_FOUND) {
+                context.getSource().sendError(Component.literal("§a[小沙雕] §c未能从背包找到§eBonzo Mask§c或者§eSpirit Mask §c:("));
+            } else {
+                context.getSource().sendError(Component.literal("§a[小沙雕] §c切换到复活头失败 :("));
+            }
+        }));
+        return 0;
     }
 
     private int executeChangeCreativeMode(CommandContext<FabricClientCommandSource> context) {
