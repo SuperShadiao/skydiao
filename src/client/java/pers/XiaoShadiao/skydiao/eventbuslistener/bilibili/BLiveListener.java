@@ -258,8 +258,12 @@ public class BLiveListener extends Thread {
             }
         } finally {
             System.out.println("断开直播间链接中...");
-            BApiClient.endInteractivePlay(appid, client.gameId);
             client.disconnect();
+            try {
+                BApiClient.endInteractivePlay(appid, client.gameId);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             System.out.println("断开成功!");
 
             if (uname != null) {

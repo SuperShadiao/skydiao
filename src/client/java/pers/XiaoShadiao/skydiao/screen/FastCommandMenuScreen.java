@@ -20,6 +20,7 @@ import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.keybinds.KeyBindsManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
+import pers.XiaoShadiao.skydiao.utils.screen.XSDSliderButton;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 public class FastCommandMenuScreen extends Screen {
@@ -60,6 +62,7 @@ public class FastCommandMenuScreen extends Screen {
 
     private Button savePageStateButton;
     private Button saveDefaultPageButton;
+    private XSDSliderButton buttonSize;
 
     static {
         load();
@@ -110,6 +113,7 @@ public class FastCommandMenuScreen extends Screen {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        ConfigManager.saveConfig();
     }
 
     public FastCommandMenuScreen(boolean editMode) {
@@ -224,6 +228,15 @@ public class FastCommandMenuScreen extends Screen {
                 ConfigManager.saveConfig();
             }).size(80, 20).build();
             saveDefaultPageButton.setTooltip(Tooltip.create(Component.literal("保存你当前的默认页面, 这样你每次打开这个菜单就会重置到这个页面")));
+            buttonSize = new XSDSliderButton(0, 0, 80, 20, Component.literal("按钮大小"), ConfigManager.fastCommandMenuButtonSize.getValue() / 200d);
+            buttonSize.valueSetter(value -> {
+                ConfigManager.fastCommandMenuButtonSize.setValue((int)(value * 200));
+                createCommandButton();
+            });
+            buttonSize.valueGetter(() -> ConfigManager.fastCommandMenuButtonSize.getValue() / 200d);
+            buttonSize.stringMsgGetter(() -> "按钮大小: " + ConfigManager.fastCommandMenuButtonSize.getValue());
+
+            addRenderableWidget(buttonSize);
 
             addRenderableWidget(saveDefaultPageButton);
             addRenderableWidget(savePageStateButton);
@@ -325,6 +338,10 @@ public class FastCommandMenuScreen extends Screen {
             saveDefaultPageButton.setMessage(ConfigManager.fastCommandMenuDefaultPage.getValue() != page ? Component.literal("保存为默认页面") : Component.literal("默认页面已保存"));
             saveDefaultPageButton.active = ConfigManager.fastCommandMenuDefaultPage.getValue() != page;
         }
+        if(buttonSize != null) {
+            buttonSize.setX(10);
+            buttonSize.setY(height - 70);
+        }
 
         if(!editMode) {
             if(!pageTitle.isEmpty()) {
@@ -406,6 +423,8 @@ public class FastCommandMenuScreen extends Screen {
 
     public class CommandButton extends Button {
 
+        private static IntSupplier size = ConfigManager.fastCommandMenuButtonSize::getValue;
+
         private int page;
         private int slot;
         private TitleAndCommand instance;
@@ -416,7 +435,7 @@ public class FastCommandMenuScreen extends Screen {
         private float targetXOffAnimation;
 
         public CommandButton() {
-            super(-50, -50, 50, 50, Component.empty(), b -> {
+            super(-size.getAsInt(), -size.getAsInt(), size.getAsInt(), size.getAsInt(), Component.empty(), b -> {
                 if (editMode) editingButton = (CommandButton) b;
             }, Supplier::get);
             xOffAnimation = targetXOffAnimation = FastCommandMenuScreen.this.page * FastCommandMenuScreen.this.width;

@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.resources.Identifier;
 import org.apache.commons.io.function.IOSupplier;
+import pers.XiaoShadiao.skydiao.utils.PicUtils;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import javax.imageio.ImageIO;
@@ -218,7 +219,7 @@ public class Gif implements AutoCloseable {
                         }
 
                         // ✅ 导出 PNG（Minecraft 兼容）
-                        byte[] pngBytes = nativeImageToPngBytes(canvas);
+                        byte[] pngBytes = PicUtils.nativeImageToPngBytes(canvas);
                         textures.add(new ImageTexture(
                                 identifier.withSuffix("____" + i),
                                 pngBytes
@@ -375,30 +376,6 @@ public class Gif implements AutoCloseable {
             case "restoreToPrevious" -> 3;
             default -> 0;
         };
-    }
-
-    /**
-     * ✅ NativeImage → PNG 字节（内存中直接生成，无需临时文件）
-     */
-    private static byte[] nativeImageToPngBytes(
-            com.mojang.blaze3d.platform.NativeImage ni) throws Exception {
-
-        int w = ni.getWidth();
-        int h = ni.getHeight();
-
-        // 构造 BufferedImage (TYPE_INT_ARGB)
-        BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
-                int pixel = ni.getPixel(x, y);
-                img.setRGB(x, y, pixel);
-            }
-        }
-        // 直接写到 ByteArrayOutputStream
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(img, "PNG", baos);
-        return baos.toByteArray();
     }
 
     @Override

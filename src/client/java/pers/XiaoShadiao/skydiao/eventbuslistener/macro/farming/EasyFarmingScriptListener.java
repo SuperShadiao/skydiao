@@ -266,6 +266,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         if (toggled) {
             if (enabled) {
                 ToolList.printChatMessage(Component.literal("§a[小沙雕] §e农业脚本已§a开启§e, 前往任意一个节点以开始执行"));
+                ToolList.printChatMessage(Component.literal("§a[小沙雕] §e警告: 小沙雕不推荐使用Skyblocker或者其他Mod的锁定鼠标/视角功能, 否则出事了你无法做出回应后果自负"));
             } else {
                 if (currentWorking != null) {
                     ExecuteNode tempNode0 = currentWorking.clone();

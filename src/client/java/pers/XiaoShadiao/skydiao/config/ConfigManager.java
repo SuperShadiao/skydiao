@@ -201,6 +201,7 @@ public class ConfigManager {
     public static final BooleanConfigOption bossDrawESP = new BooleanConfigOption("bossdrawesp", true);
     public static final BooleanConfigOption f7DrawWitherDragonESP = new BooleanConfigOption("f7drawwitherdragonesp", true);
     public static final BooleanConfigOption f7DrawStormFireballTarget = new BooleanConfigOption("f7drawstormfireballtarget", true);
+    public static final BooleanConfigOption f7DrawWitherDragonLightning = new BooleanConfigOption("f7drawwitherkinglightning", true);
     public static final BooleanConfigOption treeProgress = new BooleanConfigOption("treeprogress", true).addDependFeature(bossbar);
     public static final BooleanConfigOption f7ArrowAlignSolver = new BooleanConfigOption("f7arrowalignsolver", true);
     public static final BooleanConfigOption f7ArrowAlignSolverBlockWrongClicks = new BooleanConfigOption("f7arrowalignsolverblockwrongclicks", true);
@@ -212,6 +213,7 @@ public class ConfigManager {
     public static final BooleanConfigOption starrailNotificationSound = new BooleanConfigOption("starrailnotificationsound", true);
     public static final BooleanConfigOption fastCommandMenuSavePageState = new BooleanConfigOption("fastcommandmenusavepagestate", false);
     public static final IntConfigOption fastCommandMenuDefaultPage = new IntConfigOption("fastcommandmenudefaultpage", 0);
+    public static final IntConfigOption fastCommandMenuButtonSize = new IntConfigOption("fastcommandmenubuttonsize", 50);
 
     public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
@@ -311,7 +313,7 @@ public class ConfigManager {
             Map.entry("foraging", List.of(galateashulker, treeProgress, autoReel, autoReelAutoAim, torrhusCanyonHelper, safariBoardcastHotspot, safariBoardcastTradeNPC, safariRenderTargetESP, floorDroppingRender)),
             Map.entry("farming", List.of(openFsCommandAction, openFsKeyBind, hubratesp, autoSprayonator, autoChangeLo, halfAutoKillPests, gardenTrapPrompt, gardenBonusPrompt, fsGardenMoonFlowerMode, fsGardenMoonFlowerModeKeepNightFarming, fsTPToPest)),
             Map.entry("fishing", List.of(hotspotrender, autogg, lotusAtollHelper, fishingBigFishRender, fishingBigFishTip)),
-            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonKeyRender, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7InactiveTerminalRender, f7TerminalESPTracer, f7ArrowAlignSolver, f7ArrowAlignSolverBlockWrongClicks, f7SimonSaysSolver, f7SimonSaysSolverBlockWrongClicks, dungeonReviveItemCDRender, f7DrawWitherDragonESP, f7DrawStormFireballTarget, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered, dungeonDrinkPotion, dungeonBloodRoomTime, dungeonTrashTPS, dungeonf7msgbotssleap, dungeonMissingPlayer)),
+            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonKeyRender, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7InactiveTerminalRender, f7TerminalESPTracer, f7ArrowAlignSolver, f7ArrowAlignSolverBlockWrongClicks, f7SimonSaysSolver, f7SimonSaysSolverBlockWrongClicks, dungeonReviveItemCDRender, f7DrawWitherDragonESP, f7DrawStormFireballTarget, f7DrawWitherDragonLightning, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered, dungeonDrinkPotion, dungeonBloodRoomTime, dungeonTrashTPS, dungeonf7msgbotssleap, dungeonMissingPlayer)),
             Map.entry("rift", List.of(rifttimegunhelper)),
             Map.entry("界面类", List.of(openHud, bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, bossDrawESP, customBossESPTracer, starrailNotification, starrailNotificationSound, dyingtip, noblind, nosuffoverlay, fireOverlay, lyricColor1, lyricColor2)),
             Map.entry("ravengard", List.of(ravengardHelper, ravengardQueueMessage))

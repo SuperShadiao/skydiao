@@ -305,7 +305,7 @@ public class BasicListener extends AbstractListener {
 
         ToolList.destroy();
 
-        if(ToolList.getInstance().isDevEnvironment()) Gif.clearCache();
+        Gif.clearCache();
     }
 
     private void onJoinServer(ClientPacketListener clientPacketListener, PacketSender packetSender, Minecraft minecraft) {

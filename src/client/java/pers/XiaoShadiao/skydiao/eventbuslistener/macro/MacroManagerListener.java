@@ -30,10 +30,7 @@ import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.irc.ChatPacket;
-import pers.XiaoShadiao.skydiao.utils.Register;
-import pers.XiaoShadiao.skydiao.utils.ScreenshotUtils;
-import pers.XiaoShadiao.skydiao.utils.ToolList;
-import pers.XiaoShadiao.skydiao.utils.WindowsUtils;
+import pers.XiaoShadiao.skydiao.utils.*;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -164,6 +161,7 @@ public class MacroManagerListener extends AbstractListener {
         ToolList.printChatMessage(Component.literal("§a[小沙雕] §c请不要慌张, 如果你在当前状态第一次被check, 立即切换为手动并返回继续当前操作 (比如继续钓鱼), 发生第二次check再进行响应!"));
         ToolList.printChatMessage(Component.literal("§a[小沙雕] §c§l请不要离开当前服务器, 否则你会被直接封禁!"));
         WindowsUtils.focusWindows();
+        recordMoreFrame = 300;
         // mc.getNarrator().saySystemNow("Alert! Macro check! 警告! 马口检查!");
         Narrator.getNarrator().say("Alert! Macro check! 警告! 马口检查!", false, 1);
         alertTasks.removeIf(t -> t.future.isDone());
@@ -221,7 +219,7 @@ public class MacroManagerListener extends AbstractListener {
         }
         if(!isRecording && enabledRecord()) {
             recordCycleDelay = 0;
-            recordMoreFrame = 80;
+            recordMoreFrame = Math.max(80, recordMoreFrame);
             recordIndex = 0;
             isRecording = true;
             frameTasks.offer(() -> {
@@ -283,14 +281,7 @@ public class MacroManagerListener extends AbstractListener {
                     int delay = Math.clamp(System.currentTimeMillis() - lastFrameTime, 1, 750);
                     if (frameTasks.offer(() -> {
                         try(NativeImage image = image0) {
-                            int w = image.getWidth();
-                            int h = image.getHeight();
-                            BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-                            for (int y = 0; y < h; y++) {
-                                for (int x = 0; x < w; x++) {
-                                    bi.setRGB(x, y, image.getPixel(x, y));
-                                }
-                            }
+                            BufferedImage bi = PicUtils.copyNativeImageToBufferedImage(image);
 
                             gifEncoder.setDelay(delay);
                             gifEncoder.addFrame(bi);

@@ -31,12 +31,23 @@ public class PartyManager {
                 if (cached != null) {
                     newMembers.put(uuid, new Member(cached.name(), hyp));
                 } else {
-                    try {
-                        String name = UUIDLookup.getNameByUUID(uuid).get();
-                        newMembers.put(uuid, new Member(name, hyp));
-                    } catch (Exception e) {
-                        ToolList.getInstance().log.catching(e);
-                        newMembers.put(uuid, new Member(uuid.toString(), hyp));
+                    int tries = 0;
+                    while(true) {
+                        tries++;
+                        try {
+                            if(tries > 5) break;
+                            String name = UUIDLookup.getNameByUUID(uuid).get();
+                            newMembers.put(uuid, new Member(name, hyp));
+                            break;
+                        } catch (Exception e) {
+                            ToolList.getInstance().log.catching(e);
+                            newMembers.put(uuid, new Member(uuid.toString(), hyp));
+                            try {
+                                Thread.sleep((long) (1000 * Math.pow(2, tries)));
+                            } catch (InterruptedException ex) {
+                                ToolList.getInstance().log.catching(ex);
+                            }
+                        }
                     }
                 }
             }

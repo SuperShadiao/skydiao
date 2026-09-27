@@ -1,5 +1,8 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon;
 
+import it.unimi.dsi.fastutil.objects.Object2LongLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
@@ -15,6 +18,8 @@ import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
@@ -26,6 +31,7 @@ import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.projectile.hurtingprojectile.Fireball;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -45,6 +51,7 @@ import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
@@ -286,6 +293,8 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         if(flag1) return true;
         boolean flag2 = e.getHealth() <= 0;
         if(flag2) return true;
+        boolean flag3 = currentStage == 5 && !(e instanceof EnderDragon);
+        if(flag3) return true;
         return false;
     }
 
@@ -366,7 +375,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     }
 
     private void onLastRender(LevelRenderContext context) {
-        if(mc.level == null || (!masterFloorFlag && !isInCorrectDungeon())) return;
+        if(mc.level == null || mc.player == null || (!masterFloorFlag && !isInCorrectDungeon())) return;
 
         RenderUtils.WorldRender wr1 = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.NO_THROUGH_WALLS_LINE);
         RenderUtils.WorldRender wr2 = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.NO_THROUGH_WALLS_FILL);
@@ -397,6 +406,33 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                 }
             }
         }
+        if(currentStage == 5 && ConfigManager.f7DrawWitherDragonLightning.getValue()) {
+            Set<BlockPos> finalCollectRenderPos = new HashSet<>();
+            ObjectIterator<Object2LongMap.Entry<BlockPos>> it = stage5CollectedLightningPoint.object2LongEntrySet().iterator();
+            while(it.hasNext()) {
+                Object2LongMap.Entry<BlockPos> entry = it.next();
+                // BlockState blockState = mc.level.getBlockState(entry.getKey());
+                if(System.currentTimeMillis() - entry.getLongValue() > 7000) {
+                    it.remove();
+                    continue;
+                }
+
+                BlockPos pos = entry.getKey();
+                for (BlockPos pos2 : BlockPos.betweenClosed(pos.offset(-3, -3, -3), pos.offset(3, 3, 3))) {
+                    if(!mc.level.getBlockState(pos2).isAir() && mc.level.getBlockState(pos2.above()).isAir()) {
+                        finalCollectRenderPos.add(pos2.immutable());
+                    }
+                }
+            }
+            for (BlockPos pos : finalCollectRenderPos) {
+                RenderUtils.renderESP(wr2, pos, 1f, 1, 0f, 1f, true, true);
+                RenderUtils.renderESP(wr1, pos, 1f, 1, 0f, 1f, false, true);
+
+                if (mc.player.distanceToSqr(Vec3.atCenterOf(pos)) < 50) {
+                    RenderUtils.renderESP(wr1, pos.atY(13), 1f, 1, 0f, 1f, false);
+                }
+            }
+        }
         if(ConfigManager.f7DrawWitherDragonESP.getValue()) {
             Iterator<WitherDragonData> it = witherDragons.iterator();
             while(it.hasNext()) {
@@ -413,8 +449,17 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                         RenderUtils.renderESP(wr2, enderDragon, data.colorType.color.getRed() / 255f, data.colorType.color.getGreen() / 255f, data.colorType.color.getBlue() / 255f, 1f, true);
                     }
                     RenderUtils.renderTrace(wr1, enderDragon, data.colorType.color.getRed() / 255f, data.colorType.color.getGreen() / 255f, data.colorType.color.getBlue() / 255f, 1f);
-                } else if (enderDragon.getHealth() / enderDragon.getMaxHealth() > 0.2) {
-                    RenderUtils.renderESP(wr1, enderDragon, 1, 1, 1, 1f, false);
+                } else {
+                    float witherDragonHealthPercent = enderDragon.getHealth() / enderDragon.getMaxHealth();
+                    if (witherDragonHealthPercent > 0.2) {
+                        if(witherDragonHealthPercent > 0.5) {
+                            RenderUtils.renderESP(wr1, enderDragon, 1, 1, 1, 1f, false);
+                        } else {
+                            RenderUtils.renderESP(wr1, enderDragon, 1, 1, 1, Mth.clampedLerp((witherDragonHealthPercent - 0.2f) / 0.3f, 0.25f, 1f),  false);
+                        }
+                    } else {
+                        RenderUtils.renderESP(wr1, enderDragon, 0, 0, 0, 1f, false);
+                    }
                 }
             }
         }
@@ -646,6 +691,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
     private long stormThunderFlagTime = 0;
     private int stormThunderAfterTipTick = 0;
+    private final Object2LongMap<BlockPos> stage5CollectedLightningPoint = new Object2LongLinkedOpenHashMap<>();
 
     private boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
         if(mc.level == null || !StatusManager.get().isInDungeon()) {
@@ -670,6 +716,18 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                     }
                 }, 30);
             }
+        }
+
+        BiConsumer<BlockPos, BlockState> handler = (pos, state) -> {
+            if(state.getBlock() == Blocks.GLOWSTONE && pos.getY() <= 8) {
+                stage5CollectedLightningPoint.put(pos.immutable(), System.currentTimeMillis());
+            }
+        };
+
+        if(packet instanceof ClientboundBlockUpdatePacket clientboundBlockUpdatePacket) {
+            handler.accept(clientboundBlockUpdatePacket.getPos(), clientboundBlockUpdatePacket.getBlockState());
+        } else if(packet instanceof ClientboundSectionBlocksUpdatePacket clientboundSectionBlocksUpdatePacket) {
+            clientboundSectionBlocksUpdatePacket.runUpdates(handler);
         }
 
         Map.Entry<String, StarRailNotification.Type> turnItToStarRailMsg = null;
