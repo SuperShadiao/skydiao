@@ -29,7 +29,7 @@ public class ExecuteOfflineThread implements Runnable {
                         // Windows系统因为旧文件被占用删不掉, 启动外置exe更新
                         ToolList.getInstance().log.info("启动更新程序...");
                         try {
-                            Runtime.getRuntime().exec(new String[]{AutoUpdater.updaterEXE.getAbsolutePath(), oldFile.getAbsolutePath(), moveFrom.getAbsolutePath(), moveTo.getAbsolutePath()});
+                            Runtime.getRuntime().exec(new String[]{AutoUpdater.updaterEXE.getAbsolutePath(), oldFile.getAbsolutePath(), moveFrom.getAbsolutePath(), moveTo.getAbsolutePath(), "-automode"});
                         } catch (IOException e) {
                             e.printStackTrace();
                         }

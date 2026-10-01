@@ -34,7 +34,15 @@ public class MixinReportTypeCustomMessage {
             "Autofisher: hey 5i_XiaoShadiao i see you posted a very nice hypixelhelper autofish + rat mod on github",
             "There are so many Autofishers in main lobby #18!",
             "[MVP++] SpaceByte: 5i_XiaoShadiao give m e hypixel helper source",
-            "A100512B: 5run vg corpse之内如果我出locket所有人当我爸爸好吧。"
+            "A100512B: 5run vg corpse之内如果我出locket所有人当我爸爸好吧。",
+            "Hello," +
+                    " " +
+                    "We understand your concerns regarding the expired ban and its impact on your SkyBlock progress. Unfortunately, as the ban has expired, the appeal system will not allow an appeal. We're sorry, but this means the removed progress will remain permanently wiped. " +
+                    " " +
+                    "If you have any further questions or concerns, please let us know. " +
+                    "Dorothea, " +
+                    "Customer Support " +
+                    "Hypixel Inc."
     );
 
     @Overwrite

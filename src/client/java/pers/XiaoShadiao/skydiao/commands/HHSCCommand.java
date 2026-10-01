@@ -263,7 +263,9 @@ public class HHSCCommand extends SkydiaoCommand {
 
             @Override
             public int getPowerUp() {
-                return (int) (1 + 4 * getHealth() / getMaxHealth());
+                int i = (int) (1 + 4 * getHealth() / getMaxHealth());
+                if(!true) return ToolList.getInstance().random.nextInt(i);
+                return i;
             }
 
             @Override

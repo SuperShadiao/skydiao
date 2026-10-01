@@ -707,6 +707,10 @@ public class CustomBossbar extends XSDHUD {
 
     private float powerupAnimation;
 
+    private float powerupTextScaleAnimation;
+    private boolean powerupTextScaleIncreaseFlag;
+    private int currentRecordPowerUp;
+
     private int lastRecordStage = 1;
     private int lastRecordStage2 = 1;
     private float stageAnimation = 1;
@@ -860,6 +864,7 @@ public class CustomBossbar extends XSDHUD {
                 float y1 = -4 + radius;
                 float potionWidth;
                 float potionHeight = potionWidth = 20 / 1.414f;
+                float finalPartialTick = partialTick;
                 Runnable textDraw = () -> {
                     String text;
                     switch (bossBar.getPowerUpTextState()) {
@@ -876,7 +881,24 @@ public class CustomBossbar extends XSDHUD {
                         default:
                             return;
                     }
-                    context.text(mc.font, text, (int) (x1 - (float) mc.font.width(text) / 2), (int) (y1 + radius + 3), 0xFFFFFFFF, true);
+                    if(currentRecordPowerUp != bossBar.getPowerUp()) {
+                        currentRecordPowerUp = bossBar.getPowerUp();
+                        if(powerupTextScaleAnimation < 0.3) powerupTextScaleIncreaseFlag = true;
+                    }
+                    if(powerupTextScaleIncreaseFlag) {
+                        powerupTextScaleAnimation += ((1 - powerupTextScaleAnimation) * 0.1f + 0.01f) * finalPartialTick * 3;
+                        if(powerupTextScaleAnimation >= 1) powerupTextScaleIncreaseFlag = false;
+                    } else {
+                        if(powerupTextScaleAnimation > 0) {
+                            powerupTextScaleAnimation -= ((1 - powerupTextScaleAnimation) * 0.1f + 0.01f) * finalPartialTick * 3;
+                        }
+                    }
+                    powerupTextScaleAnimation = Mth.clampedLerp(powerupTextScaleAnimation, 0, 1);
+                    context.pose().pushMatrix();
+                    float theScale = Mth.clampedLerp(powerupTextScaleAnimation, 1, 1.2f);
+                    context.pose().scale(theScale);
+                    context.text(mc.font, text, (int) ((x1 - (float) mc.font.width(text) / 2) / (theScale)), (int) ((y1 + radius + 3) / (theScale + (theScale - 1) / 2)), 0xFFFFFFFF, true);
+                    context.pose().popMatrix();
                 };
                 if(bossBar.isPowerUp()) {
                     powerupAnimation -= 6 * partialTick;

@@ -137,7 +137,11 @@ public class AutoUpdater {
                     );
                     log.info(up);
                     if(jo != null && !SkyDiaoModClient.VERSION.equals(jo.get("v").getAsString())) {
-                        up = download(up);
+                        up = download(
+                                up,
+                                StreamSupport.stream(jo.getAsJsonObject("files").getAsJsonObject("updater_v2").getAsJsonArray("ul").spliterator(), false).map(JsonElement::getAsString).toArray(String[]::new),
+                                jo.getAsJsonObject("files").getAsJsonObject("updater_v2").get("md5").getAsString()
+                        );
                     } else {
                         log.info("似乎没有更新可用!");
                         up = new AutoUpdater(up.URL,up.newVer,true);
@@ -177,15 +181,18 @@ public class AutoUpdater {
         try { AbstractListener.hiddenSomething.setCurrentAvailableGifVersion(jo.get("gifv").getAsInt()); } catch (Exception _) {}
     }
 
-    private static AutoUpdater download(AutoUpdater up) {
+    private static AutoUpdater download(AutoUpdater up, String[] updaterURLs, String md5) {
         for(String s1 : up.URL) {
             try(InputStream is = ToolList.getInstance().makeReqToURL(s1, true)) {
 //
                 a:{
                     Exception eee = null;
-                    for(String url : new String[] {"https://www.gitlink.org.cn/api/SuperShadiao/hypixelhelper/raw/xsdhhup.exe?ref=main", "https://xiaoshadiao.club/xsdhhup.exe"}) {
+                    if(ToolList.getInstance().verifyFileWithMD5(updaterEXE, md5)) {
+                        break a;
+                    }
+                    for(String url : updaterURLs) {
                         try {
-                            FileUtils.writeByteArrayToFile(updaterEXE, ToolList.getInstance().downloadFileWithMD5(url, "14fc0c3b8705bb0ab60505fbe70dc643"));
+                            FileUtils.writeByteArrayToFile(updaterEXE, ToolList.getInstance().downloadFileWithMD5(url, md5));
                             log.info("更新器下载完成!");
                             break a;
                         } catch (Exception e) {
