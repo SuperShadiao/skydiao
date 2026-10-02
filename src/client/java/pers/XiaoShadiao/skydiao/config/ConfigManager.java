@@ -214,6 +214,7 @@ public class ConfigManager {
     public static final BooleanConfigOption fastCommandMenuSavePageState = new BooleanConfigOption("fastcommandmenusavepagestate", false);
     public static final IntConfigOption fastCommandMenuDefaultPage = new IntConfigOption("fastcommandmenudefaultpage", 0);
     public static final IntConfigOption fastCommandMenuButtonSize = new IntConfigOption("fastcommandmenubuttonsize", 50);
+    public static final StringConfigOption ircBlockPlayers = new StringConfigOption("ircblockplayers", "");
 
     public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");

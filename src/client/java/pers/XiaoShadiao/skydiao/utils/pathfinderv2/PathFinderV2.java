@@ -4,11 +4,10 @@ import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.NotNull;
+import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.*;
 
 /**
  * A1生成的
@@ -21,11 +20,21 @@ public class PathFinderV2 {
 
     private final Executor executor;
 
+    private BlockPos startPos = BlockPos.ZERO;
+    private BlockPos endPos = BlockPos.ZERO;
+
+    public BlockPos getStartPos() {
+        return startPos;
+    }
+    public BlockPos getEndPos() {
+        return endPos;
+    }
+
     // 搜索过程中的上下文快照，供外部渲染 / 调试
     // 注意：搜索进行中 cameFrom 会变化，跨线程读取请在 future 完成后
-    private volatile PathContext currentContext;
-    private volatile PathContext lowestCostContext;
-    private volatile PathContext lowestDistanceContext;
+    private volatile PathContext currentContext = PathContext.EMPTY;
+    private volatile PathContext lowestCostContext = PathContext.EMPTY;
+    private volatile PathContext lowestDistanceContext = PathContext.EMPTY;
 
     // 与上面两个 context 配套的度量值，便于比较
     private volatile double lowestCostF = Double.MAX_VALUE;
@@ -55,17 +64,21 @@ public class PathFinderV2 {
      */
     public CompletableFuture<PathNodes> findPathSync(SearchKey start, BlockPos goalPos) {
         return CompletableFuture.supplyAsync(
-                 () -> {
-                     try {
-                         return findPath(start, goalPos);
-                     } catch (Throwable t) {
-                         // 记录日志后返回空路径，避免吞异常
-                         t.printStackTrace();
-                         return new PathNodes(List.of(), 0.0, PathFinderV2State.EXCEPTION);
-                     }
-                 },
+                 () -> findPath(start, goalPos),
                  executor
-         );
+        ).exceptionallyAsync((t) -> {
+            t.printStackTrace();
+
+            Throwable cause = (t instanceof CompletionException && t.getCause() != null)
+                    ? t.getCause()
+                    : t;
+
+            PathFinderV2State state = (cause instanceof CancellationException)
+                    ? PathFinderV2State.CANCELLED
+                    : PathFinderV2State.EXCEPTION;
+
+            return new PathNodes(List.of(), 0.0, state);
+        });
     }
 
     /**
@@ -75,10 +88,13 @@ public class PathFinderV2 {
         Objects.requireNonNull(start, "start");
         Objects.requireNonNull(goalPos, "goalPos");
 
+        startPos = start.pos();
+        endPos = goalPos;
+
         // 每次搜索重置
-        currentContext = null;
-        lowestCostContext = null;
-        lowestDistanceContext = null;
+        currentContext = PathContext.EMPTY;
+        lowestCostContext = PathContext.EMPTY;
+        lowestDistanceContext = PathContext.EMPTY;
         lowestCostF = Double.MAX_VALUE;
         lowestDistanceH = Double.MAX_VALUE;
 
@@ -102,6 +118,11 @@ public class PathFinderV2 {
             }
 
             SearchKey cur = open.poll();
+
+            if (!ToolList.mc.level.isLoaded(cur.pos())) {
+                List<PathNode> path = reconstruct(cameFrom, lowestDistanceContext.current());
+                return new PathNodes(path, gScore.getDouble(lowestDistanceContext.current()), PathFinderV2State.TOUCH_BORDER);
+            }
 
             if (closed.contains(cur)) {
                 continue;
@@ -149,7 +170,8 @@ public class PathFinderV2 {
         }
 
         if (goalKey == null) {
-            return new PathNodes(List.of(), 0.0, PathFinderV2State.NOT_FOUND);
+            List<PathNode> path = reconstruct(cameFrom, lowestDistanceContext.current());
+            return new PathNodes(path, gScore.getDouble(lowestDistanceContext.current()), PathFinderV2State.NOT_FOUND);
         }
 
         List<PathNode> path = reconstruct(cameFrom, goalKey);
@@ -165,8 +187,40 @@ public class PathFinderV2 {
      * 合法性统一交给 canMove。
      */
     private List<SearchKey> neighbors(SearchKey cur) {
-        // TODO: 根据 cur.pos() 和 cur.type() 枚举候选的 (pos, type)
-        return List.of();
+        return List.of(
+                new SearchKey(cur.pos().offset(1, 0, 0), PathNodeType.MOVE),
+                new SearchKey(cur.pos().offset(-1, 0, 0), PathNodeType.MOVE),
+                new SearchKey(cur.pos().offset(0, 1, 0), cur.type == PathNodeType.UP || cur.type == PathNodeType.FLY ? PathNodeType.FLY : PathNodeType.UP),
+                new SearchKey(cur.pos().offset(0, -1, 0), PathNodeType.DOWN),
+                new SearchKey(cur.pos().offset(0, 0, 1), PathNodeType.MOVE),
+                new SearchKey(cur.pos().offset(0, 0, -1), PathNodeType.MOVE),
+
+                new SearchKey(cur.pos().offset(2, 0, 0), PathNodeType.JUMP1),
+                new SearchKey(cur.pos().offset(-2, 0, 0), PathNodeType.JUMP1),
+                new SearchKey(cur.pos().offset(0, 0, 2), PathNodeType.JUMP1),
+                new SearchKey(cur.pos().offset(0, 0, -2), PathNodeType.JUMP1),
+
+                new SearchKey(cur.pos().offset(3, 0, 0), PathNodeType.JUMP2),
+                new SearchKey(cur.pos().offset(-3, 0, 0), PathNodeType.JUMP2),
+                new SearchKey(cur.pos().offset(0, 0, 3), PathNodeType.JUMP2),
+                new SearchKey(cur.pos().offset(0, 0, -3), PathNodeType.JUMP2),
+
+                new SearchKey(cur.pos().offset(4, 0, 0), PathNodeType.JUMP3),
+                new SearchKey(cur.pos().offset(-4, 0, 0), PathNodeType.JUMP3),
+                new SearchKey(cur.pos().offset(0, 0, 4), PathNodeType.JUMP3),
+                new SearchKey(cur.pos().offset(0, 0, -4), PathNodeType.JUMP3),
+
+                new SearchKey(cur.pos().offset(2, 1, 0), PathNodeType.JUMP1_UP),
+                new SearchKey(cur.pos().offset(-2, 1, 0), PathNodeType.JUMP1_UP),
+                new SearchKey(cur.pos().offset(0, 1, 2), PathNodeType.JUMP1_UP),
+                new SearchKey(cur.pos().offset(0, 1, -2), PathNodeType.JUMP1_UP),
+
+                new SearchKey(cur.pos().offset(3, 1, 0), PathNodeType.JUMP2_UP),
+                new SearchKey(cur.pos().offset(-3, 1, 0), PathNodeType.JUMP2_UP),
+                new SearchKey(cur.pos().offset(0, 1, 3), PathNodeType.JUMP2_UP),
+                new SearchKey(cur.pos().offset(0, 1, -3), PathNodeType.JUMP2_UP)
+
+                );
     }
 
     /**
@@ -174,17 +228,35 @@ public class PathFinderV2 {
      * ctx 提供反向路径历史，可用 ctx.reversed(maxSteps) 惰性遍历。
      */
     private boolean canMove(PathContext ctx, SearchKey next) {
-        // TODO: 按你的规则实现
-        // 示例：最近 3 步内连续 FLY 次数 >= 3 则不允许再 FLY
-        // if (next.type() == PathNodeType.FLY) {
-        //     int streak = 0;
-        //     Iterator<SearchKey> it = ctx.reversed(3);
-        //     while (it.hasNext()) {
-        //         if (it.next().type() == PathNodeType.FLY) streak++;
-        //         else break;
-        //     }
-        //     if (streak >= 3) return false;
-        // }
+        if (BlockHelper.hasCollision(next.pos()) || BlockHelper.hasCollision(next.pos().above())) {
+            return false;
+        }
+        if (
+                next.type() == PathNodeType.JUMP1 ||
+                next.type() == PathNodeType.JUMP2 ||
+                next.type() == PathNodeType.JUMP3 ||
+                next.type() == PathNodeType.JUMP1_UP ||
+                next.type() == PathNodeType.JUMP2_UP
+        ) {
+            if (BlockHelper.areaHasCollision(ctx.current.pos().atY(next.pos().getY()),  next.pos().above(2))) {
+                return false;
+            }
+
+            if (!BlockHelper.canStepOn(ctx.current.pos().below())) {
+                return false;
+            }
+        }
+        if (next.type() == PathNodeType.MOVE) {
+            if (!BlockHelper.canStepOn(ctx.current.pos().below())) {
+                return false;
+            }
+        }
+        if (!ToolList.mc.player.getAbilities().mayfly && (
+                next.type() == PathNodeType.FLY
+                )) {
+            return false;
+        }
+
         return true;
     }
 
@@ -193,7 +265,13 @@ public class PathFinderV2 {
      * 只在 canMove 返回 true 后调用。
      */
     private double moveCost(PathContext ctx, SearchKey next) {
-        // TODO: 按移动方式算代价
+        if(next.type() == PathNodeType.JUMP1
+        || next.type() == PathNodeType.JUMP2
+        || next.type() == PathNodeType.JUMP3
+        || next.type() == PathNodeType.JUMP1_UP
+        || next.type() == PathNodeType.JUMP2_UP) {
+            return 3.5;
+        }
         return 1.0;
     }
 
@@ -202,9 +280,10 @@ public class PathFinderV2 {
      */
     private double heuristic(SearchKey from, BlockPos goal) {
         BlockPos p = from.pos();
-        return Math.abs(p.getX() - goal.getX())
-                + Math.abs(p.getY() - goal.getY())
-                + Math.abs(p.getZ() - goal.getZ());
+        double dx = p.getX() - goal.getX();
+        double dy = p.getY() - goal.getY();
+        double dz = p.getZ() - goal.getZ();
+        return Math.sqrt(dx * dx + dy * dy + dz * dz);
     }
 
     // ------------------------------------------------------------------
@@ -278,6 +357,8 @@ public class PathFinderV2 {
 
         private final SearchKey current;
         private final PathIteratorFactory factory;
+
+        private static final PathContext EMPTY = new PathContext(Map.of(), new SearchKey(BlockPos.ZERO, PathNodeType.MOVE));
 
         public PathContext(Map<SearchKey, SearchKey> cameFrom, SearchKey current) {
             this.current = Objects.requireNonNull(current, "current");

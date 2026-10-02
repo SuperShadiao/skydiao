@@ -36,14 +36,14 @@ public class Gif implements AutoCloseable {
     }
 
     public static void clearCache() {
-        cache.values().removeIf(gif -> {
+        ToolList.mc.execute(() -> cache.values().removeIf(gif -> {
             try {
                 gif.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
             return true;
-        });
+        }));
     }
 
     private final LongList frameDelaysMs = new LongArrayList();

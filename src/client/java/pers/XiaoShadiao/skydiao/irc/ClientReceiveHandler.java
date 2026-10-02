@@ -16,9 +16,13 @@ import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicInfo;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicListManager;
 
+import java.util.Arrays;
+
 public class ClientReceiveHandler {
 
     public void handle(ChatPacket packet, ClientListener sender) {
+        if(Arrays.stream(ConfigManager.ircBlockPlayers.getValue().split(" ")).filter(a -> !a.isBlank()).anyMatch(s -> s.equalsIgnoreCase(packet.sender))) return;
+
         switch(packet.packetType) {
             case "chat":
                 Style style = Style.EMPTY.withHoverEvent(new HoverEvent.ShowText(Component.literal("点击来@" + packet.sender))).withClickEvent(new ClickEvent.SuggestCommand("/xsdc @" + packet.sender));

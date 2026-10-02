@@ -55,6 +55,7 @@ public class MacroManagerListener extends AbstractListener {
     public static final CarnivalFruitDigger carnvialFruitDigger = new CarnivalFruitDigger();
     public static final CarnivalZombieShoot carnivalZombieShoot = new CarnivalZombieShoot();
     public static final AutoFillBottleOfWater autoFillBottleOfWater = new AutoFillBottleOfWater();
+    public static final PathFinderV2Executor pathFinderV2Executor = new PathFinderV2Executor();
 
     public static final ObsidianListener obsidianListener = new ObsidianListener();
     public static final ObsidianWRListener obsidianWRListener = new ObsidianWRListener();

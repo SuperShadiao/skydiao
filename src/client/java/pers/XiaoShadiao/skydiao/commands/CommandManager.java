@@ -23,6 +23,7 @@ public interface CommandManager {
     public static final SkydiaoCommand OPEN_CONFIG_MENU_COMMAND = new SkydiaoCommand();
     public static final SkydiaoPFCommand SKYDIAO_PF_COMMAND = new SkydiaoPFCommand();
     public static final HHPFCommand HHPF_COMMAND = new HHPFCommand();
+    public static final SkydiaoPFv2Command SKYDIAO_PF_V2_COMMAND = new SkydiaoPFv2Command();
     public static final HHMusicCommand HH_MUSIC_COMMAND = new HHMusicCommand();
     public static final SkydiaoMusicCommand SKYDIAO_MUSIC_COMMAND = new SkydiaoMusicCommand();
     public static final SkydiaoFarmingScriptCommand SKYDIAO_FARMING_SCRIPT_COMMAND = new SkydiaoFarmingScriptCommand();
@@ -34,6 +35,7 @@ public interface CommandManager {
     public static final HHStopABFCommand HH_STOP_AF_COMMAND = new HHStopABFCommand();
     public static final SkydiaoHudCommand SKYDIAO_HUD_COMMAND = new SkydiaoHudCommand();
     public static final HHHudCommand HH_HUD_COMMAND = new HHHudCommand();
+    public static final XSDCBlockCommand XSDC_BLOCK_COMMAND = new XSDCBlockCommand();
 
     public static void registerCommands() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {

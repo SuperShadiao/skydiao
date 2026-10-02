@@ -44,6 +44,10 @@ public class AutoClickerListener extends AbstractListener {
         load();
     }
 
+    private int getRandomDelay() {
+        return ToolList.getInstance().random.nextInt(4);
+    }
+
     private boolean onMouseClick(long windows, MouseButtonInfo mouseButtonInfo, int state) {
         if(mc.screen == null) {
             boolean flag = false;
@@ -52,7 +56,7 @@ public class AutoClickerListener extends AbstractListener {
                     isRightAutoClicking = state == 1;
                     flag = true;
                     if(isRightAutoClicking) {
-                        rightClickDelay = ToolList.getInstance().random.nextInt(3) + 1;
+                        rightClickDelay = getRandomDelay();
                         InputSimulator.singleRightClick();
                     }
                 }
@@ -62,7 +66,7 @@ public class AutoClickerListener extends AbstractListener {
                     isLeftAutoClicking = state == 1;
                     flag = true;
                     if(isLeftAutoClicking) {
-                        leftClickDelay = ToolList.getInstance().random.nextInt(3) + 1;
+                        leftClickDelay = getRandomDelay();
                         InputSimulator.singleLeftClick();
                     }
                 }
@@ -86,7 +90,7 @@ public class AutoClickerListener extends AbstractListener {
                 if (rightClickDelay > 0) {
                     rightClickDelay--;
                 } else {
-                    rightClickDelay = ToolList.getInstance().random.nextInt(3) + 1;
+                    rightClickDelay = getRandomDelay();
                     InputSimulator.singleRightClick();
                 }
             }
@@ -99,7 +103,7 @@ public class AutoClickerListener extends AbstractListener {
                 if (leftClickDelay > 0) {
                     leftClickDelay--;
                 } else {
-                    leftClickDelay = ToolList.getInstance().random.nextInt(3) + 1;
+                    leftClickDelay = getRandomDelay();
                     InputSimulator.singleLeftClick();
                 }
             }
