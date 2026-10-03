@@ -893,6 +893,58 @@
       "configname": "§e水晶矿洞助手",
       "description": "§e在水晶矿洞帮你搜索各种特殊结构"
     },
+    "crystalhollowsettings": {
+      "configname": "§e水晶矿洞助手详细设置",
+      "description": "§e选择要扫描的结构，并配置调试显示、重复服务器提示和线程限制"
+    },
+    "crystalhollows": {
+      "scan": {
+        "blue": {
+          "configname": "§e水晶矿洞扫描：§b蓝色水晶（Lost Precursor City）",
+          "description": "§e扫描蓝色水晶结构；当前矿洞内立即生效，需开启水晶矿洞助手"
+        },
+        "purple": {
+          "configname": "§e水晶矿洞扫描：§5紫色水晶（Jungle Temple）",
+          "description": "§e扫描紫色水晶结构；当前矿洞内立即生效，需开启水晶矿洞助手"
+        },
+        "yellow": {
+          "configname": "§e水晶矿洞扫描：§e黄色水晶（Khazad-dûm）",
+          "description": "§e扫描黄色水晶结构；当前矿洞内立即生效，需开启水晶矿洞助手"
+        },
+        "orange": {
+          "configname": "§e水晶矿洞扫描：§6橙色水晶（Goblin Queen's Den）",
+          "description": "§e扫描橙色水晶结构；当前矿洞内立即生效，需开启水晶矿洞助手"
+        },
+        "green": {
+          "configname": "§e水晶矿洞扫描：§a绿色水晶（Mines of Divan）",
+          "description": "§e扫描绿色水晶结构；当前矿洞内立即生效，需开启水晶矿洞助手"
+        },
+        "goblin_king": {
+          "configname": "§e水晶矿洞扫描：§6王下一桶（King Yolkar）",
+          "description": "§e扫描哥布林国王结构；当前矿洞内立即生效，需开启水晶矿洞助手"
+        },
+        "dragon_lair": {
+          "configname": "§e水晶矿洞扫描：§c那位来客（Dragon's Lair）",
+          "description": "§e扫描龙穴结构；当前矿洞内立即生效，需开启水晶矿洞助手"
+        },
+        "worm_fish_spot": {
+          "configname": "§e水晶矿洞扫描：§c熔岩钓点",
+          "description": "§e扫描可以烤鱼钩的地方；当前矿洞内立即生效，需开启水晶矿洞助手"
+        },
+        "corleone": {
+          "configname": "§e水晶矿洞扫描：§a骷髅王（Corleone）",
+          "description": "§e扫描 Corleone 结构；当前矿洞内立即生效，需开启水晶矿洞助手"
+        },
+        "fairy_grotto": {
+          "configname": "§e水晶矿洞扫描：§d粉色小狗（Fairy Grotto）",
+          "description": "§e同时控制四个区域的 Fairy Grotto 扫描；当前矿洞内立即生效，需开启水晶矿洞助手"
+        },
+        "bear3": {
+          "configname": "§e水晶矿洞扫描：§e熊出没",
+          "description": "§e扫描熊出没结构；当前矿洞内立即生效，需开启水晶矿洞助手"
+        }
+      }
+    },
     "crystalhollowhelperdebug": {
       "configname": "§e水晶矿洞助手调试模式",
       "description": "§e渲染调试框, 除非你喜欢看, 否则不建议开启"
@@ -1284,6 +1336,10 @@
       "searchtip2": "§a再次点击搜索分类重置",
       "disableall": "禁用所有功能",
       "disableallconfirm": "确认要禁用所有功能吗? 该操作不可恢复, 所有功能你需要重新手动设置",
+      "disablepage": "禁用本页功能",
+      "disablepageconfirm": "确认要禁用本页功能吗? 只影响当前设置页及其子页面中的开关",
+      "resetpagetodefault": "恢复本页默认值",
+      "resetpagetodefaultconfirm": "确认要恢复本页默认值吗? 只影响当前设置页及其子页面中的选项",
       "resetalltodefault": "重置所有功能为默认值",
       "resetalltodefaultconfirm": "确认要重置所有功能为默认值吗? 该操作不可恢复, 所有功能你需要重新手动设置"
     },
