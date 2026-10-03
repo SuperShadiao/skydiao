@@ -893,10 +893,6 @@
       "configname": "§e水晶矿洞助手",
       "description": "§e在水晶矿洞帮你搜索各种特殊结构"
     },
-    "crystalhollowsettings": {
-      "configname": "§e水晶矿洞助手详细设置",
-      "description": "§e选择要扫描的结构，并配置调试显示、重复服务器提示和线程限制"
-    },
     "crystalhollows": {
       "scan": {
         "blue": {
@@ -1336,10 +1332,6 @@
       "searchtip2": "§a再次点击搜索分类重置",
       "disableall": "禁用所有功能",
       "disableallconfirm": "确认要禁用所有功能吗? 该操作不可恢复, 所有功能你需要重新手动设置",
-      "disablepage": "禁用本页功能",
-      "disablepageconfirm": "确认要禁用本页功能吗? 只影响当前设置页及其子页面中的开关",
-      "resetpagetodefault": "恢复本页默认值",
-      "resetpagetodefaultconfirm": "确认要恢复本页默认值吗? 只影响当前设置页及其子页面中的选项",
       "resetalltodefault": "重置所有功能为默认值",
       "resetalltodefaultconfirm": "确认要重置所有功能为默认值吗? 该操作不可恢复, 所有功能你需要重新手动设置"
     },

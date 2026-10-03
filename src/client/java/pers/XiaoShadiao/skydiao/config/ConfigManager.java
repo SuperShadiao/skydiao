@@ -19,7 +19,6 @@ import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.bilibili.BLiveListener;
 import pers.XiaoShadiao.skydiao.screen.HudConfigScreen;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
-import pers.XiaoShadiao.skydiao.utils.crystalhollows.StructureType;
 import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
@@ -155,7 +154,17 @@ public class ConfigManager {
         }
     };
     public static final BooleanConfigOption crystalHollowHelper = new BooleanConfigOption("crystalhollowhelper", true);
-    public static final Map<StructureType, BooleanConfigOption> crystalHollowStructureScans = createStructureScanOptions();
+    public static final BooleanConfigOption crystalHollowScanBlue = new BooleanConfigOption("crystalhollows.scan.blue", true);
+    public static final BooleanConfigOption crystalHollowScanPurple = new BooleanConfigOption("crystalhollows.scan.purple", true);
+    public static final BooleanConfigOption crystalHollowScanYellow = new BooleanConfigOption("crystalhollows.scan.yellow", true);
+    public static final BooleanConfigOption crystalHollowScanOrange = new BooleanConfigOption("crystalhollows.scan.orange", true);
+    public static final BooleanConfigOption crystalHollowScanGreen = new BooleanConfigOption("crystalhollows.scan.green", true);
+    public static final BooleanConfigOption crystalHollowScanGoblinKing = new BooleanConfigOption("crystalhollows.scan.goblin_king", true);
+    public static final BooleanConfigOption crystalHollowScanDragonLair = new BooleanConfigOption("crystalhollows.scan.dragon_lair", true);
+    public static final BooleanConfigOption crystalHollowScanWormFishSpot = new BooleanConfigOption("crystalhollows.scan.worm_fish_spot", true);
+    public static final BooleanConfigOption crystalHollowScanCorleone = new BooleanConfigOption("crystalhollows.scan.corleone", true);
+    public static final BooleanConfigOption crystalHollowScanFairyGrotto = new BooleanConfigOption("crystalhollows.scan.fairy_grotto", true);
+    public static final BooleanConfigOption crystalHollowScanBear3 = new BooleanConfigOption("crystalhollows.scan.bear3", true);
     public static final BooleanConfigOption crystalHollowHelperDebug = new BooleanConfigOption("crystalhollowhelperdebug", false);
     public static final BooleanConfigOption crystalHollowDupServerTipper = new BooleanConfigOption("crystalhollowdupservertipper", true);
     public static final StringConfigOption mineshaftShareAnnounce = new StringConfigOption("mineshaftshareannounce", "");
@@ -169,7 +178,6 @@ public class ConfigManager {
             ToolList.mc.schedule(() -> Objects.requireNonNull(AbstractListener.crystalHollowHelperListener).updateThreadLimit());
         }
     };
-    public static final ConfigGroupOption crystalHollowSettings = new ConfigGroupOption("crystalhollowsettings", crystalHollowOptions());
     public static final BooleanConfigOption dungeonf7InactiveTerminalRender = new BooleanConfigOption("skyblockdungeonf7inactiveterminaldisplay", true);
     public static final BooleanConfigOption genshinImpactHeatColdRender = new BooleanConfigOption("genshinimpactheatcoldrender", true);
     public static final BooleanConfigOption autoReconnect = new BooleanConfigOption("autoreconnect", true);
@@ -313,7 +321,11 @@ public class ConfigManager {
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
             Map.entry("自动类", List.of(macroReplay, macroReplaySelfCleaning, autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, autoCarnivalAutoRestart, carnivalAutoFruitDigger, carnivalAutoShootZombie, carnivalAutoShootZombieOffset, skyblockautobloodfiend, skyblockautobloodfiendlowhealth, iAutoObsidian, iAutoObsidianWR, obsidianPositionHelper, autoObsidianPositionsFile, drillSlot, lanternSlot, obsidianPlayerCheckRange, obsidianPlayerCheck, obsidianTheEndCheck, obsidianCycleTicks, autoPickupPhoneRing, autoPlayBeachBall, autoPlayBeachBallAutoStopAt40)),
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareAnnounce,
-                    skyblockSafeIsland, crystalHollowHelper, crystalHollowSettings,
+                    skyblockSafeIsland, crystalHollowHelper, crystalHollowScanBlue, crystalHollowScanPurple,
+                    crystalHollowScanYellow, crystalHollowScanOrange, crystalHollowScanGreen,
+                    crystalHollowScanGoblinKing, crystalHollowScanDragonLair, crystalHollowScanWormFishSpot,
+                    crystalHollowScanCorleone, crystalHollowScanFairyGrotto, crystalHollowScanBear3,
+                    crystalHollowHelperDebug, crystalHollowDupServerTipper, crystalHollowHelperDisableThreadLimit,
                     genshinImpactHeatColdRender, miningCommissionEntityESP)),
             Map.entry("combat", List.of(slayerTogether, isleVolcanoFinder, isleVolcanoFinderCataOnlyMode, isleDupServerTip, endIslandDragonESPListener)),
             Map.entry("foraging", List.of(galateashulker, treeProgress, autoReel, autoReelAutoAim, torrhusCanyonHelper, safariBoardcastHotspot, safariBoardcastTradeNPC, safariRenderTargetESP, floorDroppingRender)),
@@ -325,44 +337,22 @@ public class ConfigManager {
             Map.entry("ravengard", List.of(ravengardHelper, ravengardQueueMessage))
     );
 
-    private static Map<StructureType, BooleanConfigOption> createStructureScanOptions() {
-        EnumMap<StructureType, BooleanConfigOption> options = new EnumMap<>(StructureType.class);
-        for (StructureType type : StructureType.values()) {
-            options.put(type, new BooleanConfigOption(type.configName(), true));
-        }
-        return Collections.unmodifiableMap(options);
-    }
-
-    private static List<ConfigOption<?>> crystalHollowOptions() {
-        List<ConfigOption<?>> options = new ArrayList<>(crystalHollowStructureScans.values());
-        options.addAll(List.of(crystalHollowHelperDebug, crystalHollowDupServerTipper,
-                crystalHollowHelperDisableThreadLimit));
-        return List.copyOf(options);
-    }
-
 
     /* ==================init================== */
 
-    public static final List<ConfigOption<?>> optionList = collectOptions();
-
-    private static List<ConfigOption<?>> collectOptions() {
-        List<ConfigOption<?>> options = Arrays.stream(ConfigManager.class.getDeclaredFields())
-                .filter(field -> ConfigOption.class.isAssignableFrom(field.getType())).map(field -> {
-                    try {
-                        field.setAccessible(true);
-                        return Objects.requireNonNull((ConfigOption<?>) field.get(null), field.getName());
-                    } catch (IllegalArgumentException | IllegalAccessException e) {
-                        throw new RuntimeException("Error getting config option", e);
-                    }
-                }).collect(Collectors.toList());
-        // Traverse groups as well: their children may be generated rather than declared as fields.
-        return ConfigOptionTree.flatten(options);
-    }
+    public static final List<ConfigOption<?>> optionList = Arrays.stream(ConfigManager.class.getDeclaredFields()).filter(field -> ConfigOption.class.isAssignableFrom(field.getType())).map(field -> {
+        try {
+            field.setAccessible(true);
+            return Objects.requireNonNull((ConfigOption<?>) field.get(null), field.getName());
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            throw new RuntimeException("Error getting config option", e);
+        }
+    }).collect(Collectors.toList());
 
     public static void saveConfig() {
         JsonObject jo = new JsonObject();
         for (ConfigOption<?> option : optionList) {
-            if (option instanceof ActionConfigOption || option instanceof ConfigGroupOption) {
+            if (option instanceof ActionConfigOption) {
                 continue;
             }
             Object value = option.getValue();

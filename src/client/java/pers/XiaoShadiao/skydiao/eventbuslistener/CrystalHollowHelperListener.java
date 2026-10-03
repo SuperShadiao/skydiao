@@ -20,8 +20,6 @@ import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
-import pers.XiaoShadiao.skydiao.utils.crystalhollows.StructureScanManager;
-import pers.XiaoShadiao.skydiao.utils.crystalhollows.StructureType;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 
@@ -30,9 +28,15 @@ import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiPredicate;
 import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 
 public class CrystalHollowHelperListener extends AbstractListener {
 
@@ -140,7 +144,7 @@ public class CrystalHollowHelperListener extends AbstractListener {
         EnumSet<StructureType> enabled = EnumSet.noneOf(StructureType.class);
         if (ConfigManager.crystalHollowHelper.getValue()) {
             for (StructureType type : StructureType.values()) {
-                if (ConfigManager.crystalHollowStructureScans.get(type).getValue()) enabled.add(type);
+                if (type.isEnabled()) enabled.add(type);
             }
         }
         // Apply settings before consuming results, so disabling also discards queued discoveries.
@@ -927,6 +931,187 @@ public class CrystalHollowHelperListener extends AbstractListener {
             }
         }
         return null;
+    }
+
+    private enum StructureType {
+        BLUE("§b蓝色水晶", "Lost Precursor City", 121, 130),
+        PURPLE("§5紫色水晶", "Jungle Temple", 72, 81),
+        YELLOW("§e黄色水晶", "Khazad-dûm", 0, 63),
+        ORANGE("§6橙色水晶", "Goblin Queen's Den", 125, 140),
+        GREEN("§a绿色水晶", "Mines of Divan", 97, 102),
+        GOBLIN_KING("§6王下一桶", "King Yolkar", 82, 168),
+        DRAGON_LAIR("§c那位来客", "Dragon's Lair", 64, 189),
+        WORM_FISH_SPOT("§c可以烤鱼钩的地方", "Unknown", 64, 189),
+        CORLEONE("§a骷髅王", "Corleone", 64, 189),
+        FAIRY_GROTTO("§d粉色小狗", "Fairy Grotto", 64, 189),
+        BEAR3("§e熊出没", "Unknown", 64, 189);
+
+        private final String displayName;
+        private final String waypointName;
+        private final int minY;
+        private final int maxY;
+
+        StructureType(String displayName, String waypointName, int minY, int maxY) {
+            this.displayName = displayName;
+            this.waypointName = waypointName;
+            this.minY = minY;
+            this.maxY = maxY;
+        }
+
+        public boolean isEnabled() {
+            return switch (this) {
+                case BLUE -> ConfigManager.crystalHollowScanBlue.getValue();
+                case PURPLE -> ConfigManager.crystalHollowScanPurple.getValue();
+                case YELLOW -> ConfigManager.crystalHollowScanYellow.getValue();
+                case ORANGE -> ConfigManager.crystalHollowScanOrange.getValue();
+                case GREEN -> ConfigManager.crystalHollowScanGreen.getValue();
+                case GOBLIN_KING -> ConfigManager.crystalHollowScanGoblinKing.getValue();
+                case DRAGON_LAIR -> ConfigManager.crystalHollowScanDragonLair.getValue();
+                case WORM_FISH_SPOT -> ConfigManager.crystalHollowScanWormFishSpot.getValue();
+                case CORLEONE -> ConfigManager.crystalHollowScanCorleone.getValue();
+                case FAIRY_GROTTO -> ConfigManager.crystalHollowScanFairyGrotto.getValue();
+                case BEAR3 -> ConfigManager.crystalHollowScanBear3.getValue();
+            };
+        }
+
+        public String displayName() {
+            return displayName;
+        }
+
+        public String waypointName() {
+            return waypointName;
+        }
+
+        public boolean isInRange(int y) {
+            return y >= minY && y <= maxY;
+        }
+    }
+
+    /**
+     * Owns one scan group per enabled structure. All public methods run on the client thread;
+     * workers only read cancellation flags and publish immutable completion events.
+     */
+    private static final class StructureScanManager<T> {
+        @FunctionalInterface
+        public interface ScanTask<T> {
+            T scan(BooleanSupplier cancelled) throws Exception;
+        }
+
+        public record Result<T>(StructureType type, T value, Exception failure) { }
+
+        private record Completion<T>(ScanGroup group, T value, Exception failure) { }
+
+        private static final class ScanGroup {
+            private final StructureType type;
+            private final AtomicBoolean cancelled = new AtomicBoolean();
+            private final List<Future<?>> tasks = new ArrayList<>();
+            private int remaining;
+            private boolean completed;
+            private Exception failure;
+
+            private ScanGroup(StructureType type, int remaining) {
+                this.type = type;
+                this.remaining = remaining;
+            }
+
+            private boolean shouldStop() {
+                return cancelled.get() || Thread.currentThread().isInterrupted();
+            }
+
+            private void cancel() {
+                // ForkJoinTask.cancel(true) does not guarantee an interrupt. The token is authoritative.
+                cancelled.set(true);
+                tasks.forEach(task -> task.cancel(true));
+                tasks.clear();
+            }
+        }
+
+        private ExecutorService executor;
+        private final EnumMap<StructureType, ScanGroup> groups = new EnumMap<>(StructureType.class);
+        private final ConcurrentLinkedQueue<Completion<T>> completions = new ConcurrentLinkedQueue<>();
+
+        public StructureScanManager(ExecutorService executor) {
+            this.executor = executor;
+        }
+
+        public void update(Set<StructureType> enabled,
+                           Function<StructureType, List<ScanTask<T>>> taskFactory) {
+            groups.entrySet().removeIf(entry -> {
+                if (enabled.contains(entry.getKey())) return false;
+                entry.getValue().cancel();
+                return true;
+            });
+            for (StructureType type : enabled) {
+                // Completed groups remain registered until disabled or the world changes.
+                if (groups.containsKey(type)) continue;
+                List<ScanTask<T>> tasks = taskFactory.apply(type);
+                if (tasks.isEmpty()) throw new IllegalArgumentException("No scanners for " + type);
+                ScanGroup group = new ScanGroup(type, tasks.size());
+                groups.put(type, group);
+                for (ScanTask<T> task : tasks) {
+                    group.tasks.add(executor.submit(() -> runTask(group, task)));
+                }
+            }
+        }
+
+        private void runTask(ScanGroup group, ScanTask<T> task) {
+            if (group.shouldStop()) return;
+            T value = null;
+            Exception failure = null;
+            try {
+                value = task.scan(group::shouldStop);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                failure = e;
+            } catch (Exception e) {
+                failure = e;
+            }
+            if (!group.cancelled.get()) {
+                completions.add(new Completion<>(group, value, failure));
+            }
+        }
+
+        public List<Result<T>> pollResults() {
+            List<Result<T>> results = new ArrayList<>();
+            Completion<T> completion;
+            while ((completion = completions.poll()) != null) {
+                ScanGroup group = completion.group();
+                // Group identity also rejects late results after rapid toggles and world changes.
+                if (groups.get(group.type) != group || group.completed || group.cancelled.get()) continue;
+                group.remaining--;
+                if (completion.failure() != null) group.failure = completion.failure();
+                if (completion.value() != null || group.remaining == 0) {
+                    group.completed = true;
+                    group.cancel();
+                    results.add(new Result<>(group.type, completion.value(),
+                            completion.value() == null ? group.failure : null));
+                }
+            }
+            return results;
+        }
+
+        public boolean isRunning(StructureType type) {
+            ScanGroup group = groups.get(type);
+            return group != null && !group.completed;
+        }
+
+        public void cancelAll() {
+            groups.values().forEach(ScanGroup::cancel);
+            groups.clear();
+            completions.clear();
+        }
+
+        public void replaceExecutor(ExecutorService replacement) {
+            // Restart unfinished scans on the next update without announcing completed targets again.
+            groups.entrySet().removeIf(entry -> {
+                if (entry.getValue().completed) return false;
+                entry.getValue().cancel();
+                return true;
+            });
+            ExecutorService previous = executor;
+            executor = replacement;
+            previous.shutdownNow();
+        }
     }
 
     @FunctionalInterface

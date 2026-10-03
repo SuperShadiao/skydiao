@@ -21,7 +21,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
-import pers.XiaoShadiao.skydiao.config.ConfigOptionTree;
 import pers.XiaoShadiao.skydiao.config.option.*;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
@@ -31,7 +30,6 @@ import pers.XiaoShadiao.skydiao.utils.screen.XSDSliderButton;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
@@ -42,16 +40,11 @@ import static pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager.translate;
 
 public class ConfigScreen extends Screen {
 
-    private HeaderAndFooterLayout layout;
-    private TabManager tabManager;
+    private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
+    private final TabManager tabManager = new TabManager(this::addRenderableWidget, this::removeWidget);
     private TabNavigationBar tabNavigationBar;
 
     private final Screen lastScreen;
-    private final ConfigGroupOption group;
-    private int selectedTabIndex;
-    private double[] scrollPositions = new double[0];
-    private String searchText = "";
-    private ConfigOption<?> pendingFocus;
 
     private Tab[] tabs;
 
@@ -86,117 +79,60 @@ public class ConfigScreen extends Screen {
     }
 
     public ConfigScreen(Screen lastScreen) {
-        this(lastScreen, null);
-    }
-
-    public ConfigScreen(Screen lastScreen, ConfigGroupOption group) {
-        super(Component.literal(group == null ? "SkyDiao Mod" : group.getI18nName()));
+        super(Component.literal("SkyDiao Mod"));
         this.lastScreen = lastScreen;
-        this.group = group;
-    }
-
-    @Override
-    public void removed() {
-        if (tabs != null && tabManager != null) {
-            selectedTabIndex = Math.max(0, List.of(tabs).indexOf(tabManager.getCurrentTab()));
-            scrollPositions = new double[tabs.length];
-            for (int i = 0; i < tabs.length; i++) {
-                scrollPositions[i] = ((ConfigTab) tabs[i]).configList.scrollAmount();
-            }
-        }
-        super.removed();
-    }
-
-    private List<ConfigOption<?>> scopedOptions() {
-        return group == null
-                ? ConfigManager.categories.stream().flatMap(entry -> entry.getValue().stream()).toList()
-                : group.getOptions();
-    }
-
-    private void navigateTo(ConfigTab tab, ConfigOptionTree.Entry destination) {
-        ConfigScreen target = this;
-        for (ConfigGroupOption parent : destination.parents()) {
-            target = new ConfigScreen(target, parent);
-        }
-        if (destination.option() instanceof ConfigGroupOption childGroup) {
-            target = new ConfigScreen(target, childGroup);
-        } else if (target == this) {
-            focusOption(tab, destination.option());
-            return;
-        } else {
-            target.pendingFocus = destination.option();
-        }
-        ToolList.mc.setScreen(target);
-    }
-
-    private void focusOption(ConfigTab tab, ConfigOption<?> option) {
-        if (tabNavigationBar != null) {
-            tabNavigationBar.selectTab(List.of(tabs).indexOf(tab), true);
-        }
-        tab.configList.focusOption(option);
-        setFocused(tab.configList);
     }
 
     @Override
     public void tick() {
         if(delayedSearchHandler != null) {
-            Runnable handler = delayedSearchHandler;
+            delayedSearchHandler.run();
             delayedSearchHandler = null;
-            handler.run();
         }
         super.tick();
     }
 
     @Override
     protected void init() {
-        // A parent screen is reused on return. Recreate layouts so footer widgets do not accumulate.
-        layout = new HeaderAndFooterLayout(this);
-        tabManager = new TabManager(this::addRenderableWidget, this::removeWidget);
         tabs = getTabs();
-        if (group == null) {
-            this.tabNavigationBar = TabNavigationBar.builder(this.tabManager, this.width)
-                    .addTabs(tabs)
-                    .build();
-            this.addRenderableWidget(this.tabNavigationBar);
-            this.tabNavigationBar.selectTab(Math.min(selectedTabIndex, tabs.length - 1), false);
-        } else {
-            this.tabNavigationBar = null;
-            layout.addTitleHeader(title, font);
-            tabManager.setCurrentTab(tabs[0], false);
-        }
+        this.tabNavigationBar = TabNavigationBar.builder(this.tabManager, this.width)
+                .addTabs(tabs)
+                .build();
+        this.addRenderableWidget(this.tabNavigationBar);
+        this.tabNavigationBar.selectTab(0, false);
 
         LinearLayout linearLayout = this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
 
-        String disableKey = group == null ? "disableall" : "disablepage";
-        linearLayout.addChild(Button.builder(Component.literal("§c" + translate("gui.configsettings." + disableKey)), (button) -> {
+        linearLayout.addChild(Button.builder(Component.literal("§c" + translate("gui.configsettings.disableall")), (button) -> {
             minecraft.setScreen(new ConfirmScreen(result -> {
                 if(result) {
-                    ConfigOptionTree.disableAll(scopedOptions());
+                    List<ConfigOption<?>> list = ConfigManager.categories.stream().flatMap(entry -> entry.getValue().stream()).toList();
+                    for (ConfigOption<?> option : list) {
+                        if (option instanceof BooleanConfigOption bool) {
+                            bool.setValue(false);
+                        }
+                    }
                     saveConfig();
                 }
-                minecraft.setScreen(this);
-                if (result) rebuildWidgets();
-            }, Component.literal("§c" + translate("gui.configsettings." + disableKey)), Component.literal("§c" + translate("gui.configsettings." + disableKey + "confirm"))));
+                minecraft.setScreen(new ConfigScreen(lastScreen));
+            }, Component.literal("§c" + translate("gui.configsettings.disableall")), Component.literal("§c" + translate("gui.configsettings.disableallconfirm"))));
         }).size(100, 20).build());
 
-        if (group == null) {
-            linearLayout.addChild(Button.builder(Component.literal("§eQQ | Discord"), (button) -> Util.getPlatform().openUri("https://xiaoshadiao.club/about")).size(100, 20).build());
-        }
+        linearLayout.addChild(Button.builder(Component.literal("§eQQ | Discord"), (button) -> Util.getPlatform().openUri("https://xiaoshadiao.club/about")).size(100, 20).build());
         linearLayout.addChild(Button.builder(Component.literal("§6" + translate("gui.configsettings.buttonsaveback")), this::onClose).size(100, 20).build());
-        if (group == null) {
-            linearLayout.addChild(Button.builder(Component.literal("§a" + translate("gui.configsettings.buttonfriendlink")), (button) -> Util.getPlatform().openUri("https://xiaoshadiao.club/friendlinks")).size(100, 20).build());
-        }
+        linearLayout.addChild(Button.builder(Component.literal("§a" + translate("gui.configsettings.buttonfriendlink")), (button) -> Util.getPlatform().openUri("https://xiaoshadiao.club/friendlinks")).size(100, 20).build());
 
-        String resetKey = group == null ? "resetalltodefault" : "resetpagetodefault";
-        linearLayout.addChild(Button.builder(Component.literal("§c" + translate("gui.configsettings." + resetKey)), (button) -> {
+        linearLayout.addChild(Button.builder(Component.literal("§c" + translate("gui.configsettings.resetalltodefault")), (button) -> {
             minecraft.setScreen(new ConfirmScreen(result -> {
                 if(result) {
-                    ConfigOptionTree.resetAll(scopedOptions());
+                    List<ConfigOption<?>> list = ConfigManager.categories.stream().flatMap(entry -> entry.getValue().stream()).toList();
+                    for (ConfigOption<?> option : list) {
+                        option.resetToDefault();
+                    }
                     saveConfig();
                 }
-                minecraft.setScreen(this);
-                if (result) rebuildWidgets();
-            }, Component.literal("§c" + translate("gui.configsettings." + resetKey)), Component.literal("§c" + translate("gui.configsettings." + resetKey + "confirm"))));
+                minecraft.setScreen(new ConfigScreen(lastScreen));
+            }, Component.literal("§c" + translate("gui.configsettings.resetalltodefault")), Component.literal("§c" + translate("gui.configsettings.resetalltodefaultconfirm"))));
         }).size(100, 20).build());
 
         this.layout.visitWidgets(abstractWidget -> {
@@ -204,40 +140,27 @@ public class ConfigScreen extends Screen {
             this.addRenderableWidget(abstractWidget);
         });
         this.repositionElements();
-        for (int i = 0; i < Math.min(tabs.length, scrollPositions.length); i++) {
-            if (!(tabs[i] instanceof SearchConfigTab)) {
-                ((ConfigTab) tabs[i]).configList.setScrollAmount(scrollPositions[i]);
-            }
-        }
-        if (pendingFocus != null) {
-            ConfigOption<?> option = pendingFocus;
-            delayedSearchHandler = () -> focusOption((ConfigTab) tabs[0], option);
-            pendingFocus = null;
-        }
     }
 
     @Override
     public void repositionElements() {
-        if (layout == null || tabManager == null) return;
         if (this.tabNavigationBar != null) {
             this.tabNavigationBar.updateWidth(this.width);
             this.tabNavigationBar.arrangeElements();
             int i = this.tabNavigationBar.getRectangle().bottom();
+            ScreenRectangle screenRectangle = new ScreenRectangle(0, i, this.width, this.height - this.layout.getFooterHeight() - i);
+            this.tabManager.setTabArea(screenRectangle);
             this.layout.setHeaderHeight(i);
-        }
-        this.layout.arrangeElements();
-        this.tabManager.setTabArea(new ScreenRectangle(0, layout.getHeaderHeight(), this.width, layout.getContentHeight()));
-        if(tabs != null) {
-            for (Tab tab : tabs) {
-                ((ConfigTab) tab).updateConfigList();
+            this.layout.arrangeElements();
+            if(tabs != null) {
+                for (Tab tab : tabs) {
+                    ((ConfigTab) tab).updateConfigList();
+                }
             }
         }
     }
 
     private Tab[] getTabs() {
-        if (group != null) {
-            return new Tab[]{new ConfigTab(title, group.getOptions())};
-        }
         List<ConfigTab> list = ConfigManager.categories.stream().map(entry -> new ConfigTab(entry.getKey(), entry.getValue())).collect(Collectors.toList());
         list.add(new SearchConfigTab());
         if(ToolList.getInstance().isDevEnvironment()) {
@@ -275,7 +198,7 @@ public class ConfigScreen extends Screen {
     public class SearchConfigTab extends ConfigTab {
 
         public SearchConfigTab() {
-            super("搜索", List.of());
+            super("搜索", ConfigManager.optionList);
         }
 
         @Override
@@ -288,36 +211,29 @@ public class ConfigScreen extends Screen {
             public SearchConfigList() {
                 super(SearchConfigTab.this);
                 searchBox = new EditBox(ToolList.mc.font, 0, 0, 200, 20, Component.literal(translate("configcategory.搜索")));
-                searchBox.setValue(searchText);
+                searchBox.setValue("");
                 searchBox.setMaxLength(1000);
                 searchBox.setResponder(this::updateSearchResult);
-                updateSearchResult(searchText);
+                updateSearchResult("");
             }
 
             private void updateSearchResult(String text) {
                 Optional<SearchConfigEntry> searchEntry = children().stream().filter(child -> child instanceof SearchConfigEntry).map(child -> (SearchConfigEntry) child).findFirst();
 
                 clearEntries();
-                boolean restoreScroll = text.equals(searchText);
-                searchText = text;
-                String query = text.trim().toLowerCase(Locale.ROOT);
+                String text1 = text.trim();
                 addEntryToTop(searchEntry.orElseGet(SearchConfigEntry::new));
 
                 delayedSearchHandler = () -> {
                     for (Tab tab : tabs) {
                         if(tab instanceof SearchConfigTab) continue;
-                        ConfigTab configTab = (ConfigTab) tab;
-                        for (ConfigOptionTree.Entry entry : ConfigOptionTree.entries(configTab.configOptions)) {
-                            ConfigOption<?> option = entry.option();
-                            if (query.isEmpty() || option.getI18nName().toLowerCase(Locale.ROOT).contains(query)
-                                    || option.getI18nDesc().toLowerCase(Locale.ROOT).contains(query)) {
-                                addEntry(new RedirectConfigEntry(configTab, entry));
+                        for (AbstractConfigEntry child0 : ((ConfigTab) tab).configList.children()) {
+                            if(child0 instanceof ConfigEntry child) {
+                                if(text1.isEmpty() || child.option.getI18nName().toLowerCase().contains(text1.toLowerCase()) || child.option.getI18nDesc().toLowerCase().contains(text.toLowerCase())) {
+                                    addEntry(new RedirectConfigEntry(child));
+                                }
                             }
                         }
-                    }
-                    if (restoreScroll) {
-                        int index = List.of(tabs).indexOf(SearchConfigTab.this);
-                        if (index >= 0 && index < scrollPositions.length) setScrollAmount(scrollPositions[index]);
                     }
                 };
 
@@ -345,17 +261,20 @@ public class ConfigScreen extends Screen {
             public class RedirectConfigEntry extends AbstractConfigEntry {
 
                 private final Button widget;
-                private final ConfigTab destinationTab;
-                private final ConfigOptionTree.Entry destination;
+                private final ConfigEntry configEntry;
 
-                public RedirectConfigEntry(ConfigTab destinationTab, ConfigOptionTree.Entry destination) {
-                    this.destinationTab = destinationTab;
-                    this.destination = destination;
+                public RedirectConfigEntry(ConfigEntry configEntry) {
+                    this.configEntry = configEntry;
                     widget = Button.builder(Component.literal("->"), this::redirect).size(70, 20).build();
                 }
 
                 private void redirect(Button button) {
-                    delayedSearchHandler = () -> navigateTo(destinationTab, destination);
+                    delayedSearchHandler = () -> {
+                        int tabIndex = List.of(tabs).indexOf(configEntry.tab);
+                        tabNavigationBar.selectTab(tabIndex, true);
+                        configEntry.tab.configList.setSelected(configEntry);
+                        ConfigScreen.this.setFocused(configEntry.widget);
+                    };
                 }
 
                 @Override
@@ -365,7 +284,7 @@ public class ConfigScreen extends Screen {
 
                 @Override
                 public void extractContent(GuiGraphicsExtractor guiGraphics, int left, int top, boolean bl, float f) {
-                    String name = destination.option().getI18nName();
+                    String name = configEntry.option.getI18nName();
                     // guiGraphics.drawString(Minecraft.getInstance().font, name, getContentX() - 5, getContentY() + 5, 0xFFFFFFFF);
                     RenderUtils.renderScrollingString(guiGraphics, ToolList.mc.font, Component.literal(name), getContentX(), getContentX(), getContentY() - 25, getContentX() + 100, getContentY() + 44, 0xFFFFFFFF);
                     widget.setX(getContentRight() - widget.getWidth() + 5);
@@ -387,11 +306,7 @@ public class ConfigScreen extends Screen {
         public ConfigList configList;
 
         public ConfigTab(String categoryName, List<ConfigOption<?>> configOptions) {
-            this(Component.literal(translate("configcategory." + categoryName)), configOptions);
-        }
-
-        public ConfigTab(Component title, List<ConfigOption<?>> configOptions) {
-            super(title);
+            super(Component.literal(translate("configcategory." + categoryName)));
             this.configOptions = configOptions;
             configList = getListInstance();
             this.layout.addChild(configList,0,0);
@@ -405,10 +320,6 @@ public class ConfigScreen extends Screen {
             configList.updateSize(ConfigScreen.this.width, ConfigScreen.this.layout);
         }
 
-        private void openGroup(ConfigGroupOption group) {
-            ToolList.mc.setScreen(new ConfigScreen(ConfigScreen.this, group));
-        }
-
         public class ConfigList extends ContainerObjectSelectionList<AbstractConfigEntry> {
 
             public final ConfigTab tab;
@@ -419,19 +330,6 @@ public class ConfigScreen extends Screen {
                     addEntry(configOption instanceof ColorConfigOption colorConfigOption ? new ColorConfigEntry(colorConfigOption, tab) : new ConfigEntry(configOption, tab));
                 }
                 this.tab = tab;
-            }
-
-            private void focusOption(ConfigOption<?> option) {
-                for (AbstractConfigEntry entry : children()) {
-                    if (entry instanceof ConfigEntry configEntry && configEntry.option == option) {
-                        setSelected(entry);
-                        setFocused(entry);
-                        configEntry.setFocused(configEntry.children().contains(configEntry.widget)
-                                ? configEntry.widget : configEntry.children().getFirst());
-                        centerScrollOn(entry);
-                        return;
-                    }
-                }
             }
 
             @Override
@@ -448,10 +346,6 @@ public class ConfigScreen extends Screen {
                     this.option = option;
                     this.tab = tab;
                     this.widget = switch(option) {
-                        case ConfigGroupOption groupOption -> Button.builder(
-                                Component.literal(groupOption.getI18nValue()),
-                                b -> tab.openGroup(groupOption)
-                        ).bounds(0, 0, 100, 20).build();
                         case BooleanConfigOption boolOption -> Button.builder(
                                 Component.literal(boolOption.getI18nValue()),
                                 b -> {
@@ -531,7 +425,6 @@ public class ConfigScreen extends Screen {
                             Component.literal("R"),
                             b -> option.resetToDefault()
                     ).bounds(0, 0, 20, 20).build();
-                    resetConfigButton.visible = !(option instanceof ConfigGroupOption) && !(option instanceof ActionConfigOption);
                     MutableComponent component = Component.literal(option.getI18nDesc());
                     if(option.isMacroFeature()) {
                         component.append("\n\n");
@@ -551,7 +444,7 @@ public class ConfigScreen extends Screen {
 
                 @Override
                 public @NotNull List<? extends NarratableEntry> narratables() {
-                    return resetConfigButton.visible ? List.of(resetConfigButton, widget) : List.of(widget);
+                    return List.of(resetConfigButton, widget);
                 }
 
                 @Override
@@ -563,12 +456,10 @@ public class ConfigScreen extends Screen {
                     widget.setY(getContentY());
                     widget.extractRenderState(guiGraphics, left, top, f);
 
-                    if (resetConfigButton.visible) {
-                        resetConfigButton.active = !option.isDefaultValue();
-                        resetConfigButton.setX(widget.getX() - resetConfigButton.getWidth());
-                        resetConfigButton.setY(getContentY());
-                        resetConfigButton.extractRenderState(guiGraphics, left, top, f);
-                    }
+                    resetConfigButton.active = !option.isDefaultValue();
+                    resetConfigButton.setX(widget.getX() - resetConfigButton.getWidth());
+                    resetConfigButton.setY(getContentY());
+                    resetConfigButton.extractRenderState(guiGraphics, left, top, f);
 
                     if(widget instanceof Button button) {
                         button.setMessage(Component.literal(option.getI18nValue()));
@@ -580,7 +471,7 @@ public class ConfigScreen extends Screen {
 
                 @Override
                 public @NotNull List<? extends GuiEventListener> children() {
-                    return resetConfigButton.visible ? List.of(resetConfigButton, widget) : List.of(widget);
+                    return List.of(resetConfigButton, widget);
                 }
             }
 
