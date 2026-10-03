@@ -154,6 +154,17 @@ public class ConfigManager {
         }
     };
     public static final BooleanConfigOption crystalHollowHelper = new BooleanConfigOption("crystalhollowhelper", true);
+    public static final BooleanConfigOption crystalHollowScanBlue = new BooleanConfigOption("crystalhollows.scan.blue", true);
+    public static final BooleanConfigOption crystalHollowScanPurple = new BooleanConfigOption("crystalhollows.scan.purple", true);
+    public static final BooleanConfigOption crystalHollowScanYellow = new BooleanConfigOption("crystalhollows.scan.yellow", true);
+    public static final BooleanConfigOption crystalHollowScanOrange = new BooleanConfigOption("crystalhollows.scan.orange", true);
+    public static final BooleanConfigOption crystalHollowScanGreen = new BooleanConfigOption("crystalhollows.scan.green", true);
+    public static final BooleanConfigOption crystalHollowScanGoblinKing = new BooleanConfigOption("crystalhollows.scan.goblin_king", true);
+    public static final BooleanConfigOption crystalHollowScanDragonLair = new BooleanConfigOption("crystalhollows.scan.dragon_lair", true);
+    public static final BooleanConfigOption crystalHollowScanWormFishSpot = new BooleanConfigOption("crystalhollows.scan.worm_fish_spot", true);
+    public static final BooleanConfigOption crystalHollowScanCorleone = new BooleanConfigOption("crystalhollows.scan.corleone", true);
+    public static final BooleanConfigOption crystalHollowScanFairyGrotto = new BooleanConfigOption("crystalhollows.scan.fairy_grotto", true);
+    public static final BooleanConfigOption crystalHollowScanBear3 = new BooleanConfigOption("crystalhollows.scan.bear3", true);
     public static final BooleanConfigOption crystalHollowHelperDebug = new BooleanConfigOption("crystalhollowhelperdebug", false);
     public static final BooleanConfigOption crystalHollowDupServerTipper = new BooleanConfigOption("crystalhollowdupservertipper", true);
     public static final StringConfigOption mineshaftShareAnnounce = new StringConfigOption("mineshaftshareannounce", "");
@@ -309,7 +320,13 @@ public class ConfigManager {
             Map.entry("工具类", List.of(inventoryFilter, itemStarCountRender, itemStarCountRenderColor1, itemStarCountRenderColor2, openfastcommandmenukeybinds, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodescoreboard, blivemodehideserverid, bliveboardcastdankumu, keepSprint, autoReconnect, afkInOtherPlace, freecamFlySpeed, openFreelookAndFreecamAction, openAutoClickAction, openAllAutoClickKeybindAction, openClearStashCommand)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
             Map.entry("自动类", List.of(macroReplay, macroReplaySelfCleaning, autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, autoCarnivalAutoRestart, carnivalAutoFruitDigger, carnivalAutoShootZombie, carnivalAutoShootZombieOffset, skyblockautobloodfiend, skyblockautobloodfiendlowhealth, iAutoObsidian, iAutoObsidianWR, obsidianPositionHelper, autoObsidianPositionsFile, drillSlot, lanternSlot, obsidianPlayerCheckRange, obsidianPlayerCheck, obsidianTheEndCheck, obsidianCycleTicks, autoPickupPhoneRing, autoPlayBeachBall, autoPlayBeachBallAutoStopAt40)),
-            Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareAnnounce, skyblockSafeIsland, crystalHollowHelper, crystalHollowHelperDebug, crystalHollowDupServerTipper, crystalHollowHelperDisableThreadLimit, genshinImpactHeatColdRender, miningCommissionEntityESP)),
+            Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareAnnounce,
+                    skyblockSafeIsland, crystalHollowHelper, crystalHollowScanBlue, crystalHollowScanPurple,
+                    crystalHollowScanYellow, crystalHollowScanOrange, crystalHollowScanGreen,
+                    crystalHollowScanGoblinKing, crystalHollowScanDragonLair, crystalHollowScanWormFishSpot,
+                    crystalHollowScanCorleone, crystalHollowScanFairyGrotto, crystalHollowScanBear3,
+                    crystalHollowHelperDebug, crystalHollowDupServerTipper, crystalHollowHelperDisableThreadLimit,
+                    genshinImpactHeatColdRender, miningCommissionEntityESP)),
             Map.entry("combat", List.of(slayerTogether, isleVolcanoFinder, isleVolcanoFinderCataOnlyMode, isleDupServerTip, endIslandDragonESPListener)),
             Map.entry("foraging", List.of(galateashulker, treeProgress, autoReel, autoReelAutoAim, torrhusCanyonHelper, safariBoardcastHotspot, safariBoardcastTradeNPC, safariRenderTargetESP, floorDroppingRender)),
             Map.entry("farming", List.of(openFsCommandAction, openFsKeyBind, hubratesp, autoSprayonator, autoChangeLo, halfAutoKillPests, gardenTrapPrompt, gardenBonusPrompt, fsGardenMoonFlowerMode, fsGardenMoonFlowerModeKeepNightFarming, fsTPToPest)),
