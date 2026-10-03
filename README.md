@@ -1,6 +1,6 @@
 # SkyDiao Mod
 
-## 这是什么?
+## 关于此Mod
 
 自从2026/2/23前后开始, Hypixel在Skyblock彻底扼杀了1.8.9版本客户端, 未来只能使用高版本客户端加入Skyblock
 
@@ -10,7 +10,13 @@
 
 从2026/2/27 22:00:00开始, 已迁移部分Hypixel通用功能和部分Skyblock功能. 但是部分依赖寻路的功能可能要很久之后迁移, 因为寻路要进行重写 (当然可能会直接引用Baritone)
 
+
+
 1.8.9的Hypixel Helper Mod下载: https://xiaoshadiao.club/hhdownload
+
+## 功能
+
+可以在此处查看部分功能: https://5ixsd.top/skydiao
 
 # 安装
 
