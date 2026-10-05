@@ -33,6 +33,7 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.player.KeyboardInput;
+import net.minecraft.network.DisconnectionDetails;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.chat.*;
@@ -473,8 +474,11 @@ public class BasicListener extends AbstractListener {
     }
 
     private int afkHoldTick;
+    private ToolList.ThreadedTask<?> kickBlackListPlayerTask;
+    private int tickCounter;
 
     private void onStartClientTick(Minecraft mc) {
+        tickCounter++;
         User user = mc.getUser();
         if(!(user instanceof XSDSafeSession)) MinecraftLogin.replaceSession(user);
         if(testOOM) {
@@ -519,6 +523,42 @@ public class BasicListener extends AbstractListener {
         if(System.currentTimeMillis() - lastOperationTime > 120000 && !isAFK) {
             isAFK = true;
             if(ChatClientManager.serverAvailable()) ChatClientManager.getChatClient().sender.sendAFK(true);
+        }
+
+        if(tickCounter % 40 == 0) {
+            if (SkyblockBlacklistManager.getInstance().tryGetEntryByUUID(mc.getUser().getProfileId()) != null && mc.getConnection() != null) {
+                mc.getConnection().onDisconnect(new DisconnectionDetails(Component.literal("§c你处于小沙雕的黑名单中, 若要继续游玩, 请卸载SkyDiao.")));
+            }
+            if (PartyManager.isInParty() && StatusManager.get().hasStatus() && SkyblockBlacklistManager.getInstance().isAvaliable()) {
+                PartyManager.Member self = null;
+                PartyManager.Member blpMember = null;
+                SkyblockBlacklistManager.SkyblockBlacklistEntry blpMemberEntry = null;
+                for (PartyManager.Member partyMember : PartyManager.getPartyMembers()) {
+                    SkyblockBlacklistManager.SkyblockBlacklistEntry entry = SkyblockBlacklistManager.getInstance().tryGetEntryByUUID(partyMember.hypInstance().getUuid());
+                    if (entry != null) {
+                        blpMember = partyMember;
+                        blpMemberEntry = entry;
+                    }
+                    if (partyMember.hypInstance().getUuid().equals(mc.getUser().getProfileId())) {
+                        self = partyMember;
+                    }
+                }
+                if (blpMember != null && kickBlackListPlayerTask == null || kickBlackListPlayerTask.future.isDone()) {
+                    PartyManager.Member finalSelf = self;
+                    PartyManager.Member finalBlpMember = blpMember;
+                    SkyblockBlacklistManager.SkyblockBlacklistEntry finalBlpMemberEntry = blpMemberEntry;
+                    kickBlackListPlayerTask = ToolList.addThreadedTask(() -> {
+                        Thread.sleep(1000);
+                        ToolList.sendChatMessage("/pc [SkyDiao] 发现黑名单成员" + finalBlpMember.name() + ": " + finalBlpMemberEntry.reason() + " (Type: " + finalBlpMemberEntry.type() + ")");
+                        Thread.sleep(1000);
+                        ToolList.sendChatMessage(finalSelf.hypInstance().getRole() == ClientboundPartyInfoPacket.PartyRole.LEADER ? "/p kick " + finalBlpMember.name() : "/p leave");
+                        Thread.sleep(500);
+                        ToolList.getInstance().updatePartyInfo();
+                        Thread.sleep(1000);
+                        return null;
+                    });
+                }
+            }
         }
 
         for (ConfigOption<?> option : ConfigManager.optionList) {

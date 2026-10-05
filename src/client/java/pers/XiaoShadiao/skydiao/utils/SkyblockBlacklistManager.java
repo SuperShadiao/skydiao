@@ -57,6 +57,14 @@ public class SkyblockBlacklistManager extends Thread {
                     tasks.add(UUIDLookup.getNameByUUID(uuid).thenCompose(name -> CompletableFuture.completedFuture(new SkyblockBlacklistEntry(type1, uuid, name, reason))));
                 }
             }
+
+//            if(ToolList.getInstance().isDevEnvironment()) {
+//                SkyblockBlacklistType type1 = null;
+//                String uuid = "4c09842524854b9fb1dc34b07722839b";
+//                String reason = "测试";
+//                tasks.add(UUIDLookup.getNameByUUID(uuid).thenCompose(name -> CompletableFuture.completedFuture(new SkyblockBlacklistEntry(type1, uuid, name, reason))));
+//            }
+
             for (CompletableFuture<SkyblockBlacklistEntry> task : tasks) {
                 blacklist.add(task.get());
             }
@@ -71,6 +79,17 @@ public class SkyblockBlacklistManager extends Thread {
     public List<SkyblockBlacklistEntry> getBlacklist() {
         if(!isDone) return List.of();
         return blacklist;
+    }
+
+    public SkyblockBlacklistEntry tryGetEntryByUUID(String uuid) {
+        return SkyblockBlacklistManager.getInstance().getBlacklist().stream()
+                .filter(entry -> entry.uuid().replace("-", "").equals(uuid.replace("-", "")))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public SkyblockBlacklistEntry tryGetEntryByUUID(UUID uuid) {
+        return tryGetEntryByUUID(uuid.toString());
     }
 
     private final Map<String, SkyblockBlacklistEntry> byName = new HashMap<>();
