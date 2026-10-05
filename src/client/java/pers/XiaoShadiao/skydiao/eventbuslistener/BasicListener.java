@@ -543,7 +543,7 @@ public class BasicListener extends AbstractListener {
                         self = partyMember;
                     }
                 }
-                if (blpMember != null && kickBlackListPlayerTask == null || kickBlackListPlayerTask.future.isDone()) {
+                if (blpMember != null && (kickBlackListPlayerTask == null || kickBlackListPlayerTask.future.isDone())) {
                     PartyManager.Member finalSelf = self;
                     PartyManager.Member finalBlpMember = blpMember;
                     SkyblockBlacklistManager.SkyblockBlacklistEntry finalBlpMemberEntry = blpMemberEntry;
