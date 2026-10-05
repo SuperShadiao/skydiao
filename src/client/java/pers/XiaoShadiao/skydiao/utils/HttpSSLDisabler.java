@@ -3,6 +3,7 @@ package pers.XiaoShadiao.skydiao.utils;
 import javax.net.ssl.*;
 import java.security.cert.X509Certificate;
 
+@Deprecated
 public class HttpSSLDisabler {
 
     private static SSLSocketFactory defaultSSLSocketFactory = HttpsURLConnection.getDefaultSSLSocketFactory();

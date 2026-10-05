@@ -1,7 +1,7 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener.macro;
 
 import com.madgag.gif.fmsware.AnimatedGifEncoder;
-import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.text2speech.Narrator;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
@@ -278,11 +278,11 @@ public class MacroManagerListener extends AbstractListener {
 
         if(isRecording || recordMoreFrame > 0) {
             if(frameTasks.remainingCapacity() > 1) {
-                ScreenshotUtils.takeScreenshot(mc.getMainRenderTarget(), image0 -> {
+                ScreenshotUtils.takeScreenshot2(mc.getMainRenderTarget(), image0 -> {
                     int delay = Math.clamp(System.currentTimeMillis() - lastFrameTime, 1, 750);
                     if (frameTasks.offer(() -> {
-                        try(NativeImage image = image0) {
-                            BufferedImage bi = PicUtils.copyNativeImageToBufferedImage(image);
+                        try(GpuBuffer.MappedView image = image0) {
+                            BufferedImage bi = PicUtils.cloneMappedViewToBufferedImage(mc.getMainRenderTarget(), image);
 
                             gifEncoder.setDelay(delay);
                             gifEncoder.addFrame(bi);

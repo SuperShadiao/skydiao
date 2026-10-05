@@ -921,10 +921,10 @@
         },
         "dragon_lair": {
           "configname": "§e水晶矿洞扫描：§c那位来客（Dragon's Lair）",
-          "description": "§e扫描龙穴结构；当前矿洞内立即生效，需开启水晶矿洞助手"
+          "description": "§e扫描龙巢结构；当前矿洞内立即生效，需开启水晶矿洞助手"
         },
         "worm_fish_spot": {
-          "configname": "§e水晶矿洞扫描：§c熔岩钓点",
+          "configname": "§e水晶矿洞扫描：§c钓虫点",
           "description": "§e扫描可以烤鱼钩的地方；当前矿洞内立即生效，需开启水晶矿洞助手"
         },
         "corleone": {
@@ -937,7 +937,7 @@
         },
         "bear3": {
           "configname": "§e水晶矿洞扫描：§e熊出没",
-          "description": "§e扫描熊出没结构；当前矿洞内立即生效，需开启水晶矿洞助手"
+          "description": "§e扫描三只小熊结构；当前矿洞内立即生效，需开启水晶矿洞助手"
         }
       }
     },
@@ -1264,6 +1264,22 @@
     "f7drawwitherkinglightning": {
       "configname": "§eM7渲染凋零王落雷点",
       "description": "§e标记出凋零王的落雷点防止吃到大量伤害"
+    },
+    "gardenpestesp": {
+      "configname": "§e花园害虫ESP",
+      "description": "§e开启后, 高亮花园的害虫"
+    },
+    "f7autoswapenderdragoninwitherking": {
+      "configname": "§eM7自动切换末影龙宠物",
+      "description": "§e进入第五阶段凋零王阶段时, 自动切换到末影龙宠物"
+    },
+    "autoevaluatefossils": {
+      "configname": "§e自动凿化石",
+      "description": "§e开启后, 在极寒隧道处的化石研磨机自动凿Scrap"
+    },
+    "autoevaluatefossilsautorestart": {
+      "configname": "§e自动凿化石自动重开",
+      "description": "§e凿完一个化石自动右键重开 (需要对准化石研磨机, 不想研磨了可以1.5s内准星移出)"
     },
 
     "about1": "§e小沙雕的QQ: 3381949033",

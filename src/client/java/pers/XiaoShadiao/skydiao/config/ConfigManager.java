@@ -70,6 +70,7 @@ public class ConfigManager {
     };
     public static final StringConfigOption customTitleText = new StringConfigOption("customtitletext", "");
     public static final BooleanConfigOption nacc = new BooleanConfigOption("nacc", false);
+    public static final BooleanConfigOption debugFPSIssue = new BooleanConfigOption("debugfpsissue", false);
 
     public static final ColorConfigOption lyricColor1 = new ColorConfigOption("lyriccolor1", new Color(0x00, 0xFF, 0x00).getRGB());
     public static final ColorConfigOption lyricColor2 = new ColorConfigOption("lyriccolor2", new Color(0xFF, 0xFF, 0xFF).getRGB());
@@ -129,6 +130,7 @@ public class ConfigManager {
     public static final StringConfigOption autoChangeLo = new StringConfigOption("fsautochangelo", "").flagAsMacroFeature();
     public static final BooleanConfigOption gardenTrapPrompt = new BooleanConfigOption("gardentrapprompt", true);
     public static final BooleanConfigOption gardenBonusPrompt = new BooleanConfigOption("gardenbonusprompt", true);
+    public static final BooleanConfigOption gardenPestESP = new BooleanConfigOption("gardenpestesp", true);
     public static final BooleanConfigOption fsGardenMoonFlowerMode = new BooleanConfigOption("fsgardenmoonflowermode", true).flagAsMacroFeature();
     public static final BooleanConfigOption fsGardenMoonFlowerModeKeepNightFarming = new BooleanConfigOption("fsgardenmoonflowermodekeepnightfarming", true).flagAsMacroFeature();
     public static final BooleanConfigOption hotspotrender = new BooleanConfigOption("hotspotrender", true);
@@ -226,6 +228,10 @@ public class ConfigManager {
     public static final IntConfigOption fastCommandMenuDefaultPage = new IntConfigOption("fastcommandmenudefaultpage", 0);
     public static final IntConfigOption fastCommandMenuButtonSize = new IntConfigOption("fastcommandmenubuttonsize", 50);
     public static final StringConfigOption ircBlockPlayers = new StringConfigOption("ircblockplayers", "");
+    public static final StringConfigOption customSettingEntityESP = new StringConfigOption("customsettingentityesp", "");
+    public static final BooleanConfigOption f7AutoSwapEnderDragonInWitherKing = new BooleanConfigOption("f7autoswapenderdragoninwitherking", false);
+    public static final BooleanConfigOption autoEvaluateFossils = new BooleanConfigOption("autoevaluatefossils", false);
+    public static final BooleanConfigOption autoEvaluateFossilsAutoRestart = new BooleanConfigOption("autoevaluatefossilsautorestart", false);
 
     public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
@@ -319,19 +325,19 @@ public class ConfigManager {
             Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip, enableircafktip, enableircmacrochecktip, cooltitle, customTitleText, autoHypeTrain, autoHypeTrainManbaOut)),
             Map.entry("工具类", List.of(inventoryFilter, itemStarCountRender, itemStarCountRenderColor1, itemStarCountRenderColor2, openfastcommandmenukeybinds, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodescoreboard, blivemodehideserverid, bliveboardcastdankumu, keepSprint, autoReconnect, afkInOtherPlace, freecamFlySpeed, openFreelookAndFreecamAction, openAutoClickAction, openAllAutoClickKeybindAction, openClearStashCommand)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
-            Map.entry("自动类", List.of(macroReplay, macroReplaySelfCleaning, autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, autoCarnivalAutoRestart, carnivalAutoFruitDigger, carnivalAutoShootZombie, carnivalAutoShootZombieOffset, skyblockautobloodfiend, skyblockautobloodfiendlowhealth, iAutoObsidian, iAutoObsidianWR, obsidianPositionHelper, autoObsidianPositionsFile, drillSlot, lanternSlot, obsidianPlayerCheckRange, obsidianPlayerCheck, obsidianTheEndCheck, obsidianCycleTicks, autoPickupPhoneRing, autoPlayBeachBall, autoPlayBeachBallAutoStopAt40)),
+            Map.entry("自动类", List.of(macroReplay, macroReplaySelfCleaning, autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, autoCarnivalAutoRestart, carnivalAutoFruitDigger, carnivalAutoShootZombie, carnivalAutoShootZombieOffset, skyblockautobloodfiend, skyblockautobloodfiendlowhealth, iAutoObsidian, iAutoObsidianWR, obsidianPositionHelper, autoObsidianPositionsFile, drillSlot, lanternSlot, obsidianPlayerCheckRange, obsidianPlayerCheck, obsidianTheEndCheck, obsidianCycleTicks, autoPickupPhoneRing, autoPlayBeachBall, autoPlayBeachBallAutoStopAt40, autoEvaluateFossils, autoEvaluateFossilsAutoRestart)),
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareAnnounce,
                     skyblockSafeIsland, crystalHollowHelper, crystalHollowScanBlue, crystalHollowScanPurple,
                     crystalHollowScanYellow, crystalHollowScanOrange, crystalHollowScanGreen,
                     crystalHollowScanGoblinKing, crystalHollowScanDragonLair, crystalHollowScanWormFishSpot,
                     crystalHollowScanCorleone, crystalHollowScanFairyGrotto, crystalHollowScanBear3,
                     crystalHollowHelperDebug, crystalHollowDupServerTipper, crystalHollowHelperDisableThreadLimit,
-                    genshinImpactHeatColdRender, miningCommissionEntityESP)),
+                    genshinImpactHeatColdRender, miningCommissionEntityESP, autoEvaluateFossils, autoEvaluateFossilsAutoRestart)),
             Map.entry("combat", List.of(slayerTogether, isleVolcanoFinder, isleVolcanoFinderCataOnlyMode, isleDupServerTip, endIslandDragonESPListener)),
             Map.entry("foraging", List.of(galateashulker, treeProgress, autoReel, autoReelAutoAim, torrhusCanyonHelper, safariBoardcastHotspot, safariBoardcastTradeNPC, safariRenderTargetESP, floorDroppingRender)),
-            Map.entry("farming", List.of(openFsCommandAction, openFsKeyBind, hubratesp, autoSprayonator, autoChangeLo, halfAutoKillPests, gardenTrapPrompt, gardenBonusPrompt, fsGardenMoonFlowerMode, fsGardenMoonFlowerModeKeepNightFarming, fsTPToPest)),
+            Map.entry("farming", List.of(openFsCommandAction, openFsKeyBind, hubratesp, gardenPestESP, autoSprayonator, autoChangeLo, halfAutoKillPests, gardenTrapPrompt, gardenBonusPrompt, fsGardenMoonFlowerMode, fsGardenMoonFlowerModeKeepNightFarming, fsTPToPest)),
             Map.entry("fishing", List.of(hotspotrender, autogg, lotusAtollHelper, fishingBigFishRender, fishingBigFishTip)),
-            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonKeyRender, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7InactiveTerminalRender, f7TerminalESPTracer, f7ArrowAlignSolver, f7ArrowAlignSolverBlockWrongClicks, f7SimonSaysSolver, f7SimonSaysSolverBlockWrongClicks, dungeonReviveItemCDRender, f7DrawWitherDragonESP, f7DrawStormFireballTarget, f7DrawWitherDragonLightning, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered, dungeonDrinkPotion, dungeonBloodRoomTime, dungeonTrashTPS, dungeonf7msgbotssleap, dungeonMissingPlayer)),
+            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonKeyRender, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7InactiveTerminalRender, f7TerminalESPTracer, f7ArrowAlignSolver, f7ArrowAlignSolverBlockWrongClicks, f7SimonSaysSolver, f7SimonSaysSolverBlockWrongClicks, dungeonReviveItemCDRender, f7DrawWitherDragonESP, f7DrawStormFireballTarget, f7DrawWitherDragonLightning, f7AutoSwapEnderDragonInWitherKing, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered, dungeonDrinkPotion, dungeonBloodRoomTime, dungeonTrashTPS, dungeonf7msgbotssleap, dungeonMissingPlayer)),
             Map.entry("rift", List.of(rifttimegunhelper)),
             Map.entry("界面类", List.of(openHud, bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, bossDrawESP, customBossESPTracer, starrailNotification, starrailNotificationSound, dyingtip, noblind, nosuffoverlay, fireOverlay, lyricColor1, lyricColor2)),
             Map.entry("ravengard", List.of(ravengardHelper, ravengardQueueMessage))

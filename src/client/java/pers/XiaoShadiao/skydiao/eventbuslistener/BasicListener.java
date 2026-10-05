@@ -489,7 +489,7 @@ public class BasicListener extends AbstractListener {
             }
             Optional.ofNullable(mc.getConnection()).map(c -> c.getPlayerInfo(mc.player.getUUID())).map(PlayerInfo::getSkin).ifPresent(skin -> selfPlayerSkin = skin);
         }
-        if(ConfigManager.keepSprint.getValue() && !MacroManagerListener.autoDojo.isDoingSwiftness()) {
+        if(ConfigManager.keepSprint.getValue() && !MacroManagerListener.autoDojo.isDoingSwiftness() && !MacroManagerListener.pathFinderV2Executor.isRunning()) {
             InputSimulator.setSprint(true);
         }
         while(KeyBindsManager.toggleKeepSprint.consumeClick()) {

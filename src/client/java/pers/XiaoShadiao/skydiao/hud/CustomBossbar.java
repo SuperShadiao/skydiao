@@ -255,7 +255,8 @@ public class CustomBossbar extends XSDHUD {
             if (!am.isActive()) continue;
             if(starRailBossBar != null && (entity == null || entity.isInvisible() || entity == starRailBossBar.getTargetEntity() || starRailBossBar.shouldNotRenderOtherBoss(entity))) continue;
 
-            if (i < ConfigManager.bossbarDisplayLimit.getValue() - (starRailBossBar != null ? 3 : 0)) {
+            int bossbarCount = ConfigManager.bossbarDisplayLimit.getValue();
+            if (i < Math.min(bossbarCount, Math.max(3, bossbarCount - (starRailBossBar != null ? 3 : 0)))) {
                 MutableComponent s = am.bossName == null ? Component.empty() : am.bossName.copy();
                 StringBuilder shealth = new StringBuilder("      ");
                 if(entity != null) {

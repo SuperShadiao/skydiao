@@ -8,12 +8,36 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
 import net.minecraft.util.ARGB;
 
+import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 
 public class ScreenshotUtils {
 
+    public static void takeScreenshot2(final RenderTarget target) {
+        takeScreenshot2(target, null);
+    }
+
     public static void takeScreenshot(final RenderTarget target, final Consumer<NativeImage> callback) {
         takeScreenshot(target, 1, callback);
+    }
+
+    public static void takeScreenshot2(final RenderTarget target, final Consumer<GpuBuffer.MappedView> callback) {
+        int width = target.width;
+        int height = target.height;
+        GpuTexture sourceTexture = target.getColorTexture();
+        if (sourceTexture == null) {
+            throw new IllegalStateException("Tried to capture screenshot of an incomplete framebuffer");
+        } else {
+            GpuBuffer buffer = RenderSystem.getDevice().createBuffer(() -> "Screenshot buffer", 9, (long)width * height * sourceTexture.getFormat().pixelSize());
+            CommandEncoder commandEncoder = RenderSystem.getDevice().createCommandEncoder();
+            RenderSystem.getDevice().createCommandEncoder().copyTextureToBuffer(sourceTexture, buffer, 0L, () -> {
+                GpuBuffer.MappedView read0 = commandEncoder.mapBuffer(buffer, true, false);
+
+                callback.accept(read0);
+
+                buffer.close();
+            }, 0);
+        }
     }
 
     public static void takeScreenshot(final RenderTarget target, final int downscaleFactor, final Consumer<NativeImage> callback) {
@@ -33,10 +57,11 @@ public class ScreenshotUtils {
                         int outputWidth = width / downscaleFactor;
                         NativeImage image = new NativeImage(outputWidth, outputHeight, false);
 
+                        ByteBuffer data = PicUtils.cloneByteBuffer(read.data()).join();
                         for (int y = 0; y < outputHeight; y++) {
                             for (int x = 0; x < outputWidth; x++) {
                                 if (downscaleFactor == 1) {
-                                    int argb = read.data().getInt((x + y * width) * sourceTexture.getFormat().pixelSize());
+                                    int argb = data.getInt((x + y * width) * sourceTexture.getFormat().pixelSize());
                                     image.setPixelABGR(x, height - y - 1, argb | 0xFF000000);
                                 } else {
                                     int red = 0;
@@ -45,7 +70,7 @@ public class ScreenshotUtils {
 
                                     for (int i = 0; i < downscaleFactor; i++) {
                                         for (int j = 0; j < downscaleFactor; j++) {
-                                            int argb = read.data().getInt((x * downscaleFactor + i + (y * downscaleFactor + j) * width) * sourceTexture.getFormat().pixelSize());
+                                            int argb = data.getInt((x * downscaleFactor + i + (y * downscaleFactor + j) * width) * sourceTexture.getFormat().pixelSize());
                                             red += ARGB.red(argb);
                                             green += ARGB.green(argb);
                                             blue += ARGB.blue(argb);

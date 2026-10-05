@@ -4,6 +4,8 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "MixinMinecraftServer",
+    "fun.MixinChorusFlower",
+    "fun.MixinEnderman",
     "fun.MixinHurtEntityServer",
     "fun.MixinWarden"
   ],

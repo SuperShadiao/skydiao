@@ -51,7 +51,6 @@ import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinEntityCloneableAccessor;
 import pers.XiaoShadiao.skydiao.utils.blivesensitiveword.ComponentHelper;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -125,7 +124,7 @@ public class ToolList {
         return makeReqToURL(url, allowErrorStream, ucin, onRedirect, false);
     }
 
-    public InputStream makeReqToURL(String url, boolean allowErrorStream, Consumer<URLConnection> ucin, Consumer<String> onRedirect, boolean disableSSL) {
+    public InputStream makeReqToURL(String url, boolean allowErrorStream, Consumer<URLConnection> ucin, Consumer<String> onRedirect, @SuppressWarnings("unused") boolean disableSSL) {
 
         if (url.contains("hypixelhelper.pages.dev")) url = url.replace("hypixelhelper.pages.dev", "xiaoshadiao.club");
 
@@ -141,14 +140,14 @@ public class ToolList {
                 uc.addRequestProperty("Referer", "https://www.gitlink.org.cn/SuperShadiao/hypixelhelper");
 
             uc.setInstanceFollowRedirects(true);
-            if (uc instanceof HttpsURLConnection) {
-                if (disableSSL) {
-                    ((HttpsURLConnection) uc).setSSLSocketFactory(HttpSSLDisabler.getTrustAll());
-                    ((HttpsURLConnection) uc).setHostnameVerifier((h, s) -> true);
-                } else {
-                    ((HttpsURLConnection) uc).setSSLSocketFactory(HttpSSLDisabler.getDefault());
-                }
-            }
+//            if (uc instanceof HttpsURLConnection) {
+//                if (disableSSL) {
+//                    ((HttpsURLConnection) uc).setSSLSocketFactory(HttpSSLDisabler.getTrustAll());
+//                    ((HttpsURLConnection) uc).setHostnameVerifier((h, s) -> true);
+//                } else {
+//                    ((HttpsURLConnection) uc).setSSLSocketFactory(HttpSSLDisabler.getDefault());
+//                }
+//            }
             uc.setConnectTimeout(30000);
             uc.setReadTimeout(30000);
 

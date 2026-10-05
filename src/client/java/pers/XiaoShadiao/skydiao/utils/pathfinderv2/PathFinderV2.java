@@ -2,12 +2,17 @@ package pers.XiaoShadiao.skydiao.utils.pathfinderv2;
 
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Stream;
 
 /**
  * A1生成的
@@ -15,8 +20,27 @@ import java.util.concurrent.*;
 
 public class PathFinderV2 {
 
+    public interface PathFinderConfig {
+
+        public boolean isAllowBreak();
+        public boolean isAllowPlace();
+
+    }
+
     /** 起始节点默认使用的移动方式 */
     private static final PathNodeType DEFAULT_START_TYPE = PathNodeType.MOVE;
+
+    private static final PathFinderConfig DEFAULT_CONFIG = new PathFinderConfig() {
+        @Override
+        public boolean isAllowBreak() {
+            return ConfigManager.pfAllowBreak.getValue();
+        }
+
+        @Override
+        public boolean isAllowPlace() {
+            return ConfigManager.pfAllowPlace.getValue();
+        }
+    };
 
     private final Executor executor;
 
@@ -40,12 +64,19 @@ public class PathFinderV2 {
     private volatile double lowestCostF = Double.MAX_VALUE;
     private volatile double lowestDistanceH = Double.MAX_VALUE;
 
-    public PathFinderV2(Executor executor) {
-        this.executor = Objects.requireNonNull(executor, "executor");
+    private final PathFinderConfig config;
+
+    public PathFinderConfig getConfig() {
+        return config;
     }
 
     public PathFinderV2() {
-        this(ForkJoinPool.commonPool());
+        this(DEFAULT_CONFIG);
+    }
+
+    public PathFinderV2(PathFinderConfig config) {
+        this.executor = ForkJoinPool.commonPool();
+        this.config = config;
     }
 
     // ------------------------------------------------------------------
@@ -187,13 +218,31 @@ public class PathFinderV2 {
      * 合法性统一交给 canMove。
      */
     private List<SearchKey> neighbors(SearchKey cur) {
-        return List.of(
+
+        List<SearchKey> move = List.of(
                 new SearchKey(cur.pos().offset(1, 0, 0), PathNodeType.MOVE),
                 new SearchKey(cur.pos().offset(-1, 0, 0), PathNodeType.MOVE),
-                new SearchKey(cur.pos().offset(0, 1, 0), cur.type == PathNodeType.UP || cur.type == PathNodeType.FLY ? PathNodeType.FLY : PathNodeType.UP),
-                new SearchKey(cur.pos().offset(0, -1, 0), PathNodeType.DOWN),
                 new SearchKey(cur.pos().offset(0, 0, 1), PathNodeType.MOVE),
-                new SearchKey(cur.pos().offset(0, 0, -1), PathNodeType.MOVE),
+                new SearchKey(cur.pos().offset(0, 0, -1), PathNodeType.MOVE)
+        );
+        if(cur.type == PathNodeType.FLY) {
+            move = move.stream().map(k -> {
+                if(!BlockHelper.canStepOn(k.pos().below())) {
+                    return k.setType(PathNodeType.FLY);
+                }
+                return k;
+            }).toList();
+        }
+
+        List<SearchKey> up = List.of(
+                new SearchKey(cur.pos().offset(0, 1, 0), cur.type == PathNodeType.UP || cur.type == PathNodeType.FLY ? PathNodeType.FLY : PathNodeType.UP)
+        );
+
+        List<SearchKey> down = List.of(
+                new SearchKey(cur.pos().offset(0, -1, 0), cur.type == PathNodeType.FLY && !BlockHelper.canStepOn(cur.pos().offset(0, -2, 0)) ? PathNodeType.FLY : PathNodeType.DOWN)
+        );
+
+        List<SearchKey> jumpMove = List.of(
 
                 new SearchKey(cur.pos().offset(2, 0, 0), PathNodeType.JUMP1),
                 new SearchKey(cur.pos().offset(-2, 0, 0), PathNodeType.JUMP1),
@@ -221,6 +270,12 @@ public class PathFinderV2 {
                 new SearchKey(cur.pos().offset(0, 1, -3), PathNodeType.JUMP2_UP)
 
                 );
+
+        if(cur.type == PathNodeType.FLY) {
+            jumpMove = List.of();
+        }
+
+        return Stream.of(move, up, down, jumpMove).flatMap(List::stream).toList();
     }
 
     /**
@@ -231,14 +286,10 @@ public class PathFinderV2 {
         if (BlockHelper.hasCollision(next.pos()) || BlockHelper.hasCollision(next.pos().above())) {
             return false;
         }
-        if (
-                next.type() == PathNodeType.JUMP1 ||
-                next.type() == PathNodeType.JUMP2 ||
-                next.type() == PathNodeType.JUMP3 ||
-                next.type() == PathNodeType.JUMP1_UP ||
-                next.type() == PathNodeType.JUMP2_UP
-        ) {
-            if (BlockHelper.areaHasCollision(ctx.current.pos().atY(next.pos().getY()),  next.pos().above(2))) {
+        if (next.type().isJumpMove()) {
+            if (
+                    BlockHelper.areaHasCollision(ctx.current.pos().below(), next.pos().above(2), List.of(next.pos().below(), ctx.current.pos().below(), next.pos().below(2)))
+            ) {
                 return false;
             }
 
@@ -246,15 +297,24 @@ public class PathFinderV2 {
                 return false;
             }
         }
-        if (next.type() == PathNodeType.MOVE) {
-            if (!BlockHelper.canStepOn(ctx.current.pos().below())) {
+        if (next.type().isMove()) {
+            if (
+                    ((ctx.current.type().isMove() || ctx.current.type() == PathNodeType.DOWN) && !BlockHelper.canStepOn(ctx.current.pos().below())) ||
+                    (ctx.current.type().isJump() && ctx.getCurrentOffset(1).type().isMove() && !BlockHelper.canStepOn(ctx.getCurrentOffset(1).pos().below()))
+            ) {
                 return false;
             }
         }
-        if (!ToolList.mc.player.getAbilities().mayfly && (
-                next.type() == PathNodeType.FLY
-                )) {
-            return false;
+        if (!ToolList.mc.player.getAbilities().mayfly) {
+            if(next.type() == PathNodeType.FLY) {
+                return false;
+            }
+            if(next.type().isJump() && ctx.current.type().isJump() && !BlockHelper.canStepOn(ctx.current.pos().below())) {
+                return false;
+            }
+            if(ctx.current.type() == PathNodeType.DOWN && (next.type().isJump() || next.type().isMove()) && !BlockHelper.canStepOn(next.pos().below())) {
+                return false;
+            }
         }
 
         return true;
@@ -265,14 +325,20 @@ public class PathFinderV2 {
      * 只在 canMove 返回 true 后调用。
      */
     private double moveCost(PathContext ctx, SearchKey next) {
-        if(next.type() == PathNodeType.JUMP1
-        || next.type() == PathNodeType.JUMP2
-        || next.type() == PathNodeType.JUMP3
-        || next.type() == PathNodeType.JUMP1_UP
-        || next.type() == PathNodeType.JUMP2_UP) {
-            return 3.5;
+        double ret;
+        if(next.type().isJumpMove()) {
+            ret = 5;
+        } else if(next.type() == PathNodeType.FLY) {
+            ret = 0.05;
+        } else {
+            ret = 0.4;
         }
-        return 1.0;
+
+        if(BlockPos.betweenClosedStream(ctx.current.pos().offset(1, 1, 1), ctx.current.pos().offset(-1, 0, -1)).anyMatch(BlockHelper::hasCollision)) {
+            ret += 1;
+        }
+
+        return ret;
     }
 
     /**
@@ -302,7 +368,49 @@ public class PathFinderV2 {
             cur = cameFrom.get(cur);
         }
 
-        return new ArrayList<>(deque);
+        return optimizePath(new ArrayList<>(deque));
+    }
+
+    private List<PathNode> optimizePath(List<PathNode> path) {
+        for(int i = path.size() - 1; i > 3; i--) {
+            if(path.get(i - 1).type().isJumpMove()) continue;
+            BlockPos vec1 = path.get(i).pos();
+            BlockPos vec2 = path.get(i - 1).pos();
+            BlockPos vec3 = path.get(i - 2).pos();
+
+            if(
+                    (Math.abs(vec1.getX() - vec3.getX()) == 1 || Math.abs(vec1.getZ() - vec3.getZ()) == 1) &&
+                            (vec1.getY() - vec2.getY()) == 0 &&
+                            (vec2.getY() - vec3.getY()) == 1
+                            &&
+                            (!isActuallyAllowBreak() || (!BlockHelper.hasCollision(vec2) && !BlockHelper.hasCollision(vec2.above()))) &&
+                            (!isActuallyAllowPlace() || (BlockHelper.hasCollision(vec2.below())))
+            ) {
+                path.remove(i - 1);
+            }
+        }
+
+        for(int i = path.size() - 1; i > 3; i--) {
+            if(path.get(i - 1).type().isJumpMove()) continue;
+            BlockPos vec1 = path.get(i).pos();
+            BlockPos vec2 = path.get(i - 1).pos();
+            BlockPos vec3 = path.get(i - 2).pos();
+            if(
+                    Math.abs(vec1.getX() - vec3.getX()) == 1 &&
+                            Math.abs(vec1.getZ() - vec3.getZ()) == 1 &&
+                            /*Math.abs*/(vec1.getY() - vec3.getY()) >= -2 && (vec1.getY() - vec3.getY()) <= 0 &&
+                            vec2.getY() <= vec3.getY() && vec2.getY() <= vec1.getY() &&
+                            (
+                                    ToolList.getInstance().isFullBlock(ToolList.mc.level.getBlockState(vec1.below())) == ToolList.getInstance().isFullBlock(ToolList.mc.level.getBlockState(vec3.below())) ||
+                                            !ToolList.getInstance().isFullBlock(ToolList.mc.level.getBlockState(vec1.below())) && ToolList.getInstance().isFullBlock(ToolList.mc.level.getBlockState(vec3.below()))
+                            ) &&
+                            (!isActuallyAllowBreak() || (!BlockHelper.hasCollision(vec2) && !BlockHelper.hasCollision(vec2.above()))) &&
+                            (!isActuallyAllowPlace() || (BlockHelper.hasCollision(vec2.below())))
+            ) {
+                path.remove(i - 1);
+            }
+        }
+        return path;
     }
 
     /**
@@ -335,11 +443,33 @@ public class PathFinderV2 {
     // ==================================================================
 
     public record SearchKey(BlockPos pos, PathNodeType type) {
+        public SearchKey setType(PathNodeType type) {
+            return new SearchKey(pos, type);
+        }
     }
 
     // ==================================================================
     // 内部类：PathContext 提供反向惰性路径历史
     // ==================================================================
+
+    public boolean isActuallyAllowBreak() {
+        return config.isAllowBreak() && !ToolList.mc.gameMode.getPlayerMode().isBlockPlacingRestricted();
+    }
+
+    public boolean isActuallyAllowPlace() {
+        return config.isAllowPlace() && !ToolList.mc.gameMode.getPlayerMode().isBlockPlacingRestricted() && hasBlockInInventory();
+    }
+
+    private static boolean hasBlockInInventory() {
+        LocalPlayer player = ToolList.mc.player;
+        for (int i = 0; i < 9; i++) { // 检查物品栏的前 9 个槽
+            ItemStack itemStack = player.getInventory().getItem(i);
+            if (itemStack.getItem() instanceof BlockItem) {
+                return true;
+            }
+        }
+        return false; // 未找到方块，返回 false
+    }
 
     @FunctionalInterface
     public interface PathIteratorFactory {
@@ -385,6 +515,15 @@ public class PathFinderV2 {
 
         public Iterator<SearchKey> reversed() {
             return factory.create(Integer.MAX_VALUE);
+        }
+
+        public SearchKey getCurrentOffset(int offset) {
+            Iterator<SearchKey> it = reversed();
+            SearchKey cur = it.next();
+            for (int i = 0; i < offset && it.hasNext(); i++) {
+                cur = it.next();
+            }
+            return cur;
         }
 
         public Iterator<SearchKey> reversed(int maxSteps) {

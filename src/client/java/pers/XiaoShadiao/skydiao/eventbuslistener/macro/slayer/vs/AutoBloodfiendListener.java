@@ -523,7 +523,7 @@ public class AutoBloodfiendListener extends AbstractListener implements IMacro {
             ToolList.TPInfo tpInfo = ToolList.getInstance().parseTPPacket(velocity);
             Vec3 velocityVec = tpInfo.to().deltaMovement();
             BFTaskManiaHandler task = getRunningTaskByClass(BFTaskManiaHandler.class);
-            ToolList.printChatMessage(Component.literal("§a[小沙雕] X:" + velocityVec.x + " Y:" + velocityVec.y + " Z:" + velocityVec.z));
+            if (task != null) ToolList.printChatMessage(Component.literal("§a[小沙雕] X:" + velocityVec.x + " Y:" + velocityVec.y + " Z:" + velocityVec.z));
             if (task != null && (((Math.abs(velocityVec.x) > 0.5 && Math.abs(velocityVec.z) > 0.5)) || Math.abs(velocityVec.x) > 1 || Math.abs(velocityVec.z) > 1)) {
                 ToolList.printChatMessage(Component.literal("§a[小沙雕] §eKB!"));
                 task.flagKB();

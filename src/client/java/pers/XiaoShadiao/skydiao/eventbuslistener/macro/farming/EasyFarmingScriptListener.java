@@ -437,6 +437,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                 .addAction(ctx -> InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")), 200)
                 .addAction(() -> ToolList.sendChatMessage("/warp garden"), 500, true);
 
+        kpest.addAction(() -> FarmingUtils.changeLoadout(autoLoadoutConfig.get(0)), 200);
 
         kpest.addAction(() -> {
             try {

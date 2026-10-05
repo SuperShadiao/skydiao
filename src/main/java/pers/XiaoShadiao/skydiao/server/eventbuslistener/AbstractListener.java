@@ -14,6 +14,7 @@ public abstract class AbstractListener extends Thread {
     public final Logger logger = LogManager.getLogger(getListenerName());
 
     public static final WardenControllerListener wardenControllerListener = new WardenControllerListener();
+    public static final EndermanDropSomething endmanDropSomething = new EndermanDropSomething();
 
     public AbstractListener() {
         setName("SLT_" + getListenerName());

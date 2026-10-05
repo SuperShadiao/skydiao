@@ -23,6 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ResolvableProfile;
 import pers.XiaoShadiao.skydiao.commands.args.ClientBlockPosArgument;
+import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.E2AMappingListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon.DungeonF7BossbarListener;
@@ -184,6 +185,10 @@ public class HHSCCommand extends SkydiaoCommand {
                 getArgConstantInstance("printscoreboard").executes(this::executePrintScoreboard),
                 getArgConstantInstance("sethiddensomethingindex").then(getArgInstance("index", IntegerArgumentType.integer(0, AbstractListener.hiddenSomething.getTotalGifCount())).executes(this::setHiddenSomethingIndex)),
                 getArgConstantInstance("togglee2arecord").executes(_ -> owo(() -> AbstractListener.e2AMappingListener.toggleRecord = !AbstractListener.e2AMappingListener.toggleRecord)),
+                getArgConstantInstance("togglefpsdebug").executes(context -> owo(() -> {
+                    ConfigManager.debugFPSIssue.setValue(!ConfigManager.debugFPSIssue.getValue());
+                    context.getSource().sendFeedback(Component.literal("§a[小沙雕] " + (ConfigManager.debugFPSIssue.getValue() ? "§a已开启" : "§c已关闭") + "FPS调试"));
+                })),
                 devcommand
         );
     }

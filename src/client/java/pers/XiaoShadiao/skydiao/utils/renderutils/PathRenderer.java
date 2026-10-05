@@ -29,7 +29,7 @@ public class PathRenderer {
         RenderUtils.renderWorldLine(wr, prev.add(0.5, 0.5, 0.5), current.add(0.5, 0.5, 0.5), r, g, b, 1.0F);
 
         if(drawEnd) {
-            RenderUtils.renderESP(wr, current, r,g,b, 1, false);
+            RenderUtils.renderESP(wr, current.add(0.5, 0, 0.5), r,g,b, 1, false);
         }
     }
 

@@ -1,10 +1,16 @@
 package pers.XiaoShadiao.skydiao.utils;
 
+import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.textures.GpuTexture;
+import net.minecraft.util.ARGB;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
 
 public class PicUtils {
@@ -54,6 +60,37 @@ public class PicUtils {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(img, "PNG", baos);
         return baos.toByteArray();
+    }
+
+    public static BufferedImage cloneMappedViewToBufferedImage(RenderTarget target, GpuBuffer.MappedView mappedView) {
+        int width = target.width;
+        int height = target.height;
+        GpuTexture sourceTexture = target.getColorTexture();
+
+        if (sourceTexture == null) throw new IllegalStateException("Tried to capture screenshot of an incomplete framebuffer");
+
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB_PRE);
+
+        ByteBuffer data = cloneByteBuffer(mappedView.data()).join();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int argb = data.getInt((x + y * width) * sourceTexture.getFormat().pixelSize());
+                image.setRGB(x, height - y - 1, (ARGB.blue(argb) << 16) | (ARGB.green(argb) << 8) | (ARGB.red(argb)) | 0xFF000000);
+            }
+        }
+        return image;
+    }
+
+    public static CompletableFuture<ByteBuffer> cloneByteBuffer(ByteBuffer buffer) {
+        CompletableFuture<ByteBuffer> future = new CompletableFuture<>();
+        ToolList.mc.execute(() -> {
+            ByteBuffer heapDst = ByteBuffer.allocate(buffer.remaining());
+            heapDst.order(buffer.order());
+            heapDst.put(buffer);
+            heapDst.position(0);
+            future.complete(heapDst);
+        });
+        return future;
     }
 
 }

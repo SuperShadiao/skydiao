@@ -32,6 +32,7 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.screen.MinecraftCrashedScreen;
@@ -164,7 +165,7 @@ public class MixinMinecraft {
     @WrapOperation(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;runTick(Z)V"), method = "run")
     public void run(Minecraft instance, boolean bl, Operation<Void> original) {
         try {
-            if(ToolList.getInstance().isXiaoShadiao()) {
+            if(ConfigManager.debugFPSIssue.getValue()) {
                 if(dumperThread == null) {
                     Thread thread = Thread.currentThread();
                     dumperThread = MCThreadDumper.INSTANCE;

@@ -19,6 +19,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragonPart;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -268,6 +270,13 @@ public class RenderUtils {
     }
 
     public static void renderESP(WorldRender worldRender, Entity entity, float r, float g, float b, float a, boolean fillBox) {
+        if(entity instanceof EnderDragon ed) {
+            for (EnderDragonPart subEntity : ed.getSubEntities()) {
+                renderESP(worldRender, subEntity, r, g, b, a, fillBox);
+            }
+            return;
+        }
+
         float partialTicks = ToolList.mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
         double x = Mth.lerp(partialTicks, entity.xo, entity.getX());
         double y = Mth.lerp(partialTicks, entity.yo, entity.getY());

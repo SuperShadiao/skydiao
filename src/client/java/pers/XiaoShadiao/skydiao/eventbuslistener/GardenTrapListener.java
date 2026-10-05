@@ -1,7 +1,7 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener;
 
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.minecraft.client.Minecraft;
 import net.minecraft.sounds.SoundEvents;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
@@ -11,19 +11,20 @@ import pers.XiaoShadiao.skydiao.utils.tab.TabReader;
 import java.util.LinkedList;
 
 public class GardenTrapListener extends AbstractListener {
+
     @Override
     public String getListenerName() {
         return "GardenTrapListener";
     }
 
-    @Override
-    public void registerListeners() {
-        LevelRenderEvents.END_MAIN.register(this::onLastRender);
-    }
-
     private long lastShowTime = System.currentTimeMillis();
 
-    private void onLastRender(LevelRenderContext context) {
+    @Override
+    public void registerListeners() {
+        ClientTickEvents.START_CLIENT_TICK.register(this::onTick);
+    }
+
+    private void onTick(Minecraft mc) {
         if (!ConfigManager.gardenTrapPrompt.getValue() || mc.level == null || !"garden".equals(StatusManager.get().getMode()))
             return;
 
@@ -43,4 +44,5 @@ public class GardenTrapListener extends AbstractListener {
         lastShowTime = now;
         XSDHUD.bigTitle.updateTitleMsg(String.join("，", cps), 5000, SoundEvents.WITHER_SPAWN);
     }
+
 }

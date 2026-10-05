@@ -261,9 +261,9 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             stage3BreakGateFlag = true;
             ToolList.addThreadedTask(() -> {
                 Thread.sleep(2000);
-                addStarRailNotification("通过完成所有Terminal, Device和拉杆来解除Goldor的免疫状态!", StarRailNotification.Type.warning);
+                if(remainTerminal == terminals) addStarRailNotification("通过完成所有Terminal, Device和拉杆来解除Goldor的免疫状态!", StarRailNotification.Type.warning);
                 Thread.sleep(3000);
-                addStarRailNotification("靠近Goldor将受到大量伤害, 通过攻击Goldor可延缓其移动速度!", StarRailNotification.Type.warning);
+                if(remainTerminal == terminals) addStarRailNotification("靠近Goldor将受到大量伤害, 通过攻击Goldor可延缓其移动速度!", StarRailNotification.Type.warning);
                 return null;
             });
         }
@@ -284,6 +284,9 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                 addStarRailNotification("在对应凋零龙生成点击杀对应凋零龙即可削减凋零王生命值!", StarRailNotification.Type.warning);
                 return null;
             });
+            if(ConfigManager.f7AutoSwapEnderDragonInWitherKing.getValue()) {
+                autoSwitchPetListener.switchPet("Ender Dragon", null);
+            }
         }
     }
 

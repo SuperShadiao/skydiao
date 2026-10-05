@@ -3,11 +3,17 @@ package pers.XiaoShadiao.skydiao.eventbuslistener;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.TooltipFlag;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ResurrectionItemListener extends AbstractListener implements IDungeonListener {
 
@@ -45,6 +51,16 @@ public class ResurrectionItemListener extends AbstractListener implements IDunge
             sendDungeonF7ChatMessage(ConfigManager.dungeonBonzoTriggered.getValue());
             if (!displayTitleStarRail("Bonzo复活甲已触发!")) displayTitle("Bonzo");
             bonzoCD = 300 * 20;
+
+            if(mc.player != null && mc.level != null) {
+                for (Component line : mc.player.getItemBySlot(EquipmentSlot.HEAD).getTooltipLines(Item.TooltipContext.of(mc.level), mc.player, TooltipFlag.NORMAL)) {
+                    Matcher matcher = Pattern.compile("Cooldown: (\\d+)s").matcher(ToolList.getInstance().deleteColorCode(line.getString()));
+                    if(matcher.find()) {
+                        String cd = matcher.group(1);
+                        bonzoCD = Integer.parseInt(cd) * 20 + 20;
+                    }
+                }
+            }
         } else if (msg.matches("^Your Phoenix Pet saved you from certain death!$")) {
             sendDungeonF7ChatMessage(ConfigManager.dungeonPhoenixTriggered.getValue());
             if (!displayTitleStarRail("Phoenix复活甲已触发!")) displayTitle("Phoenix");

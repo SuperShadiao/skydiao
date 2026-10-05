@@ -7,7 +7,11 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.commands.arguments.ResourceArgument;
+import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
@@ -22,6 +26,7 @@ import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AutoSwapReviveHeadListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AutoSwitchPetListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.CustomSettingEntityESPListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
@@ -39,6 +44,7 @@ import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicListManager;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.PlayerThread;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
+import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -116,18 +122,96 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                         .then(getArgConstantInstance("stop").executes(c -> owo(() -> MacroManagerListener.autoFillBottleOfWater.enabled = false))),
                 getArgConstantInstance("editfastcommand").executes(this::executeEditFastCommand),
                 getArgConstantInstance("changetocreativemode").executes(this::executeChangeCreativeMode),
-                getArgConstantInstance("swaprevivehead").executes(this::executeSwapReviveHead)
-        );
+                getArgConstantInstance("swaprevivehead").executes(this::executeSwapReviveHead),
+                getArgConstantInstance("swapgoldordiamondhead").executes(this::executeSwapGoldOrDiamondHead),
+                getArgConstantInstance("entityesp")
+                        .then(getArgInstance("operation", StringArgumentType.string()).suggests((c, s) -> s.suggest("add").suggest("addTemp").suggest("remove").suggest("removeTemp").buildFuture())
+                                .then(getArgConstantInstance("byArmorStand")
+                                        .then(getArgInstance("color_red", IntegerArgumentType.integer(0, 255))
+                                                .then(getArgInstance("color_green", IntegerArgumentType.integer(0, 255))
+                                                        .then(getArgInstance("color_blue", IntegerArgumentType.integer(0, 255))
+                                                                .then(getArgInstance("entity", StringArgumentType.string())
+                                                                        .executes(c -> executeEntityESP(c, false, StringArgumentType.getString(c, "operation").equals("addTemp"), CustomSettingEntityESPListener.FilterType.ARMORSTAND)))
+                                                        ))))
+                                .then(getArgConstantInstance("byEntityType")
+                                        .then(getArgInstance("color_red", IntegerArgumentType.integer(0, 255))
+                                                .then(getArgInstance("color_green", IntegerArgumentType.integer(0, 255))
+                                                        .then(getArgInstance("color_blue", IntegerArgumentType.integer(0, 255))
+                                                                .then(getArgInstance("entity", ResourceArgument.resource(getCommandBuildContext(), Registries.ENTITY_TYPE))
+                                                                        .suggests(SuggestionProviders.cast(SuggestionProviders.SUMMONABLE_ENTITIES))
+                                                                        .executes(c -> executeEntityESP(c, false, StringArgumentType.getString(c, "operation").equals("addTemp"), CustomSettingEntityESPListener.FilterType.ENTITY_TYPE)))
+                                                        ))))
+                                .then(getArgInstance("entity", StringArgumentType.string())
+                                        .suggests((c, s) -> {
+                                            (StringArgumentType.getString(c, "operation").equals("removeTemp") ? AbstractListener.customSettingEntityESPListener.getTempEntries() : AbstractListener.customSettingEntityESPListener.getEntries()).forEachRemaining(entry -> s.suggest(entry.entityType()));
+                                            return s.buildFuture();
+                                        })
+                                        .executes(c -> executeEntityESP(c, true, StringArgumentType.getString(c, "operation").equals("removeTemp"), null)))
+                                .then(getArgInstance("entity_type", ResourceArgument.resource(getCommandBuildContext(), Registries.ENTITY_TYPE))
+                                        .suggests((c, s) -> {
+                                            (StringArgumentType.getString(c, "operation").equals("removeTemp") ? AbstractListener.customSettingEntityESPListener.getTempEntries() : AbstractListener.customSettingEntityESPListener.getEntries()).forEachRemaining(entry -> s.suggest(entry.entityType()));
+                                            return s.buildFuture();
+                                        })
+                                        .executes(c -> executeEntityESP(c, true, StringArgumentType.getString(c, "operation").equals("removeTemp"), null)))))
+                ;
+    }
+
+    private int executeSwapGoldOrDiamondHead(CommandContext<FabricClientCommandSource> context) {
+        AbstractListener.autoSwapReviveHeadListener.switchReviveHead(AutoSwapReviveHeadListener.Type.HEAD, (callbackResult -> {
+            if(callbackResult == AutoSwapReviveHeadListener.CallbackResult.DONE) {
+                context.getSource().sendFeedback(Component.literal("§a[小沙雕] 已完成切换"));
+            } else if(callbackResult == AutoSwapReviveHeadListener.CallbackResult.NOT_FOUND) {
+                context.getSource().sendError(Component.literal("§a[小沙雕] §c未能从背包找到§e金/钻头 §c:("));
+            } else {
+                context.getSource().sendError(Component.literal("§a[小沙雕] §c切换到金/钻头失败 (" + callbackResult + ")"));
+            }
+        }));
+        return 0;
+    }
+
+    private int executeEntityESP(CommandContext<FabricClientCommandSource> context, boolean remove, boolean temp, CustomSettingEntityESPListener.FilterType entityType) {
+
+        String entity;
+        try {
+            entity = context.getArgument("entity", String.class);
+        } catch (Exception e) {
+            try {
+                entity = context.getArgument("entity", Holder.Reference.class).key().identifier().toString();
+            } catch (Exception e1) {
+                entity = context.getArgument("entity_type", Holder.Reference.class).key().identifier().toString();
+            }
+        }
+        if(remove) {
+            if(temp) {
+                AbstractListener.customSettingEntityESPListener.removeTemp(entity);
+            } else {
+                AbstractListener.customSettingEntityESPListener.remove(entity);
+            }
+            context.getSource().sendFeedback(Component.literal("§a[小沙雕] 已移除" + (temp ? "临时" : "") + "实体§e" + entity + "§a的ESP"));
+        } else {
+            int color_red = context.getArgument("color_red", Integer.class);
+            int color_green = context.getArgument("color_green", Integer.class);
+            int color_blue = context.getArgument("color_blue", Integer.class);
+
+            if(temp) {
+                AbstractListener.customSettingEntityESPListener.addTemp(entity, entityType, new Color(color_red, color_green, color_blue));
+            } else {
+                AbstractListener.customSettingEntityESPListener.add(entity, entityType, new Color(color_red, color_green, color_blue));
+            }
+            context.getSource().sendFeedback(Component.literal("§a[小沙雕] 已添加" + (temp ? "临时" : "") + "实体§e" + entity + "§a的ESP " + (entityType == CustomSettingEntityESPListener.FilterType.ARMORSTAND ? "(根据目标头顶盔甲架搜索包含该内容的目标)" : "(根据实体类别搜索目标)")));
+        }
+        return 0;
+
     }
 
     private int executeSwapReviveHead(CommandContext<FabricClientCommandSource> context) {
-        AbstractListener.autoSwapReviveHeadListener.switchReviveHead((callbackResult -> {
+        AbstractListener.autoSwapReviveHeadListener.switchReviveHead(AutoSwapReviveHeadListener.Type.REVIVE, (callbackResult -> {
             if(callbackResult == AutoSwapReviveHeadListener.CallbackResult.DONE) {
                 context.getSource().sendFeedback(Component.literal("§a[小沙雕] 已完成切换"));
             } else if(callbackResult == AutoSwapReviveHeadListener.CallbackResult.NOT_FOUND) {
                 context.getSource().sendError(Component.literal("§a[小沙雕] §c未能从背包找到§eBonzo Mask§c或者§eSpirit Mask §c:("));
             } else {
-                context.getSource().sendError(Component.literal("§a[小沙雕] §c切换到复活头失败 :("));
+                context.getSource().sendError(Component.literal("§a[小沙雕] §c切换到复活头失败 (" + callbackResult + ")"));
             }
         }));
         return 0;
@@ -141,7 +225,7 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                             System.out.println(mc.level.getBlockState(pos).is(Blocks.OAK_WALL_SIGN));
                             return mc.level.getBlockState(pos).is(Blocks.OAK_WALL_SIGN) && mc.player.distanceToSqr(Vec3.atCenterOf(pos)) < 100;
                         })
-                &&
+                        &&
                         mc.level.dimension().identifier().equals(Identifier.parse("minecraft:the_end"))
         ) {
             PlayerInfo playerInfoInstance = mc.getConnection().getPlayerInfo(mc.player.getUUID());
@@ -399,7 +483,7 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
             } else if (result == AutoSwitchPetListener.CallbackResult.NOT_FOUND) {
                 context.getSource().sendError(Component.literal("§a[小沙雕] §c未找到§e" + petName));
             } else {
-                context.getSource().sendError(Component.literal("§a[小沙雕] §c切换失败 :("));
+                context.getSource().sendError(Component.literal("§a[小沙雕] §c切换失败 (" + result + ")"));
             }
         });
         return 0;

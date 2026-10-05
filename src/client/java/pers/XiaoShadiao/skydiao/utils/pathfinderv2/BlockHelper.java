@@ -5,6 +5,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
+import java.util.List;
+
 public class BlockHelper {
 
     public static double getBlockY(BlockPos pos) {
@@ -34,10 +36,25 @@ public class BlockHelper {
     }
 
     public static boolean areaHasCollision(BlockPos pos1, BlockPos pos2) {
+        return areaHasCollision(pos1, pos2, List.of());
+    }
+
+    public static boolean areaHasCollision(BlockPos pos1, BlockPos pos2, List<BlockPos> exceptPos) {
         for (BlockPos pos : BlockPos.betweenClosed(pos1, pos2)) {
-            if (hasCollision(pos)) return true;
+            if (!exceptPos.contains(pos) && hasCollision(pos)) return true;
         }
         return false;
+    }
+
+    public static boolean areaNoCollision(BlockPos pos1, BlockPos pos2) {
+        return areaNoCollision(pos1, pos2, List.of());
+    }
+
+    public static boolean areaNoCollision(BlockPos pos1, BlockPos pos2, List<BlockPos> exceptPos) {
+        for (BlockPos pos : BlockPos.betweenClosed(pos1, pos2)) {
+            if (!exceptPos.contains(pos) && hasCollision(pos)) return false;
+        }
+        return true;
     }
 
     public static boolean canStepOn(BlockPos pos) {

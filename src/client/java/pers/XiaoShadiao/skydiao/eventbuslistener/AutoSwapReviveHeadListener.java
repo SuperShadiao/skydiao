@@ -18,6 +18,12 @@ import java.util.function.Consumer;
 
 public class AutoSwapReviveHeadListener extends AbstractListener {
 
+    public enum Type {
+        HEAD,
+        REVIVE,
+        ;
+    }
+
     @Override
     public String getListenerName() {
         return "AutoSwapReviveHeadListener";
@@ -28,7 +34,7 @@ public class AutoSwapReviveHeadListener extends AbstractListener {
         ScreenEvents.AFTER_INIT.register(this::onLoadoutGuiOpen);
     }
 
-    public boolean execute = false;
+    public Type execute = null;
     public Consumer<CallbackResult> callback;
     private PageSwitchCallback pageSwitchCallback;
 
@@ -56,7 +62,7 @@ public class AutoSwapReviveHeadListener extends AbstractListener {
     }
 
     public void onStatsEquipmentGuiDraw(Screen screen0, GuiGraphicsExtractor drawContext, int mouseX, int mouseY, float tickDelta) {
-        if (!execute) return;
+        if (execute == null) return;
 
         if (!(screen0 instanceof ContainerScreen)) return;
         ChestMenu menu0 = ((ContainerScreen) screen0).getMenu();
@@ -65,7 +71,8 @@ public class AutoSwapReviveHeadListener extends AbstractListener {
         Consumer<CallbackResult> callback = this.callback;
         this.callback = null;
 
-        execute = false;
+        Type currentType = execute;
+        execute = null;
 
         ToolList.addThreadedTask(new Callable<Void>() {
             public Void call() {
@@ -82,7 +89,7 @@ public class AutoSwapReviveHeadListener extends AbstractListener {
                     for (Slot slot : menu.slots) {
                         if(slot.container == mc.player.getInventory()) {
                             String id = ToolList.getInstance().tryGetSkyblockItemId(slot.getItem());
-                            if(id.endsWith("SPIRIT_MASK") || id.endsWith("BONZO_MASK")) {
+                            if(currentType == Type.REVIVE ? (id.endsWith("SPIRIT_MASK") || id.endsWith("BONZO_MASK")) : ((id.endsWith("_HEAD") && (id.startsWith("GOLD_") || id.startsWith("DIAMOND_"))))) {
                                 mc.execute(() -> {
                                     if (mc.player != null && mc.gameMode != null) {
                                         mc.gameMode.handleContainerInput(finalMenu1.containerId, slot.index, 0, ContainerInput.PICKUP, mc.player);
@@ -119,26 +126,26 @@ public class AutoSwapReviveHeadListener extends AbstractListener {
         });
     }
 
-    public void switchReviveHead(Consumer<CallbackResult> callback) {
+    public void switchReviveHead(Type type, Consumer<CallbackResult> callback) {
         // 终止前一个未完成的任务
         if (this.callback != null) {
             this.callback.accept(CallbackResult.TERMINATED);
         }
 
-        execute = true;
+        execute = type;
         this.callback = callback;
 
         ToolList.addThreadedTask(() -> {
             Thread.sleep(7000);
 
             // 检查是否仍未处理
-            if (AutoSwapReviveHeadListener.this.execute) {
+            if (AutoSwapReviveHeadListener.this.execute == type) {
                 // 使用 call 方法确保线程安全和防止重复调用
                 Consumer<CallbackResult> cb = AutoSwapReviveHeadListener.this.callback;
                 if (cb != null) {
                     cb.accept(CallbackResult.TERMINATED);  // 超时应返回 TERMINATED
                 }
-                AutoSwapReviveHeadListener.this.execute = false;
+                AutoSwapReviveHeadListener.this.execute = null;
                 AutoSwapReviveHeadListener.this.callback = null;
             }
             return null;
