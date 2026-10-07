@@ -20,7 +20,7 @@ public class HUDCrashFixer extends XSDHUD {
     }
 
     @Override
-    public void renderEffect(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
+    public void renderEffect(GuiGraphicsExtractor context, DeltaTracker tickCounter, boolean force, HudOffsetAndScale settings) {
         ClientRenderCrashFixer.gg = context;
     }
 

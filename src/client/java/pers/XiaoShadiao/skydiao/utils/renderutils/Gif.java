@@ -378,10 +378,17 @@ public class Gif implements AutoCloseable {
         };
     }
 
+    private boolean isClosed;
+
     @Override
     public void close() throws Exception {
         textures.forEach(SimpleTexture::close);
         textures.clear();
+        isClosed = true;
+    }
+
+    public boolean isClosed() {
+        return isClosed;
     }
 
     public SimpleTexture updateAndGetFrame() {

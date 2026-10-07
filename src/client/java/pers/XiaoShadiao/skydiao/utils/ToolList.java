@@ -670,6 +670,7 @@ public class ToolList {
     public record TPInfo(PositionMoveRotation from, PositionMoveRotation to) { }
 
     public TPInfo parseTPPacket(ClientboundPlayerPositionPacket tpPacket) {
+        if(mc.player == null) return new TPInfo(new PositionMoveRotation(Vec3.ZERO, Vec3.ZERO, 0, 0), new PositionMoveRotation(Vec3.ZERO, Vec3.ZERO, 0, 0));
         PositionMoveRotation player = PositionMoveRotation.of(mc.player);
         PositionMoveRotation to = PositionMoveRotation.calculateAbsolute(player, tpPacket.change(), tpPacket.relatives());
         return new TPInfo(player, to);

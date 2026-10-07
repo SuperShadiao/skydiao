@@ -22,7 +22,7 @@ public class StarRailNotification extends XSDHUD {
     }
 
     @Override
-    public void renderEffect(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
+    public void renderEffect(GuiGraphicsExtractor context, DeltaTracker tickCounter, boolean force, HudOffsetAndScale settings) {
 
     }
 

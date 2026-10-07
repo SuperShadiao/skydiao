@@ -30,7 +30,7 @@ public class BlindOrDying extends XSDHUD {
     }
 
     @Override
-    public void renderEffect(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
+    public void renderEffect(GuiGraphicsExtractor context, DeltaTracker tickCounter, boolean force, HudOffsetAndScale settings) {
         effectAnimation += tickCounter.getGameTimeDeltaTicks() / 7.5f;
         if(mc.player == null) return;
         if(ConfigManager.dyingtip.getValue() && mc.player.getHealth() / mc.player.getMaxHealth() < 0.25) {

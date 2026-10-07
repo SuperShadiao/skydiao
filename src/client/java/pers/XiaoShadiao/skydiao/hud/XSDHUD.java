@@ -32,6 +32,7 @@ public abstract class XSDHUD implements HudElement {
     public static final GenshinImpactHeatCold genshinImpactHeatCold = new GenshinImpactHeatCold();
     public static final MusicLyricDisplay musicLyricDisplay = new MusicLyricDisplay();
     public static final DungeonReviveItemCD dungeonReviveItemCD = new DungeonReviveItemCD();
+    public static final PinglessMiningHUD pinglessMiningHUD = new PinglessMiningHUD();
 
     public static final List<XSDHUD> huds = Util.make(new ArrayList<>(), arr -> Register.execRegister(XSDHUD.class, XSDHUD.class, arr::add));
 
@@ -44,7 +45,8 @@ public abstract class XSDHUD implements HudElement {
 
     public abstract void render(GuiGraphicsExtractor context, DeltaTracker tickCounter, boolean force);
 
-    public abstract void renderEffect(GuiGraphicsExtractor context, DeltaTracker tickCounter);
+    /* 不受HUD位置和缩放影响的渲染效果 */
+    public abstract void renderEffect(GuiGraphicsExtractor context, DeltaTracker tickCounter, boolean force, HudOffsetAndScale settings);
 
     public @Nullable abstract String getHudName();
 
@@ -65,7 +67,7 @@ public abstract class XSDHUD implements HudElement {
         }
         render(graphics, deltaTracker, force);
         pose.popMatrix();
-        renderEffect(graphics, deltaTracker);
+        renderEffect(graphics, deltaTracker, force, settings == null ? new HudOffsetAndScale(0, 0, 1) : settings);
     }
 
     public record HudOffsetAndScale(float x, float y, float scale) {}

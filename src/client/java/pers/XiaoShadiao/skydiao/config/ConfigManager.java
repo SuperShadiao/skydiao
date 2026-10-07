@@ -232,19 +232,20 @@ public class ConfigManager {
     public static final BooleanConfigOption f7AutoSwapEnderDragonInWitherKing = new BooleanConfigOption("f7autoswapenderdragoninwitherking", false);
     public static final BooleanConfigOption autoEvaluateFossils = new BooleanConfigOption("autoevaluatefossils", false);
     public static final BooleanConfigOption autoEvaluateFossilsAutoRestart = new BooleanConfigOption("autoevaluatefossilsautorestart", false);
+    public static final BooleanConfigOption pinglessMining = new BooleanConfigOption("pinglessmining", false);
 
     public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
-    public static final StringConfigOption dungeonf7msgbotsimonsays1 = new StringConfigOption("dungeonf7msgbotsimonsays1", "Simon Says已完成 1/5...");
-    public static final StringConfigOption dungeonf7msgbotsimonsays2 = new StringConfigOption("dungeonf7msgbotsimonsays2", "Simon Says已完成 2/5...");
-    public static final StringConfigOption dungeonf7msgbotsimonsays3 = new StringConfigOption("dungeonf7msgbotsimonsays3", "Simon Says已完成 3/5...");
-    public static final StringConfigOption dungeonf7msgbotsimonsays4 = new StringConfigOption("dungeonf7msgbotsimonsays4", "Simon Says已完成 4/5...");
-    public static final StringConfigOption dungeonf7msgbotsimonsays5 = new StringConfigOption("dungeonf7msgbotsimonsays5", "Simon Says已完成 5/5...");
+    public static final StringConfigOption dungeonf7msgbotsimonsays1 = new StringConfigOption("dungeonf7msgbotsimonsays1", "Simon Says已完成 1/4...");
+    public static final StringConfigOption dungeonf7msgbotsimonsays2 = new StringConfigOption("dungeonf7msgbotsimonsays2", "Simon Says已完成 2/4...");
+    public static final StringConfigOption dungeonf7msgbotsimonsays3 = new StringConfigOption("dungeonf7msgbotsimonsays3", "Simon Says已完成 3/4...");
+    public static final StringConfigOption dungeonf7msgbotsimonsays4 = new StringConfigOption("dungeonf7msgbotsimonsays4", "Simon Says已完成 4/4...");
+    public static final StringConfigOption dungeonf7msgbotsimonsays5 = new StringConfigOption("dungeonf7msgbotsimonsays5", "");
     public static final StringConfigOption dungeonf7msgbotmelodystart = new StringConfigOption("dungeonf7msgbotmelodystart", "Melody终端开始咯!");
-    public static final StringConfigOption dungeonf7msgbotmelody1 = new StringConfigOption("dungeonf7msgbotmelody1", "Melody终端已完成 1/4...");
-    public static final StringConfigOption dungeonf7msgbotmelody2 = new StringConfigOption("dungeonf7msgbotmelody2", "Melody终端已完成 2/4...");
-    public static final StringConfigOption dungeonf7msgbotmelody3 = new StringConfigOption("dungeonf7msgbotmelody3", "Melody终端已完成 3/4...");
-    public static final StringConfigOption dungeonf7msgbotmelody4 = new StringConfigOption("dungeonf7msgbotmelody4", "Melody终端已完成 4/4...");
+    public static final StringConfigOption dungeonf7msgbotmelody1 = new StringConfigOption("dungeonf7msgbotmelody1", "Melody终端已完成 1/3...");
+    public static final StringConfigOption dungeonf7msgbotmelody2 = new StringConfigOption("dungeonf7msgbotmelody2", "Melody终端已完成 2/3...");
+    public static final StringConfigOption dungeonf7msgbotmelody3 = new StringConfigOption("dungeonf7msgbotmelody3", "Melody终端已完成 3/3...");
+    public static final StringConfigOption dungeonf7msgbotmelody4 = new StringConfigOption("dungeonf7msgbotmelody4", "");
     public static final StringConfigOption dungeonf7msgbotcoretunnel = new StringConfigOption("dungeonf7msgbotcoretunnel", "已进入Goldor核心隧道!");
     public static final StringConfigOption dungeonBonzoTriggered = new StringConfigOption("dungeonbonzotriggered", "复活甲爆炸了。(Bonzo)");
     public static final StringConfigOption dungeonSpiritMaskTriggered = new StringConfigOption("dungeonspiritmasktriggered", "复活甲爆炸了。(Spirit)");
@@ -332,12 +333,12 @@ public class ConfigManager {
                     crystalHollowScanGoblinKing, crystalHollowScanDragonLair, crystalHollowScanWormFishSpot,
                     crystalHollowScanCorleone, crystalHollowScanFairyGrotto, crystalHollowScanBear3,
                     crystalHollowHelperDebug, crystalHollowDupServerTipper, crystalHollowHelperDisableThreadLimit,
-                    genshinImpactHeatColdRender, miningCommissionEntityESP, autoEvaluateFossils, autoEvaluateFossilsAutoRestart)),
+                    genshinImpactHeatColdRender, miningCommissionEntityESP, autoEvaluateFossils, autoEvaluateFossilsAutoRestart, pinglessMining)),
             Map.entry("combat", List.of(slayerTogether, isleVolcanoFinder, isleVolcanoFinderCataOnlyMode, isleDupServerTip, endIslandDragonESPListener)),
             Map.entry("foraging", List.of(galateashulker, treeProgress, autoReel, autoReelAutoAim, torrhusCanyonHelper, safariBoardcastHotspot, safariBoardcastTradeNPC, safariRenderTargetESP, floorDroppingRender)),
             Map.entry("farming", List.of(openFsCommandAction, openFsKeyBind, hubratesp, gardenPestESP, autoSprayonator, autoChangeLo, halfAutoKillPests, gardenTrapPrompt, gardenBonusPrompt, fsGardenMoonFlowerMode, fsGardenMoonFlowerModeKeepNightFarming, fsTPToPest)),
             Map.entry("fishing", List.of(hotspotrender, autogg, lotusAtollHelper, fishingBigFishRender, fishingBigFishTip)),
-            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonKeyRender, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7InactiveTerminalRender, f7TerminalESPTracer, f7ArrowAlignSolver, f7ArrowAlignSolverBlockWrongClicks, f7SimonSaysSolver, f7SimonSaysSolverBlockWrongClicks, dungeonReviveItemCDRender, f7DrawWitherDragonESP, f7DrawStormFireballTarget, f7DrawWitherDragonLightning, f7AutoSwapEnderDragonInWitherKing, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered, dungeonDrinkPotion, dungeonBloodRoomTime, dungeonTrashTPS, dungeonf7msgbotssleap, dungeonMissingPlayer)),
+            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonKeyRender, dungeonRenderTraps, necronLadderNotification, dungeonf7autoterm, dungeonf7autotermclickdelay, resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7InactiveTerminalRender, f7TerminalESPTracer, f7ArrowAlignSolver, f7ArrowAlignSolverBlockWrongClicks, f7SimonSaysSolver, f7SimonSaysSolverBlockWrongClicks, dungeonReviveItemCDRender, f7DrawWitherDragonESP, f7DrawStormFireballTarget, f7DrawWitherDragonLightning, f7AutoSwapEnderDragonInWitherKing, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered, dungeonDrinkPotion, dungeonBloodRoomTime, dungeonTrashTPS, dungeonf7msgbotssleap, dungeonMissingPlayer)),
             Map.entry("rift", List.of(rifttimegunhelper)),
             Map.entry("界面类", List.of(openHud, bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, bossDrawESP, customBossESPTracer, starrailNotification, starrailNotificationSound, dyingtip, noblind, nosuffoverlay, fireOverlay, lyricColor1, lyricColor2)),
             Map.entry("ravengard", List.of(ravengardHelper, ravengardQueueMessage))
@@ -381,7 +382,9 @@ public class ConfigManager {
             Int2ObjectMap.entry(0, List.of(bossbar, bossbarShowHealth, bossbarAddTargetEntity)),
             Int2ObjectMap.entry(1, List.of(dungeonRenderDangerousEnemy, dungeonKeyRender)),
             Int2ObjectMap.entry(2, List.of(macroReplay, macroReplaySelfCleaning)),
-            Int2ObjectMap.entry(3, List.of(bossbar, starrailNotification, starrailNotificationSound))
+            Int2ObjectMap.entry(3, List.of(bossbar, starrailNotification, starrailNotificationSound)),
+            Int2ObjectMap.entry(5, List.of(dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4))
+
             );
 
     static {

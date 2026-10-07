@@ -14,9 +14,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinMultiPlayerGameModeDestroyBlockDelayAccessor;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 public class InputSimulator {
 
@@ -485,6 +491,42 @@ public class InputSimulator {
         isMouseLeftHolding = false;
         isMouseRightHolding = false;
         rightClickCounter = leftClickCounter = 0;
+    }
+
+    public static List<Direction> tryNoViewChangeControlMoveTo(BlockPos pos, double requireDist) {
+        Vec3 playerPos = mc.player.position();
+        Direction forward = mc.player.getDirection();
+        Direction right = forward.getClockWise();
+        Direction backward = right.getClockWise();
+        Direction left = backward.getClockWise();
+        List<Direction> activeDirections = new ArrayList<>();
+
+        Map<Direction, Consumer<Boolean>> directionInput = Map.of(
+                forward,
+                (Consumer<Boolean>) InputSimulator::setForward,
+                right,
+                (Consumer<Boolean>) InputSimulator::setRight,
+                backward,
+                (Consumer<Boolean>) InputSimulator::setBackward,
+                left,
+                (Consumer<Boolean>) InputSimulator::setLeft
+        );
+
+        Vec3 target = pos.getBottomCenter();
+
+        for (Map.Entry<Direction, Consumer<Boolean>> entry : directionInput.entrySet()) {
+            Vec3 original = playerPos;
+            Vec3 to = playerPos.relative(entry.getKey(), requireDist);
+
+            double distFrom = target.distanceTo(original);
+            double distTo = target.distanceTo(to);
+            boolean active = distTo < distFrom;
+            entry.getValue().accept(active);
+            if(active) {
+                activeDirections.add(entry.getKey());
+            }
+        }
+        return activeDirections;
     }
 
 }

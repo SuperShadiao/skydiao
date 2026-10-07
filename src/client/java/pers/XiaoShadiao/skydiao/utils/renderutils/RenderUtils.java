@@ -200,7 +200,7 @@ public class RenderUtils {
         poseStack.mulPose(Axis.ZP.rotationDegrees(180.0f));
 
         context.submitNodeCollector().submitCustomGeometry(poseStack, RenderTypes.text(texture), ((pose, buffer) -> {
-            float z = 1f - 1 / 2048f;
+            float z = 1f - 1 / 512f;
             buffer.addVertex(pose, 0.0f, 1, z).setColor(Color.WHITE.getRGB()).setUv(0.0f, 1.0f).setLight(LightCoordsUtil.FULL_BRIGHT);
             buffer.addVertex(pose, 1, 1, z).setColor(Color.WHITE.getRGB()).setUv(1.0f, 1.0f).setLight(LightCoordsUtil.FULL_BRIGHT);
             buffer.addVertex(pose, 1, 0.0f, z).setColor(Color.WHITE.getRGB()).setUv(1.0f, 0.0f).setLight(LightCoordsUtil.FULL_BRIGHT);

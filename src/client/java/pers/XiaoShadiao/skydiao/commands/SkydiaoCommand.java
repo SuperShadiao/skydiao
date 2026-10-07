@@ -152,8 +152,21 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                                             (StringArgumentType.getString(c, "operation").equals("removeTemp") ? AbstractListener.customSettingEntityESPListener.getTempEntries() : AbstractListener.customSettingEntityESPListener.getEntries()).forEachRemaining(entry -> s.suggest(entry.entityType()));
                                             return s.buildFuture();
                                         })
-                                        .executes(c -> executeEntityESP(c, true, StringArgumentType.getString(c, "operation").equals("removeTemp"), null)))))
-                ;
+                                        .executes(c -> executeEntityESP(c, true, StringArgumentType.getString(c, "operation").equals("removeTemp"), null)))),
+                getArgConstantInstance("autofindeventegg")
+                        .then(getArgConstantInstance("start").executes(this::executeStartFindEventEgg))
+                        .then(getArgConstantInstance("stop").executes(this::executeStopFindEventEgg))
+        );
+    }
+
+    private int executeStartFindEventEgg(CommandContext<FabricClientCommandSource> context) {
+        AbstractListener.autoFindLobbyEventEgg.startFind();
+        return 0;
+    }
+
+    private int executeStopFindEventEgg(CommandContext<FabricClientCommandSource> context) {
+        AbstractListener.autoFindLobbyEventEgg.stopFind();
+        return 0;
     }
 
     private int executeSwapGoldOrDiamondHead(CommandContext<FabricClientCommandSource> context) {

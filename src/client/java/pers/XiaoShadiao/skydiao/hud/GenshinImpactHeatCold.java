@@ -70,7 +70,7 @@ public class GenshinImpactHeatCold extends XSDHUD {
 		if(animation > 100) animation = 100;
         // float L = heat / 100f;
         int guiPosX = context.guiWidth() / 2;
-        int guiPosY = context.guiHeight() / 2 + 10;
+        int guiPosY = context.guiHeight() / 2 + 40;
 
         if(animation <= 20) {
             context.fill(guiPosX - 1, guiPosY - 1, guiPosX + 2, guiPosY + 2, new Color(1,1,1,(animation / 20f)).getRGB());
@@ -116,7 +116,7 @@ public class GenshinImpactHeatCold extends XSDHUD {
     }
 
     @Override
-    public void renderEffect(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
+    public void renderEffect(GuiGraphicsExtractor context, DeltaTracker tickCounter, boolean force, HudOffsetAndScale settings) {
         if(heatOrColdValue >= currentColor.warningStage1) {
             draw(context, getColor(currentColor,(int) (75 * (Math.min(timewarn, 20) / 20f))).getRGB());
         }

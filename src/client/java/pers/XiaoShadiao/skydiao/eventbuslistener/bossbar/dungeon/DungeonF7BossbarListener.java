@@ -280,7 +280,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         if(currentStage == 5) {
             addStarRailNotification("最终阶段", StarRailNotification.Type.warning);
             ToolList.addThreadedTask(() -> {
-                Thread.sleep(8000);
+                Thread.sleep(2000);
                 addStarRailNotification("在对应凋零龙生成点击杀对应凋零龙即可削减凋零王生命值!", StarRailNotification.Type.warning);
                 return null;
             });

@@ -496,7 +496,7 @@ public class AutoBloodfiendListener extends AbstractListener implements IMacro {
         }
 
         @Override
-        public void renderEffect(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
+        public void renderEffect(GuiGraphicsExtractor context, DeltaTracker tickCounter, boolean force, HudOffsetAndScale settings) {
 
         }
 
