@@ -91,10 +91,17 @@ public class PinglessMiningHUD extends XSDHUD {
     }
 
     private void onStartTick(Minecraft mc) {
+        if (!ConfigManager.pinglessMining.getValue()) {
+            breakTotalTick = 0;
+            lastAimingPos = BlockPos.ZERO;
+            cantReadMiningSpeedTick = 0;
+            return;
+        }
+
         if (mc.level == null || !Set.of("mining_3", "crystal_hollow", "mineshaft").contains(String.valueOf(StatusManager.get().getMode()))) return;
 
         if (
-                ConfigManager.pinglessMining.getValue() && (mc.options.keyAttack.isDown() || InputSimulator.isMouseLeftHolding) &&
+                (mc.options.keyAttack.isDown() || InputSimulator.isMouseLeftHolding) &&
                         (mc.hitResult instanceof BlockHitResult blockHitResult && mc.hitResult.getType() == HitResult.Type.BLOCK)
         ) {
             OreTypes oreType = OreTypes.byBlock(mc.level.getBlockState(blockHitResult.getBlockPos()).getBlock());
