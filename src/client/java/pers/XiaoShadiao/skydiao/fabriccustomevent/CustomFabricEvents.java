@@ -143,4 +143,18 @@ public final class CustomFabricEvents {
     public interface SlotRender {
         public void renderSlots(Screen screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float tickDelta);
     }
+
+    public static final Event<@NotNull ScreenReplacer> REPLACE_SCREEN = EventFactory.createArrayBacked(ScreenReplacer.class, (callbacks) -> (beforeScreen) -> {
+        Screen afterScreen = null;
+        for (ScreenReplacer callback : callbacks) {
+            Screen result = callback.replaceScreen(beforeScreen);
+            if(result != null) afterScreen = result;
+        }
+        return afterScreen != null ? afterScreen : beforeScreen;
+    });
+
+    public interface ScreenReplacer {
+        public Screen replaceScreen(Screen screen);
+    }
+
 }

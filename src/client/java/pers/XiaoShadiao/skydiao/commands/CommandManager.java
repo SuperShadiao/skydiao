@@ -18,6 +18,7 @@ public interface CommandManager {
     public static final HHCalcCommand HH_CALC_COMMAND = new HHCalcCommand();
     public static final SkydiaoCalcCommand SKYDIAO_CALC_COMMAND = new SkydiaoCalcCommand();
     public static final HHTCommand HHT_COMMAND = new HHTCommand();
+    public static final HHChallengeMCCommand HH_CHALLENGE_MC_COMMAND = new HHChallengeMCCommand();
     public static final SkydiaoTCommand SKYDIAO_T_COMMAND = new SkydiaoTCommand();
     public static final HHSCCommand HHSC_COMMAND = new HHSCCommand();
     public static final SkydiaoCommand OPEN_CONFIG_MENU_COMMAND = new SkydiaoCommand();

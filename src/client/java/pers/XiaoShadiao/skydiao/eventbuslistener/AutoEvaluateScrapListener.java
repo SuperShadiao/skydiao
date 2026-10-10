@@ -53,6 +53,7 @@ public class AutoEvaluateScrapListener extends AbstractListener {
 
         if(mc.screen instanceof ContainerScreen containerScreen && ToolList.getInstance().deleteColorCode(containerScreen.getTitle().getString()).equals("Fossil Excavator")) {
             IntSet dirts = new IntOpenHashSet();
+            IntSet firstClickDirts = new IntOpenHashSet();
             IntSet fossils = new IntOpenHashSet();
 
             for (Slot slot : containerScreen.getMenu().slots) {
@@ -66,6 +67,9 @@ public class AutoEvaluateScrapListener extends AbstractListener {
                 boolean isStart = itemName.equals("Start Excavator") && slot.getItem().getItem() == Items.GREEN_TERRACOTTA;
 
                 if(isDirt || isStart) {
+                    if(slot.getItem().getItem() == Items.LIME_STAINED_GLASS_PANE) {
+                        firstClickDirts.add(slot.index);
+                    }
                     dirts.add(slot.index);
                 } else if(isFossil) {
                     fossils.add(slot.index);
@@ -96,7 +100,7 @@ public class AutoEvaluateScrapListener extends AbstractListener {
                 mc.gameMode.handleContainerInput(containerScreen.getMenu().containerId, bestTile.toSlotIndex(), 0, ContainerInput.PICKUP, mc.player);
             } else if(!dirts.isEmpty()) {
                 IntList random = new IntArrayList(dirts);
-                int randomDirt = random.getInt(ToolList.getInstance().random.nextInt(random.size()));
+                int randomDirt = firstClickDirts.isEmpty() ? random.getInt(ToolList.getInstance().random.nextInt(random.size())) : firstClickDirts.iterator().nextInt();
                 mc.gameMode.handleContainerInput(containerScreen.getMenu().containerId, randomDirt, 0, ContainerInput.PICKUP, mc.player);
             }
         }

@@ -294,6 +294,10 @@ public class BasicListener extends AbstractListener {
                 }
             }
         }
+
+        if(message.contains("加入了组队") || message.endsWith("joined the party.")) {
+            delayTickExecutor.delayExec(() -> ToolList.getInstance().updatePartyInfo(), 5);
+        }
     }
 
     private void onDisconnect(ClientPacketListener clientPacketListener, Minecraft minecraft) {

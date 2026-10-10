@@ -1,5 +1,6 @@
 package pers.XiaoShadiao.skydiao.mixin.client;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.minecraft.UserApiService;
@@ -34,6 +35,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
+import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.screen.MinecraftCrashedScreen;
 import pers.XiaoShadiao.skydiao.utils.ClientRenderCrashFixer;
@@ -259,6 +261,12 @@ public class MixinMinecraft {
     public String updateTitle(Minecraft instance, Operation<String> original) {
         return AbstractListener.titleChanger.updateMCTitle(original.call(instance));
     }
+
+    @WrapMethod(method = "setScreen")
+    public void setScreen(Screen screen, Operation<Void> original) {
+        original.call(CustomFabricEvents.REPLACE_SCREEN.invoker().replaceScreen(screen));
+    }
+
 
     @Overwrite
     public SplashManager getSplashManager() {

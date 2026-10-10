@@ -98,7 +98,7 @@ public class PinglessMiningHUD extends XSDHUD {
             return;
         }
 
-        if (mc.level == null || !Set.of("mining_3", "crystal_hollow", "mineshaft").contains(String.valueOf(StatusManager.get().getMode()))) return;
+        if (mc.level == null || !Set.of("mining_3", "crystal_hollows", "mineshaft").contains(String.valueOf(StatusManager.get().getMode()))) return;
 
         if (
                 (mc.options.keyAttack.isDown() || InputSimulator.isMouseLeftHolding) &&
@@ -108,6 +108,8 @@ public class PinglessMiningHUD extends XSDHUD {
             if (oreType != null) {
                 totalBreakTickNeeded = oreType.getTotalBreakTick(miningSpeed);
                 if(breakTotalTick < totalBreakTickNeeded) breakTotalTick++;
+            } else {
+                totalBreakTickNeeded = 10000;
             }
             if (!lastAimingPos.equals(blockHitResult.getBlockPos())) {
                 if (mc.level != null) {
@@ -128,7 +130,7 @@ public class PinglessMiningHUD extends XSDHUD {
             }
         }, () -> {
             cantReadMiningSpeedTick++;
-            if(cantReadMiningSpeedTick % (60 * 20) == 0) {
+            if(cantReadMiningSpeedTick % (20 * 20) == 0) {
                 ToolList.printChatMessage(Component.literal("§a[小沙雕] §cPingless Mining无法从Tab读取Mining Speed, 请使用§6/tab§c将Stats分类显示在Tab并显示Mining Speed"));
             }
         });

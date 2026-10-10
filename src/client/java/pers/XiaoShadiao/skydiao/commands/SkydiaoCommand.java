@@ -155,7 +155,8 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                                         .executes(c -> executeEntityESP(c, true, StringArgumentType.getString(c, "operation").equals("removeTemp"), null)))),
                 getArgConstantInstance("autofindeventegg")
                         .then(getArgConstantInstance("start").executes(this::executeStartFindEventEgg))
-                        .then(getArgConstantInstance("stop").executes(this::executeStopFindEventEgg))
+                        .then(getArgConstantInstance("stop").executes(this::executeStopFindEventEgg)),
+                getArgConstantInstance("challenge_mc").redirect(HH_CHALLENGE_MC_COMMAND.getCommandNode())
         );
     }
 

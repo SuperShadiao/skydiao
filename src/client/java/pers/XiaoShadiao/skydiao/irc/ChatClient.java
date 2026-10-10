@@ -184,7 +184,7 @@ public class ChatClient extends Thread {
         p.initSender();
         p.packetType = "join";
         p.message = "hhskb " + SkyDiaoModClient.VERSION;
-        if(ToolList.getInstance().isXiaoShadiao() && ToolList.mc.getUser() instanceof XSDSafeSession user) {
+        if(ToolList.mc.getUser() instanceof XSDSafeSession user) {
             UUID uuid = UUID.randomUUID();
             try {
                 if(user.checkTokenVaild(uuid).get()) {

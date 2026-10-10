@@ -52,7 +52,7 @@ public class E2AMappingListener extends AbstractListener {
                         continue;
                     }
                     String name = armorStand.getName().getString();
-                    if (name.contains("by:")) continue;
+                    if (name.contains("by:") || !name.contains(" ")) continue;
                     Matcher matcher = timeMatcher.matcher(name);
                     if (matcher.find()) {
                         armorStandsForBoss.add(armorStand);

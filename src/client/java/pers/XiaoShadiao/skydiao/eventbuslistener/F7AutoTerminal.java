@@ -21,6 +21,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
+import pers.XiaoShadiao.skydiao.screen.F7TerminalScreen;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.*;
@@ -89,9 +91,21 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
     @Override
     public void registerListeners() {
         ScreenEvents.AFTER_INIT.register(this::afterScreenInit);
+        CustomFabricEvents.REPLACE_SCREEN.register(this::replaceScreen);
         ClientTickEvents.START_CLIENT_TICK.register(this::onClientTick);
         ClientReceiveMessageEvents.GAME.register(this::onChat);
         ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
+    }
+
+    private Screen replaceScreen(Screen screen) {
+        if(ConfigManager.dungeonf7termui.getValue() && screen instanceof ContainerScreen screen1) {
+            for (TerminalType value : TerminalType.values()) {
+                if (value.testScreen(this, screen)) {
+                    return new F7TerminalScreen(screen1.getMenu(), mc.player.getInventory(), screen1.getTitle(), value, ConfigManager.dungeonf7autoterm.getValue());
+                }
+            }
+        }
+        return null;
     }
 
     private void onChat(Component component, boolean b) {
@@ -250,7 +264,7 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
     }
 
     private boolean enableNoForceDelayClick() {
-        return true || ToolList.getInstance().isInHypixelAlpha();
+        return true;
     }
 
     private boolean matchesSpecialCase(DyeColor color, ItemStack item) {
@@ -281,6 +295,7 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                     currentTerminal = value;
                     pendingClick = null;
                     ScreenEvents.afterExtract(screen).register(this::afterScreenRender);
+
                     break a;
                 }
             }
@@ -303,7 +318,13 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
 
                 clickedCounter++;
                 logger.info("Clicked Slot " + temp.slot.index);
-                if(mc.gameMode != null && mc.player != null) mc.gameMode.handleContainerInput(temp.containerId, temp.slot.index, temp.rightClick ? 1 : 0, ContainerInput.PICKUP, mc.player);
+                if(mc.gameMode != null && mc.player != null) {
+                    if(!(screen instanceof F7TerminalScreen f7TerminalScreen)) {
+                        mc.gameMode.handleContainerInput(temp.containerId, temp.slot.index, temp.rightClick ? 1 : 0, ContainerInput.PICKUP, mc.player);
+                    } else {
+                        f7TerminalScreen.clickSlot(temp.slot, temp.rightClick ? 1 : 0);
+                    }
+                }
                 if(temp.addBlacklistAfterClick) blacklistedSlots.add(temp.slot.index);
             } else {
                 if(enableNoForceDelayClick() && System.currentTimeMillis() - lastClickTime > 500 + ConfigManager.dungeonf7autotermclickdelay.getValue() && !blacklistedSlots.isEmpty()) {
