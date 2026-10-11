@@ -24,7 +24,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Pattern;
 
 public final class DynamicSpotHUD extends XSDHUD {
-    public static final DynamicSpotHUD INSTANCE = new DynamicSpotHUD();
     private static final int CARD_TOP = 15;
     private static final int IDLE_HEIGHT = 28;
     private static final int IDLE_MIN_WIDTH = 210;
@@ -39,7 +38,7 @@ public final class DynamicSpotHUD extends XSDHUD {
     private static final int SUCCESS = 0xFF63D08A;
     private static final int WARNING = 0xFFFFB45C;
     private static final int ERROR = 0xFFFF6B78;
-    private static final Identifier CLIENT_ICON = Identifier.fromNamespaceAndPath("skydiao", "icon0.png");
+    private static final Identifier CLIENT_ICON = Identifier.fromNamespaceAndPath("skydiao", "icon.png");
     private static final Identifier USER_ICON = statusIcon("user");
     private static final Identifier LINK_ICON = statusIcon("link");
     private static final Identifier REFRESH_ICON = statusIcon("refresh");
@@ -53,9 +52,6 @@ public final class DynamicSpotHUD extends XSDHUD {
     private static int idleWidth = IDLE_MIN_WIDTH;
     private static Object lastConnection;
     private static boolean hypixel;
-
-    private DynamicSpotHUD() {
-    }
 
     @Override
     public void runRegister() {

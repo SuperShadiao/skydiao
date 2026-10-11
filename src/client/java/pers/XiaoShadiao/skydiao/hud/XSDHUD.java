@@ -33,6 +33,7 @@ public abstract class XSDHUD implements HudElement {
     public static final MusicLyricDisplay musicLyricDisplay = new MusicLyricDisplay();
     public static final DungeonReviveItemCD dungeonReviveItemCD = new DungeonReviveItemCD();
     public static final PinglessMiningHUD pinglessMiningHUD = new PinglessMiningHUD();
+    public static final DynamicSpotHUD dynamicSpotHUD = new DynamicSpotHUD();
 
     public static final List<XSDHUD> huds = Util.make(new ArrayList<>(), arr -> Register.execRegister(XSDHUD.class, XSDHUD.class, arr::add));
 
