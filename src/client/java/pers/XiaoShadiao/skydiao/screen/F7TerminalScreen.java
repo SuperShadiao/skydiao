@@ -365,7 +365,8 @@ public class F7TerminalScreen extends ContainerScreen implements IContainerScree
                 }
 
                 if(isButtonHovered(customSlotLineCol, mouseX, mouseY)) {
-                    drawCustomSlot(graphics, customSlotLineCol, 255, 255, 255, 50);
+                    // 悬停高亮与按钮底色混合而非覆盖，否则半透明白会把底色整块抹掉
+                    drawCustomSlot(graphics, customSlotLineCol[0], customSlotLineCol[1], 255, 255, 255, 50, false);
                 }
             }
         }
@@ -403,6 +404,10 @@ public class F7TerminalScreen extends ContainerScreen implements IContainerScree
     }
 
     private void drawCustomSlot(GuiGraphicsExtractor graphics, int line, int col, int red, int green, int blue, int alpha) {
+        drawCustomSlot(graphics, line, col, red, green, blue, alpha, true);
+    }
+
+    private void drawCustomSlot(GuiGraphicsExtractor graphics, int line, int col, int red, int green, int blue, int alpha, boolean overwriteBeforeColors) {
         int x = getButtonX(col);
         int y = getButtonY(line);
 
@@ -411,7 +416,7 @@ public class F7TerminalScreen extends ContainerScreen implements IContainerScree
                 graphics,
                 x, y,
                 buttonSize, buttonSize,
-                true, 5, 0,
+                true, overwriteBeforeColors, 5, 0,
                 red / 255f, green / 255f, blue / 255f, alpha / 255f
         );
     }
@@ -478,7 +483,7 @@ public class F7TerminalScreen extends ContainerScreen implements IContainerScree
                 getTopY(),
                 (4 * buttonSize + buttonSpacing * 2) + (4 * buttonSize + buttonSpacing * 2),
                 getBottumY() - getTopY(),
-                true, 10, 0.9f,
+                true, true, 10, 0.9f,
                 0, 0, 0, 0.8f
         );
     }

@@ -2,20 +2,14 @@ package pers.XiaoShadiao.skydiao.eventbuslistener;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.micaftic.morpher.capability.ModelInfoCapability;
 import com.micaftic.morpher.capability.PlayerCapability;
 import com.micaftic.morpher.capability.ProjectileCapability;
-import com.micaftic.morpher.capability.ProjectileModelCapability;
 import com.micaftic.morpher.client.ClientModelManager;
 import com.micaftic.morpher.client.model.ModelAssembly;
-import com.micaftic.morpher.core.api.network.fabric.YSMPayload;
-import com.micaftic.morpher.geckolib3.core.molang.util.StringPool;
-import com.micaftic.morpher.network.NetworkHandler;
-import com.micaftic.morpher.resource.models.ModelProperties;
+import com.micaftic.morpher.core.model.catalog.LocalModelCatalog;
+import com.micaftic.morpher.core.model.lifecycle.KeyedRequestLeaseRegistry;
 import com.micaftic.morpher.resource.pojo.RawYsmModel;
 import com.micaftic.morpher.util.LocalModelSelectionStore;
-import com.micaftic.morpher.util.data.OrderedStringMap;
-import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.Int2FloatOpenHashMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
@@ -26,16 +20,12 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
-import org.apache.commons.lang3.StringUtils;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.irc.ChatPacket;
@@ -75,24 +65,16 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
         ClientTickEvents.START_CLIENT_TICK.register(this::onTick);
         ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register(this::onUnload);
-        CustomFabricEvents.CLIENT_SEND_PACKET_EVENT.register(this::onSendPacket);
     }
 
-    private void onSendPacket(Packet<?> packet) {
-        if (packet instanceof ServerboundCustomPayloadPacket(CustomPacketPayload payload)) {
-            // logger.info("Send Custom Payload: " + payload.type().id());
-            if (payload.type().id().getNamespace().equals("sparkle_morpher")) {
-                if (payload instanceof YSMPayload(FriendlyByteBuf buf)) {
-                    FriendlyByteBuf copy = new FriendlyByteBuf(buf.copy());
-                    long id = copy.readUnsignedByte();
-                    if (id == 7) {
-                        byte[] remaining = new byte[copy.readableBytes()];
-                        copy.readBytes(remaining);
-                        trySendToIRC(new IRCModelPacket(currentModelId, currentTextureId, Base64.getEncoder().encodeToString(remaining), "play_animation").toIRCPacket());
-                    }
-                }
-            }
-        }
+    public void startPlayAnimation(String key) {
+        if (!StatusManager.get().hasStatus()) return;
+        trySendToIRC(new IRCModelPacket(currentModelId, currentTextureId, key, "play_animation").toIRCPacket());
+    }
+
+    public void stopPlayAnimation() {
+        if (!StatusManager.get().hasStatus()) return;
+        trySendToIRC(new IRCModelPacket(currentModelId, currentTextureId, "", "play_animation").toIRCPacket());
     }
 
     private void onUnload(Minecraft mc, ClientLevel level) {
@@ -104,12 +86,6 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
     private void onTick(Minecraft mc) {
         if (!StatusManager.get().hasStatus()) return;
 
-        if (ClientModelManager.getSyncStatus().getCurrentState() != ClientModelManager.SyncState.IDLE) {
-            ClientModelManager.onSyncConnected();
-        }
-        if (!NetworkHandler.isClientConnected()) {
-            NetworkHandler.markClientHandshakeComplete();
-        }
         if(delaySyncTick > 0) {
             delaySyncTick--;
             if(delaySyncTick == 0) resendSwitchPacket();
@@ -146,26 +122,17 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
                 if(owner instanceof AbstractClientPlayer player) {
                     Pair<String, String> id = player == mc.player ? Pair.of(currentModelId, currentTextureId) : name2Id.get(player.getName().getString());
                     if(id != null) {
-                        ProjectileModelCapability.get(projectile).ifPresent(cap -> {
-                            String mapModelId = id.first();
-                            String capModelId = cap.getOwnerModelId();
-                            Optional<ModelAssembly> context = ClientModelManager.getModelContext(id.first());
-                            if (context.isPresent()) {
-                                if (!mapModelId.equals(capModelId)) {
-                                    ModelInfoCapability.get(player).ifPresent(modelInfo -> {
-                                        modelInfo.withMolangVars(molangVars -> {
-                                            cap.setModel(mapModelId, molangVars);
-                                            ProjectileCapability.get(projectile).ifPresent(cap2 -> {
-                                                cap2.updateModelId(mapModelId);
-                                                Int2FloatOpenHashMap floatMap = new Int2FloatOpenHashMap();
-                                                molangVars.object2FloatEntrySet().fastForEach(entry -> floatMap.put(StringPool.computeIfAbsent(entry.getKey()), entry.getFloatValue()));
-                                                cap2.setFloatProperties(floatMap);
-                                            });
-                                        });
-                                    });
+                        String mapModelId = id.first();
+                        Optional<ModelAssembly> context = ClientModelManager.getModelContext(id.first());
+                        if (context.isPresent()) {
+                            ProjectileCapability.get(projectile).ifPresent(cap2 -> {
+                                if (!mapModelId.equals(cap2.getModelId())) {
+                                    cap2.updateModelId(mapModelId);
+                                    Int2FloatOpenHashMap floatMap = new Int2FloatOpenHashMap();
+                                    cap2.setFloatProperties(floatMap);
                                 }
-                            }
-                        });
+                            });
+                        }
                     }
                 };
             }
@@ -207,30 +174,14 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
             }
             case "play_animation" -> {
                 if(mc.level == null) return;
-                byte[] decode = Base64.getDecoder().decode(model.data);
-                // System.out.println(Arrays.toString(decode));
-                FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.wrappedBuffer(decode));
-                int animationIndex = buf.readVarInt();
-                String category = buf.readUtf();
-                logger.info("Decode result: category '" + category + "' | animationIndex " + animationIndex);
+                String animation = model.data;
+
+                logger.info("Animation Name: " + animation);
                 for (Entity entity : mc.level.entitiesForRendering()) {
                     if(entity instanceof AbstractClientPlayer player) {
                         if(packet.sender.equals(player.getName().getString())) {
                             PlayerCapability.get(player).ifPresent(cap -> {
-                                ModelProperties modelProperties = cap.getModelAssembly().getModelData().getModelProperties();
-                                Map<String, OrderedStringMap<String, String>> extraAnimationClassify = modelProperties.getExtraAnimationClassify();
-                                OrderedStringMap<String, String> extraAnimations;
-                                if (StringUtils.isNotBlank(category) && extraAnimationClassify.containsKey(category)) {
-                                    extraAnimations = extraAnimationClassify.get(category);
-                                    logger.info("Use category animation");
-                                } else {
-                                    extraAnimations = modelProperties.getExtraAnimation();
-                                    logger.info("Use default animation");
-                                }
-
-                                if (extraAnimations.size() > animationIndex) {
-                                    cap.requestModelSwitch(animationIndex == -1 ? null :extraAnimations.getKeyAt(animationIndex));
-                                }
+                                cap.requestModelSwitch(animation);
                             });
                         }
                     }
@@ -276,24 +227,18 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
             // 加载到内存
             String realId = parseModelId(id);
             Method loadMethod;
-            try {
-                loadMethod = ClientModelManager.class.getDeclaredMethod(
-                        "loadLocalModel",
-                        String.class,
-                        RawYsmModel.class
-                );
-                loadMethod.setAccessible(true);
-                loadMethod.invoke(null, realId, rawModel);
-            } catch (Throwable e) {
-                loadMethod = ClientModelManager.class.getDeclaredMethod(
-                        "loadLocalModel",
-                        String.class,
-                        RawYsmModel.class,
-                        boolean.class
-                );
-                loadMethod.setAccessible(true);
-                loadMethod.invoke(null, realId, rawModel, true);
-            }
+
+            loadMethod = ClientModelManager.class.getDeclaredMethod(
+                    "loadLocalModel",
+                    String.class,
+                    RawYsmModel.class,
+                    boolean.class,
+                    long.class,
+                    LocalModelCatalog.Entry.class,
+                    KeyedRequestLeaseRegistry.Lease.class
+            );
+            loadMethod.setAccessible(true);
+            loadMethod.invoke(null, realId, rawModel, false, -1, null, null);
 
             ToolList.printChatMessage(Component.literal("§a[小沙雕] 从IRC下载了一个YSM模型: §e" + realId));
             ToolList.printChatMessage(Component.literal("§a[小沙雕] 注意, 模型文件不会写到你的磁盘, 意味着你可以在模型列表看到该玩家的模型, 但重启后资源将被释放! 若你想要对方的模型, 请找他手动索取!"));

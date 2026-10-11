@@ -171,19 +171,20 @@ public class RenderUtils {
     }
 
     // 转发到 BlurredRoundedSurface：自定义辉光，useLiquidGlassblur 控制半透明底色是否预模糊，
+    // overwriteBeforeColors 控制是否覆盖此前已绘制的颜色（false 则与之混合），
     // glowRadius 为辉光距离，glowR/g/b/a（0~1）为辉光颜色/强度
     public static void drawWithCustomGlow(GuiGraphicsExtractor graphics, float x, float y, float w, float h,
-                                          boolean useLiquidGlassblur, float radius,
+                                          boolean useLiquidGlassblur, boolean overwriteBeforeColors, float radius,
                                           float glowRadius, float r, float g, float b, float a,
                                           float glowR, float glowG, float glowB, float glowA) {
-        BlurredRoundedSurface.drawWithCustomGlow(graphics, x, y, w, h, useLiquidGlassblur, radius, glowRadius, r, g, b, a, glowR, glowG, glowB, glowA);
+        BlurredRoundedSurface.drawWithCustomGlow(graphics, x, y, w, h, useLiquidGlassblur, overwriteBeforeColors, radius, glowRadius, r, g, b, a, glowR, glowG, glowB, glowA);
     }
 
     // 转发到 BlurredRoundedSurface：辉光颜色未指定时跟随内部颜色
     public static void drawWithCustomGlow(GuiGraphicsExtractor graphics, float x, float y, float w, float h,
-                                          boolean useLiquidGlassblur, float radius,
+                                          boolean useLiquidGlassblur, boolean overwriteBeforeColors, float radius,
                                           float glowRadius, float r, float g, float b, float a) {
-        BlurredRoundedSurface.drawWithCustomGlow(graphics, x, y, w, h, useLiquidGlassblur, radius, glowRadius, r, g, b, a);
+        BlurredRoundedSurface.drawWithCustomGlow(graphics, x, y, w, h, useLiquidGlassblur, overwriteBeforeColors, radius, glowRadius, r, g, b, a);
     }
 
     // 转发到 BlurredRoundedSurface：在 GuiRenderer.render 头部合成待渲染的模糊面板

@@ -71,7 +71,9 @@ public abstract class XSDHUD implements HudElement {
         renderEffect(graphics, deltaTracker, force, settings == null ? new HudOffsetAndScale(0, 0, 1) : settings);
     }
 
-    public record HudOffsetAndScale(float x, float y, float scale) {}
+    public record HudOffsetAndScale(float x, float y, float scale) {
+        public static final HudOffsetAndScale DEFAULT = new HudOffsetAndScale(0, 0, 1);
+    }
 
     public static Map<String, HudOffsetAndScale> hudOffsetAndScaleMap = new HashMap<>();
 
@@ -106,7 +108,7 @@ public abstract class XSDHUD implements HudElement {
 
     public static void saveHudAppendOffset(XSDHUD hud, float deltaX, float deltaY) {
         if(hud.getHudName() != null) {
-            HudOffsetAndScale hos = hudOffsetAndScaleMap.computeIfAbsent(hud.getHudName(), n -> new HudOffsetAndScale(0, 0, 1.0f));
+            HudOffsetAndScale hos = hudOffsetAndScaleMap.computeIfAbsent(hud.getHudName(), n -> HudOffsetAndScale.DEFAULT);
             HudOffsetAndScale newHos = new HudOffsetAndScale(hos.x + deltaX, hos.y + deltaY, hos.scale);
             hudOffsetAndScaleMap.put(hud.getHudName(), newHos);
             saveHudOffsetAndScalesToConfig();
@@ -115,7 +117,7 @@ public abstract class XSDHUD implements HudElement {
 
     public static void saveHudAppendScale(XSDHUD hud, float deltaScale) {
         if(hud.getHudName() != null) {
-            HudOffsetAndScale hos = hudOffsetAndScaleMap.computeIfAbsent(hud.getHudName(), n -> new HudOffsetAndScale(0, 0, 1.0f));
+            HudOffsetAndScale hos = hudOffsetAndScaleMap.computeIfAbsent(hud.getHudName(), n -> HudOffsetAndScale.DEFAULT);
             HudOffsetAndScale newHos = new HudOffsetAndScale(hos.x, hos.y, hos.scale + deltaScale);
             hudOffsetAndScaleMap.put(hud.getHudName(), newHos);
             saveHudOffsetAndScalesToConfig();

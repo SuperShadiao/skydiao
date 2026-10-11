@@ -33,12 +33,14 @@ void main() {
     float aa = max(fwidth(d), 0.75);
     float coverage = 1.0 - smoothstep(-aa * 0.5, aa * 0.5, d);
 
-    // data[7].z = 1：液态玻璃（采样预模糊场景，body 不透明）；0：直接用半透明底色叠加到现有画面。
+    // data[7].z = 1：液态玻璃（采样预模糊场景）；0：直接用半透明底色叠加到现有画面。
+    // data[7].w = 1：覆盖此前已绘制的颜色（玻璃体不透明）；0：与之混合，保留已绘制的颜色。
     vec4 glassTint = data[5];
     float useGlass = data[7].z;
+    float overwrite = data[7].w;
     vec3 sceneColor = texture(Scene, texCoord).rgb;
     vec3 body = useGlass > 0.5 ? mix(sceneColor, glassTint.rgb, glassTint.a) : glassTint.rgb;
-    float bodyAlpha = useGlass > 0.5 ? 1.0 : glassTint.a;
+    float bodyAlpha = (useGlass > 0.5 && overwrite > 0.5) ? 1.0 : glassTint.a;
     float rim = (1.0 - smoothstep(0.0, 0.85 * scale, abs(d))) * 0.12;
     float topLight = 1.0 - clamp((p.y - bounds.y) / max(bounds.w, 1.0), 0.0, 1.0);
     body += vec3(0.78, 0.84, 0.94) * rim * (0.45 + 0.55 * topLight);

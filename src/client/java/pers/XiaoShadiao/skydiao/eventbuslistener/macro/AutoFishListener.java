@@ -139,14 +139,22 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
                             } catch (InterruptedException e) {
                             }
 
-                            if (isHoldingFishRod() && !InputSimulator.isInventoryOpen())
-                                InputSimulator.setPlayerPitch(tempP + 1.3453f * ToolList.getInstance().random.nextInt(3) * (ToolList.getInstance().random.nextBoolean() ? 1 : -1));
-                            if (isHoldingFishRod() && !InputSimulator.isInventoryOpen())
-                                InputSimulator.setPlayerYaw(tempY + 1.3453f * ToolList.getInstance().random.nextInt(3) * (ToolList.getInstance().random.nextBoolean() ? 1 : -1));
+                            float afterChangePitch = tempP + 1.3453f * ToolList.getInstance().random.nextInt(3) * (ToolList.getInstance().random.nextBoolean() ? 1 : -1);
+                            float afterChangeYaw = tempY + 1.3453f * ToolList.getInstance().random.nextInt(3) * (ToolList.getInstance().random.nextBoolean() ? 1 : -1);
+                            if (isHoldingFishRod() && !InputSimulator.isInventoryOpen()) {
+                                InputSimulator.setPlayerPitch(afterChangePitch);
+                            }
+                            if (isHoldingFishRod() && !InputSimulator.isInventoryOpen()) {
+                                InputSimulator.setPlayerYaw(afterChangeYaw);
+                            }
 
                             try {
                                 Thread.sleep(2000 + ToolList.getInstance().random.nextInt(3000));
                             } catch (InterruptedException e) {
+                            }
+
+                            if (Math.abs(afterChangePitch - InputSimulator.getPlayerPitch()) > 15 || Math.abs(afterChangeYaw - InputSimulator.getPlayerYaw()) % 360 > 15) {
+                                return;
                             }
 
                             if (isHoldingFishRod() && !InputSimulator.isInventoryOpen())

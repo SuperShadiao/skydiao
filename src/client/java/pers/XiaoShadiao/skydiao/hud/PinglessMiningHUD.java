@@ -25,6 +25,7 @@ import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 import pers.XiaoShadiao.skydiao.utils.tab.TabReader;
 
+import java.awt.*;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -67,7 +68,12 @@ public class PinglessMiningHUD extends XSDHUD {
 
     @Override
     public void renderEffect(GuiGraphicsExtractor context, DeltaTracker tickCounter, boolean force, HudOffsetAndScale settings) {
-        if(increaseBreakTotalTick) breakTotalTick += tickCounter.getGameTimeDeltaTicks();
+        if(increaseBreakTotalTick) {
+            breakTotalTick += tickCounter.getGameTimeDeltaTicks();
+            if(breakTotalTick > totalBreakTickNeeded) {
+                breakTotalTick = totalBreakTickNeeded;
+            }
+        }
         if(breakTotalTick > 0 || force) {
             Matrix3x2fStack pose = context.pose();
             pose.pushMatrix();
@@ -79,8 +85,9 @@ public class PinglessMiningHUD extends XSDHUD {
             }
             int r = 12;
             int t = 2;
+            boolean isFull = breakTotalTick >= totalBreakTickNeeded;
             RenderUtils.drawRoundedCircle(context, 0, 0, 0 - 90, 360 - 90, r, t, 0xFF000000);
-            RenderUtils.drawRoundedCircle(context, 0, 0, 0 - 90, (int) Mth.clampedLerp(breakTotalTick / totalBreakTickNeeded, 0, 360) - 90, r, t, 0xFF00FF00);
+            RenderUtils.drawRoundedCircle(context, 0, 0, 0 - 90, (int) Mth.clampedLerp(breakTotalTick / totalBreakTickNeeded, 0, 360) - 90, r, t, isFull ? 0xFF00FF00 : 0xFFFF6600);
             context.centeredText(mc.font, AbstractListener.tpsListener.getCurrentTPS() < 16 ? "§clf tps..." : (int) breakTotalTick + "/" + totalBreakTickNeeded + "t", 0, 20, -1);
 
             pose.popMatrix();
@@ -110,7 +117,6 @@ public class PinglessMiningHUD extends XSDHUD {
             OreTypes oreType = OreTypes.byBlock(mc.level.getBlockState(blockHitResult.getBlockPos()).getBlock());
             if (oreType != null) {
                 totalBreakTickNeeded = oreType.getTotalBreakTick(miningSpeed);
-                // if(breakTotalTick < totalBreakTickNeeded) breakTotalTick++;
                 increaseBreakTotalTick = breakTotalTick < totalBreakTickNeeded;
             } else {
                 breakTotalTick = 0;
