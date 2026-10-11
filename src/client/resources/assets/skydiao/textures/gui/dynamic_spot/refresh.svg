@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+  <defs><path id="arrow" d="M12.5 1L4.5 6.5L12.5 12Q13 12.25 13 11.5V9C17.5 9 20.5 11.5 21.5 15.5C21.5 8.5 18.5 5.5 13 5V1.5Q13 .75 12.5 1Z"/></defs>
+  <use href="#arrow"/>
+  <use href="#arrow" transform="rotate(180 12 12)"/>
+</svg>
