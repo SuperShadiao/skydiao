@@ -14,6 +14,7 @@ import net.minecraft.world.scores.PlayerScoreEntry;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.utils.renderutils.BlurredRoundedSurface;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -194,7 +195,7 @@ public final class DynamicSpotHUD extends XSDHUD {
         float radius = Math.min(currentHeight / 2F, 14F + progress);
         int x = Math.round((screenWidth - currentWidth) / 2F);
         int y = CARD_TOP;
-        DynamicSpotSurface.draw(graphics, x, y, currentWidth, currentHeight, radius);
+        BlurredRoundedSurface.draw(graphics, x, y, currentWidth, currentHeight, radius);
         // Restore the watermark while the same shell contracts around it.
         float idleOpacity = Math.clamp(1F - progress / 0.18F, 0F, 1F);
         idleOpacity = idleOpacity * idleOpacity * (3F - 2F * idleOpacity);
@@ -269,7 +270,7 @@ public final class DynamicSpotHUD extends XSDHUD {
 
     private static void renderIdle(GuiGraphicsExtractor graphics) {
         int x = Math.round((Minecraft.getInstance().getWindow().getGuiScaledWidth() - idleWidth) / 2F);
-        DynamicSpotSurface.draw(graphics, x, CARD_TOP, idleWidth, IDLE_HEIGHT, IDLE_HEIGHT / 2F);
+        BlurredRoundedSurface.draw(graphics, x, CARD_TOP, idleWidth, IDLE_HEIGHT, IDLE_HEIGHT / 2F);
         drawIdleContent(graphics, x, CARD_TOP, idleWidth, 1F);
     }
 
@@ -279,7 +280,7 @@ public final class DynamicSpotHUD extends XSDHUD {
         int cardWidth = Math.min(maxWidth,
                 Math.max(170, Math.max(client.font.width(notice.title), client.font.width(notice.detail)) + 56));
         int x = (client.getWindow().getGuiScaledWidth() - cardWidth) / 2;
-        DynamicSpotSurface.draw(graphics, x, CARD_TOP, cardWidth, 39, 10);
+        BlurredRoundedSurface.draw(graphics, x, CARD_TOP, cardWidth, 39, 10);
         graphics.text(client.font, Component.literal(notice.type), x + 9, 22, notice.color);
         int textWidth = Math.max(0, cardWidth - 48);
         graphics.text(client.font, Component.literal(fit(notice.title, textWidth)), x + 35, 22, TEXT);

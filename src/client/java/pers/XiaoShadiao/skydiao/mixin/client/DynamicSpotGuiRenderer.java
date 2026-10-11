@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import pers.XiaoShadiao.skydiao.hud.DynamicSpotSurface;
+import pers.XiaoShadiao.skydiao.utils.renderutils.BlurredRoundedSurface;
 
 @Mixin(GuiRenderer.class)
 public abstract class DynamicSpotGuiRenderer {
@@ -17,6 +17,6 @@ public abstract class DynamicSpotGuiRenderer {
 
     @Inject(method = "render", at = @At("HEAD"))
     private void skydiao$renderGlassBeforeGui(GpuBufferSlice fog, CallbackInfo ci) {
-        DynamicSpotSurface.renderPending(renderState);
+        BlurredRoundedSurface.renderPending(renderState);
     }
 }

@@ -18,6 +18,7 @@ import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 
 import java.awt.*;
 import java.util.Objects;
@@ -93,11 +94,12 @@ public class GenshinImpactHeatCold extends XSDHUD {
 
             // LogManager.getLogger().info(80f / 255f * Math.sin(Math.PI * Math.min(timewarnrender,0) / 30d));
             if(heatOrColdValue >= currentColor.warningStage1) {
-                context.fill(guiPosX - 42, guiPosY - 47 + 50, guiPosX - 40 + 83, guiPosY - 52 + 50, new Color(1f,0,0,(float) (75f / 255f * Math.sin(Math.PI * Math.max(timewarnrender,0) / 30d))).getRGB());
+                // context.fill(guiPosX - 42, guiPosY - 47 + 50, guiPosX - 40 + 83, guiPosY - 52 + 50, new Color(1f,0,0,(float) (75f / 255f * Math.sin(Math.PI * Math.max(timewarnrender,0) / 30d))).getRGB());
+                RenderUtils.drawWithCustomGlow(context, guiPosX - 42, guiPosY - 52 + 50, 85, 5, false, 2, 0.75f, 1, 0, 0, (float) (75f / 255f * Math.sin(Math.PI * Math.max(timewarnrender,0) / 30d)));
 
                 if(heatOrColdValue >= currentColor.warningStage2) {
-                    // context.fill(guiPosX - 42, guiPosY - 47 + 50, guiPosX - 40 + 83, guiPosY - 52 + 50, new Color(1f,0,0,(float) (40f / 255f * Math.sin(Math.PI * Math.max(timewarnrender,0) / 30d))).getRGB());
-                    context.fill(guiPosX - 42, guiPosY - 47 + 50, guiPosX - 40 + 83, guiPosY - 52 + 50, new Color(1f,0,0,(float) (80f / 255f * (animation2 / 10f))).getRGB());
+                    // context.fill(guiPosX - 42, guiPosY - 47 + 50, guiPosX - 40 + 83, guiPosY - 52 + 50, new Color(1f,0,0,(float) (80f / 255f * (animation2 / 10f))).getRGB());
+                    RenderUtils.drawWithCustomGlow(context, guiPosX - 42, guiPosY - 52 + 50, 85, 5, false, 2, 0.75f, 1, 0, 0, (float) (100f / 255f * (animation2 / 10f)));
                 }
             }
 
@@ -111,6 +113,7 @@ public class GenshinImpactHeatCold extends XSDHUD {
 
             }
         }
+        // RenderUtils.renderPendingBlurredRoundedSurface(context.guiRenderState);
 
         pose.popMatrix();
     }

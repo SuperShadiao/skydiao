@@ -11,6 +11,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -156,6 +157,43 @@ public class RenderUtils {
     public static void renderSlot(GuiGraphicsExtractor guiGraphics, AbstractContainerScreen<?> abstractContainerScreen, Slot slot, int rgb) {
         MixinAbstractContainerScreenPosGetter getter = (MixinAbstractContainerScreenPosGetter) abstractContainerScreen;
         guiGraphics.fill(getter.getLeftPos() + slot.x, getter.getTopPos() + slot.y, getter.getLeftPos() + slot.x + 16, getter.getTopPos() + slot.y + 16, rgb);
+    }
+
+    // 转发到 BlurredRoundedSurface：绘制圆角矩形并做周围模糊/辉光
+    public static void drawBlurredRoundedSurface(GuiGraphicsExtractor graphics, float x, float y, float w, float h, float radius) {
+        BlurredRoundedSurface.draw(graphics, x, y, w, h, radius);
+    }
+
+    // 转发到 BlurredRoundedSurface：绘制圆角矩形并做周围模糊/辉光，r/g/b/a（0~1）为玻璃底色与不透明度
+    public static void drawBlurredRoundedSurface(GuiGraphicsExtractor graphics, float x, float y, float w, float h, float radius,
+                                                 float r, float g, float b, float a) {
+        BlurredRoundedSurface.draw(graphics, x, y, w, h, radius, r, g, b, a);
+    }
+
+    // 转发到 BlurredRoundedSurface：自定义辉光，useLiquidGlassblur 控制半透明底色是否预模糊，
+    // glowRadius 为辉光距离，glowR/g/b/a（0~1）为辉光颜色/强度
+    public static void drawWithCustomGlow(GuiGraphicsExtractor graphics, float x, float y, float w, float h,
+                                          boolean useLiquidGlassblur, float radius,
+                                          float glowRadius, float r, float g, float b, float a,
+                                          float glowR, float glowG, float glowB, float glowA) {
+        BlurredRoundedSurface.drawWithCustomGlow(graphics, x, y, w, h, useLiquidGlassblur, radius, glowRadius, r, g, b, a, glowR, glowG, glowB, glowA);
+    }
+
+    // 转发到 BlurredRoundedSurface：辉光颜色未指定时跟随内部颜色
+    public static void drawWithCustomGlow(GuiGraphicsExtractor graphics, float x, float y, float w, float h,
+                                          boolean useLiquidGlassblur, float radius,
+                                          float glowRadius, float r, float g, float b, float a) {
+        BlurredRoundedSurface.drawWithCustomGlow(graphics, x, y, w, h, useLiquidGlassblur, radius, glowRadius, r, g, b, a);
+    }
+
+    // 转发到 BlurredRoundedSurface：在 GuiRenderer.render 头部合成待渲染的模糊面板
+    public static void renderPendingBlurredRoundedSurface(GuiRenderState state) {
+        BlurredRoundedSurface.renderPending(state);
+    }
+
+    // 转发到 BlurredRoundedSurface：释放 GPU 资源
+    public static void closeBlurredRoundedSurface() {
+        BlurredRoundedSurface.close();
     }
 
     public static void renderNameTag(LevelRenderContext context, Vec3 pos, Component name) {

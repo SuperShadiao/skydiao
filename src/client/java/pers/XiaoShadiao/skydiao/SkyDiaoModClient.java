@@ -26,7 +26,9 @@ import pers.XiaoShadiao.skydiao.utils.autoupdater.ExecuteOfflineThread;
 import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.XSDSafeSession;
+import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.NodeGraphManager;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 public class SkyDiaoModClient implements ClientModInitializer {
@@ -100,6 +102,11 @@ public class SkyDiaoModClient implements ClientModInitializer {
         ExecuteOfflineThread task = new ExecuteOfflineThread();
         Runtime.getRuntime().addShutdownHook(new Thread(task));
         ClientLifecycleEvents.CLIENT_STOPPING.register(task::run);
+        try {
+            NodeGraphManager.INSTANCE.init();
+        } catch (IOException e) {
+
+        }
 
     }
 }

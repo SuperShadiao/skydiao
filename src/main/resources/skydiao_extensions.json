@@ -1,0 +1,46 @@
+{
+  "_template": "skydiao 节点扩展模板：复制本文件、改掉 manifest.id 就能做成一个新的扩展包，用节点图编辑器的「导入扩展」按钮载入。注意：type 的 id 必须与 Java 侧节点类 getType() 返回的字符串一致；与 default 扩展重复的 type id 会被编辑器跳过。",
+  "manifest": {
+    "id": "skydiao",
+    "name": "skydiao",
+    "version": "1.0.0",
+    "minEditor": 1,
+    "description": "Skydiao模组自定义节点扩展模板：在此声明本模组专属的入口节点，执行逻辑在 Java 侧的对应节点类里实现。"
+  },
+  "categories": [
+    { "id": "skydiao_event", "label": "SkyDiao事件" },
+    { "id": "skydiao_chat", "label": "SkyDiao聊天" }
+  ],
+  "types": {
+    "on_tick_start": {
+      "category": "skydiao_event",
+      "label": "每刻触发",
+      "color": "#2e7d32",
+      "execIn": false,
+      "execOut": [{ "id": "out", "label": "执行" }],
+      "in": [],
+      "out": [],
+      "desc": "入口节点：游戏每刻（tick）触发一次执行。"
+    },
+    "on_chat_message": {
+      "category": "skydiao_event",
+      "label": "收到聊天",
+      "color": "#2e7d32",
+      "execIn": false,
+      "execOut": [{ "id": "out", "label": "执行" }],
+      "in": [],
+      "out": [{ "id": "msg", "label": "消息", "type": "string" }],
+      "desc": "入口节点：收到聊天消息时触发执行，可匹配关键词。"
+    },
+    "print_chat_message": {
+      "category": "skydiao_chat",
+      "label": "打印聊天消息",
+      "color": "#2e7d32",
+      "execIn": true,
+      "execOut": [{ "id": "out", "label": "执行" }],
+      "in": [{ "id": "msg", "label": "消息", "type": "string", "default": "OvO" }],
+      "out": [],
+      "desc": "入口节点：收到聊天消息时触发执行，可匹配关键词。"
+    }
+  }
+}

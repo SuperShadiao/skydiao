@@ -406,7 +406,14 @@ public class F7TerminalScreen extends ContainerScreen implements IContainerScree
         int x = getButtonX(col);
         int y = getButtonY(line);
 
-        graphics.fill(x, y, x + buttonSize, y + buttonSize, alpha << 24 | red << 16 | green << 8 | blue);
+        // graphics.fill(x, y, x + buttonSize, y + buttonSize, alpha << 24 | red << 16 | green << 8 | blue);
+        RenderUtils.drawWithCustomGlow(
+                graphics,
+                x, y,
+                buttonSize, buttonSize,
+                true, 5, 0,
+                red / 255f, green / 255f, blue / 255f, alpha / 255f
+        );
     }
 
     private void drawTextAtCustomSlot(GuiGraphicsExtractor graphics, String text, int[] lineCol) {
@@ -464,7 +471,16 @@ public class F7TerminalScreen extends ContainerScreen implements IContainerScree
             extractMenuBackground(graphics);
         }
 
-        graphics.fill(width / 2 - (4 * buttonSize + buttonSpacing * 2), getTopY(), width / 2 + (4 * buttonSize + buttonSpacing * 2), getBottumY(), 0xFF000000);
+        // graphics.fill(width / 2 - (4 * buttonSize + buttonSpacing * 2), getTopY(), width / 2 + (4 * buttonSize + buttonSpacing * 2), getBottumY(), 0xFF000000);
+        RenderUtils.drawWithCustomGlow(
+                graphics,
+                width / 2f - (4 * buttonSize + buttonSpacing * 2),
+                getTopY(),
+                (4 * buttonSize + buttonSpacing * 2) + (4 * buttonSize + buttonSpacing * 2),
+                getBottumY() - getTopY(),
+                true, 10, 0.9f,
+                0, 0, 0, 0.8f
+        );
     }
 
     private int getBottumY() {

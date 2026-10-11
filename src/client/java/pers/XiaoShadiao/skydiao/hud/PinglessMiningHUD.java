@@ -32,7 +32,8 @@ import java.util.regex.Pattern;
 public class PinglessMiningHUD extends XSDHUD {
 
     private BlockPos lastAimingPos = BlockPos.ZERO;
-    private int breakTotalTick = 0;
+    private float breakTotalTick = 0;
+    private boolean increaseBreakTotalTick;
     private int totalBreakTickNeeded = 0;
 
     private int miningSpeed = 1000;
@@ -66,6 +67,7 @@ public class PinglessMiningHUD extends XSDHUD {
 
     @Override
     public void renderEffect(GuiGraphicsExtractor context, DeltaTracker tickCounter, boolean force, HudOffsetAndScale settings) {
+        if(increaseBreakTotalTick) breakTotalTick += tickCounter.getGameTimeDeltaTicks();
         if(breakTotalTick > 0 || force) {
             Matrix3x2fStack pose = context.pose();
             pose.pushMatrix();
@@ -78,8 +80,8 @@ public class PinglessMiningHUD extends XSDHUD {
             int r = 12;
             int t = 2;
             RenderUtils.drawRoundedCircle(context, 0, 0, 0 - 90, 360 - 90, r, t, 0xFF000000);
-            RenderUtils.drawRoundedCircle(context, 0, 0, 0 - 90, (int) Mth.clampedLerp(breakTotalTick / (float) totalBreakTickNeeded, 0, 360) - 90, r, t, 0xFF00FF00);
-            context.centeredText(mc.font, AbstractListener.tpsListener.getCurrentTPS() < 16 ? "§clf tps..." : breakTotalTick + "/" + totalBreakTickNeeded + "t", 0, 20, -1);
+            RenderUtils.drawRoundedCircle(context, 0, 0, 0 - 90, (int) Mth.clampedLerp(breakTotalTick / totalBreakTickNeeded, 0, 360) - 90, r, t, 0xFF00FF00);
+            context.centeredText(mc.font, AbstractListener.tpsListener.getCurrentTPS() < 16 ? "§clf tps..." : (int) breakTotalTick + "/" + totalBreakTickNeeded + "t", 0, 20, -1);
 
             pose.popMatrix();
         }
@@ -95,6 +97,7 @@ public class PinglessMiningHUD extends XSDHUD {
             breakTotalTick = 0;
             lastAimingPos = BlockPos.ZERO;
             cantReadMiningSpeedTick = 0;
+            increaseBreakTotalTick = false;
             return;
         }
 
@@ -107,19 +110,24 @@ public class PinglessMiningHUD extends XSDHUD {
             OreTypes oreType = OreTypes.byBlock(mc.level.getBlockState(blockHitResult.getBlockPos()).getBlock());
             if (oreType != null) {
                 totalBreakTickNeeded = oreType.getTotalBreakTick(miningSpeed);
-                if(breakTotalTick < totalBreakTickNeeded) breakTotalTick++;
+                // if(breakTotalTick < totalBreakTickNeeded) breakTotalTick++;
+                increaseBreakTotalTick = breakTotalTick < totalBreakTickNeeded;
             } else {
+                breakTotalTick = 0;
                 totalBreakTickNeeded = 10000;
+                increaseBreakTotalTick = false;
             }
             if (!lastAimingPos.equals(blockHitResult.getBlockPos())) {
                 if (mc.level != null) {
                     lastAimingPos = blockHitResult.getBlockPos();
                     breakTotalTick = 0;
+                    increaseBreakTotalTick = false;
                 }
             }
         } else {
             breakTotalTick = 0;
             lastAimingPos = BlockPos.ZERO;
+            increaseBreakTotalTick = false;
         }
 
         TabReader.findLineWith("Mining Speed").ifPresentOrElse(line -> {
