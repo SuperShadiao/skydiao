@@ -1,10 +1,6 @@
 package pers.XiaoShadiao.skydiao.utils.nodegraphexecutor;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.java_websocket.WebSocket;
@@ -15,6 +11,7 @@ import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.executor.NodeGraphError;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -50,18 +47,51 @@ import java.util.Collection;
 public final class LocalhostWSServer extends WebSocketServer {
 
     /** 单例：在客户端初始化里调用 {@code LocalhostWSServer.INSTANCE.start()} 即可开工 */
-    public static final LocalhostWSServer INSTANCE = new LocalhostWSServer();
+    private static LocalhostWSServer INSTANCE;
 
     private static final Logger log = LogManager.getLogger("XSD NodeGraph WS");
     private static final int PORT = 841;
     private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
 
-    private LocalhostWSServer() {
-        super(new InetSocketAddress("127.0.0.1", PORT));
+    private final int thisServerPort;
+
+    private LocalhostWSServer(int port) {
+        super(new InetSocketAddress("127.0.0.1", port));
+        thisServerPort = port;
         setReuseAddr(true);
-        setDaemon(true); // 不阻止游戏退出
         // 执行出错时，把可序列化的错误推给所有已连接的网页
         NodeGraphManager.INSTANCE.setErrorListener(this::pushError);
+    }
+
+    public static LocalhostWSServer getInstance() {
+        return INSTANCE;
+    }
+
+    public int getPort() {
+        return thisServerPort;
+    }
+
+    public static void startServer() {
+        if (INSTANCE == null) {
+            for (int i = 0; i < 50; ++i) {
+                int port = PORT + i;
+                if(isPortFree(port)) {
+                    INSTANCE = new LocalhostWSServer(port);
+                    INSTANCE.start();
+                    break;
+                }
+            }
+        }
+    }
+
+    private static boolean isPortFree(int port) {
+        try (ServerSocket probe = new ServerSocket()) {
+            probe.setReuseAddress(false);   // 关键：Windows 上必须
+            probe.bind(new InetSocketAddress("127.0.0.1", port), 1);
+            return true;
+        } catch (IOException e) {           // 通常是 BindException: Address already in use
+            return false;
+        }
     }
 
     // ---------- 目录 ----------
@@ -80,7 +110,7 @@ public final class LocalhostWSServer extends WebSocketServer {
 
     @Override
     public void onStart() {
-        log.info("节点图 WebSocket 已监听 ws://127.0.0.1:{}", PORT);
+        log.info("节点图 WebSocket 已监听 ws://127.0.0.1:{}", thisServerPort);
     }
 
     @Override

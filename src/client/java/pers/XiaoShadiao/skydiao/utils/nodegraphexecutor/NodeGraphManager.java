@@ -306,6 +306,11 @@ public final class NodeGraphManager {
                 Objects.requireNonNull(NodeGraphManager.class.getClassLoader().getResourceAsStream("skydiao_extensions.json")),
                 defaultExtensionFile
         );
-        LocalhostWSServer.INSTANCE.start();
+        LocalhostWSServer.startServer();
     }
+
+    public static LocalhostWSServer getLocalServer() {
+        return LocalhostWSServer.getInstance();
+    }
+
 }

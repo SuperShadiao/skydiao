@@ -42,9 +42,12 @@ import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.XSDSafeSession;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicInfo;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicListManager;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.PlayerThread;
+import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.LocalhostWSServer;
+import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.NodeGraphManager;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
 import java.awt.*;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -156,7 +159,28 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                 getArgConstantInstance("autofindeventegg")
                         .then(getArgConstantInstance("start").executes(this::executeStartFindEventEgg))
                         .then(getArgConstantInstance("stop").executes(this::executeStopFindEventEgg)),
-                getArgConstantInstance("challenge_mc").redirect(HH_CHALLENGE_MC_COMMAND.getCommandNode())
+                getArgConstantInstance("challenge_mc").redirect(HH_CHALLENGE_MC_COMMAND.getCommandNode()),
+                getArgConstantInstance("nodegraph")
+                        .then(getArgConstantInstance("openfolder").executes(_ -> owo(() -> Util.getPlatform().openFile(NodeGraphManager.graphsFolder))))
+                        .then(getArgConstantInstance("reload").executes(_ -> owo(NodeGraphManager.INSTANCE::reloadFolder)))
+                        .then(getArgConstantInstance("edit").executes(_ -> {
+                            ToolList.printChatMessage(Component.literal("§a[小沙雕] 正在尝试拉起节点图编辑器..."));
+                            ToolList.addThreadedTask(() -> {
+                                LocalhostWSServer localServer = NodeGraphManager.getLocalServer();
+                                if(localServer != null) {
+                                    try(InputStream is = ToolList.getInstance().makeReqToURL("http://localhost:8788")) {
+                                        is.readAllBytes();
+                                        Util.getPlatform().openUri("http://localhost:8788/tools/NodeGraph?port=" + localServer.getPort());
+                                    } catch (Throwable e) {
+                                        Util.getPlatform().openUri("https://xiaoshadiao.club/tools/NodeGraph?port=" + localServer.getPort());
+                                    }
+                                } else {
+                                    ToolList.printChatMessage(Component.literal("§a[小沙雕] §c当前设备环境不具备支持节点图编辑器的条件。"));
+                                }
+                                return 0;
+                            });
+                            return 0;
+                        }))
         );
     }
 

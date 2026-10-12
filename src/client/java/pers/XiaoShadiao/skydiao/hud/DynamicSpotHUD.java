@@ -303,7 +303,7 @@ public final class DynamicSpotHUD extends XSDHUD {
             for (IdlePart part : idleParts) {
                 int color = (alpha << 24) | (part.color() & 0xFFFFFF);
                 if (part.icon() == null) {
-                    graphics.text(client.font, Component.literal(part.text()), partX, y + 9, color);
+                    graphics.text(client.font, Component.literal(part.text()), partX, y + (IDLE_HEIGHT - client.font.lineHeight + 2) / 2, color);
                 } else {
                     graphics.blit(RenderPipelines.GUI_TEXTURED, part.icon(), partX, y + (IDLE_HEIGHT - STATUS_ICON_SIZE) / 2,
                             0, 0, STATUS_ICON_SIZE, STATUS_ICON_SIZE, 64, 64, 64, 64, color);

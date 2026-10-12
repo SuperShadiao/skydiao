@@ -136,8 +136,8 @@ public class PinglessMiningHUD extends XSDHUD {
             increaseBreakTotalTick = false;
         }
 
-        TabReader.findLineWith("Mining Speed").ifPresentOrElse(line -> {
-            Matcher matcher = Pattern.compile("\\d+").matcher(line);
+        TabReader.findLineWith("Mining Speed:").ifPresentOrElse(line -> {
+            Matcher matcher = Pattern.compile("\\d+").matcher(ToolList.getInstance().deleteColorCode(line));
             if (matcher.find()) {
                 miningSpeed = Integer.parseInt(matcher.group());
                 cantReadMiningSpeedTick = 0;

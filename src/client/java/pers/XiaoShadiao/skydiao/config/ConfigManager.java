@@ -258,7 +258,7 @@ public class ConfigManager {
     public static final StringConfigOption dungeonTrashTPS = new StringConfigOption("dungeontrashtps", "太强了喵, 我们服务器有很高的[tps] TPS喵!");
     public static final StringConfigOption dungeonf7msgbotssleap = new StringConfigOption("dungeonf7msgbotssleap", "已安全到达Simon Says处, 准许Leap!");
     public static final StringConfigOption dungeonMissingPlayer = new StringConfigOption("dungeonmissingplayer", "玩家[players]未进入服务器!");
-    public static final BooleanConfigOption dynamicSpot = new BooleanConfigOption("dynamicspot", true);
+    public static final BooleanConfigOption dynamicSpot = new BooleanConfigOption("dynamicspot", false);
     public static final BooleanConfigOption dynamicSpotReplaceTabList = new BooleanConfigOption("dynamicspotreplacetablist", false);
 
     public static final StringConfigOption hudOffsetAndScale = new StringConfigOption("hudoffsetandscale", "{}");
@@ -388,9 +388,10 @@ public class ConfigManager {
             Int2ObjectMap.entry(1, List.of(dungeonRenderDangerousEnemy, dungeonKeyRender)),
             Int2ObjectMap.entry(2, List.of(macroReplay, macroReplaySelfCleaning)),
             Int2ObjectMap.entry(3, List.of(bossbar, starrailNotification, starrailNotificationSound)),
-            Int2ObjectMap.entry(5, List.of(dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4))
+            Int2ObjectMap.entry(5, List.of(dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotsimonsays5, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotmelody4)),
+            Int2ObjectMap.entry(6, List.of(dynamicSpot))
 
-            );
+    );
 
     static {
         readConfig();

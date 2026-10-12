@@ -35,7 +35,7 @@
     "print_chat_message": {
       "category": "skydiao_chat",
       "label": "打印聊天消息",
-      "color": "#2e7d32",
+      "color": "#e051c8",
       "execIn": true,
       "execOut": [{ "id": "out", "label": "执行" }],
       "in": [{ "id": "msg", "label": "消息", "type": "string", "default": "OvO" }],
