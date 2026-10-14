@@ -236,6 +236,22 @@ public class ConfigManager {
     public static final BooleanConfigOption autoEvaluateFossils = new BooleanConfigOption("autoevaluatefossils", false);
     public static final BooleanConfigOption autoEvaluateFossilsAutoRestart = new BooleanConfigOption("autoevaluatefossilsautorestart", false);
     public static final BooleanConfigOption pinglessMining = new BooleanConfigOption("pinglessmining", false);
+    public static final BooleanConfigOption dynamicSpot = new BooleanConfigOption("dynamicspot", false);
+    public static final BooleanConfigOption dynamicSpotReplaceTabList = new BooleanConfigOption("dynamicspotreplacetablist", false);
+    public static final BooleanConfigOption dungeonautogfs = new BooleanConfigOption("dungeonautogfs", false);
+    public static final BooleanConfigOption dungeonautogfsleap = new BooleanConfigOption("dungeonautogfsleap", false);
+    public static final BooleanConfigOption dungeonautogfstnt = new BooleanConfigOption("dungeonautogfstnt", false);
+    public static final BooleanConfigOption dungeonautogfsdecoy = new BooleanConfigOption("dungeonautogfsdecoy", false);
+    public static final BooleanConfigOption dungeonautogfsenderpearl = new BooleanConfigOption("dungeonautogfsenderpearl", false);
+    public static final ColorConfigOption dungeonf7termuichoosecolorbuttoncolor = new ColorConfigOption("dungeonf7termuichoosecolorbuttoncolor", 0x00FF00);
+    public static final ColorConfigOption dungeonf7termuistartwithbuttoncolor = new ColorConfigOption("dungeonf7termuistartwithbuttoncolor", 0x00FF00);
+    public static final ColorConfigOption dungeonf7termuionoffbuttoncolor = new ColorConfigOption("dungeonf7termuionoffbuttoncolor", new Color(255, 20, 0).getRGB());
+    public static final IntConfigOption dungeonf7termuichangecolorbuttonlight = new IntConfigOption("dungeonf7termuichangecolorbuttonlight", 255);
+    public static final ColorConfigOption dungeonf7termuimelodyflagcolor = new ColorConfigOption("dungeonf7termuimelodyflagcolor", 0x00FF00);
+    public static final ColorConfigOption dungeonf7termuimelodybuttoncolor = new ColorConfigOption("dungeonf7termuimelodybuttoncolor", 0x00FF00);
+    public static final ColorConfigOption dungeonf7termuiclickorderfirstbuttoncolor = new ColorConfigOption("dungeonf7termuiclickorderfirstbuttoncolor", 0x00FF00);
+    public static final ColorConfigOption dungeonf7termuiclickordersecondbuttoncolor = new ColorConfigOption("dungeonf7termuiclickordersecondbuttoncolor", 0xFFFF00);
+    public static final ColorConfigOption dungeonf7termuiclickorderthirdbuttoncolor = new ColorConfigOption("dungeonf7termuiclickorderthirdbuttoncolor", 0xFF0000);
 
     public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
@@ -258,8 +274,6 @@ public class ConfigManager {
     public static final StringConfigOption dungeonTrashTPS = new StringConfigOption("dungeontrashtps", "太强了喵, 我们服务器有很高的[tps] TPS喵!");
     public static final StringConfigOption dungeonf7msgbotssleap = new StringConfigOption("dungeonf7msgbotssleap", "已安全到达Simon Says处, 准许Leap!");
     public static final StringConfigOption dungeonMissingPlayer = new StringConfigOption("dungeonmissingplayer", "玩家[players]未进入服务器!");
-    public static final BooleanConfigOption dynamicSpot = new BooleanConfigOption("dynamicspot", false);
-    public static final BooleanConfigOption dynamicSpotReplaceTabList = new BooleanConfigOption("dynamicspotreplacetablist", false);
 
     public static final StringConfigOption hudOffsetAndScale = new StringConfigOption("hudoffsetandscale", "{}");
 
@@ -338,12 +352,37 @@ public class ConfigManager {
                     crystalHollowScanGoblinKing, crystalHollowScanDragonLair, crystalHollowScanWormFishSpot,
                     crystalHollowScanCorleone, crystalHollowScanFairyGrotto, crystalHollowScanBear3,
                     crystalHollowHelperDebug, crystalHollowDupServerTipper, crystalHollowHelperDisableThreadLimit,
-                    genshinImpactHeatColdRender, miningCommissionEntityESP, autoEvaluateFossils, autoEvaluateFossilsAutoRestart, pinglessMining)),
+                    genshinImpactHeatColdRender, miningCommissionEntityESP, autoEvaluateFossils,
+                    autoEvaluateFossilsAutoRestart, pinglessMining)),
             Map.entry("combat", List.of(slayerTogether, isleVolcanoFinder, isleVolcanoFinderCataOnlyMode, isleDupServerTip, endIslandDragonESPListener)),
             Map.entry("foraging", List.of(galateashulker, treeProgress, autoReel, autoReelAutoAim, torrhusCanyonHelper, safariBoardcastHotspot, safariBoardcastTradeNPC, safariRenderTargetESP, floorDroppingRender)),
             Map.entry("farming", List.of(openFsCommandAction, openFsKeyBind, hubratesp, gardenPestESP, autoSprayonator, autoChangeLo, halfAutoKillPests, gardenTrapPrompt, gardenBonusPrompt, fsGardenMoonFlowerMode, fsGardenMoonFlowerModeKeepNightFarming, fsTPToPest)),
             Map.entry("fishing", List.of(hotspotrender, autogg, lotusAtollHelper, fishingBigFishRender, fishingBigFishTip)),
-            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonKeyRender, dungeonRenderTraps, necronLadderNotification, dungeonf7termui, dungeonf7termuibackground, dungeonf7termuibuttonsize, dungeonf7autoterm, dungeonf7autotermclickdelay, resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7InactiveTerminalRender, f7TerminalESPTracer, f7ArrowAlignSolver, f7ArrowAlignSolverBlockWrongClicks, f7SimonSaysSolver, f7SimonSaysSolverBlockWrongClicks, dungeonReviveItemCDRender, f7DrawWitherDragonESP, f7DrawStormFireballTarget, f7DrawWitherDragonLightning, f7AutoSwapEnderDragonInWitherKing, dungeonf7msgbot, dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3, dungeonf7msgbotsimonsays4, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1, dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotcoretunnel, dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered, dungeonDrinkPotion, dungeonBloodRoomTime, dungeonTrashTPS, dungeonf7msgbotssleap, dungeonMissingPlayer)),
+            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonKeyRender, dungeonRenderTraps, necronLadderNotification,
+
+                    dungeonf7autoterm, dungeonf7autotermclickdelay,
+
+                    dungeonf7termui, dungeonf7termuibackground, dungeonf7termuibuttonsize,
+                    dungeonf7termuichoosecolorbuttoncolor, dungeonf7termuistartwithbuttoncolor,
+                    dungeonf7termuionoffbuttoncolor, dungeonf7termuichangecolorbuttonlight,
+                    dungeonf7termuimelodyflagcolor, dungeonf7termuimelodybuttoncolor,
+                    dungeonf7termuiclickorderfirstbuttoncolor, dungeonf7termuiclickordersecondbuttoncolor,
+                    dungeonf7termuiclickorderthirdbuttoncolor,
+
+                    dungeonautogfs, dungeonautogfsleap, dungeonautogfstnt, dungeonautogfsdecoy, dungeonautogfsenderpearl,
+
+                    resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7InactiveTerminalRender,
+                    f7TerminalESPTracer, f7ArrowAlignSolver, f7ArrowAlignSolverBlockWrongClicks,
+                    f7SimonSaysSolver, f7SimonSaysSolverBlockWrongClicks, dungeonReviveItemCDRender,
+                    f7DrawWitherDragonESP, f7DrawStormFireballTarget, f7DrawWitherDragonLightning, f7AutoSwapEnderDragonInWitherKing,
+
+                    dungeonf7msgbot, dungeonf7msgbotsimonsaysstart,
+                    dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3,
+                    dungeonf7msgbotsimonsays4, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1,
+                    dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotcoretunnel,
+                    dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered,
+                    dungeonDrinkPotion, dungeonBloodRoomTime, dungeonTrashTPS,
+                    dungeonf7msgbotssleap, dungeonMissingPlayer)),
             Map.entry("rift", List.of(rifttimegunhelper)),
             Map.entry("界面类", List.of(openHud, bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, bossDrawESP, customBossESPTracer, starrailNotification, starrailNotificationSound, dyingtip, noblind, nosuffoverlay, fireOverlay, lyricColor1, lyricColor2, dynamicSpot, dynamicSpotReplaceTabList)),
             Map.entry("ravengard", List.of(ravengardHelper, ravengardQueueMessage))

@@ -117,6 +117,9 @@ public class PinglessMiningHUD extends XSDHUD {
             OreTypes oreType = OreTypes.byBlock(mc.level.getBlockState(blockHitResult.getBlockPos()).getBlock());
             if (oreType != null) {
                 totalBreakTickNeeded = oreType.getTotalBreakTick(miningSpeed);
+                if(miningSpeed < oreType.getMinMiningSpeed()) {
+                    totalBreakTickNeeded = Math.max(totalBreakTickNeeded, 4); // Soft Cap强制限制为4t
+                }
                 increaseBreakTotalTick = breakTotalTick < totalBreakTickNeeded;
             } else {
                 breakTotalTick = 0;

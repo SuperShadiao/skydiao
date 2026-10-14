@@ -3,9 +3,7 @@ package pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.executor;
 import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.factory.AbstractNodeFactory;
 import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.node.AbstractNode;
 import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.node.impl.basic.*;
-import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.node.impl.mc.OnChatMessageNode;
-import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.node.impl.mc.OnClientTickStartNode;
-import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.node.impl.mc.PrintChatMessageNode;
+import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.node.impl.mc.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,21 +22,62 @@ public final class NodeGraphFactoryRegistry {
             SetVarNode.FACTORY,
             IncVarNode.FACTORY,
             DecVarNode.FACTORY,
+            // 作用域变量：节点图作用域 + 全局作用域，各 4 个操作
+            ScopedVarNode.GRAPH_GET,
+            ScopedVarNode.GRAPH_SET,
+            ScopedVarNode.GRAPH_INC,
+            ScopedVarNode.GRAPH_DEC,
+            ScopedVarNode.GLOBAL_GET,
+            ScopedVarNode.GLOBAL_SET,
+            ScopedVarNode.GLOBAL_INC,
+            ScopedVarNode.GLOBAL_DEC,
             MathAddNode.FACTORY,
             MathSubNode.FACTORY,
             MathMulNode.FACTORY,
             MathDivNode.FACTORY,
             MathModNode.FACTORY,
             MathCmpNode.FACTORY,
+            MathIntTextNode.FACTORY,
+            MathRoundTextNode.FACTORY,
             LogicNotNode.FACTORY,
             PrintNode.FACTORY,
             StrTrimNode.FACTORY,
             StrConcatNode.FACTORY,
             StrContainsNode.FACTORY,
             StrReplaceNode.FACTORY,
+            StrStartsWithNode.FACTORY,
+            StrEndsWithNode.FACTORY,
+            StrSplitNode.FACTORY,
+            // 对象比较
+            ObjEqualsNode.FACTORY,
+            ObjNullNode.FACTORY,
+            ObjContentEmptyNode.FACTORY,
+            // 容器：列表 / 集合 / 映射
+            ListOpNode.NEW,
+            ListOpNode.ADD,
+            ListOpNode.INDEX_OF,
+            ListOpNode.GET,
+            ListOpNode.REMOVE_AT,
+            ListOpNode.CLEAR,
+            ListOpNode.TO_SET,
+            SetOpNode.NEW,
+            SetOpNode.ADD,
+            SetOpNode.CONTAINS,
+            SetOpNode.REMOVE,
+            SetOpNode.CLEAR,
+            SetOpNode.TO_LIST,
+            MapOpNode.NEW,
+            MapOpNode.PUT,
+            MapOpNode.GET,
+            MapOpNode.HAS_KEY,
+            MapOpNode.REMOVE,
+            MapOpNode.CLEAR,
             OnClientTickStartNode.FACTORY,
             OnChatMessageNode.FACTORY,
-            PrintChatMessageNode.FACTORY
+            PrintChatMessageNode.FACTORY,
+            OnLoadGraphNode.FACTORY,
+            OnLevelChangeNode.FACTORY,
+            GetSelfOnlineInfoNode.FACTORY
     );
 
     private static final Map<String, AbstractNodeFactory<?>> TYPE_TO_FACTORY;

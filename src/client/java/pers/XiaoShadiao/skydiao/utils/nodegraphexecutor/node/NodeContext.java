@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 /**
@@ -16,6 +17,9 @@ public final class NodeContext {
 
     /** 值连线递归求值深度上限，防止环形连边把栈打爆（对应网页的 ctx._depth > 40） */
     private static final int MAX_DEPTH = 40;
+
+    /** 全局变量表：整个应用实例共享（进程内唯一），跨节点图、跨触发保留 */
+    private static final Map<String, Object> GLOBAL_VARS = new ConcurrentHashMap<>();
 
     private final NodeGraph graph;
     private final Consumer<String> printer;
@@ -63,6 +67,23 @@ public final class NodeContext {
     /** 变量按数字读取，缺省当 0（对应网页的 Number(ctx.vars[name] || 0)） */
     public double numVar(String name) {
         return asDouble(vars.get(name), 0);
+    }
+
+    // ---------- 作用域变量 ----------
+
+    /** 节点图作用域变量表：整张图共享，跨触发保留，图重载时丢弃 */
+    public Map<String, Object> graphVars() {
+        return graph.vars();
+    }
+
+    /** 全局作用域变量表：整个应用实例共享，跨节点图、跨触发保留（进程重启才清空） */
+    public static Map<String, Object> globalVars() {
+        return GLOBAL_VARS;
+    }
+
+    /** 按数字读取任意变量表里的值，缺省当 0 */
+    public static double numOf(Map<String, Object> table, String name) {
+        return asDouble(table == null ? null : table.get(name), 0);
     }
 
     // ---------- 输入 ----------

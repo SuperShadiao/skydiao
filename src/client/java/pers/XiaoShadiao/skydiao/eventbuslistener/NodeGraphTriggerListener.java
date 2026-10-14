@@ -1,11 +1,15 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener;
 
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
 import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.NodeGraphManager;
 import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.node.impl.mc.OnChatMessageNode;
+import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.node.impl.mc.OnClientTickStartNode;
+import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.node.impl.mc.OnLevelChangeNode;
 
 import java.util.Map;
 
@@ -20,6 +24,11 @@ public class NodeGraphTriggerListener extends AbstractListener {
     public void registerListeners() {
         ClientTickEvents.START_CLIENT_TICK.register(this::onStartTick);
         ClientReceiveMessageEvents.GAME.register(this::onChat);
+        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register(this::onLevelChange);
+    }
+
+    private void onLevelChange(Minecraft mc, ClientLevel level) {
+        NodeGraphManager.INSTANCE.triggerAllStartNode(OnLevelChangeNode.FACTORY.getType());
     }
 
     private void onChat(Component component, boolean b) {
@@ -32,7 +41,7 @@ public class NodeGraphTriggerListener extends AbstractListener {
 
     // /src/client/java/pers/XiaoShadiao/skydiao/utils/nodegraphexecutor/node/skydiao_extensions.json
     private void onStartTick(Minecraft mc) {
-        NodeGraphManager.INSTANCE.triggerAllStartNode("on_tick_start");
+        NodeGraphManager.INSTANCE.triggerAllStartNode(OnClientTickStartNode.FACTORY.getType());
     }
 
 }

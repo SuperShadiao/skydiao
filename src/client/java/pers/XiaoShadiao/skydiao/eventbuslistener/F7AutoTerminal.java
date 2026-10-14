@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -119,7 +120,7 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
     private int currentMelodyLine;
 
     private void onClientTick(Minecraft mc) {
-        if(mc.player == null || mc.level == null || !(mc.screen instanceof ContainerScreen containerScreen)) {
+        if(mc.player == null || mc.level == null || !(mc.screen instanceof AbstractContainerScreen<?> containerScreen)) {
             if(currentTerminal == TerminalType.MELODY && mc.screen == null) {
                 if(currentMelodyLine == 2) {
                     sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotmelody[3].getValue());
@@ -134,7 +135,8 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
         if(System.currentTimeMillis() - openScreenTime < 350) {
             return;
         }
-        ChestMenu menu = containerScreen.getMenu();
+
+        if(!(containerScreen.getMenu() instanceof ChestMenu menu)) return;
         ItemStack carriedItem = menu.getCarried();      // 牢地服务器喜欢Lag, 所以判断这个东西避免频繁发包
 
         if(currentTerminal != null) {
@@ -358,7 +360,7 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
         }
 
         public boolean testScreen(F7AutoTerminal _this, Screen screen) {
-            if(!(screen instanceof ContainerScreen containerScreen)) return false;
+            if(!(screen instanceof AbstractContainerScreen<?> containerScreen)) return false;
             Matcher matcher = regex.matcher(containerScreen.getTitle().getString());
             if(matcher.find()) {
                 if(matcher.groupCount() == 1) arg = matcher.group(1);

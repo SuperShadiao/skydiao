@@ -1310,6 +1310,62 @@
       "configname": "§e灵动岛替换Tab列表",
       "description": "§e将Tab列表也替换成灵动岛显示 (部分Mod可能会覆写该功能导致动画异常)"
     },
+    "dungeonautogfs": {
+      "configname": "§e地牢自动取Sack物品总开关",
+      "description": "§e开启后, 背包中缺少物品时自动取出Sack里的物品 (总开关, 请确保你有Dungeon Sack且有充足物品后再开启)"
+    },
+    "dungeonautogfsleap": {
+      "configname": "§e地牢自动取Sack物品Spirit Leap",
+      "description": "§e开启后, 背包中缺少Spirit Leap时自动取出Sack里的物品"
+    },
+    "dungeonautogfstnt": {
+      "configname": "§e地牢自动取Sack物品Superboom TNT",
+      "description": "§e开启后, 背包中缺少Superboom TNT时自动取出Sack里的物品"
+    },
+    "dungeonautogfsdecoy": {
+      "configname": "§e地牢自动取Sack物品Decoy",
+      "description": "§e开启后, 背包中缺少Decoy时自动取出Sack里的物品"
+    },
+    "dungeonautogfsenderpearl": {
+      "configname": "§e地牢自动取Sack物品Ender Pearl",
+      "description": "§e开启后, 背包中缺少Ender Pearl时自动取出Sack里的物品"
+    },
+    "dungeonf7termuichoosecolorbuttoncolor": {
+      "configname": "§e选色终端按钮颜色",
+      "description": "§e自定义终端UI的选色终端的按钮的颜色"
+    },
+    "dungeonf7termuistartwithbuttoncolor": {
+      "configname": "§e首字母终端按钮颜色",
+      "description": "§e自定义终端UI的首字母终端的按钮的颜色"
+    },
+    "dungeonf7termuionoffbuttoncolor": {
+      "configname": "§e开关终端按钮颜色",
+      "description": "§e自定义终端UI的开关终端的按钮的颜色"
+    },
+    "dungeonf7termuichangecolorbuttonlight": {
+      "configname": "§e同色终端按钮颜色亮度",
+      "description": "§e自定义终端UI的同色终端的按钮的颜色的亮度, 取值范围为0~255"
+    },
+    "dungeonf7termuimelodyflagcolor": {
+      "configname": "§eMelody终端标记颜色",
+      "description": "§e自定义终端UI的Melody终端标记的按钮的颜色"
+    },
+    "dungeonf7termuimelodybuttoncolor": {
+      "configname": "§eMelody终端按钮颜色",
+      "description": "§e自定义终端UI的Melody终端的按钮的颜色"
+    },
+    "dungeonf7termuiclickorderfirstbuttoncolor": {
+      "configname": "§e顺序点击终端首个按钮颜色",
+      "description": "§e自定义终端UI的顺序点击终端首个按钮的按钮的颜色"
+    },
+    "dungeonf7termuiclickordersecondbuttoncolor": {
+      "configname": "§e顺序点击终端第二个按钮颜色",
+      "description": "§e自定义终端UI的顺序点击终端第二个按钮的按钮的颜色"
+    },
+    "dungeonf7termuiclickorderthirdbuttoncolor": {
+      "configname": "§e顺序点击终端第三个按钮颜色",
+      "description": "§e自定义终端UI的顺序点击终端第三个按钮的按钮的颜色"
+    },
 
     "about1": "§e小沙雕的QQ: 3381949033",
     "about2": "§e小沙雕の狗窝: https://xiaoshadiao.club/qqg",

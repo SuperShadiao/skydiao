@@ -33,4 +33,10 @@ public class OnClientTickStartNode extends AbstractNode {
     public boolean isEntry() {
         return true;
     }
+
+    @Override
+    public String label() {
+        return "每刻执行";
+    }
+
 }

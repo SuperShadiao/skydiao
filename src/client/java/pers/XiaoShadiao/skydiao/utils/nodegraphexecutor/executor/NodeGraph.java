@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 节点图：节点 + 边。可由网页端导出的 JSON 直接构造。
@@ -45,6 +46,8 @@ public final class NodeGraph {
 
     private final Map<String, AbstractNode> nodes = new LinkedHashMap<>();
     private final List<Edge> edges = new ArrayList<>();
+    /** 节点图作用域变量：整张图共享，跨触发保留；图被重新载入时随之丢弃 */
+    private final Map<String, Object> vars = new ConcurrentHashMap<>();
 
     // ---------- 构造 ----------
 
@@ -106,6 +109,11 @@ public final class NodeGraph {
 
     public Collection<AbstractNode> nodes() {
         return nodes.values();
+    }
+
+    /** 节点图作用域变量表 */
+    public Map<String, Object> vars() {
+        return vars;
     }
 
     /** 第一个入口节点（start / 事件）；没有则返回 null */

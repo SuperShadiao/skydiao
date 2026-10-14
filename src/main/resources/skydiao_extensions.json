@@ -9,7 +9,8 @@
   },
   "categories": [
     { "id": "skydiao_event", "label": "SkyDiao事件" },
-    { "id": "skydiao_chat", "label": "SkyDiao聊天" }
+    { "id": "skydiao_chat", "label": "SkyDiao聊天" },
+    { "id": "skydiao_server", "label": "SkyDiao服务器相关" }
   ],
   "types": {
     "on_tick_start": {
@@ -32,6 +33,26 @@
       "out": [{ "id": "msg", "label": "消息", "type": "string" }],
       "desc": "入口节点：收到聊天消息时触发执行，可匹配关键词。"
     },
+    "on_nodegraph_load": {
+      "category": "skydiao_event",
+      "label": "当节点图被加载",
+      "color": "#2e7d32",
+      "execIn": false,
+      "execOut": [{ "id": "out", "label": "执行" }],
+      "in": [],
+      "out": [],
+      "desc": "入口节点：节点图加载或重载完成后触发执行。"
+    },
+    "on_level_change": {
+      "category": "skydiao_event",
+      "label": "当世界变化时",
+      "color": "#2e7d32",
+      "execIn": false,
+      "execOut": [{ "id": "out", "label": "执行" }],
+      "in": [],
+      "out": [],
+      "desc": "入口节点：世界变化时触发执行。"
+    },
     "print_chat_message": {
       "category": "skydiao_chat",
       "label": "打印聊天消息",
@@ -40,7 +61,23 @@
       "execOut": [{ "id": "out", "label": "执行" }],
       "in": [{ "id": "msg", "label": "消息", "type": "string", "default": "OvO" }],
       "out": [],
-      "desc": "入口节点：收到聊天消息时触发执行，可匹配关键词。"
+      "desc": "在游戏中打印聊天消息。"
+    },
+    "get_server_self_online_info": {
+      "category": "skydiao_server",
+      "label": "取自身Hypixel在线状态",
+      "color": "#ff5454",
+      "execIn": true,
+      "execOut": [{ "id": "out", "label": "执行" }],
+      "in": [],
+      "out": [
+        { "id": "is_online", "label": "是否在线", "type": "bool" },
+        { "id": "game_type", "label": "游戏类型", "type": "string" },
+        { "id": "game_mode", "label": "游戏模式", "type": "string" },
+        { "id": "lobby_name", "label": "大厅名称", "type": "string" },
+        { "id": "server_id", "label": "服务器ID", "type": "string" }
+      ],
+      "desc": "获取自身Hypixel在线状态信息，例如是否在Hypixel服务器内、游戏类型、游戏模式、大厅名称、服务器ID等。"
     }
   }
 }

@@ -3,10 +3,11 @@ package pers.XiaoShadiao.skydiao.screen;
 import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.ContainerInput;
@@ -27,7 +28,7 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class F7TerminalScreen extends ContainerScreen implements IContainerScreenHelper {
+public class F7TerminalScreen extends AbstractContainerScreen<@NotNull ChestMenu> implements IContainerScreenHelper {
 
     public final F7AutoTerminal.TerminalType terminalType;
 
@@ -55,7 +56,7 @@ public class F7TerminalScreen extends ContainerScreen implements IContainerScree
     private int currentMelodyLine;
 
     public F7TerminalScreen(ChestMenu menu, Inventory inventory, Component title, F7AutoTerminal.TerminalType terminalType, boolean autoMode) {
-        super(menu, inventory, title);
+        super(menu, inventory, title, /*176*/ (ConfigManager.dungeonf7termuibuttonsize.getValue() + 2) * 7 + 44, 114 + menu.getRowCount() * 18);
         this.terminalType = terminalType;
         this.buttonSize = ConfigManager.dungeonf7termuibuttonsize.getValue();
         this.buttonSpacing = 2;
@@ -236,12 +237,15 @@ public class F7TerminalScreen extends ContainerScreen implements IContainerScree
                 i++;
                 int[] customSlotLineCol = getCustomSlotIndexByIndex(originSlots.indexOf(slot));
                 if(i == 1) {
-                    drawCustomSlot(graphics, customSlotLineCol, 0, 255, 0, 255);
+                    Color color = new Color(ConfigManager.dungeonf7termuiclickorderfirstbuttoncolor.getValue());
+                    drawCustomSlot(graphics, customSlotLineCol, color.getRed(), color.getGreen(), color.getBlue(), 255);
                     onSlotClick = (slot2, _) -> slot2 != slot;
                 } else if(i == 2) {
-                    drawCustomSlot(graphics, customSlotLineCol, 255, 255, 0, 175);
+                    Color color = new Color(ConfigManager.dungeonf7termuiclickordersecondbuttoncolor.getValue());
+                    drawCustomSlot(graphics, customSlotLineCol, color.getRed(), color.getGreen(), color.getBlue(), 255);
                 } else if(i == 3) {
-                    drawCustomSlot(graphics, customSlotLineCol, 255, 0, 0, 120);
+                    Color color = new Color(ConfigManager.dungeonf7termuiclickorderthirdbuttoncolor.getValue());
+                    drawCustomSlot(graphics, customSlotLineCol, color.getRed(), color.getGreen(), color.getBlue(), 255);
                 }
                 drawTextAtCustomSlot(graphics, String.valueOf(getItemOrOldItem(slot).getCount()), customSlotLineCol);
             }
@@ -273,9 +277,9 @@ public class F7TerminalScreen extends ContainerScreen implements IContainerScree
                         drawTitle(graphics, "选择...");
                         if (ToolList.getInstance().stringHasContext(terminalType.arg)) {
                             String s = ToolList.getInstance().deleteColorCode(item.getHoverName().getString());
-                            if (s.toLowerCase().startsWith(terminalType.arg.toLowerCase()) && !clickedSlots.contains(slot)
-                            ) {
-                                drawCustomSlot(graphics, customSlotLineCol, 0, 255, 0, 255);
+                            if (s.toLowerCase().startsWith(terminalType.arg.toLowerCase()) && !clickedSlots.contains(slot)) {
+                                Color color = new Color(ConfigManager.dungeonf7termuistartwithbuttoncolor.getValue());
+                                drawCustomSlot(graphics, customSlotLineCol, color.getRed(), color.getGreen(), color.getBlue(), 255);
                             } else {
                                 terminalButtons[customSlotIndex] = null;
                             }
@@ -296,7 +300,8 @@ public class F7TerminalScreen extends ContainerScreen implements IContainerScree
                                 if (!clickedSlots.contains(slot)
                                         && (itemUpCase.startsWith(colorUpperCase) || itemUpCase.endsWith(colorUpperCase) || (item.getItem().getDescriptionId().contains(colorItemID.toLowerCase()) && !item.getItem().getDescriptionId().contains("_" + colorItemID.toLowerCase()))
                                         || matchesSpecialCase(dye.get(), item))) {
-                                    drawCustomSlot(graphics, customSlotLineCol, 0, 255, 0, 255);
+                                    Color color = new Color(ConfigManager.dungeonf7termuichoosecolorbuttoncolor.getValue());
+                                    drawCustomSlot(graphics, customSlotLineCol, color.getRed(), color.getGreen(), color.getBlue(), 255);
                                 } else {
                                     terminalButtons[customSlotIndex] = null;
                                 }
@@ -306,17 +311,19 @@ public class F7TerminalScreen extends ContainerScreen implements IContainerScree
                     case ON_OFF -> {
                         drawTitle(graphics, "开关...");
                         if (item.getItem() == Items.RED_STAINED_GLASS_PANE && !clickedSlots.contains(slot)) {
-                            drawCustomSlot(graphics, customSlotLineCol, 255, 20, 0, 255);
+                            Color color = new Color(ConfigManager.dungeonf7termuionoffbuttoncolor.getValue());
+                            drawCustomSlot(graphics, customSlotLineCol, color.getRed(), color.getGreen(), color.getBlue(), 255);
                         } else {
                             terminalButtons[customSlotIndex] = null;
                         }
                     }
                     case CHANGE_COLOR -> {
                         drawTitle(graphics, "同色...");
+                        int light = Mth.clamp(ConfigManager.dungeonf7termuichangecolorbuttonlight.getValue(), 0, 255);
                         if(autoMode) {
                             Color color = COLOR_MAP.get(item.getItem());
                             if(color != null) {
-                                drawCustomSlot(graphics, customSlotLineCol, color.getRed(), color.getGreen(), color.getBlue(), 255);
+                                drawCustomSlot(graphics, customSlotLineCol, color.getRed(), color.getGreen(), color.getBlue(), light);
                             }
                         } else {
                             drawFooterTitle(graphics, "§7左键点击正数按钮, 右键点击负数按钮");
@@ -339,7 +346,7 @@ public class F7TerminalScreen extends ContainerScreen implements IContainerScree
                             };
                             if (i != 0) {
                                 int j = Math.abs(i);
-                                drawCustomSlot(graphics, customSlotLineCol, i < 0 ? 0 : 255, 125, i > 0 ? 0 : 255, 255 / (3 - j));
+                                drawCustomSlot(graphics, customSlotLineCol, i < 0 ? 0 : 255, 125, i > 0 ? 0 : 255, light / (3 - j));
                                 drawTextAtCustomSlot(graphics, String.valueOf(i), customSlotLineCol);
                             } else if (!item.isEmpty()) {
                                 terminalButtons[customSlotIndex] = null;
@@ -354,8 +361,12 @@ public class F7TerminalScreen extends ContainerScreen implements IContainerScree
                             int y = getButtonY(customSlotLineCol[0]);
                             RenderUtils.drawOutlineRect(graphics, x, y, x + buttonSize, y + buttonSize * 3 + buttonSpacing * 2, 0xFFFF00AA);
                         } else {
-                            if(item.getItem() == Items.LIME_STAINED_GLASS_PANE || item.getItem() == Items.LIME_TERRACOTTA) {
-                                drawCustomSlot(graphics, customSlotLineCol, 0, 255, 0, 255);
+                            if(item.getItem() == Items.LIME_STAINED_GLASS_PANE) {
+                                Color color = new Color(ConfigManager.dungeonf7termuimelodyflagcolor.getValue());
+                                drawCustomSlot(graphics, customSlotLineCol, color.getRed(), color.getGreen(), color.getBlue(), 255);
+                            } else if(item.getItem() == Items.LIME_TERRACOTTA) {
+                                Color color = new Color(ConfigManager.dungeonf7termuimelodybuttoncolor.getValue());
+                                drawCustomSlot(graphics, customSlotLineCol, color.getRed(), color.getGreen(), color.getBlue(), 255);
                             } else if(item.getItem() == Items.RED_STAINED_GLASS_PANE) {
                                 drawCustomSlot(graphics, customSlotLineCol, 30, 30, 30, 255);
                             }

@@ -75,9 +75,10 @@ public class AccountSelectScreen extends Screen {
     }
 
     private static final Set<MinecraftLogin.MinecraftSessionContainer> accounts = new HashSet<>();
+    private static boolean modified = false;
 
     public static Set<MinecraftLogin.MinecraftSessionContainer> getAccounts() {
-        return accounts;
+        return Collections.unmodifiableSet(accounts);
     }
 
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
@@ -205,23 +206,26 @@ public class AccountSelectScreen extends Screen {
     public static void save() {
 
         try {
-            JsonArray json = new JsonArray();
-            for (MinecraftLogin.MinecraftSessionContainer msc : accounts) {
-                if(msc.isPurchased) json.add(MSC_To_Json(msc));
-            }
-            // FileUtils.writeStringToFile(configFile, json.toString(), "UTF-8");
-            try {
-                if(nativeLoaded && ConfigManager.nacc.getValue()) {
-                    save0(json.toString());
-                    configFileMap.keySet().forEach(File::delete);
-                } else throw new UnsupportedOperationException();
-            } catch (Throwable e) {
-                if(!(e instanceof UnsupportedOperationException)) ToolList.getInstance().log.catching(e);
-                if(!(e instanceof NativeOperationException)) {
-                    FileUtils.writeByteArrayToFile(configCurrentFile, encodeString(json.toString(), getCurrentHWID()));
-                } else {
-                    tipError(translate("gui.accountmanager.tippinerrorinsave"));
+            if(modified) {
+                JsonArray json = new JsonArray();
+                for (MinecraftLogin.MinecraftSessionContainer msc : accounts) {
+                    if (msc.isPurchased) json.add(MSC_To_Json(msc));
                 }
+                // FileUtils.writeStringToFile(configFile, json.toString(), "UTF-8");
+                try {
+                    if (nativeLoaded && ConfigManager.nacc.getValue()) {
+                        save0(json.toString());
+                        configFileMap.keySet().forEach(File::delete);
+                    } else throw new UnsupportedOperationException();
+                } catch (Throwable e) {
+                    if (!(e instanceof UnsupportedOperationException)) ToolList.getInstance().log.catching(e);
+                    if (!(e instanceof NativeOperationException)) {
+                        FileUtils.writeByteArrayToFile(configCurrentFile, encodeString(json.toString(), getCurrentHWID()));
+                    } else {
+                        tipError(translate("gui.accountmanager.tippinerrorinsave"));
+                    }
+                }
+                modified = false;
             }
         } catch (Exception e) {
             ToolList.getInstance().log.warn("Failed to save accounts");
@@ -236,6 +240,8 @@ public class AccountSelectScreen extends Screen {
         accounts.remove(msc);
         accounts.add(msc);
 
+        modified = true;
+
         if(msc.isPurchased) {
             tipSuccess(/*"登录成功! "*/translate("gui.accountmanager.tipaccountloginsuccess") + " " + msc.name);
         } else {
@@ -248,6 +254,7 @@ public class AccountSelectScreen extends Screen {
         accounts.remove(msc);
         tipInfo(/*"删除" + msc.name + "成功!"*/translate("gui.accountmanager.tipdelete", msc.name));
 
+        modified = true;
         isAccountChanged = true;
     }
 

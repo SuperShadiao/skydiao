@@ -70,6 +70,7 @@
     "adapter.spmloader.FlyingStateChange",
     "adapter.spmloader.FlyingStateChangeParent",
     "adapter.spmloader.FreecamAndFreelookFixer",
+    "adapter.spmloader.MixinCancelForceDisable",
     "adapter.spmloader.MixinCloudConnection",
     "adapter.spmloader.MixinDisableClearRemote",
     "adapter.spmloader.MixinHelmetRemover",

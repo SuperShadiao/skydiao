@@ -52,7 +52,7 @@ public final class DynamicSpotHUD extends XSDHUD {
     private static final DynamicSpotAnimation TAB_ANIMATION = new DynamicSpotAnimation();
     private static float tabProgress;
     private static List<IdlePart> idleParts = List.of();
-    private static int idleWidth = IDLE_MIN_WIDTH;
+    private static float idleWidth = IDLE_MIN_WIDTH;
     private static Object lastConnection;
     private static boolean hypixel;
 
@@ -169,7 +169,12 @@ public final class DynamicSpotHUD extends XSDHUD {
         parts.add(textPart(client, fpsText, TEXT));
         idleParts = List.copyOf(parts);
         int contentWidth = parts.stream().mapToInt(IdlePart::width).sum();
-        idleWidth = Math.min(maxWidth, Math.max(IDLE_MIN_WIDTH, contentWidth + IDLE_TEXT_LEFT + IDLE_RIGHT_PADDING));
+
+        float idleAnimationWidth = Math.min(maxWidth, Math.max(IDLE_MIN_WIDTH, contentWidth + IDLE_TEXT_LEFT + IDLE_RIGHT_PADDING));
+
+        float delta = idleAnimationWidth - idleWidth;
+
+        idleWidth = idleWidth + delta * 0.09F;
     }
 
     private static IdlePart textPart(Minecraft client, String text, int color) {
@@ -274,7 +279,7 @@ public final class DynamicSpotHUD extends XSDHUD {
     private static void renderIdle(GuiGraphicsExtractor graphics) {
         int x = Math.round((Minecraft.getInstance().getWindow().getGuiScaledWidth() - idleWidth) / 2F);
         BlurredRoundedSurface.draw(graphics, x, CARD_TOP, idleWidth, IDLE_HEIGHT, IDLE_HEIGHT / 2F);
-        drawIdleContent(graphics, x, CARD_TOP, idleWidth, 1F);
+        drawIdleContent(graphics, x, CARD_TOP, Math.round(idleWidth), 1F);
     }
 
     private static void renderNotice(GuiGraphicsExtractor graphics, Notice notice) {

@@ -9,9 +9,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.executor.GraphRunner;
+import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.executor.NodeExecException;
 import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.executor.NodeGraph;
 import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.executor.NodeGraphError;
 import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.node.AbstractNode;
+import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.node.impl.basic.OnLoadGraphNode;
 
 import java.io.File;
 import java.io.IOException;
@@ -197,7 +199,20 @@ public final class NodeGraphManager {
 
     private NodeGraph put(String name, JsonObject root) {
         NodeGraph graph = NodeGraph.fromJson(root);
-        graphs.put(name == null || name.isBlank() ? "graph" : name, graph);
+        String realName = name == null || name.isBlank() ? "graph" : name;
+        NodeGraph oldGraph = graphs.put(realName, graph);
+        for (AbstractNode entry : graph.entries(OnLoadGraphNode.FACTORY.getType())) {
+            NodeGraphError error = new GraphRunner(graph, logger).runFrom(entry);
+            if(error != null) {
+                notifyError(error);
+                if(oldGraph != null) {
+                    graphs.put(realName, oldGraph);
+                } else {
+                    graphs.remove(realName);
+                }
+                throw new NodeExecException(error.code, error.message, error.detail);
+            }
+        }
         return graph;
     }
 
