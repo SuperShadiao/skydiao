@@ -252,6 +252,7 @@ public class ConfigManager {
     public static final ColorConfigOption dungeonf7termuiclickorderfirstbuttoncolor = new ColorConfigOption("dungeonf7termuiclickorderfirstbuttoncolor", 0x00FF00);
     public static final ColorConfigOption dungeonf7termuiclickordersecondbuttoncolor = new ColorConfigOption("dungeonf7termuiclickordersecondbuttoncolor", 0xFFFF00);
     public static final ColorConfigOption dungeonf7termuiclickorderthirdbuttoncolor = new ColorConfigOption("dungeonf7termuiclickorderthirdbuttoncolor", 0xFF0000);
+    public static final BooleanConfigOption dungeonautoswitchbackitem = new BooleanConfigOption("dungeonautoswitchbackitem", false);
 
     public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
@@ -274,6 +275,7 @@ public class ConfigManager {
     public static final StringConfigOption dungeonTrashTPS = new StringConfigOption("dungeontrashtps", "太强了喵, 我们服务器有很高的[tps] TPS喵!");
     public static final StringConfigOption dungeonf7msgbotssleap = new StringConfigOption("dungeonf7msgbotssleap", "已安全到达Simon Says处, 准许Leap!");
     public static final StringConfigOption dungeonMissingPlayer = new StringConfigOption("dungeonmissingplayer", "玩家[players]未进入服务器!");
+    public static final StringConfigOption dungeonCryptsEnough = new StringConfigOption("dungeoncryptsenough", "已获取足够的Crypts!");
 
     public static final StringConfigOption hudOffsetAndScale = new StringConfigOption("hudoffsetandscale", "{}");
 
@@ -371,7 +373,8 @@ public class ConfigManager {
 
                     dungeonautogfs, dungeonautogfsleap, dungeonautogfstnt, dungeonautogfsdecoy, dungeonautogfsenderpearl,
 
-                    resurrectionItemTriggeredTitle, dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7InactiveTerminalRender,
+                    dungeonautoswitchbackitem, resurrectionItemTriggeredTitle,
+                    dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7InactiveTerminalRender,
                     f7TerminalESPTracer, f7ArrowAlignSolver, f7ArrowAlignSolverBlockWrongClicks,
                     f7SimonSaysSolver, f7SimonSaysSolverBlockWrongClicks, dungeonReviveItemCDRender,
                     f7DrawWitherDragonESP, f7DrawStormFireballTarget, f7DrawWitherDragonLightning, f7AutoSwapEnderDragonInWitherKing,
@@ -382,7 +385,7 @@ public class ConfigManager {
                     dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotcoretunnel,
                     dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered,
                     dungeonDrinkPotion, dungeonBloodRoomTime, dungeonTrashTPS,
-                    dungeonf7msgbotssleap, dungeonMissingPlayer)),
+                    dungeonf7msgbotssleap, dungeonMissingPlayer, dungeonCryptsEnough)),
             Map.entry("rift", List.of(rifttimegunhelper)),
             Map.entry("界面类", List.of(openHud, bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, bossDrawESP, customBossESPTracer, starrailNotification, starrailNotificationSound, dyingtip, noblind, nosuffoverlay, fireOverlay, lyricColor1, lyricColor2, dynamicSpot, dynamicSpotReplaceTabList)),
             Map.entry("ravengard", List.of(ravengardHelper, ravengardQueueMessage))

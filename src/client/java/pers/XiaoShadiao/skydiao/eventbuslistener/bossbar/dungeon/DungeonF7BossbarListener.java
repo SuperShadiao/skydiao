@@ -148,6 +148,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     public double getHealth() {
         // float health = f7Boss.getHealth();
         if(f7Boss == null) return 0;
+        if(currentStage == 5 && Arrays.stream(WitherDragonData.ColorType.values()).allMatch(WitherDragonData.ColorType::isDragonDead)) return 0;
         double scale = f7Boss.getProgress();
         return getMaxHealth() * (scale < 0.02 ? 0 : scale);
     }

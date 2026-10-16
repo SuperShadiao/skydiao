@@ -5,24 +5,18 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.multiplayer.PlayerInfo;
-import net.minecraft.network.chat.Component;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.scores.DisplaySlot;
-import net.minecraft.world.scores.Objective;
-import net.minecraft.world.scores.PlayerScoreEntry;
-import net.minecraft.world.scores.PlayerTeam;
-import net.minecraft.world.scores.Scoreboard;
+import net.minecraft.world.scores.*;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.utils.renderutils.BlurredRoundedSurface;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 public final class DynamicSpotHUD extends XSDHUD {
@@ -30,7 +24,7 @@ public final class DynamicSpotHUD extends XSDHUD {
     private static final int TAB_CARD_TOP = 15;
     private static final int IDLE_HEIGHT = 28;
     private static final int IDLE_MIN_WIDTH = 210;
-    private static final int IDLE_TEXT_LEFT = 34;
+    private static final int IDLE_TEXT_LEFT = 17;
     private static final int IDLE_RIGHT_PADDING = 22;
     private static final int STATUS_ICON_SIZE = 12;
     private static final int STATUS_ICON_GAP = 4;
@@ -53,8 +47,13 @@ public final class DynamicSpotHUD extends XSDHUD {
     private static float tabProgress;
     private static List<IdlePart> idleParts = List.of();
     private static float idleWidth = IDLE_MIN_WIDTH;
-    private static Object lastConnection;
-    private static boolean hypixel;
+
+    public static final Identifier MOD_NAME_PART_ID = Identifier.fromNamespaceAndPath("skydiao", "dynamic_spot_mod_name");
+    public static final Identifier USERNAME_PART_ID = Identifier.fromNamespaceAndPath("skydiao", "dynamic_spot_username");
+    public static final Identifier FPSTPS_PART_ID = Identifier.fromNamespaceAndPath("skydiao", "dynamic_spot_fps_tps");
+    public static final Identifier SEPARATOR_PART_ID = Identifier.fromNamespaceAndPath("skydiao", "dynamic_spot_separator");
+
+    private static final List<ReplaceIdlePart> replaceIdleParts = new ArrayList<>();
 
     @Override
     public void runRegister() {
@@ -123,7 +122,7 @@ public final class DynamicSpotHUD extends XSDHUD {
         return idleWidth;
     }
 
-    private static Identifier statusIcon(String name) {
+    public static Identifier statusIcon(String name) {
         return Identifier.fromNamespaceAndPath("skydiao", "textures/gui/dynamic_spot/" + name + ".png");
     }
 
@@ -153,11 +152,10 @@ public final class DynamicSpotHUD extends XSDHUD {
 //        }
 
         List<IdlePart> parts = new ArrayList<>();
-        parts.add(textPart(client, "Skydiao", TEXT));
-        parts.add(textPart(client, SEPARATOR, MUTED));
-        parts.add(iconPart(USER_ICON, TEXT));
-        parts.add(textPart(client, user, TEXT));
-        parts.add(textPart(client, SEPARATOR, MUTED));
+        parts.add(iconPart(MOD_NAME_PART_ID, CLIENT_ICON, 18, TEXT, textPart(null, "Skydiao", TEXT, null)));
+        parts.add(textPart(SEPARATOR_PART_ID, SEPARATOR, MUTED, null));
+        parts.add(iconPart(USERNAME_PART_ID, USER_ICON, TEXT, textPart(null, user, TEXT, null)));
+        parts.add(textPart(SEPARATOR_PART_ID, SEPARATOR, MUTED, null));
 //        parts.add(iconPart(LINK_ICON, pingColor));
 //        if (server != null) {
 //            parts.add(textPart(client, pingText, pingColor));
@@ -165,8 +163,33 @@ public final class DynamicSpotHUD extends XSDHUD {
 //        }
 //        parts.add(textPart(client, connection, TEXT));
 //        parts.add(textPart(client, SEPARATOR, MUTED));
-        parts.add(iconPart(REFRESH_ICON, TEXT));
-        parts.add(textPart(client, fpsText, TEXT));
+        parts.add(iconPart(FPSTPS_PART_ID, REFRESH_ICON, TEXT, textPart(null, fpsText, TEXT, null)));
+
+        replaceIdleParts.removeIf(entry -> entry.shouldRemove.getAsBoolean());
+        parts.replaceAll(part -> {
+            for (ReplaceIdlePart replaceIdlePart : replaceIdleParts) {
+                if (Objects.equals(replaceIdlePart.targetIdHolder, part.idHolder)) {
+                    part = replaceIdlePart.part.get();
+                }
+            }
+            return part;
+        });
+        Iterator<IdlePart> iterator = parts.iterator();
+        boolean removeSeparator = false;
+        while (iterator.hasNext()) {
+            IdlePart part = iterator.next();
+            if (part == null) {
+                iterator.remove();
+                removeSeparator = true;
+                continue;
+            }
+            if (removeSeparator && part.idHolder == SEPARATOR_PART_ID) {
+                removeSeparator = false;
+                iterator.remove();
+                continue;
+            }
+        }
+
         idleParts = List.copyOf(parts);
         int contentWidth = parts.stream().mapToInt(IdlePart::width).sum();
 
@@ -177,12 +200,34 @@ public final class DynamicSpotHUD extends XSDHUD {
         idleWidth = idleWidth + delta * 0.09F;
     }
 
-    private static IdlePart textPart(Minecraft client, String text, int color) {
-        return new IdlePart(text, null, color, client.font.width(text));
+    public static IdlePart textPart(Identifier idHolder, String text, int color, IdlePart next) {
+        return new IdlePart(idHolder, Component.literal(text), null, color, mc.font.width(text), next);
     }
 
-    private static IdlePart iconPart(Identifier icon, int color) {
-        return new IdlePart("", icon, color, STATUS_ICON_SIZE + STATUS_ICON_GAP);
+    public static IdlePart textPart(Identifier idHolder, Component text, int color, IdlePart next) {
+        return new IdlePart(idHolder, text, null, color, mc.font.width(text), next);
+    }
+
+    public static IdlePart iconPart(Identifier idHolder, Identifier icon, int color, IdlePart next) {
+        return new IdlePart(idHolder, Component.empty(), icon, color, STATUS_ICON_SIZE + STATUS_ICON_GAP, next);
+    }
+
+    public static IdlePart iconPart(Identifier idHolder, Identifier icon, int iconSize, int color, IdlePart next) {
+        return new IdlePart(idHolder, Component.empty(), icon, color, iconSize + STATUS_ICON_GAP, next);
+    }
+
+    public static void replaceIdlePart(Identifier targetIdHolder, IdlePart part, long durationMs) {
+        long startTime = System.currentTimeMillis();
+        replaceIdleParts.add(new ReplaceIdlePart(targetIdHolder, () -> part, () -> System.currentTimeMillis() - startTime > durationMs));
+    }
+
+    public static void replaceIdlePart(Identifier targetIdHolder, Supplier<IdlePart> part, long durationMs) {
+        long startTime = System.currentTimeMillis();
+        replaceIdleParts.add(new ReplaceIdlePart(targetIdHolder, part, () -> System.currentTimeMillis() - startTime > durationMs));
+    }
+
+    public static void replaceIdlePart(Identifier targetIdHolder, Supplier<IdlePart> part, BooleanSupplier shouldRemove) {
+        replaceIdleParts.add(new ReplaceIdlePart(targetIdHolder, part, shouldRemove));
     }
 
     public static void drawTabShell(GuiGraphicsExtractor graphics, int screenWidth, int naturalTop,
@@ -228,8 +273,6 @@ public final class DynamicSpotHUD extends XSDHUD {
         }
         tabProgress = 0F;
         TAB_ANIMATION.reset();
-        lastConnection = null;
-        hypixel = false;
     }
 
     public static void showSuccess(String title, String detail, long durationMs) {
@@ -302,18 +345,23 @@ public final class DynamicSpotHUD extends XSDHUD {
         graphics.enableScissor(x + 4, y + 2, x + width - 4, y + IDLE_HEIGHT - 2);
         try {
             // Sample the complete transparent logo, including during the Tab crossfade.
-            graphics.blit(RenderPipelines.GUI_TEXTURED, CLIENT_ICON, x + 8, y + 5,
-                    0, 0, 18, 18, 64, 64, 64, 64, (alpha << 24) | 0xFFFFFF);
+//            graphics.blit(RenderPipelines.GUI_TEXTURED, CLIENT_ICON, x + 8, y + 5,
+//                    0, 0, 18, 18, 64, 64, 64, 64, (alpha << 24) | 0xFFFFFF);
+            // int partX = x + IDLE_TEXT_LEFT;
             int partX = x + IDLE_TEXT_LEFT;
-            for (IdlePart part : idleParts) {
-                int color = (alpha << 24) | (part.color() & 0xFFFFFF);
-                if (part.icon() == null) {
-                    graphics.text(client.font, Component.literal(part.text()), partX, y + (IDLE_HEIGHT - client.font.lineHeight + 2) / 2, color);
-                } else {
-                    graphics.blit(RenderPipelines.GUI_TEXTURED, part.icon(), partX, y + (IDLE_HEIGHT - STATUS_ICON_SIZE) / 2,
-                            0, 0, STATUS_ICON_SIZE, STATUS_ICON_SIZE, 64, 64, 64, 64, color);
-                }
-                partX += part.width();
+            for (IdlePart part1 : idleParts) {
+                IdlePart part = part1;
+                do {
+                    int color = (alpha << 24) | (part.color() & 0xFFFFFF);
+                    if (part.icon() == null) {
+                        graphics.text(client.font, part.text(), partX, y + (IDLE_HEIGHT - client.font.lineHeight + 2) / 2, color);
+                    } else {
+                        int iconSize = part.width - STATUS_ICON_GAP;
+                        graphics.blit(RenderPipelines.GUI_TEXTURED, part.icon(), partX, y + (IDLE_HEIGHT - iconSize) / 2,
+                                0, 0, iconSize, iconSize, 64, 64, 64, 64, color);
+                    }
+                    partX += part.width;
+                } while ((part = part.next()) != null);
             }
         } finally {
             graphics.disableScissor();
@@ -382,9 +430,16 @@ public final class DynamicSpotHUD extends XSDHUD {
     private record Notice(String title, String detail, String type, int color, long createdAt, long durationMs) {
     }
 
-    private record IdlePart(String text, Identifier icon, int color, int width) {
+    public record IdlePart(Identifier idHolder, Component text, Identifier icon, int color, int width, IdlePart next) {
+
+        public int width() {
+            if (next != null) return width + next.width();
+            return width;
+        }
+
     }
 
-
+    public record ReplaceIdlePart(Identifier targetIdHolder, Supplier<IdlePart> part, BooleanSupplier shouldRemove) {
+    }
 
 }

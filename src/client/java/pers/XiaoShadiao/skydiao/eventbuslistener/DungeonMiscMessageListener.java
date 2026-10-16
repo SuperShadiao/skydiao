@@ -23,6 +23,7 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.math.NumberUtils;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
@@ -32,6 +33,7 @@ import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
+import pers.XiaoShadiao.skydiao.utils.tab.TabReader;
 
 import java.util.List;
 
@@ -41,6 +43,8 @@ public class DungeonMiscMessageListener extends AbstractListener implements IDun
 
     private final IntPriorityQueue armorStandDungeonKey = new IntArrayFIFOQueue();
     private ArmorStand currentArmorStandDungeonKey;
+
+    private boolean isCryptsEnough = false;
 
     @Override
     public String getListenerName() {
@@ -130,6 +134,7 @@ public class DungeonMiscMessageListener extends AbstractListener implements IDun
 
     private void onUnload(Minecraft mc, ClientLevel level) {
         dungeonStartTime = -1;
+        isCryptsEnough = false;
     }
 
     private void onChat(Component component, boolean b) {
@@ -166,7 +171,20 @@ public class DungeonMiscMessageListener extends AbstractListener implements IDun
                 }
             }
         }
-        // sendDungeonF7ChatMessage(ConfigManager.dungeonBloodRoomTime.getValue());;
+
+        if(!isCryptsEnough) TabReader.findLineStartsWith("Crypts: ").ifPresent(
+                line -> {
+                    String replace = line.replace("Crypts: ", "");
+                    if (NumberUtils.isDigits(replace)) {
+                        int crypt = Integer.parseInt(replace);
+                        if(crypt >= 5) {
+                            isCryptsEnough = true;
+                            addStarRailNotification("已获取足够的Crypts!", StarRailNotification.Type.success);
+                            sendDungeonF7ChatMessage(ConfigManager.dungeonCryptsEnough.getValue());
+                        }
+                    }
+                }
+        );
     }
 
     @Override

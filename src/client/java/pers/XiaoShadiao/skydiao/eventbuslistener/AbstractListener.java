@@ -89,6 +89,8 @@ public abstract class AbstractListener extends Thread {
     public static final AutoFindLobbyEventEgg autoFindLobbyEventEgg = new AutoFindLobbyEventEgg();
     public static final NodeGraphTriggerListener nodeGraphTriggerListener = new NodeGraphTriggerListener();
     public static final DungeonAutoGFSListener dungeonAutoGFSListener = new DungeonAutoGFSListener();
+    public static final DungeonNoSwapItemInEndListener dungeonNoSwapItemInEndListener = new DungeonNoSwapItemInEndListener();
+    public static final AutoPetToDynamicSpotListener autoPetToDynamicSpotListener = new AutoPetToDynamicSpotListener();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();

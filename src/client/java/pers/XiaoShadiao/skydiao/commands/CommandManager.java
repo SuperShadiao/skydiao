@@ -37,6 +37,8 @@ public interface CommandManager {
     public static final SkydiaoHudCommand SKYDIAO_HUD_COMMAND = new SkydiaoHudCommand();
     public static final HHHudCommand HH_HUD_COMMAND = new HHHudCommand();
     public static final XSDCBlockCommand XSDC_BLOCK_COMMAND = new XSDCBlockCommand();
+    public static final HHRepartyCommand HH_REPARTY_COMMAND = new HHRepartyCommand();
+    public static final SkydiaoRepartyCommand SKYDIAO_REPARTY_COMMAND = new SkydiaoRepartyCommand();
 
     public static void registerCommands() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {

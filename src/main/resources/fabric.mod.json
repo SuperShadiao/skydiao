@@ -44,12 +44,13 @@
   },
   "suggests": {
     "chatpatches": "8.0-alpha.9",
-    "sparkle_morpher": "*"
+    "sparkle_morpher": ">=2.1.0"
   },
   "breaks": {
     "chatpatches": "<8.0-alpha.8",
     "replaymod": "*",
-    "essential": "*"
+    "essential": "*",
+    "sparkle_morpher": "<2.1.0"
   },
   "custom": {
     "modmenu": {

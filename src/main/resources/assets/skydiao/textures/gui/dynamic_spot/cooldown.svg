@@ -1,0 +1,28 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+    <!-- 顶部横条 -->
+    <rect x="10" y="6" width="44" height="5" rx="2.5" fill="#FFFFFF"/>
+    <!-- 底部横条 -->
+    <rect x="10" y="53" width="44" height="5" rx="2.5" fill="#FFFFFF"/>
+
+    <!-- 沙漏外轮廓 -->
+    <path d="M 14 11 L 50 11 L 32 32 L 50 53 L 14 53 L 32 32 Z"
+          fill="none" stroke="#FFFFFF" stroke-width="2.5"
+          stroke-linejoin="round"/>
+
+    <!-- 上方沙子：表面呈凹陷漏斗状 -->
+    <path d="M 19 16
+           Q 25 21 32 19
+           Q 39 21 45 16
+           L 34 28
+           L 30 28
+           Z"
+          fill="#FFFFFF"/>
+
+    <!-- 下方沙堆：圆顶三角堆 -->
+    <path d="M 18 51
+           L 29 39
+           Q 32 36 35 39
+           L 46 51
+           Z"
+          fill="#FFFFFF"/>
+</svg>

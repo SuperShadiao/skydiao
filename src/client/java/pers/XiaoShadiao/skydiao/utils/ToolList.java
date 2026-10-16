@@ -382,7 +382,6 @@ public class ToolList {
 
     public String getMidOfText(String target, String left, String right) {
         try {
-
             int j = 0, k = 0;
             boolean b = false;
 
@@ -399,12 +398,30 @@ public class ToolList {
                 }
             }
             return k * j == 0 ? "" : target.substring(j, k);
-
         } catch (Exception e) {
             e.printStackTrace();
             return "";
         }
     }
+
+//    public String getMidOfText(String target, String left, String right) {
+//        if (target == null || left == null || right == null) {
+//            return "";
+//        }
+//
+//        int leftIndex = target.indexOf(left);
+//        if (leftIndex < 0) {
+//            return "";
+//        }
+//
+//        int start = leftIndex + left.length();
+//        int rightIndex = target.indexOf(right, start);
+//        if (rightIndex < 0) {
+//            return "";
+//        }
+//
+//        return target.substring(start, rightIndex);
+//    }
 
     public double ezStringToNumber(String number) {
         if (number == null || number.isEmpty()) {

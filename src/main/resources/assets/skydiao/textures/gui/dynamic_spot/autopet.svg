@@ -1,0 +1,35 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <!-- 用于挖出齿轮中心孔 -->
+        <mask id="gearHole">
+            <rect width="64" height="64" fill="white"/>
+            <circle cx="48" cy="48" r="3.5" fill="black"/>
+        </mask>
+    </defs>
+
+    <!-- 骨头：逆时针旋转45度，纯白色 -->
+    <g transform="rotate(-45, 30, 27)" fill="#FFFFFF">
+        <rect x="12" y="21" width="36" height="12" rx="3"/>
+        <circle cx="12" cy="18" r="8"/>
+        <circle cx="12" cy="36" r="8"/>
+        <circle cx="48" cy="18" r="8"/>
+        <circle cx="48" cy="36" r="8"/>
+    </g>
+
+    <!-- 右下角齿轮：纯白色，带中心孔，更像设置图标 -->
+    <g mask="url(#gearHole)">
+        <!-- 8个齿轮齿 -->
+        <g fill="#FFFFFF">
+            <rect x="45.5" y="34" width="5" height="5" rx="1"/>
+            <rect x="45.5" y="34" width="5" height="5" rx="1" transform="rotate(45, 48, 48)"/>
+            <rect x="45.5" y="34" width="5" height="5" rx="1" transform="rotate(90, 48, 48)"/>
+            <rect x="45.5" y="34" width="5" height="5" rx="1" transform="rotate(135, 48, 48)"/>
+            <rect x="45.5" y="34" width="5" height="5" rx="1" transform="rotate(180, 48, 48)"/>
+            <rect x="45.5" y="34" width="5" height="5" rx="1" transform="rotate(225, 48, 48)"/>
+            <rect x="45.5" y="34" width="5" height="5" rx="1" transform="rotate(270, 48, 48)"/>
+            <rect x="45.5" y="34" width="5" height="5" rx="1" transform="rotate(315, 48, 48)"/>
+        </g>
+        <!-- 齿轮圆盘主体 -->
+        <circle cx="48" cy="48" r="9" fill="#FFFFFF"/>
+    </g>
+</svg>
