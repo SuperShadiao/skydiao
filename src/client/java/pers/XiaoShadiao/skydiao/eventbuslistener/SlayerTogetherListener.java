@@ -71,8 +71,7 @@ public class SlayerTogetherListener extends AbstractListener {
         if(mc.player == null) return;
 
         String message = ToolList.getInstance().deleteColorCode(component.getString());
-        if (message.matches("SLAYER MINI-BOSS (.*) has spawned!")) {
-
+        if (message.matches("(SLAYER MINI-BOSS (.*) has spawned!|SLAYER MINIBOSS! (.*) spawned!)")) {
             String killsLine = null;
             for (String s : ToolList.getInstance().fetchScoreboardLinesNoColor()) {
                 if(s.matches(" ?\\d+/\\d+ Kills")) {
