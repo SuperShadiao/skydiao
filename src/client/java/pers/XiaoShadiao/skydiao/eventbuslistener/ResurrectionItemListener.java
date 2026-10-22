@@ -14,8 +14,6 @@ import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
-import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -103,18 +101,18 @@ public class ResurrectionItemListener extends AbstractListener implements IDunge
         return phoenixCD;
     }
 
-    private class DynamicSpotCooldown implements Supplier<DynamicSpotHUD.IdlePart>, BooleanSupplier {
+    private class DynamicSpotCooldown implements DynamicSpotHUD.IdlePartSupplier, DynamicSpotHUD.ShouldRemoveSupplier {
 
         private DynamicSpotHUD.IdlePart tempPart = null;
         private long lastUpdateTime = 0;
 
         @Override
-        public boolean getAsBoolean() {
+        public boolean shouldRemove() {
             return getPhoenixCD() <= 0 && getBonzoCD() <= 0 && getSpiritCD() <= 0;
         }
 
         @Override
-        public DynamicSpotHUD.IdlePart get() {
+        public DynamicSpotHUD.IdlePart getIdlePart(Identifier replaceTargetIdHolder) {
             if(tempPart != null) {
                 if(System.currentTimeMillis() - lastUpdateTime < 4000) {
                     return tempPart;

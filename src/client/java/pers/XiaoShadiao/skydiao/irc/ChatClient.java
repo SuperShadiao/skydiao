@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.ICustomSkinModelLoader;
+import pers.XiaoShadiao.skydiao.utils.OnlinePlayerList;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
@@ -166,6 +167,8 @@ public class ChatClient extends Thread {
             try { listener.interrupt(); } catch (Exception e) { }
             try { sender.interrupt(); } catch (Exception e) { }
             try { socket.close(); } catch (Exception e) { }
+            
+            OnlinePlayerList.clearPlayers();
 
             if(retryCount > 0 && doWhileToken == currentWhileToken) {
                 retryCount--;
@@ -213,6 +216,7 @@ public class ChatClient extends Thread {
         }
 
         ToolList.getInstance().updatePartyInfo();
+        sender.sendGetOnlinePlayers();
     }
 
     public void flagHeartbeat() {

@@ -312,7 +312,8 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
             pendingClick = null;
             return;
         }
-        if (System.currentTimeMillis() - lastClickTime > ToolList.getInstance().random.nextInt(100) + ConfigManager.dungeonf7autotermclickdelay.getValue()) {
+        int delay = Math.max(80, ConfigManager.dungeonf7autotermclickdelay.getValue());
+        if (System.currentTimeMillis() - lastClickTime > ToolList.getInstance().random.nextInt(100) + delay) {
             if(pendingClick != null) {
                 Click temp = lastClick = pendingClick;
                 pendingClick = null;
@@ -329,7 +330,7 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                 }
                 if(temp.addBlacklistAfterClick) blacklistedSlots.add(temp.slot.index);
             } else {
-                if(enableNoForceDelayClick() && System.currentTimeMillis() - lastClickTime > 500 + ConfigManager.dungeonf7autotermclickdelay.getValue() && !blacklistedSlots.isEmpty()) {
+                if(enableNoForceDelayClick() && System.currentTimeMillis() - lastClickTime > 500 + delay && !blacklistedSlots.isEmpty()) {
                     blacklistedSlots.clear();
                     logger.info("Cleared click blp cause no pending clicks");
                 }

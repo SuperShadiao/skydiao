@@ -11,6 +11,7 @@ import net.minecraft.world.item.ItemStackTemplate;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.ICustomSkinModelLoader;
+import pers.XiaoShadiao.skydiao.utils.OnlinePlayerList;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicInfo;
@@ -42,9 +43,13 @@ public class ClientReceiveHandler {
                     ToolList.printChatMessage(Component.literal("§a[XSDChat] §7[§b+§7] " + packet.getRank(true) + "§b" + packet.sender + "..."));
                     if(ConfigManager.enablexsdccommandtip.getValue()) ToolList.printChatMessage(Component.literal("§a[XSDChat] " + CrowdinI18nManager.translate("xsdchat.xsdctip")));
                 }
+                if(!packet.getRank(false).contains("[离线]")) {
+                    OnlinePlayerList.addPlayer(packet.sender, packet.senderUUID, packet.message);
+                }
                 break;
             case "leave":
                 if(ConfigManager.enableircjointip.getValue()) ToolList.printChatMessage(Component.literal("§a[XSDChat] §7[§c-§7] " + packet.getRank(true) + "§c" + packet.sender + "..."));
+                OnlinePlayerList.removePlayerByUUID(packet.senderUUID);
                 break;
             case "heartbeat":
                 sender.flagHeartbeat();
@@ -96,6 +101,9 @@ public class ClientReceiveHandler {
                         .withHoverEvent(new HoverEvent.ShowText(Component.literal("/skydiao listensharemusic " + shareId)));
                 ToolList.printChatMessage(component.withStyle(style1));
                 ToolList.printChatMessage(component2.withStyle(style1));
+                break;
+            case "get_players":
+                OnlinePlayerList.readFromPacket(packet);
                 break;
         }
     }

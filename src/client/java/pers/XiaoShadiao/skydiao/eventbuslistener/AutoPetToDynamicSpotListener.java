@@ -20,7 +20,6 @@ public class AutoPetToDynamicSpotListener extends AbstractListener {
 
     private void onChat(Component component, boolean b) {
         String message = component.getString();
-
         // §cAutopet §eequipped your §7[Lvl 100] §dGuardian§e! §a§lVIEW RULE
         String pet = ToolList.getInstance().getMidOfText(message, "§cAutopet §eequipped your ", "§e!");
         if (pet.isBlank()) {
@@ -30,6 +29,11 @@ public class AutoPetToDynamicSpotListener extends AbstractListener {
         DynamicSpotHUD.replaceIdlePart(
                 DynamicSpotHUD.USERNAME_PART_ID,
                 DynamicSpotHUD.iconPart(null, DynamicSpotHUD.statusIcon("autopet"), 0xFFFFFFFF, DynamicSpotHUD.textPart(null, "§cAutopet §r➜ " + pet, 0xFFFFFFFF, null)),
+                5000L
+        );
+        DynamicSpotHUD.replaceIdlePart(
+                DynamicSpotHUD.MOD_NAME_PART_ID,
+                (DynamicSpotHUD.IdlePart) null,
                 5000L
         );
     }

@@ -32,6 +32,7 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.network.DisconnectionDetails;
 import net.minecraft.network.PacketListener;
@@ -72,6 +73,7 @@ import pers.XiaoShadiao.skydiao.utils.playerinput.XSDSimulatorInput;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 import pers.XiaoShadiao.skydiao.utils.renderutils.Gif;
 import pers.XiaoShadiao.skydiao.utils.renderutils.ImageTexture;
+import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -128,6 +130,20 @@ public class BasicListener extends AbstractListener {
                 BLiveListener.launch();
             }
         });
+        LevelRenderEvents.COLLECT_SUBMITS.register(this::onCollectSubmits);
+    }
+
+    private void onCollectSubmits(LevelRenderContext context) {
+        if(mc.level == null) {
+            return;
+        }
+        for (AbstractClientPlayer player : mc.level.players()) {
+            if(player == mc.player) continue;
+
+            if(OnlinePlayerList.getPlayerNames().contains(player.getName().getString())) {
+                RenderUtils.renderClientLogoOnEntity(context, player);
+            }
+        }
     }
 
     private static final Identifier firmModListPayload = Identifier.fromNamespaceAndPath("firmament", "mod_list");
@@ -349,6 +365,7 @@ public class BasicListener extends AbstractListener {
                                 .withClickEvent(new ClickEvent.RunCommand("/hhm modmenumod"))
                         ));
                     }
+                    ToolList.printChatMessage(Component.literal("§a[小沙雕] §e小提示: " + RandomTips.getRandomTip()));
                 });
                 return null;
             });

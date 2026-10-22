@@ -1372,7 +1372,47 @@
     },
     "dungeoncryptsenough": {
       "configname": "§e地牢Crypts充足消息发送",
-      "description": "§e地牢内获取到5个Crypts时发送一条消息"
+      "description": "§e地牢内获取到5个Crypts时发送一条消息 (留空则禁用该消息)"
+    },
+    "dungeonf7stage3enterarea2": {
+      "configname": "§e地牢F7第三阶段进入第二个终端区域消息发送",
+      "description": "§e地牢内进入到第三阶段第二个终端区域时发送一条消息, 以方便提示落后的玩家进行传送 (留空则禁用该消息)"
+    },
+    "dungeonf7stage3enterarea3": {
+      "configname": "§e地牢F7第三阶段进入第三个终端区域消息发送",
+      "description": "§e地牢内进入到第三阶段第三个终端区域时发送一条消息, 以方便提示落后的玩家进行传送 (留空则禁用该消息)"
+    },
+    "dungeonf7stage3enterarea4": {
+      "configname": "§e地牢F7第三阶段进入第四个终端区域消息发送",
+      "description": "§e地牢内进入到第三阶段第四个终端区域时发送一条消息, 以方便提示落后的玩家进行传送 (留空则禁用该消息)"
+    },
+    "dungeonuseragnarock3s": {
+      "configname": "§e地牢使用Ragnarock剩余3s消息发送",
+      "description": "§e地牢内使用Ragnarock蓄力剩余3s时发送一条消息 (留空则禁用该消息)"
+    },
+    "dungeonuseragnarock2s": {
+      "configname": "§e地牢使用Ragnarock剩余2s消息发送",
+      "description": "§e地牢内使用Ragnarock蓄力剩余2s时发送一条消息 (留空则禁用该消息)"
+    },
+    "dungeonuseragnarock1s": {
+      "configname": "§e地牢使用Ragnarock剩余1s消息发送",
+      "description": "§e地牢内使用Ragnarock蓄力剩余1s时发送一条消息 (留空则禁用该消息)"
+    },
+    "dungeonuseragnarock": {
+      "configname": "§e地牢使用Ragnarock消息发送",
+      "description": "§e地牢内使用Ragnarock蓄力完成时发送一条消息, 使用[strength]代表通过Ragnarock获取的力量数 (留空则禁用该消息)"
+    },
+    "dungeonuseragnarockcancelled": {
+      "configname": "§e地牢使用Ragnarock取消消息发送",
+      "description": "§e地牢内使用Ragnarock时因切换物品取消了蓄力时发送一条消息 (留空则禁用该消息)"
+    },
+    "dungeonuseragnarockrecievedamage": {
+      "configname": "§e地牢使用Ragnarock受到伤害取消消息发送",
+      "description": "§e地牢内使用Ragnarock时因收到伤害取消了蓄力时发送一条消息 (留空则禁用该消息)"
+    },
+    "preventshortbowdrawing": {
+      "configname": "§e防止短弓拉弓",
+      "description": "§e防止在使用短弓时右键触发拉弓动作"
     },
 
     "about1": "§e小沙雕的QQ: 3381949033",
@@ -1493,7 +1533,7 @@
       "tiploginstage": "请完成登录操作...",
       "tipdelete": "删除%s成功!",
       "buttonback": "返回",
-      "buttonaddmicrosoftaccount": "添加Mircosoft账号"
+      "buttonaddmicrosoftaccount": "添加Microsoft账号"
     },
     "custombackgroundsettings": {
       "toggleon": "§a自定义背景: 开",

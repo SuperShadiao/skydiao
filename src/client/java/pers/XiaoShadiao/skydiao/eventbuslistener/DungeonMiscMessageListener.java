@@ -16,16 +16,22 @@ import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.jetbrains.annotations.Nullable;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
+import pers.XiaoShadiao.skydiao.hud.DynamicSpotHUD;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.utils.HeadTextures;
 import pers.XiaoShadiao.skydiao.utils.PartyManager;
@@ -36,6 +42,8 @@ import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 import pers.XiaoShadiao.skydiao.utils.tab.TabReader;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DungeonMiscMessageListener extends AbstractListener implements IDungeonListener {
 
@@ -45,6 +53,11 @@ public class DungeonMiscMessageListener extends AbstractListener implements IDun
     private ArmorStand currentArmorStandDungeonKey;
 
     private boolean isCryptsEnough = false;
+
+    private int lastRagnarockMessage = 0;
+    private double ragnarockStrength = 0;
+    private boolean isRightClickedRagnarock = false;
+    private DynamicSpotRagnarockTime ragnarockTime = new DynamicSpotRagnarockTime();
 
     @Override
     public String getListenerName() {
@@ -59,6 +72,30 @@ public class DungeonMiscMessageListener extends AbstractListener implements IDun
         ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register(this::onUnload);
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
         LevelRenderEvents.END_MAIN.register(this::onLastRender);
+        CustomFabricEvents.ON_INGAME_CLICK.register(this::onIngameClick);
+    }
+
+    private boolean onIngameClick(CustomFabricEvents.ClickType clickType) {
+        if(mc.player != null) {
+            ItemStack item = mc.player.getMainHandItem();
+            if("RAGNAROCK_AXE".equals(ToolList.getInstance().tryGetSkyblockItemId(item))) {
+                if(clickType == CustomFabricEvents.ClickType.RIGHT) {
+                    List<Component> tooltipLines = item.getTooltipLines(Item.TooltipContext.of(mc.level), mc.player, TooltipFlag.NORMAL);
+                    for (Component tooltipLine : tooltipLines) {
+                        String s = ToolList.getInstance().deleteColorCode(tooltipLine.getString());
+                        if(s.startsWith("Strength: ")) {
+                            Matcher matcher = Pattern.compile("Strength: \\+(\\d+)").matcher(s);
+                            if(matcher.find()) {
+                                ragnarockStrength = Double.parseDouble(matcher.group(1)) * 1.5;
+                                isRightClickedRagnarock = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private void onLastRender(LevelRenderContext context) {
@@ -77,14 +114,52 @@ public class DungeonMiscMessageListener extends AbstractListener implements IDun
 
     private boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
         if(packet instanceof ClientboundAddEntityPacket addEntityPacket) {
-            if (addEntityPacket.getType() == EntityType.ARMOR_STAND) {
+            if (StatusManager.get().isInDungeon() && addEntityPacket.getType() == EntityType.ARMOR_STAND) {
                 delayTickExecutor.delayExec(() -> armorStandDungeonKey.enqueue(addEntityPacket.getId()), 2);
+            }
+        }
+        if(packet instanceof ClientboundSystemChatPacket(Component content, boolean overlay)) {
+            if (overlay && isRightClickedRagnarock) {
+                String msg = ToolList.getInstance().deleteColorCode(content.getString());
+
+                if(msg.contains("CASTING IN 3s")) {
+                    if(lastRagnarockMessage != 3) {
+                        lastRagnarockMessage = 3;
+                        sendDungeonF7ChatMessage(ConfigManager.dungeonUseRagnarock3s.getValue());
+                    }
+                } else if(msg.contains("CASTING IN 2s")) {
+                    if(lastRagnarockMessage != 2) {
+                        lastRagnarockMessage = 2;
+                        sendDungeonF7ChatMessage(ConfigManager.dungeonUseRagnarock2s.getValue());
+                    }
+                } else if(msg.contains("CASTING IN 1s")) {
+                    if(lastRagnarockMessage != 1) {
+                        lastRagnarockMessage = 1;
+                        sendDungeonF7ChatMessage(ConfigManager.dungeonUseRagnarock1s.getValue());
+                    }
+                } else if(msg.contains("CASTING")) {
+                    if(lastRagnarockMessage != 0) {
+                        lastRagnarockMessage = 0;
+                        isRightClickedRagnarock = false;
+                        ragnarockTime.flagActive();
+                        DynamicSpotHUD.replaceIdlePart(DynamicSpotHUD.USERNAME_PART_ID, ragnarockTime, ragnarockTime);
+                        DynamicSpotHUD.replaceIdlePart(DynamicSpotHUD.MOD_NAME_PART_ID, ragnarockTime, ragnarockTime);
+                        sendDungeonF7ChatMessage(ConfigManager.dungeonUseRagnarock.getValue().replace("[strength]", String.valueOf(ragnarockStrength)));
+                    }
+                } else if(msg.contains("CANCELLED")) {
+                    if(lastRagnarockMessage != -1) {
+                        lastRagnarockMessage = -1;
+                        isRightClickedRagnarock = false;
+                        sendDungeonF7ChatMessage(ConfigManager.dungeonUseRagnarockCancelled.getValue());
+                    }
+                }
             }
         }
         return false;
     }
 
     private void onClientStartTick(Minecraft mc) {
+        ragnarockTime.decreaseTick();
         if(!StatusManager.get().isInDungeon()) return;
         if(mc.player == null || mc.level == null) return;
 
@@ -170,6 +245,9 @@ public class DungeonMiscMessageListener extends AbstractListener implements IDun
                     sendDungeonF7ChatMessage(value.replace("[players]", String.join(", ", missingPlayers)));
                 }
             }
+        } else if("Ragnarock was cancelled due to taking damage!".equals(msg)) {
+            isRightClickedRagnarock = false;
+            sendDungeonF7ChatMessage(ConfigManager.dungeonUseRagnarockRecieveDamage.getValue());
         }
 
         if(!isCryptsEnough) TabReader.findLineStartsWith("Crypts: ").ifPresent(
@@ -190,6 +268,30 @@ public class DungeonMiscMessageListener extends AbstractListener implements IDun
     @Override
     public int getFloor() {
         return 7;
+    }
+
+    public class DynamicSpotRagnarockTime implements DynamicSpotHUD.IdlePartSupplier, DynamicSpotHUD.ShouldRemoveSupplier {
+
+        public int timeTick;
+
+        public void decreaseTick() {
+            if(timeTick > 0) timeTick--;
+        }
+
+        public void flagActive() {
+            timeTick = 20 * 10;
+        }
+
+        @Override
+        public DynamicSpotHUD.IdlePart getIdlePart(@Nullable Identifier replaceTargetIdHolder) {
+            return replaceTargetIdHolder == DynamicSpotHUD.USERNAME_PART_ID ? null : DynamicSpotHUD.textPart(Identifier.fromNamespaceAndPath("skydiao", "ragnarock_time"), "§rRagnarock §c+" + ragnarockStrength + "\uE00D §r" + (timeTick / 20 + 1) + "s", 0xFFFFFFFF, null);
+        }
+
+        @Override
+        public boolean shouldRemove() {
+            return timeTick <= 0;
+        }
+
     }
 
 }

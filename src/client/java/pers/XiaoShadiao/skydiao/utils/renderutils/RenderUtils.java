@@ -9,7 +9,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.core.BlockPos;
@@ -19,6 +22,7 @@ import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityAttachment;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragonPart;
@@ -27,6 +31,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.scores.PlayerTeam;
 import org.joml.Matrix3x2fStack;
 import org.joml.Vector3f;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
@@ -202,6 +207,141 @@ public class RenderUtils {
         Entity cameraEntity0 = cameraEntity1 == null ? Objects.requireNonNull(mc().getCameraEntity(), "Camera Entity") : cameraEntity1;
         LivingEntity cameraEntity = Objects.requireNonNull(cameraEntity0.asLivingEntity() == null ? ToolList.mc.player : cameraEntity0.asLivingEntity());
         context.submitNodeCollector().submitNameTag(context.poseStack(), pos.subtract(cameraEntity.getEyePosition(ToolList.mc.getDeltaTracker().getGameTimeDeltaPartialTick(true))).subtract(0, 0.35, 0), 0, name, true, 15, 1000, context.levelState().cameraRenderState);
+    }
+
+    public static void renderClientLogoOnEntity(LevelRenderContext context, AbstractClientPlayer player) {
+        PoseStack poseStack = context.poseStack();
+
+        double distanceToCameraSq = player.distanceToSqr(
+                context.levelState().cameraRenderState.pos.x,
+                context.levelState().cameraRenderState.pos.y,
+                context.levelState().cameraRenderState.pos.z);
+
+        // 与原版 NameTag 保持一致的显示前置条件，不满足时直接不渲染
+        if (!shouldShowClientLogo(player, distanceToCameraSq)) {
+            return;
+        }
+
+        // 与原生 NameTag 使用同一锚点：实体 NAME_TAG 附着点（头顶）再向上 0.5 格；
+        // 位置同样按插值后的渲染坐标计算，避免移动时与 NameTag 错位
+        float partialTick = mc().getDeltaTracker().getGameTimeDeltaPartialTick(true);
+        Vec3 attachment = player.getAttachments().get(EntityAttachment.NAME_TAG, 0, player.getYRot(partialTick));
+        double anchorX = Mth.lerp(partialTick, player.xo, player.getX()) - context.levelState().cameraRenderState.pos.x + attachment.x;
+        double anchorY = Mth.lerp(partialTick, player.yo, player.getY()) - context.levelState().cameraRenderState.pos.y + attachment.y + 0.5;
+        double anchorZ = Mth.lerp(partialTick, player.zo, player.getZ()) - context.levelState().cameraRenderState.pos.z + attachment.z;
+
+        // 复刻 EntityRenderer.submitNameDisplay：存在计分板 belowName 文本时，先渲染计分行，
+        // 再把 NameTag 行整体上移一行高，因此图标需要跟随 NameTag 一起上移
+        if (distanceToCameraSq < 100.0 && player.belowNameDisplay() != null) {
+            anchorY += 9.0 * 1.15 * 0.025;
+        }
+
+        // 复刻 AvatarRenderer.getRenderOffset：潜行时整个实体（NameTag 锚点包含在内）向下偏移 2/16 格
+        if (player.isCrouching()) {
+            anchorY -= player.getScale() * 2.0 / 16.0;
+        }
+
+        // 复刻原生 NameTag 的文字坐标系（见 NameTagFeatureRenderer）：
+        // 平移锚点 -> 相机朝向 billboard -> 缩放 0.025（含 Y 翻转，用于把“文字向下”的 Y 轴映射到世界坐标）
+        // 该坐标系中：文字水平居中占 x ∈ [-width/2, width/2]，一行文字纵向占 y ∈ [0, 9]，单位为“文字像素”
+        float nameWidth = mc().font.width(player.getDisplayName());
+        float logoSize = 9.0f;   // 与 NameTag 行高等高；调大/调小此值即可改变 logo 尺寸
+        float gap = 2.0f;
+
+        float logoRight = -nameWidth / 2.0f - gap;   // 紧贴文字左边界
+        float logoLeft = logoRight - logoSize;
+        float centerY = 4.5f;                        // 文字行的竖直中心
+        float logoTop = centerY - logoSize / 2.0f;
+        float logoBottom = centerY + logoSize / 2.0f;
+
+        poseStack.pushPose();
+        poseStack.translate(anchorX, anchorY, anchorZ);
+        // 与 NameTag 使用相同朝向，保证 logo 与文字处于同一平面
+        poseStack.mulPose(context.levelState().cameraRenderState.orientation);
+        poseStack.scale(0.025f, -0.025f, 0.025f);
+
+        // 复刻原生 NameTag 的遮挡规则（EntityRenderer.submitNameDisplay 传入 !state.isDiscrete）：
+        // 未潜行时叠加两份——忽略深度的半透明副本 + 受深度测试的不透明副本；
+        // 潜行时只画一份受深度测试的半透明副本。
+        // 结果：被方块遮挡 -> 半透明；潜行 -> 半透明；同时满足 -> 完全不可见。
+        Identifier texture = Identifier.fromNamespaceAndPath("skydiao", "xsdv2.png");
+        boolean seeThrough = !player.isDiscrete();
+        if (seeThrough) {
+            submitClientLogo(context, poseStack, RenderTypes.textSeeThrough(texture), 0x80FFFFFF, logoLeft, logoRight, logoTop, logoBottom);
+        }
+        submitClientLogo(context, poseStack, RenderTypes.text(texture), seeThrough ? 0xFFFFFFFF : 0x80FFFFFF, logoLeft, logoRight, logoTop, logoBottom);
+
+        poseStack.popPose();
+    }
+
+    /**
+     * 复刻原版 NameTag 的显示前置条件：
+     * EntityRenderer.extractRenderState（显示距离）与 LivingEntityRenderer / AvatarRenderer#shouldShowName
+     * （隐藏 GUI、第一人称本体、骑乘、隐身、队伍 NameTag 可见性）。
+     */
+    private static boolean shouldShowClientLogo(AbstractClientPlayer player, double distanceToCameraSq) {
+        Minecraft minecraft = mc();
+        LocalPlayer localPlayer = minecraft.player;
+        if (localPlayer == null) {
+            return false;
+        }
+
+        // 原版：显示距离上限 64 格；相机实体（第一人称下的自己）不显示；骑乘中不显示；F1 隐藏 GUI 后不显示
+        if (distanceToCameraSq >= 4096.0
+                || player == minecraft.getCameraEntity()
+                || player.isVehicle()
+                || !Minecraft.renderNames()) {
+            return false;
+        }
+
+        // 原版：潜行（discrete）时显示距离缩短为 32 格
+        if (player.isDiscrete() && distanceToCameraSq >= 1024.0) {
+            return false;
+        }
+
+        // 原版：隐身不渲染 NameTag；同队伍且开启“可看见友好隐身”时例外
+        boolean isVisibleToPlayer = !player.isInvisibleTo(localPlayer);
+        if (player == localPlayer) {
+            return isVisibleToPlayer;
+        }
+
+        // 原版：由服务器下发的计分板队伍决定 NameTag 可见性
+        PlayerTeam team = player.getTeam();
+        if (team == null) {
+            return isVisibleToPlayer;
+        }
+        PlayerTeam myTeam = localPlayer.getTeam();
+        return switch (team.getNameTagVisibility()) {
+            case ALWAYS -> isVisibleToPlayer;
+            case NEVER -> false;
+            case HIDE_FOR_OTHER_TEAMS ->
+                    myTeam == null ? isVisibleToPlayer : team.isAlliedTo(myTeam) && (team.canSeeFriendlyInvisibles() || isVisibleToPlayer);
+            case HIDE_FOR_OWN_TEAM ->
+                    myTeam == null ? isVisibleToPlayer : !team.isAlliedTo(myTeam) && isVisibleToPlayer;
+        };
+    }
+
+    private static void submitClientLogo(
+            LevelRenderContext context,
+            PoseStack poseStack,
+            RenderType renderType,
+            int argb,
+            float left,
+            float right,
+            float top,
+            float bottom
+    ) {
+        context.submitNodeCollector().submitCustomGeometry(
+                poseStack,
+                renderType,
+                (pose, buffer) -> {
+                    // 顶点顺序与 UV 完全照搬 Font 的字形四边形，保证正面朝向相机、不被背面剔除
+                    buffer.addVertex(pose, left, top, 0).setColor(argb).setUv(0.0f, 0.0f).setLight(LightCoordsUtil.FULL_BRIGHT);
+                    buffer.addVertex(pose, left, bottom, 0).setColor(argb).setUv(0.0f, 1.0f).setLight(LightCoordsUtil.FULL_BRIGHT);
+                    buffer.addVertex(pose, right, bottom, 0).setColor(argb).setUv(1.0f, 1.0f).setLight(LightCoordsUtil.FULL_BRIGHT);
+                    buffer.addVertex(pose, right, top, 0).setColor(argb).setUv(1.0f, 0.0f).setLight(LightCoordsUtil.FULL_BRIGHT);
+                }
+        );
     }
 
     public enum SideDirection {

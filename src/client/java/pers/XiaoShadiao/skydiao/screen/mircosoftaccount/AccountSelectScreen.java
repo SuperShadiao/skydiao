@@ -236,6 +236,10 @@ public class AccountSelectScreen extends Screen {
 
     public static native void save0();
 
+    public static void flagModified() {
+        modified = true;
+    }
+
     public static void addAccount(MinecraftLogin.MinecraftSessionContainer msc) {
         accounts.remove(msc);
         accounts.add(msc);

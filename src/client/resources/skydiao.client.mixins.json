@@ -36,6 +36,7 @@
   "mixins": [
     "MixinAcviteProfilePathAccessor",
     "MixinBlockableEventLoop",
+    "MixinBow",
     "MixinClientCommonPacketListenerImpl",
     "MixinClientPacketListener",
     "MixinEntityCloneable",
@@ -53,6 +54,7 @@
     "MixinReportTypeCustomMessage",
     "MixinSendPacket",
     "MixinStartConnectServer",
+    "MixinTabClientLogo",
     "MixinUserDataSecurer",
     "adapter.chatpatches.MixinChatPatcherTranslateButton",
     "adapter.firmament.FirmamentGithubRepoProxy",

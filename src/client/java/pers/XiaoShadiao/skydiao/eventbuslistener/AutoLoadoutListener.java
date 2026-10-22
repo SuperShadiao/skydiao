@@ -30,6 +30,7 @@ public class AutoLoadoutListener extends AbstractListener {
     public int loadout = 0;
     public Consumer<CallbackResult> callback;
     private PageSwitchCallback pageSwitchCallback;
+    private int taskId;
 
     public void onLoadoutGuiOpen(Minecraft client, Screen screen, int scaledWidth, int scaledHeight) {
         if (!(screen instanceof ContainerScreen containerScreen)) return;
@@ -159,6 +160,8 @@ public class AutoLoadoutListener extends AbstractListener {
         this.loadout = index;
         this.callback = callback;
 
+        int expectedTaskId = this.taskId = ToolList.getInstance().random.nextInt();
+
         // 使用原子操作确保线程安全
         final int expectedIndex = index;
 
@@ -166,7 +169,7 @@ public class AutoLoadoutListener extends AbstractListener {
             Thread.sleep(7000);
 
             // 检查是否仍未处理
-            if (AutoLoadoutListener.this.loadout == expectedIndex) {
+            if (AutoLoadoutListener.this.taskId == expectedTaskId) {
                 // 使用 call 方法确保线程安全和防止重复调用
                 Consumer<CallbackResult> cb = AutoLoadoutListener.this.callback;
                 if (cb != null) {

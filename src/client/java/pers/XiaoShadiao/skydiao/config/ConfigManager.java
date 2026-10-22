@@ -253,8 +253,9 @@ public class ConfigManager {
     public static final ColorConfigOption dungeonf7termuiclickordersecondbuttoncolor = new ColorConfigOption("dungeonf7termuiclickordersecondbuttoncolor", 0xFFFF00);
     public static final ColorConfigOption dungeonf7termuiclickorderthirdbuttoncolor = new ColorConfigOption("dungeonf7termuiclickorderthirdbuttoncolor", 0xFF0000);
     public static final BooleanConfigOption dungeonautoswitchbackitem = new BooleanConfigOption("dungeonautoswitchbackitem", false);
+    public static final BooleanConfigOption preventShortbowDrawing = new BooleanConfigOption("preventshortbowdrawing", true);
 
-    public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
+    // public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
     public static final StringConfigOption dungeonf7msgbotsimonsays1 = new StringConfigOption("dungeonf7msgbotsimonsays1", "Simon Says已完成 1/4...");
     public static final StringConfigOption dungeonf7msgbotsimonsays2 = new StringConfigOption("dungeonf7msgbotsimonsays2", "Simon Says已完成 2/4...");
@@ -276,6 +277,15 @@ public class ConfigManager {
     public static final StringConfigOption dungeonf7msgbotssleap = new StringConfigOption("dungeonf7msgbotssleap", "已安全到达Simon Says处, 准许Leap!");
     public static final StringConfigOption dungeonMissingPlayer = new StringConfigOption("dungeonmissingplayer", "玩家[players]未进入服务器!");
     public static final StringConfigOption dungeonCryptsEnough = new StringConfigOption("dungeoncryptsenough", "已获取足够的Crypts!");
+    public static final StringConfigOption dungeonf7Stage3EnterArea2 = new StringConfigOption("dungeonf7stage3enterarea2", "已进入第二位面。");
+    public static final StringConfigOption dungeonf7Stage3EnterArea3 = new StringConfigOption("dungeonf7stage3enterarea3", "已进入第三位面。");
+    public static final StringConfigOption dungeonf7Stage3EnterArea4 = new StringConfigOption("dungeonf7stage3enterarea4", "已进入第四位面。");
+    public static final StringConfigOption dungeonUseRagnarock3s = new StringConfigOption("dungeonuseragnarock3s", "大狗大狗大狗...");
+    public static final StringConfigOption dungeonUseRagnarock2s = new StringConfigOption("dungeonuseragnarock2s", "");
+    public static final StringConfigOption dungeonUseRagnarock1s = new StringConfigOption("dungeonuseragnarock1s", "");
+    public static final StringConfigOption dungeonUseRagnarock = new StringConfigOption("dungeonuseragnarock", "叫！！！(+[strength]\uE00D)");
+    public static final StringConfigOption dungeonUseRagnarockCancelled = new StringConfigOption("dungeonuseragnarockcancelled", "大狗叫不出来了。");
+    public static final StringConfigOption dungeonUseRagnarockRecieveDamage = new StringConfigOption("dungeonuseragnarockrecievedamage", "大狗受到伤害没叫出来。");
 
     public static final StringConfigOption hudOffsetAndScale = new StringConfigOption("hudoffsetandscale", "{}");
 
@@ -345,7 +355,7 @@ public class ConfigManager {
 
     public static final List<Map.Entry<String, List<ConfigOption<?>>>> categories = List.of(
             Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip, enableircafktip, enableircmacrochecktip, cooltitle, customTitleText, autoHypeTrain, autoHypeTrainManbaOut)),
-            Map.entry("工具类", List.of(inventoryFilter, itemStarCountRender, itemStarCountRenderColor1, itemStarCountRenderColor2, openfastcommandmenukeybinds, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodescoreboard, blivemodehideserverid, bliveboardcastdankumu, keepSprint, autoReconnect, afkInOtherPlace, freecamFlySpeed, openFreelookAndFreecamAction, openAutoClickAction, openAllAutoClickKeybindAction, openClearStashCommand)),
+            Map.entry("工具类", List.of(inventoryFilter, itemStarCountRender, itemStarCountRenderColor1, itemStarCountRenderColor2, openfastcommandmenukeybinds, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodescoreboard, blivemodehideserverid, bliveboardcastdankumu, keepSprint, autoReconnect, afkInOtherPlace, freecamFlySpeed, openFreelookAndFreecamAction, preventShortbowDrawing, openAutoClickAction, openAllAutoClickKeybindAction, openClearStashCommand)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
             Map.entry("自动类", List.of(macroReplay, macroReplaySelfCleaning, autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, autoCarnivalAutoRestart, carnivalAutoFruitDigger, carnivalAutoShootZombie, carnivalAutoShootZombieOffset, skyblockautobloodfiend, skyblockautobloodfiendlowhealth, iAutoObsidian, iAutoObsidianWR, obsidianPositionHelper, autoObsidianPositionsFile, drillSlot, lanternSlot, obsidianPlayerCheckRange, obsidianPlayerCheck, obsidianTheEndCheck, obsidianCycleTicks, autoPickupPhoneRing, autoPlayBeachBall, autoPlayBeachBallAutoStopAt40, autoEvaluateFossils, autoEvaluateFossilsAutoRestart)),
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareAnnounce,
@@ -379,13 +389,16 @@ public class ConfigManager {
                     f7SimonSaysSolver, f7SimonSaysSolverBlockWrongClicks, dungeonReviveItemCDRender,
                     f7DrawWitherDragonESP, f7DrawStormFireballTarget, f7DrawWitherDragonLightning, f7AutoSwapEnderDragonInWitherKing,
 
-                    dungeonf7msgbot, dungeonf7msgbotsimonsaysstart,
-                    dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3,
+                    dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3,
                     dungeonf7msgbotsimonsays4, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1,
                     dungeonf7msgbotmelody2, dungeonf7msgbotmelody3, dungeonf7msgbotcoretunnel,
                     dungeonBonzoTriggered, dungeonPhoenixTriggered, dungeonSpiritMaskTriggered,
                     dungeonDrinkPotion, dungeonBloodRoomTime, dungeonTrashTPS,
-                    dungeonf7msgbotssleap, dungeonMissingPlayer, dungeonCryptsEnough)),
+                    dungeonf7msgbotssleap, dungeonMissingPlayer, dungeonCryptsEnough,
+                    dungeonf7Stage3EnterArea2, dungeonf7Stage3EnterArea3, dungeonf7Stage3EnterArea4,
+                    dungeonUseRagnarock3s, dungeonUseRagnarock2s, dungeonUseRagnarock1s,
+                    dungeonUseRagnarock, dungeonUseRagnarockCancelled, dungeonUseRagnarockRecieveDamage
+            )),
             Map.entry("rift", List.of(rifttimegunhelper)),
             Map.entry("界面类", List.of(openHud, bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, bossDrawESP, customBossESPTracer, starrailNotification, starrailNotificationSound, dyingtip, noblind, nosuffoverlay, fireOverlay, lyricColor1, lyricColor2, dynamicSpot, dynamicSpotReplaceTabList)),
             Map.entry("ravengard", List.of(ravengardHelper, ravengardQueueMessage))

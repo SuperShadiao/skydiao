@@ -74,7 +74,7 @@ public class DungeonAutoGFSListener extends AbstractListener {
         if(!hasEmptySlot) return; // 不管怎么说, 我先来, You have no space in your inventory!
 
         for (RequiredItem requiredItem : items) {
-            if(requiredItem.getCount() > itemCount.getInt(requiredItem.itemId) && requiredItem.enabled.getAsBoolean()) {
+            if(requiredItem.requiredCount() > itemCount.getInt(requiredItem.itemId) && requiredItem.enabled.getAsBoolean()) {
                 // /gfs SPIRIT_LEAP 1
                 ToolList.sendChatMessage("/gfs " + requiredItem.itemId + " " + requiredItem.getCount);
                 ToolList.printChatMessage(Component.literal("§a[小沙雕] §e自动从Sack拿取物品" + requiredItem.itemId));

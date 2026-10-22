@@ -13,13 +13,16 @@ import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.Items;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.utils.OnlinePlayerList;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -72,6 +75,10 @@ public class BetterAFKPlaceListener extends AbstractListener {
                     ToolList.sendChatMessage("/visit " + future.get(10, TimeUnit.SECONDS));
                 } catch (TimeoutException _) {
                     ToolList.sendChatMessage("/visit " + future.getNow(pickupDefaultId()));
+                } catch (ExecutionException e) {
+                    logger.catching(e);
+                    Thread.sleep(5000);
+                    continue;
                 }
                 Thread.sleep(5000);
                 if (!(mc.screen instanceof ContainerScreen containerScreen)) return null;
@@ -112,17 +119,26 @@ public class BetterAFKPlaceListener extends AbstractListener {
         if(xiaoshadiaoWantMoreSocialXP && !ToolList.getInstance().isXiaoShadiao()) return CompletableFuture.completedFuture("5i_XiaoShadiao");
 
         return CompletableFuture.supplyAsync(() -> {
-            try(InputStream is = ToolList.getInstance().makeReqToURL("https://irci.xiaoshadiao.club/playerlist")) {
-                JsonArray array = JsonParser.parseString(new String(is.readAllBytes())).getAsJsonObject().getAsJsonArray("players");
-                List<String> list = array.asList().stream()
-                        .map(JsonElement::getAsJsonObject)
-                        .filter(jo -> "SkyBlock".equals(jo.getAsJsonObject("currentGame").get("gameType").getAsString()))
-                        .map(jo -> jo.get("name").getAsString()).toList();
-                return list.isEmpty() ? pickupDefaultId() : list.get(ToolList.getInstance().random.nextInt(list.size()));
-            } catch (Throwable e) {
-                logger.catching(e);
+            List<String> playersList = OnlinePlayerList.getPlayers().stream()
+                    .filter(OnlinePlayerList.OnlinePlayer::isSkyDiaoUser)
+                    .map(OnlinePlayerList.OnlinePlayer::name).toList();
+
+            if(playersList.isEmpty()) {
+                try(InputStream is = ToolList.getInstance().makeReqToURL("https://irci.xiaoshadiao.club/playerlist")) {
+                    JsonArray array = JsonParser.parseString(new String(is.readAllBytes())).getAsJsonObject().getAsJsonArray("players");
+                    List<String> list = array.asList().stream()
+                            .map(JsonElement::getAsJsonObject)
+                            .filter(jo -> "SkyBlock".equals(jo.getAsJsonObject("currentGame").get("gameType").getAsString()))
+                            .map(jo -> jo.get("name").getAsString()).toList();
+                    if (list.isEmpty()) throw new NoSuchElementException("No player found");
+                    return list.get(ToolList.getInstance().random.nextInt(list.size()));
+                } catch (Throwable e) {
+                    logger.catching(e);
+                }
+                throw new NoSuchElementException("No player found");
+            } else {
+                return playersList.get(ToolList.getInstance().random.nextInt(playersList.size()));
             }
-            return pickupDefaultId();
         });
     }
 

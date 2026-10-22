@@ -296,6 +296,7 @@ public class MinecraftLogin {
                         replace(instance.initializeAccount(this.refreshToken, true));
                         downloadSkin();
                         ToolList.getInstance().log.info("Refresh token (" + name + ") success!");
+                        AccountSelectScreen.flagModified();
                     } catch(MinecraftLoginException e) {
                         ToolList.getInstance().log.warn("Refresh token (" + name + ") failed!", e);
                         flag = false;
@@ -325,6 +326,7 @@ public class MinecraftLogin {
                     replace(instance.initializeAccount(this.refreshToken, true));
                     downloadSkin();
                     ToolList.getInstance().log.info("Refresh token (" + name + ") success!");
+                    AccountSelectScreen.flagModified();
                 } catch (Exception e) {
                     ToolList.getInstance().log.warn("Refresh token (" + name + ") failed!", e);
                 }

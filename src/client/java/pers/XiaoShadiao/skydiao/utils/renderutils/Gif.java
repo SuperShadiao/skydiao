@@ -54,11 +54,11 @@ public class Gif implements AutoCloseable {
 
     private final boolean missingTexture;
 
-    public Gif(Identifier identifier) {
+    private Gif(Identifier identifier) {
         this(identifier, () -> ToolList.mc.getResourceManager().getResource(identifier).orElseThrow(() -> new IOException("No resource: " + identifier)).open());
     }
 
-    public Gif(Identifier identifier, IOSupplier<InputStream> ioSupplier) {
+    private Gif(Identifier identifier, IOSupplier<InputStream> ioSupplier) {
         boolean missingTexture1 = false;
 
         a: try {

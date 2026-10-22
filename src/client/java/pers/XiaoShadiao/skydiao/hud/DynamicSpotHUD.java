@@ -9,9 +9,11 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.scores.*;
+import org.jetbrains.annotations.Nullable;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.utils.renderutils.BlurredRoundedSurface;
+import pers.XiaoShadiao.skydiao.utils.renderutils.Gif;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -39,6 +41,10 @@ public final class DynamicSpotHUD extends XSDHUD {
     private static final Identifier USER_ICON = statusIcon("user");
     private static final Identifier LINK_ICON = statusIcon("link");
     private static final Identifier REFRESH_ICON = statusIcon("refresh");
+    private static final Identifier FPS_ICON = statusIcon("fps");
+    private static final Identifier TPS_ICON = statusIcon("tps");
+    private static final Identifier BAKED_TPS_ICON = Identifier.fromNamespaceAndPath("skydiao", "textures/gui/dynamic_spot/tps_baked.gif");
+
     private static final Pattern HYPIXEL = Pattern.compile(
             "(?i)(?<![\\w.-])www\\.hypixel\\.(?:net|com)(?![\\w.-])");
     private static final Queue<Notice> INCOMING = new ConcurrentLinkedQueue<>();
@@ -50,7 +56,8 @@ public final class DynamicSpotHUD extends XSDHUD {
 
     public static final Identifier MOD_NAME_PART_ID = Identifier.fromNamespaceAndPath("skydiao", "dynamic_spot_mod_name");
     public static final Identifier USERNAME_PART_ID = Identifier.fromNamespaceAndPath("skydiao", "dynamic_spot_username");
-    public static final Identifier FPSTPS_PART_ID = Identifier.fromNamespaceAndPath("skydiao", "dynamic_spot_fps_tps");
+    public static final Identifier FPS_PART_ID = Identifier.fromNamespaceAndPath("skydiao", "dynamic_spot_fps");
+    public static final Identifier TPS_PART_ID = Identifier.fromNamespaceAndPath("skydiao", "dynamic_spot_tps");
     public static final Identifier SEPARATOR_PART_ID = Identifier.fromNamespaceAndPath("skydiao", "dynamic_spot_separator");
 
     private static final List<ReplaceIdlePart> replaceIdleParts = new ArrayList<>();
@@ -132,7 +139,8 @@ public final class DynamicSpotHUD extends XSDHUD {
 //        int ping = ping(client);
 //        String pingText = ping < 0 ? "...ms" : ping + "ms";
 //        String connection = server == null ? "singleplayer" : server;
-        String fpsText = Math.max(0, client.getFps()) + " FPS | " + AbstractListener.tpsListener.getCurrentFormattedTPS() + " TPS";
+        String fpsText = Math.max(0, client.getFps()) + " FPS";
+        String tpsText = AbstractListener.tpsListener.getCurrentFormattedTPS() + " TPS";
 //        int pingColor = server == null || ping < 0 ? TEXT : ping < 100 ? 0xFF80C810
 //                : ping <= 400 ? 0xFFC87D28 : 0xFFCA3E2E;
         int maxWidth = Math.max(1, client.getWindow().getGuiScaledWidth() - 16);
@@ -163,30 +171,34 @@ public final class DynamicSpotHUD extends XSDHUD {
 //        }
 //        parts.add(textPart(client, connection, TEXT));
 //        parts.add(textPart(client, SEPARATOR, MUTED));
-        parts.add(iconPart(FPSTPS_PART_ID, REFRESH_ICON, TEXT, textPart(null, fpsText, TEXT, null)));
+        parts.add(iconPart(FPS_PART_ID, FPS_ICON, TEXT, textPart(null, fpsText, TEXT, null)));
+        parts.add(textPart(SEPARATOR_PART_ID, SEPARATOR, MUTED, null));
+        if(AbstractListener.tpsListener.getCurrentTPS() > 12) {
+            parts.add(iconPart(TPS_PART_ID, TPS_ICON, TEXT, textPart(null, tpsText, TEXT, null)));
+        } else {
+            Gif gif = Gif.create(BAKED_TPS_ICON);
+            parts.add(iconPart(TPS_PART_ID, gif.updateAndGetFrame().resourceId(), TEXT, textPart(null, tpsText, TEXT & 0xFFFF2222, null)));
+        }
 
-        replaceIdleParts.removeIf(entry -> entry.shouldRemove.getAsBoolean());
+        replaceIdleParts.removeIf(entry -> entry.shouldRemove.shouldRemove());
         parts.replaceAll(part -> {
             for (ReplaceIdlePart replaceIdlePart : replaceIdleParts) {
-                if (Objects.equals(replaceIdlePart.targetIdHolder, part.idHolder)) {
-                    part = replaceIdlePart.part.get();
+                if (part != null && Objects.equals(replaceIdlePart.targetIdHolder, part.idHolder)) {
+                    part = replaceIdlePart.part.getIdlePart(replaceIdlePart.targetIdHolder);
+                    if(part == null) return null;
                 }
             }
             return part;
         });
-        Iterator<IdlePart> iterator = parts.iterator();
-        boolean removeSeparator = false;
-        while (iterator.hasNext()) {
-            IdlePart part = iterator.next();
-            if (part == null) {
-                iterator.remove();
-                removeSeparator = true;
-                continue;
-            }
-            if (removeSeparator && part.idHolder == SEPARATOR_PART_ID) {
-                removeSeparator = false;
-                iterator.remove();
-                continue;
+        parts.removeIf(Objects::isNull);
+
+        for (int i = parts.size() - 1; i >= 0; i--) {
+            if(i == parts.size() - 1 && Objects.equals(parts.get(i).idHolder, SEPARATOR_PART_ID)) {
+                parts.remove(i);
+            } else if(i > 0 && Objects.equals(parts.get(i).idHolder, SEPARATOR_PART_ID) && Objects.equals(parts.get(i - 1).idHolder, SEPARATOR_PART_ID)) {
+                parts.remove(i);
+            } else if(i == 0 && Objects.equals(parts.get(i).idHolder, SEPARATOR_PART_ID)) {
+                parts.remove(i);
             }
         }
 
@@ -197,7 +209,7 @@ public final class DynamicSpotHUD extends XSDHUD {
 
         float delta = idleAnimationWidth - idleWidth;
 
-        idleWidth = idleWidth + delta * 0.09F;
+        idleWidth = idleWidth + delta * 0.09F * mc.getDeltaTracker().getGameTimeDeltaTicks() * 3;
     }
 
     public static IdlePart textPart(Identifier idHolder, String text, int color, IdlePart next) {
@@ -218,15 +230,33 @@ public final class DynamicSpotHUD extends XSDHUD {
 
     public static void replaceIdlePart(Identifier targetIdHolder, IdlePart part, long durationMs) {
         long startTime = System.currentTimeMillis();
-        replaceIdleParts.add(new ReplaceIdlePart(targetIdHolder, () -> part, () -> System.currentTimeMillis() - startTime > durationMs));
+        replaceIdleParts.add(new ReplaceIdlePart(targetIdHolder, (_) -> part, () -> System.currentTimeMillis() - startTime > durationMs));
     }
 
-    public static void replaceIdlePart(Identifier targetIdHolder, Supplier<IdlePart> part, long durationMs) {
+    public interface IdlePartSupplier extends Supplier<IdlePart> {
+        IdlePart getIdlePart(@Nullable Identifier replaceTargetIdHolder);
+
+        @Override
+        default IdlePart get() {
+            return getIdlePart(null);
+        }
+    }
+
+    public interface ShouldRemoveSupplier extends BooleanSupplier {
+        boolean shouldRemove();
+
+        @Override
+        default boolean getAsBoolean() {
+            return shouldRemove();
+        }
+    }
+
+    public static void replaceIdlePart(Identifier targetIdHolder, IdlePartSupplier part, long durationMs) {
         long startTime = System.currentTimeMillis();
         replaceIdleParts.add(new ReplaceIdlePart(targetIdHolder, part, () -> System.currentTimeMillis() - startTime > durationMs));
     }
 
-    public static void replaceIdlePart(Identifier targetIdHolder, Supplier<IdlePart> part, BooleanSupplier shouldRemove) {
+    public static void replaceIdlePart(Identifier targetIdHolder, IdlePartSupplier part, ShouldRemoveSupplier shouldRemove) {
         replaceIdleParts.add(new ReplaceIdlePart(targetIdHolder, part, shouldRemove));
     }
 
@@ -439,7 +469,7 @@ public final class DynamicSpotHUD extends XSDHUD {
 
     }
 
-    public record ReplaceIdlePart(Identifier targetIdHolder, Supplier<IdlePart> part, BooleanSupplier shouldRemove) {
+    public record ReplaceIdlePart(Identifier targetIdHolder, IdlePartSupplier part, ShouldRemoveSupplier shouldRemove) {
     }
 
 }

@@ -33,6 +33,7 @@ public class AutoSwitchPetListener extends AbstractListener {
     public String petName;
     public Consumer<CallbackResult> callback;
     private PageSwitchCallback pageSwitchCallback;
+    private int taskId;
 
     public void onLoadoutGuiOpen(Minecraft client, Screen screen, int scaledWidth, int scaledHeight) {
         if (!(screen instanceof ContainerScreen containerScreen)) return;
@@ -130,14 +131,13 @@ public class AutoSwitchPetListener extends AbstractListener {
         this.petName = petName;
         this.callback = callback;
 
-        // 使用原子操作确保线程安全
-        final String expectedPetName = petName;
+        int expectedTaskId = this.taskId = ToolList.getInstance().random.nextInt();
 
         ToolList.addThreadedTask(() -> {
             Thread.sleep(7000);
 
             // 检查是否仍未处理
-            if (AutoSwitchPetListener.this.petName.equals(expectedPetName)) {
+            if (AutoSwitchPetListener.this.taskId == expectedTaskId) {
                 // 使用 call 方法确保线程安全和防止重复调用
                 Consumer<CallbackResult> cb = AutoSwitchPetListener.this.callback;
                 if (cb != null) {

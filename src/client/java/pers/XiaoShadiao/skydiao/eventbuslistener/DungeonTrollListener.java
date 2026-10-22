@@ -20,7 +20,6 @@ public class DungeonTrollListener extends AbstractListener {
     private static final int gifWidth = 468;
     private static final int gifHeight = 60;
 
-    private Gif gif;
     private float animationOffset;
 
     @Override
@@ -36,10 +35,6 @@ public class DungeonTrollListener extends AbstractListener {
 
     private void onCollectSubmits(LevelRenderContext context) {
         if(!"dungeon_hub".equals(StatusManager.get().getMode())) return;
-
-        if(gif == null || gif.isClosed()) {
-            gif = new Gif(gifId);
-        }
 
         animationOffset += mc.getDeltaTracker().getGameTimeDeltaTicks() / 13;
 
@@ -63,7 +58,7 @@ public class DungeonTrollListener extends AbstractListener {
 
         for (int i = 0; i < 3; i++) {
             int offset = i;
-            context.submitNodeCollector().submitCustomGeometry(poseStack, RenderTypes.text(gif.updateAndGetFrame().resourceId()), ((pose, buffer) -> {
+            context.submitNodeCollector().submitCustomGeometry(poseStack, RenderTypes.text(Gif.create(gifId).updateAndGetFrame().resourceId()), ((pose, buffer) -> {
                 float z = 1f - 1 / 512f;
 
                 buffer.addVertex(pose, renderWidth * offset - animationOffset, 1, z).setColor(Color.WHITE.getRGB()).setUv(0.0f, 1.0f).setLight(LightCoordsUtil.FULL_BRIGHT);

@@ -84,4 +84,11 @@ public class ClientSender extends ChatClient {
         send(packet);
     }
 
+    public void sendGetOnlinePlayers() {
+        ChatPacket packet = new ChatPacket();
+        packet.packetType = "get_players";
+        packet.initSender();
+        send(packet);
+    }
+
 }

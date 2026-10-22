@@ -83,6 +83,13 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     private final BlockPos stage3LeapPositionCorn1 = new BlockPos(110, 125, 88);
     private final BlockPos stage3LeapPositionCorn2 = new BlockPos(102, 120, 99);
 
+    private final BoundingBox stage3Area2 = new BoundingBox(88, 152, 146, 19, 103, 121);
+    private final BoundingBox stage3Area3 = new BoundingBox(-4, 152, 50, 19, 103, 121);
+    private final BoundingBox stage3Area4 = new BoundingBox(19, 152, 51, 92, 103, 28);
+    private final List<BoundingBox> stage3Areas = List.of(stage3Area2, stage3Area3, stage3Area4);
+
+    private BoundingBox stage3CurrentArea = null;
+
     private boolean isNecronUsingUltimateSkill;
 
     private int stage5DragonCount = 0;
@@ -574,7 +581,8 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             }
         }
         if (currentStage == 4) {
-            if (mc.player.hasEffect(MobEffects.BLINDNESS)) {
+            if (!isNecronUsingUltimateSkill && mc.player.hasEffect(MobEffects.BLINDNESS)) {
+                addStarRailNotification("Necron陷入狂暴且不断增加杀伤范围, 使用高频攻击削弱其范围!", StarRailNotification.Type.warning);
                 isNecronUsingUltimateSkill = true;
             }
         }
@@ -583,7 +591,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             if(getHealth() == 0 && !stage3LeapTip) {
                 if(mc.player.onGround() && ToolList.getInstance().isEntityInArea(mc.player, stage3LeapPositionCorn1, stage3LeapPositionCorn2)) {
                     stage3LeapTip = true;
-                    if(!ConfigManager.dungeonf7msgbotssleap.getValue().isEmpty()) sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotssleap.getValue() + " (SS Leap)");
+                    if(!mc.player.isInvisible()) if(!ConfigManager.dungeonf7msgbotssleap.getValue().isEmpty()) sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotssleap.getValue() + " (SS Leap)");
                 }
             }
         } else {
@@ -615,7 +623,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             boolean inArea = ToolList.getInstance().isEntityInArea(mc.player, new BlockPos(50, 115, 54), new BlockPos(58, 122, 57));
             if (inArea && !enteredGoldorCoreTunnel) {
                 enteredGoldorCoreTunnel = true;
-                sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotcoretunnel.getValue());
+                if(!mc.player.isInvisible()) sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotcoretunnel.getValue());
             } else if(!inArea && enteredGoldorCoreTunnel) {
                 enteredGoldorCoreTunnel = false;
             }
@@ -632,6 +640,27 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             }
             if(!(stage5DragonCount == 5 && (tempCount == 0))) stage5DragonCount = tempCount;
             if(getHealth() == 0 && tempCount == 0) stage5DragonCount = 0;
+        }
+
+        for (BoundingBox area : stage3Areas) {
+            if(area.isInside(mc.player.blockPosition())) {
+                if(!Objects.equals(stage3CurrentArea, area)) {
+                    if(!mc.player.isInvisible()) {
+                        if (Objects.equals(area, stage3Area2)) {
+                            sendDungeonF7ChatMessage(ConfigManager.dungeonf7Stage3EnterArea2.getValue());
+                        } else if (Objects.equals(area, stage3Area3)) {
+                            sendDungeonF7ChatMessage(ConfigManager.dungeonf7Stage3EnterArea3.getValue());
+                        } else if (Objects.equals(area, stage3Area4)) {
+                            sendDungeonF7ChatMessage(ConfigManager.dungeonf7Stage3EnterArea4.getValue());
+                        }
+                    }
+                    stage3CurrentArea = area;
+                }
+                break;
+            }
+        }
+        if(stage3CurrentArea != null && !stage3CurrentArea.isInside(mc.player.blockPosition())) {
+            stage3CurrentArea = null;
         }
 
     }
@@ -678,7 +707,17 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         }
         if(currentStage == 4) {
             if(message.equals("[BOSS] Necron: ARGH!")) {
+                addStarRailNotification("Necron狂暴终止, 全力输出!", StarRailNotification.Type.success);
                 isNecronUsingUltimateSkill = false;
+            }
+        }
+        if(currentStage == 5) {
+            if (Set.of(
+                    "[BOSS] Wither King: Futile.",
+                    "[BOSS] Wither King: You just made a terrible mistake!",
+                    "[BOSS] Wither King: I am not impressed.",
+                    "[BOSS] Wither King: Your skills have faded humans.").contains(message)) {
+                addStarRailNotification("未在对应出生点击杀凋零龙, 未能对凋零王造成伤害!", StarRailNotification.Type.warning);
             }
         }
         if(message.contains(">") && message.contains("[SkyDiao]") && message.contains("(SS Leap)")) {

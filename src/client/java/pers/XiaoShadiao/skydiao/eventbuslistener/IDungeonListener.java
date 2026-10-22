@@ -1,7 +1,6 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener;
 
 import net.minecraft.network.chat.Component;
-import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.utils.PartyManager;
@@ -30,13 +29,15 @@ public interface IDungeonListener {
     public default void sendDungeonF7ChatMessage(String message) {
         if(!StatusManager.get().isInDungeon()) return;
 
-        if(ConfigManager.dungeonf7msgbot.getValue()) {
-            if(ToolList.getInstance().isDevEnvironment()) {
-                ToolList.printChatMessage(Component.literal(message));
-            } else {
-                ToolList.getInstance().log.info(message);
+        if(/*ConfigManager.dungeonf7msgbot.getValue()*/true) {
+            if(!message.trim().isEmpty()) {
+                if(ToolList.getInstance().isDevEnvironment()) {
+                    ToolList.printChatMessage(Component.literal(message));
+                } else {
+                    ToolList.getInstance().log.info(message);
+                }
             }
-            if(ToolList.mc.player != null && !message.trim().isEmpty() && PartyManager.isInParty()) ToolList.mc.player.connection.sendChat((ToolList.getInstance().isDevEnvironment() ? "/achat" : "/pc") + " [SkyDiao] " + message);
+            if(ToolList.mc.player != null && !message.trim().isEmpty() && PartyManager.isInParty()) ToolList.mc.player.connection.sendChat("/pc [SkyDiao] " + message);
         }
     }
 
