@@ -508,6 +508,10 @@
       "configname": "§eSkyblock Mineshaft分享",
       "description": "§e将你的Glacite Mineshaft自动分享给其他Hypixel Helper用户, 并且你必须开启这个才能看见其他人的邀请!"
     },
+    "mineshaftsharecorpseinchat": {
+      "configname": "在聊天栏显示Mineshaft尸体信息",
+      "description": "§e开启后将Mineshaft分享中的尸体种类和数量额外显示在聊天提示下方；尸体信息始终显示在悬停提示中"
+    },
     "skyblockmineshaftsharingskyblockonly": {
       "configname": "§eSkyblock Mineshaft仅Skb提示",
       "description": "§eMineshaft的分享提示仅在Skyblock中提示"
