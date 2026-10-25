@@ -14,11 +14,11 @@ public class PlayerThread {
     private static long lastResponse;
 
     private static int musicPlayerAccessor;
-    
+
     static Queue<MusicInfo> musicFixQueue = new ConcurrentLinkedQueue<>();
-    
+
     private static Thread playThread;
-    
+
     private static boolean playing;
 
     private static Queue<MusicInfo> playQueue = new ConcurrentLinkedQueue<>();
@@ -26,13 +26,13 @@ public class PlayerThread {
 
     public static MusicInfo currentMusic;
     private static MusicInfo currentMusic2;
-    
-    public static boolean switchMusicFlag; 
-    
+
+    public static boolean switchMusicFlag;
+
     private static int[] randomSortedMusic = new int[0];
-    
+
     public static int musicflag;
-    
+
     static {
         MusicListManager.loadMusicFromFolder();
     }
@@ -49,7 +49,7 @@ public class PlayerThread {
     public static void clearQueue() {
         playQueue.clear();
     }
-    
+
     public static void playMI(MusicInfo mi) {
         clearQueue();
         playQueue.add(mi);
@@ -73,33 +73,33 @@ public class PlayerThread {
         } catch(Exception e) {}
         destoryCurrent();
     }
-    
+
     public static boolean isPlaying() {
         return playing;
     }
-    
+
     public static void executeThread() {
-        
+
         int thisTokenAcc = musicPlayerAccessor = ToolList.getInstance().random.nextInt();
         List<MusicInfo> musiclist = MusicListManager.getMusics();
 
         try {
             playQueue.add(musiclist.get(ConfigManager.musiclastmusic.getValue()));
         } catch(Exception e) {};
-        
+
         while(thisTokenAcc == musicPlayerAccessor) {
-            
+
             try {
                 musiclist = MusicListManager.getMusics();
                 if (musiclist.isEmpty()) {
                     ConfigManager.musicplayer.setValue(false);
                 }
-                
+
                 playing = ConfigManager.musicplayer.getValue();
                 lastResponse = System.currentTimeMillis();
                 if(playing) {
                     // fixers.get(ToolList.getInstance().random.nextInt(fixers.size())).interrupt();
-                    
+
                     if(musiclist.size() != randomSortedMusic.length) {
                         randomSortedMusic = new int[musiclist.size()];
                         for(int i = 0;i < randomSortedMusic.length;i++) {
@@ -107,12 +107,12 @@ public class PlayerThread {
                         }
                         for(int i = 0;i < randomSortedMusic.length;i++) {
                             int index = ToolList.getInstance().random.nextInt(randomSortedMusic.length);
-                            
+
                             int temp = randomSortedMusic[index];
                             randomSortedMusic[index] = randomSortedMusic[i];
                             randomSortedMusic[i] = temp;
                         }
-                        
+
                     }
                     int playMode = ConfigManager.musicplayermode.getValue();
                     if(playQueue.isEmpty()) {
@@ -120,7 +120,7 @@ public class PlayerThread {
                             case 0:
                                 if(musiclist.indexOf(currentMusic2) + 1 == musiclist.size()) playQueue.addAll(musiclist);
                                 else playQueue.addAll(musiclist.subList(musiclist.indexOf(currentMusic2) + 1, musiclist.size()));
-                                
+
                                 break;
                             case 1:
                                 for(int i : randomSortedMusic) {
@@ -189,21 +189,19 @@ public class PlayerThread {
         playThread.setPriority(Thread.MAX_PRIORITY);
         playThread.start();
     }
-    
+
     public static boolean threadStatus_Died() {
         return System.currentTimeMillis() - lastResponse > 10000;
     }
 
     public static void threadStatus_SetAlive() {
-        lastResponse = System.currentTimeMillis(); 
+        lastResponse = System.currentTimeMillis();
     }
 
     public static void fixMIFileVeriable(MusicInfo mi) {
-        if(mi.musicFile == null || mi.musicLyric == null || mi.imgFile == null)  {
-            mi.musicLyric = new File(ConfigManager.hypixelhelpermusicfolder.getValue(), mi.type.toUpperCase() + "_" + mi.hashOrID + "_lyric.txt");
-            mi.musicFile = new File(ConfigManager.hypixelhelpermusicfolder.getValue(), mi.type.toUpperCase() + "_" + mi.hashOrID + ".mp3");
-            mi.imgFile = new File(ConfigManager.hypixelhelpermusicfolder.getValue(), mi.type.toUpperCase() + "_" + mi.hashOrID + ".png");
-        }
+        mi.musicLyric = new File(ConfigManager.hypixelhelpermusicfolder.getValue(), mi.type.toUpperCase() + "_" + mi.hashOrID + "_lyric.txt");
+        mi.musicFile = new File(ConfigManager.hypixelhelpermusicfolder.getValue(), mi.type.toUpperCase() + "_" + mi.hashOrID + ".mp3");
+        mi.imgFile = new File(ConfigManager.hypixelhelpermusicfolder.getValue(), mi.type.toUpperCase() + "_" + mi.hashOrID + ".png");
     }
 
     public static void play(String idOrHash, String musicInfo, File music, File lyric) {
@@ -214,7 +212,7 @@ public class PlayerThread {
         fixMIFileVeriable(mi);
         play(mi.hashOrID, mi.name + " - " + mi.singer, mi.musicFile, mi.musicLyric, null, mi);
     }
-    
+
     public static void play(String idOrHash, String musicInfo, File music, File lyric, MusicStatus ms, MusicInfo mi) {
         try {
             current.getPlayer().stop();
@@ -228,6 +226,9 @@ public class PlayerThread {
                 current = ms == null ? new MusicStatus(music, lyric, mi) : ms;
                 current.getPlayer().play();
             } catch (Throwable e) {
+                if(!mi.canPlay()) {
+                    MusicListManager.addFixQueue(mi);
+                }
                 e.printStackTrace();
                 try {
                     Thread.sleep(2500);

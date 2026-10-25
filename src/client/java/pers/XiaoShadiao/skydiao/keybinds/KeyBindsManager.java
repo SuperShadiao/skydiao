@@ -25,6 +25,9 @@ public class KeyBindsManager {
 
     public static final KeyMapping fastMenu = new KeyMapping("key.fastMenu", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
 
+    public static final KeyMapping openConfigMenu = new KeyMapping("key.openConfigMenu", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
+    public static final KeyMapping openPartyFinderMenu = new KeyMapping("key.openPartyFinderMenu", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
+
     public static void registerKeyBinds() {
         Register.execRegister(KeyBindsManager.class, KeyMapping.class, KeyMappingHelper::registerKeyMapping);
     }

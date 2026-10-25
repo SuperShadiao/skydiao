@@ -210,6 +210,7 @@ public final class DynamicSpotHUD extends XSDHUD {
         float delta = idleAnimationWidth - idleWidth;
 
         idleWidth = idleWidth + delta * 0.09F * mc.getDeltaTracker().getGameTimeDeltaTicks() * 3;
+        if(!Float.isFinite(idleWidth)) idleWidth = 0;
     }
 
     public static IdlePart textPart(Identifier idHolder, String text, int color, IdlePart next) {

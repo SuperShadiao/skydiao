@@ -199,7 +199,7 @@ public class MineshaftShareListener extends AbstractListener {
 
                 ToolList.printChatMessage(Component.literal("§a[XSD§bMS§a] §e" + p.sender + "§a的" + (type == null ? "§bGlacite" : type.displayName()) + " §bMineshaft§a可以加入, 但你可能不在对应的环境, 为了防止误触, 你可以输入§e/skydiaojoinmineshaft " + p.sender + "§a加入.").withStyle(cs));
                 if(ConfigManager.mineshaftShareCorpseInChat.getValue() && !extraShaftInfo.isEmpty()) {
-                    ToolList.printChatMessage(Component.literal(extraShaftInfo.toString().stripTrailing()).withStyle(cs));
+                    ToolList.printChatMessage(Component.literal("§a[XSD§bMS§a] " + extraShaftInfo.toString().stripTrailing()).withStyle(cs));
                 }
             }
         } else {

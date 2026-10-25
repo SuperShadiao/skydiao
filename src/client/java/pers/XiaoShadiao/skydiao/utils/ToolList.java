@@ -293,7 +293,7 @@ public class ToolList {
     public boolean verifyFileWithMD5(File file, String md5) {
         if (!file.exists()) return false;
         String realMD5 = getMD5(file);
-        return realMD5.equals(md5);
+        return realMD5.equalsIgnoreCase(md5);
     }
 
     public byte[] downloadFileWithMD5(String url, String md5) throws IOException {
@@ -301,7 +301,7 @@ public class ToolList {
             byte[] bytes = is.readAllBytes();
 
             String realMD5 = getMD5(bytes);
-            if (realMD5.equals(md5)) {
+            if (realMD5.equalsIgnoreCase(md5)) {
                 return bytes;
 
             } else {
@@ -333,25 +333,23 @@ public class ToolList {
     }
 
     public String getMD5(InputStream inputStream) {
-        try {
-            MessageDigest md5 = MessageDigest.getInstance("MD5");
-            byte[] buffer = new byte[8192]; // 8KB缓冲区
-            int bytesRead;
-
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                md5.update(buffer, 0, bytesRead); // 分块更新摘要
-            }
-
-            byte[] digest = md5.digest();
-            return byteToHex(digest);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
+        try (inputStream) {
             try {
-                inputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+                MessageDigest md5 = MessageDigest.getInstance("MD5");
+                byte[] buffer = new byte[8192]; // 8KB缓冲区
+                int bytesRead;
+
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    md5.update(buffer, 0, bytesRead); // 分块更新摘要
+                }
+
+                byte[] digest = md5.digest();
+                return byteToHex(digest);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

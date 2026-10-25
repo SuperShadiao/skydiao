@@ -337,11 +337,25 @@ public class CustomBossbar extends XSDHUD {
                     context.fill((int) (x + midLength - midLength * scale + 1f), 16 + yOffset, (int) (x + midLength + midLength * scale - 1f), 19 + yOffset, new Color((int) Math.max(209, 209 + am.hitsChanges * 46), (int) Math.max(193, 193 + am.hitsChanges * 62), (int) Math.max(239, 239 + am.hitsChanges * 16), 255).getRGB());
                     context.fill((int) (x + midLength - midLength * scale), 17 + yOffset, (int) (x + midLength + midLength * scale), 18 + yOffset, new Color((int) Math.max(209, 209 + am.hitsChanges * 46), (int) Math.max(193, 193 + am.hitsChanges * 62), (int) Math.max(239, 239 + am.hitsChanges * 16), 255).getRGB());
 
-                    context.fill((int) (x + midLength - midLength * scale - 1f), 15 + yOffset, (int) (x + midLength - midLength * scale + 1f), 20 + yOffset, new Color(255, 255, 255, 255).getRGB());
-                    context.fill((int) (x + midLength + midLength * scale - 1f), 15 + yOffset, (int) (x + midLength + midLength * scale + 1f), 20 + yOffset, new Color(255, 255, 255, 255).getRGB());
-
-                    context.fill((int) (x + midLength - midLength * scale - 1f), 14 + yOffset, (int) (x + midLength - midLength * scale + 1f), 21 + yOffset, new Color(255, 255, 255, (int) (255 * am.hitsChanges)).getRGB());
-                    context.fill((int) (x + midLength + midLength * scale - 1f), 14 + yOffset, (int) (x + midLength + midLength * scale + 1f), 21 + yOffset, new Color(255, 255, 255, (int) (255 * am.hitsChanges)).getRGB());
+//                    context.fill((int) (x + midLength - midLength * scale - 1f), 15 + yOffset, (int) (x + midLength - midLength * scale + 1f), 20 + yOffset, new Color(255, 255, 255, 255).getRGB());
+//                    context.fill((int) (x + midLength + midLength * scale - 1f), 15 + yOffset, (int) (x + midLength + midLength * scale + 1f), 20 + yOffset, new Color(255, 255, 255, 255).getRGB());
+//
+//                    context.fill((int) (x + midLength - midLength * scale - 1f), 14 + yOffset, (int) (x + midLength - midLength * scale + 1f), 21 + yOffset, new Color(255, 255, 255, (int) (255 * am.hitsChanges)).getRGB());
+//                    context.fill((int) (x + midLength + midLength * scale - 1f), 14 + yOffset, (int) (x + midLength + midLength * scale + 1f), 21 + yOffset, new Color(255, 255, 255, (int) (255 * am.hitsChanges)).getRGB());
+                    RenderUtils.drawWithCustomGlow(
+                            context,
+                            (x + midLength - midLength * scale - 1f), 15 + yOffset,
+                            3, 5,
+                            false, true,
+                            1, (float) (0.2 + am.hitsChanges * 1.5), 1, 1, 1, 1
+                    );
+                    RenderUtils.drawWithCustomGlow(
+                            context,
+                            (x + midLength + midLength * scale - 3f), 15 + yOffset,
+                            3, 5,
+                            false, true,
+                            2, (float) (0.2 + am.hitsChanges * 1.5), 1, 1, 1, 1
+                    );
                 }
 
             } else {
@@ -498,7 +512,7 @@ public class CustomBossbar extends XSDHUD {
 
                 if(entity instanceof Pig && ToolList.getInstance().isDevEnvironment()) {
                     isHitProtection = true;
-                    hits = (int) currentHealth;
+                    hits = (int) (currentHealth * 1000);
                     if (lastHits != hits) {
                         hitsChanges = 1;
                     }

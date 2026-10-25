@@ -5,6 +5,7 @@ import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import pers.XiaoShadiao.skydiao.utils.MultiThreadDownloader;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,7 +69,9 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
                 while(tries++ < 3) {
                     try {
                         log.info("Downloading lib " + name);
-                        FileUtils.copyURLToFile(new URL(url), getPrepareFile());
+                        // FileUtils.copyURLToFile(new URL(url), getPrepareFile());
+                        Throwable throwable = MultiThreadDownloader.download(url, getPrepareFile(), md5);
+                        if(throwable != null) throw throwable;
                         verifyOrThrow(getPrepareFile());
                         break;
                     } catch (Throwable e) {
@@ -96,7 +99,7 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
             ZipInputStream zis = new ZipInputStream(Files.newInputStream(file.toPath()));
             while (zis.getNextEntry() != null) {}
 
-            if(!getMD5(file).equals(md5)) {
+            if(!getMD5(file).equalsIgnoreCase(md5)) {
                 throw new RuntimeException("MD5校验失败");
             }
         }
@@ -123,25 +126,23 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
         }
 
         private String getMD5(InputStream inputStream) {
-            try {
-                MessageDigest md5 = MessageDigest.getInstance("MD5");
-                byte[] buffer = new byte[8192]; // 8KB缓冲区
-                int bytesRead;
-
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
-                    md5.update(buffer, 0, bytesRead); // 分块更新摘要
-                }
-
-                byte[] digest = md5.digest();
-                return byteToHex(digest);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            } finally {
+            try (inputStream) {
                 try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    MessageDigest md5 = MessageDigest.getInstance("MD5");
+                    byte[] buffer = new byte[8192]; // 8KB缓冲区
+                    int bytesRead;
+
+                    while ((bytesRead = inputStream.read(buffer)) != -1) {
+                        md5.update(buffer, 0, bytesRead); // 分块更新摘要
+                    }
+
+                    byte[] digest = md5.digest();
+                    return byteToHex(digest);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
 

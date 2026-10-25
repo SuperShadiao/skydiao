@@ -12,6 +12,7 @@ import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicInfo;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -82,7 +83,7 @@ public class NeteaseCloud extends MusicPlatform {
                 else throw new RuntimeException("无版权或要VIP");
             };
 
-            try (InputStream bytes = fetchMusic(url, false, null, redirectConsumer)) {
+            try (InputStream bytes = fetchMusic(url, false, uc -> ((HttpURLConnection) uc).setInstanceFollowRedirects(false), redirectConsumer)) {
 
                 byte[] bytes1;
                 try (InputStream is = fetchMusic("https://music.163.com/api/song/lyric?id=" + mi.hashOrID + "&lv=-1&kv=-1&tv=-1")) {
@@ -124,7 +125,14 @@ public class NeteaseCloud extends MusicPlatform {
                     ToolList.getInstance().log.warn("获取 " + mi + " 图标: " + e);
                 }
 
-                FileUtils.copyInputStreamToFile(bytes, musicFile);
+                bytes1 = bytes.readAllBytes();
+                bytes.close();
+
+                if(new Bitstream(new ByteArrayInputStream(bytes1)).readFrame() == null) {
+                    throw new RuntimeException("mp3文件无效");
+                }
+
+                FileUtils.writeByteArrayToFile(musicFile, bytes1);
                 FileUtils.writeStringToFile(musicLyric, JsonParser.parseString(result1).getAsJsonObject().get("lrc").getAsJsonObject().get("lyric").getAsString(), "UTF-8");
                 ToolList.getInstance().log.info("写出完成");
             }

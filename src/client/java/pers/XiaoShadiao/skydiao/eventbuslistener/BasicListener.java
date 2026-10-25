@@ -60,14 +60,17 @@ import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.irc.ChatPacket;
 import pers.XiaoShadiao.skydiao.keybinds.KeyBindsManager;
+import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
 import pers.XiaoShadiao.skydiao.screen.FastCommandMenuScreen;
 import pers.XiaoShadiao.skydiao.screen.mircosoftaccount.AccountSelectScreen;
+import pers.XiaoShadiao.skydiao.screen.partyfinder.PartyListScreen;
 import pers.XiaoShadiao.skydiao.utils.*;
 import pers.XiaoShadiao.skydiao.utils.autoupdater.AutoUpdater;
 import pers.XiaoShadiao.skydiao.utils.blivesensitiveword.ServerIdSpoofer;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.XSDSafeSession;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.PlayerThread;
+import pers.XiaoShadiao.skydiao.utils.partyfinder.PartyFinderManager;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 import pers.XiaoShadiao.skydiao.utils.playerinput.XSDSimulatorInput;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
@@ -311,7 +314,7 @@ public class BasicListener extends AbstractListener {
             }
         }
 
-        if(message.contains("加入了组队") || message.endsWith("joined the party.")) {
+        if(message.contains("加入了组队") || message.contains("离开了组队") || message.contains("解散") || message.endsWith("joined the party.") || message.endsWith("left the party.") || message.contains("disband")) {
             delayTickExecutor.delayExec(() -> ToolList.getInstance().updatePartyInfo(), 5);
         }
     }
@@ -477,6 +480,8 @@ public class BasicListener extends AbstractListener {
         }
     }
 
+    private long lastNotifyPublicPartyTime;
+
     private void onWorldChange(Minecraft mc, ClientLevel clientLevel) {
         ChatClientManager.getChatClient();
         reloadCustomCape();
@@ -492,6 +497,15 @@ public class BasicListener extends AbstractListener {
         if(SkyblockBlacklistManager.getInstance().isDone() && !SkyblockBlacklistManager.getInstance().isAvaliable()) SkyblockBlacklistManager.updateBlacklist();
 
         if(ToolList.getInstance().isDevEnvironment()) Gif.clearCache();
+
+        if(System.currentTimeMillis() - lastNotifyPublicPartyTime > 60000) {
+            lastNotifyPublicPartyTime = System.currentTimeMillis();
+            delayTickExecutor.delayExec(() -> {
+                if (PartyFinderManager.isPublic && !PartyFinderManager.selfPartyData.isPartyFull()) {
+                    ToolList.printChatMessage(Component.literal("§a[小沙雕] §e当前你的队伍处于公开状态, 若要停止公开请使用/skydiaofp关闭!"));
+                }
+            }, 80);
+        }
     }
 
     private int afkHoldTick;
@@ -529,6 +543,12 @@ public class BasicListener extends AbstractListener {
         }
         if(KeyBindsManager.fastMenu.isDown() && mc.screen == null) {
             mc.setScreen(new FastCommandMenuScreen(false));
+        }
+        while(KeyBindsManager.openConfigMenu.consumeClick()) {
+            mc.setScreen(new ConfigScreen(mc.screen));
+        }
+        while(KeyBindsManager.openPartyFinderMenu.consumeClick()) {
+            mc.setScreen(new PartyListScreen());
         }
         if((!(mc.screen instanceof ChatScreen) || mc.screen.getClass().getName().startsWith("pers.XiaoShadiao")) && Arrays.stream(mc.options.keyMappings).anyMatch(KeyMapping::isDown))  {
             if(afkHoldTick++ > 20) {

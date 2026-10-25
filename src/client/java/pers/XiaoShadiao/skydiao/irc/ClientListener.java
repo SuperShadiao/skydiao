@@ -88,7 +88,7 @@ public class ClientListener extends ChatClient {
                                         String json = packet.getJson().toString();
                                         if(json.length() < 500) {
                                             log.info("Received packet: " + json);
-                                        } else {
+                                        } else if(!(packet.packetType.startsWith("find_party") && !ToolList.getInstance().isXiaoShadiao())) {
                                             log.info("Received packet " + packet.packetType + " (" + json.length() + ")");
                                         }
                                         break;

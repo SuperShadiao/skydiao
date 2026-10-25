@@ -24,6 +24,18 @@ public class Calc {
             if (args.length != 1) throw new RuntimeException("ln函数需要一个参数");
             return Math.log(args[0]);
         });
+        FUNCTIONS.put("sin", args -> {
+            if (args.length != 1) throw new RuntimeException("sin函数需要一个参数");
+            return Math.sin(args[0]);
+        });
+        FUNCTIONS.put("cos", args -> {
+            if (args.length != 1) throw new RuntimeException("cos函数需要一个参数");
+            return Math.cos(args[0]);
+        });
+        FUNCTIONS.put("tan", args -> {
+            if (args.length != 1) throw new RuntimeException("tan函数需要一个参数");
+            return Math.tan(args[0]);
+        });
 
         // 双参数函数
         FUNCTIONS.put("log", args -> {

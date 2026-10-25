@@ -39,6 +39,10 @@ public interface CommandManager {
     public static final XSDCBlockCommand XSDC_BLOCK_COMMAND = new XSDCBlockCommand();
     public static final HHRepartyCommand HH_REPARTY_COMMAND = new HHRepartyCommand();
     public static final SkydiaoRepartyCommand SKYDIAO_REPARTY_COMMAND = new SkydiaoRepartyCommand();
+    public static final SkydiaoFindPartyCommand SKYDIAO_FIND_PARTY_COMMAND = new SkydiaoFindPartyCommand();
+    public static final HHFindPartyCommand HH_FIND_PARTY_COMMAND = new HHFindPartyCommand();
+    public static final HHFPCommand HH_FP_COMMAND = new HHFPCommand();
+    public static final SkydiaoFPCommand SKYDIAO_FP_COMMAND = new SkydiaoFPCommand();
 
     public static void registerCommands() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {

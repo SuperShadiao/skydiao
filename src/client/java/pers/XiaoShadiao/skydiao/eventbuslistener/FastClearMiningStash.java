@@ -146,7 +146,8 @@ public class FastClearMiningStash extends AbstractListener {
             "SUGAR_CANE", "ENCHANTED_SUGAR",
             "BLAZE_ROD", "ENCHANTED_BLAZE_POWDER",
             "COCOA_BEANS", "ENCHANTED_COCOA",
-            "INK_SACK:3", "ENCHANTED_COCOA"
+            "INK_SACK:3", "ENCHANTED_COCOA",
+            "DOUBLE_PLANT", "ENCHANTED_SUNFLOWER"
     );
 
     private String handleId(String id) {

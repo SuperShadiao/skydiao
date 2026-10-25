@@ -1,11 +1,13 @@
 package pers.XiaoShadiao.skydiao.utils;
 
 import net.hypixel.modapi.packet.impl.clientbound.ClientboundPartyInfoPacket;
+import pers.XiaoShadiao.skydiao.utils.partyfinder.PartyFinderManager;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class PartyManager {
 
@@ -53,6 +55,8 @@ public class PartyManager {
             }
             synchronized (PartyManager.class) {
                 members = newMembers;
+                PartyFinderManager.selfPartyData.players.clear();
+                PartyFinderManager.selfPartyData.players.addAll(members.values().stream().map(Member::name).collect(Collectors.toSet()));
             }
         }, null);
     }

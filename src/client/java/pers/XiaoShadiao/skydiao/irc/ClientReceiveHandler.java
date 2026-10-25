@@ -11,13 +11,18 @@ import net.minecraft.world.item.ItemStackTemplate;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.ICustomSkinModelLoader;
+import pers.XiaoShadiao.skydiao.screen.partyfinder.PartyListScreen;
 import pers.XiaoShadiao.skydiao.utils.OnlinePlayerList;
+import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicInfo;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicListManager;
+import pers.XiaoShadiao.skydiao.utils.partyfinder.PartyFinderData;
+import pers.XiaoShadiao.skydiao.utils.partyfinder.PartyFinderManager;
 
 import java.util.Arrays;
+import java.util.Iterator;
 
 public class ClientReceiveHandler {
 
@@ -102,8 +107,65 @@ public class ClientReceiveHandler {
                 ToolList.printChatMessage(component.withStyle(style1));
                 ToolList.printChatMessage(component2.withStyle(style1));
                 break;
-            case "get_players":
+            case "getplayers":
                 OnlinePlayerList.readFromPacket(packet);
+                break;
+            case "find_party_check_list":
+                if(PartyFinderManager.isPublic && StatusManager.get().hasStatus()) {
+                    PartyFinderData clone = PartyFinderManager.selfPartyData.clone();
+                    clone.requestKey = packet.message;
+                    ChatPacket packet2 = new ChatPacket();
+                    packet2.packetType = "find_party_check_callbackinfo";
+                    packet2.message = clone.toJson().toString();
+                    packet2.initSender();
+                    ChatClientManager.trySendOrWarning(packet2);
+                }
+                break;
+            case "find_party_check_callbackinfo":
+                PartyFinderData data = PartyFinderData.fromJson(JsonParser.parseString(packet.message).getAsJsonObject());
+                if(ToolList.mc.screen instanceof PartyListScreen partyListScreen) {
+                    partyListScreen.addData(data);
+                }
+                break;
+            case "find_party_let_me_in":
+                if(ToolList.mc.getUser().getName().equalsIgnoreCase(packet.message) && StatusManager.get().hasStatus() && PartyFinderManager.isPublic && !PartyFinderManager.selfPartyData.isPartyFull() && !PartyFinderManager.selfPartyData.players.contains(packet.sender)) {
+                    ToolList.printChatMessage(Component.literal("§a[小沙雕] §e" + packet.sender + "§a请求加入你的队伍!"));
+                    ToolList.sendChatMessage("/p invite " + packet.sender);
+
+                    ChatPacket packet2 = new ChatPacket();
+                    packet2.packetType = "find_party_please_join";
+                    packet2.message = packet.sender;
+                    packet2.initSender();
+                    ChatClientManager.trySendOrWarning(packet2);
+                    try { Thread.sleep(2000); } catch (InterruptedException e) {}
+                    ToolList.getInstance().updatePartyInfo();
+                }
+                break;
+            case "find_party_please_join":
+                if(ToolList.mc.getUser().getName().equalsIgnoreCase(packet.message)) {
+                    ToolList.addThreadedTask(() -> {
+                        ToolList.sendChatMessage("/p leave");
+                        Thread.sleep(1000);
+                        ToolList.sendChatMessage("/p join " + packet.sender);
+                        return null;
+                    });
+                }
+                break;
+            case "find_party_broadcast":
+                data = PartyFinderData.fromJson(JsonParser.parseString(packet.message).getAsJsonObject());
+                MutableComponent msg = Component.literal("§a[小沙雕] §e" + packet.sender + "§a的§r")
+                        .append(Component.literal(data.partyType.displayName).withColor(data.partyType.color.getRGB()))
+                        .append("§a队伍[");
+                Iterator<PartyFinderData.SubType> iterator = data.getOrderedPartySubTypes().iterator();
+                while(iterator.hasNext()) {
+                    PartyFinderData.SubType subType = iterator.next();
+                    msg.append(Component.literal(subType.displayName).withColor(subType.color.getRGB()));
+                    if(iterator.hasNext()) msg.append(Component.literal("§r, "));
+                }
+                ToolList.printChatMessage(
+                        msg.append("§a]可以加入, 当前人数(" + data.players.size() + "/" + data.maxPlayers + "), 使用§e/skydiaofp join " + data.leaderPlayerName + "§a加入队伍!")
+                                .withStyle(Style.EMPTY.withHoverEvent(new HoverEvent.ShowText(Component.literal("队伍备注: " + data.description + "\n\n§e点击快速填充指令"))).withClickEvent(new ClickEvent.SuggestCommand("/skydiaofp join " + data.leaderPlayerName)))
+                );
                 break;
         }
     }
