@@ -92,6 +92,7 @@ public abstract class AbstractListener extends Thread {
     public static final DungeonNoSwapItemInEndListener dungeonNoSwapItemInEndListener = new DungeonNoSwapItemInEndListener();
     public static final AutoPetToDynamicSpotListener autoPetToDynamicSpotListener = new AutoPetToDynamicSpotListener();
     public static final AutoTipListener autoTipListener = new AutoTipListener();
+    public static final ShaftHOTMSwitchListener shaftHOTMSwitchListener = new ShaftHOTMSwitchListener();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();

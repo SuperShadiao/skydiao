@@ -29,6 +29,11 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
     public static final File libPrepareFolder = new File(libFolder, "1");
     public static final File libLoadFolder = new File(libFolder, "2");
 
+    static {
+        libLoadFolder.mkdirs();
+        libPrepareFolder.mkdirs();
+    }
+
     private static SkyDiaoPreLaunch instance;
 
     public static SkyDiaoPreLaunch getInstance() {

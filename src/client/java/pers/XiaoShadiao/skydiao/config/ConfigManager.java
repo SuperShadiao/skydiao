@@ -255,6 +255,8 @@ public class ConfigManager {
     public static final ColorConfigOption dungeonf7termuiclickorderthirdbuttoncolor = new ColorConfigOption("dungeonf7termuiclickorderthirdbuttoncolor", 0xFF0000);
     public static final BooleanConfigOption dungeonautoswitchbackitem = new BooleanConfigOption("dungeonautoswitchbackitem", false);
     public static final BooleanConfigOption preventShortbowDrawing = new BooleanConfigOption("preventshortbowdrawing", true);
+    public static final IntConfigOption mineshaftEnterLoadout = new IntConfigOption("mineshaftenterloadout", 0);
+    public static final IntConfigOption mineshaftExitLoadout = new IntConfigOption("mineshaftexitloadout", 0);
 
     // public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
@@ -360,7 +362,8 @@ public class ConfigManager {
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
             Map.entry("自动类", List.of(macroReplay, macroReplaySelfCleaning, autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, autoCarnivalAutoRestart, carnivalAutoFruitDigger, carnivalAutoShootZombie, carnivalAutoShootZombieOffset, skyblockautobloodfiend, skyblockautobloodfiendlowhealth, iAutoObsidian, iAutoObsidianWR, obsidianPositionHelper, autoObsidianPositionsFile, drillSlot, lanternSlot, obsidianPlayerCheckRange, obsidianPlayerCheck, obsidianTheEndCheck, obsidianCycleTicks, autoPickupPhoneRing, autoPlayBeachBall, autoPlayBeachBallAutoStopAt40, autoEvaluateFossils, autoEvaluateFossilsAutoRestart)),
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareCorpseInChat, mineshaftShareAnnounce,
-                    skyblockSafeIsland, crystalHollowHelper, crystalHollowScanBlue, crystalHollowScanPurple,
+                    skyblockSafeIsland, mineshaftEnterLoadout, mineshaftExitLoadout,
+                    crystalHollowHelper, crystalHollowScanBlue, crystalHollowScanPurple,
                     crystalHollowScanYellow, crystalHollowScanOrange, crystalHollowScanGreen,
                     crystalHollowScanGoblinKing, crystalHollowScanDragonLair, crystalHollowScanWormFishSpot,
                     crystalHollowScanCorleone, crystalHollowScanFairyGrotto, crystalHollowScanBear3,

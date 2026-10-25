@@ -9,6 +9,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.ContainerInput;
+import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.utils.PageSwitchCallback;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
@@ -25,12 +26,14 @@ public class AutoLoadoutListener extends AbstractListener {
     @Override
     public void registerListeners() {
         ScreenEvents.AFTER_INIT.register(this::onLoadoutGuiOpen);
+        CustomFabricEvents.MOUSE_BUTTON_EVENT.register((hwnd, button, state) -> state == 1 && mc.screen != null && futureTask != null && !futureTask.future.isDone());
     }
 
     public int loadout = 0;
     public Consumer<CallbackResult> callback;
     private PageSwitchCallback pageSwitchCallback;
     private int taskId;
+    private ToolList.ThreadedTask<?> futureTask;
 
     public void onLoadoutGuiOpen(Minecraft client, Screen screen, int scaledWidth, int scaledHeight) {
         if (!(screen instanceof ContainerScreen containerScreen)) return;
@@ -90,7 +93,7 @@ public class AutoLoadoutListener extends AbstractListener {
 
         loadout = 0;
 
-        ToolList.addThreadedTask(new Callable<Void>() {
+        futureTask = ToolList.addThreadedTask(new Callable<Void>() {
             public Void call() {
                 Screen screen;
                 ChestMenu menu = menu0;
@@ -161,9 +164,6 @@ public class AutoLoadoutListener extends AbstractListener {
         this.callback = callback;
 
         int expectedTaskId = this.taskId = ToolList.getInstance().random.nextInt();
-
-        // 使用原子操作确保线程安全
-        final int expectedIndex = index;
 
         ToolList.addThreadedTask(() -> {
             Thread.sleep(7000);

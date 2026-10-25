@@ -50,6 +50,11 @@ public final class MultiThreadDownloader {
 
         if(verify(dest, md5)) return null;
         try {
+            if(!dest.exists()) {
+                File parentFile = dest.getParentFile();
+                if(parentFile != null && !parentFile.exists()) parentFile.mkdirs();
+                dest.createNewFile();
+            }
             Probe probe = probe(url);
             if (!probe.rangeSupported()) {
                 // 服务器不支持 Range，只能单连接完整下载

@@ -11,6 +11,7 @@ import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.Nullable;
+import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.utils.PageSwitchCallback;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
@@ -33,12 +34,14 @@ public class AutoSwapReviveHeadListener extends AbstractListener {
     @Override
     public void registerListeners() {
         ScreenEvents.AFTER_INIT.register(this::onLoadoutGuiOpen);
+        CustomFabricEvents.MOUSE_BUTTON_EVENT.register((hwnd, button, state) -> state == 1 && mc.screen != null && futureTask != null && !futureTask.future.isDone());
     }
 
     public Type execute = null;
     public Consumer<CallbackResult> callback;
     private PageSwitchCallback pageSwitchCallback;
     private int taskId;
+    private ToolList.ThreadedTask<?> futureTask;
 
     public void onLoadoutGuiOpen(Minecraft client, Screen screen, int scaledWidth, int scaledHeight) {
         if (!(screen instanceof ContainerScreen containerScreen)) return;
@@ -76,7 +79,7 @@ public class AutoSwapReviveHeadListener extends AbstractListener {
         Type currentType = execute;
         execute = null;
 
-        ToolList.addThreadedTask(new Callable<Void>() {
+        futureTask = ToolList.addThreadedTask(new Callable<Void>() {
             public Void call() {
                 Screen screen;
                 ChestMenu menu = menu0;

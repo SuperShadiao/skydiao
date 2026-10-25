@@ -2,6 +2,7 @@ package pers.XiaoShadiao.skydiao.eventbuslistener.macro;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
@@ -15,6 +16,7 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -28,6 +30,7 @@ import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractFishingListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.E2AMappingListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
+import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinFishHookEntityHookedAccessor;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
@@ -406,6 +409,17 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
         ClientTickEvents.START_CLIENT_TICK.register(this::onStartClientTick);
         ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register(this::worldUnload);
         LevelRenderEvents.END_MAIN.register(this::onLastRender);
+        ClientReceiveMessageEvents.GAME.register(this::onChat);
+        ClientReceiveMessageEvents.GAME_CANCELED.register(this::onChat);
+    }
+
+    private void onChat(Component component, boolean b) {
+        if(isThisMacroEnabled()) {
+            String msg = ToolList.getInstance().deleteColorCode(component.getString());
+            if ("There is not enough space for another Sea Creature! Kill some to make space for new ones!".equals(msg)) {
+                XSDHUD.bigTitle.updateTitleMsg("到达海怪上限!", 3000, SoundEvents.BLAZE_DEATH);
+            }
+        }
     }
 
     private void onLastRender(LevelRenderContext context) {
