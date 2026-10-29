@@ -1,12 +1,12 @@
 package pers.XiaoShadiao.skydiao.utils;
 
-import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class URLFetchProcess extends FilterInputStream {
+public class URLFetchProcess extends FilterInputStream implements IDownloadProcess {
 
     // 1. 计数器：记录已读取的字节数
     private long readByteCount = 0;
@@ -57,7 +57,7 @@ public class URLFetchProcess extends FilterInputStream {
 
     // 重写 readAllBytes
     @Override
-    public byte[] readAllBytes() throws IOException {
+    public byte @NotNull [] readAllBytes() throws IOException {
         try {
             byte[] result = super.readAllBytes();
             readByteCount += result.length; // 记录全部读取的长度
@@ -70,21 +70,32 @@ public class URLFetchProcess extends FilterInputStream {
         }
     }
 
-    public String getProcessString() {
-        return ToolList.getInstance().numberToByteString(readByteCount);
+    @Override
+    public long getTotalByteSize() {
+        return readByteCount;
+    }
+
+    @Override
+    public long getDownloadedByteSize() {
+        return readByteCount;
     }
 
     public boolean isDone() {
         return done;
     }
 
+    @Override
+    public boolean isMaxByteSizeUnknown() {
+        return false;
+    }
+
     public boolean isFailed() {
         return failed;
     }
 
+    @Override
     public URLFetchProcess addToTitle() {
-        AbstractListener.titleChanger.downloadProcess.addProcess(this);
+        IDownloadProcess.super.addToTitle();
         return this;
     }
-
 }

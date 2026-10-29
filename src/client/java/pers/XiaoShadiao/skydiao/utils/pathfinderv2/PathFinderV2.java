@@ -47,6 +47,12 @@ public class PathFinderV2 {
     private BlockPos startPos = BlockPos.ZERO;
     private BlockPos endPos = BlockPos.ZERO;
 
+    private boolean forceFly = false;
+
+    public void setForceFly(boolean forceFly) {
+        this.forceFly = forceFly;
+    }
+
     public BlockPos getStartPos() {
         return startPos;
     }
@@ -305,7 +311,7 @@ public class PathFinderV2 {
                 return false;
             }
         }
-        if (!ToolList.mc.player.getAbilities().mayfly) {
+        if (!canFly()) {
             if(next.type() == PathNodeType.FLY) {
                 return false;
             }
@@ -318,6 +324,10 @@ public class PathFinderV2 {
         }
 
         return true;
+    }
+
+    private boolean canFly() {
+        return ToolList.mc.player.getAbilities().mayfly || forceFly;
     }
 
     /**

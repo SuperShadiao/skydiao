@@ -7,10 +7,22 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.PacketListener;
+import net.minecraft.network.PacketProcessor;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
+import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.pathfinder.PathFinder;
 import pers.XiaoShadiao.skydiao.utils.pathfinderv2.*;
@@ -30,14 +42,18 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
     private PathFinderV2 pathfinder = null;
     private CompletableFuture<PathNodes> task = null;
 
-    private Queue<RePathInfo> rePathInfoQueue = new ArrayDeque<>();
+    private final Queue<RePathInfo> rePathInfoQueue = new ArrayDeque<>();
 
     private final List<PathNode> path = new ArrayList<>();
     private final List<BlockPos> pathBlockPos = new ArrayList<>();
     private PathNode lastPassedNode = null;
+    private PathNode preAimToRender = null;
 
     private boolean canUseAOTE;
+    private int teleportDist = 8;
     private boolean canUseEWarp;
+
+    private long waitAOTESync = 0;
 
     private boolean isPaused;
 
@@ -51,6 +67,14 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
         ClientTickEvents.START_CLIENT_TICK.register(this::onStartTick);
         LevelRenderEvents.END_MAIN.register(this::onLastRender);
         ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register(this::onUnload);
+        CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
+    }
+
+    private boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
+        if(packet instanceof ClientboundPlayerPositionPacket) {
+            waitAOTESync = System.currentTimeMillis() - 400;
+        }
+        return false;
     }
 
     private int tickCounter = 0;
@@ -78,6 +102,10 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
 
             RenderUtils.renderESP(wrLine, startPos, 0, 1, 1, 1, false);
             RenderUtils.renderESP(wrLine, endPos, 0, 1, 0, 1, false);
+
+            if(preAimToRender != null) {
+                RenderUtils.renderESP(wrLine, preAimToRender.pos(), 1, 0, 0.5f, 1, false);
+            }
 
             if(!task1.isDone()) {
                 PathRenderer.renderPath(context, pathfinder.getCurrentContext().getForwardPath().stream().map(PathNode::pos).toList(), 0, 0, 1f, xray, false);
@@ -109,10 +137,12 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
                 } catch (Throwable e) {
                     logger.catching(e);
                 } finally {
+                    InputSimulator.stopAiming();
                     isThreadRunning = false;
                 }
                 if(rePathInfoQueue.isEmpty()) break;
 
+                updateAOTEEWarpState();
                 RePathInfo rePathInfo = rePathInfoQueue.poll();
                 pathfinder = rePathInfo.pathfinderInstance();
                 task = rePathInfo.preRunTask();
@@ -123,7 +153,6 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
     private void executeThread() {
 
         if(pathfinder != null && task != null) {
-            AimHelper aimHelper = new AimHelper(0.8);
             PathNodes pathNodes;
             try {
                 pathNodes = task.get();
@@ -146,6 +175,8 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
             }
 
             flagPathfinderAlive();
+
+            AimHelper.Result lastAimResult = null;
             while (pathfinder != null && task != null && !path.isEmpty()) {
 
                 PathNode node = path.getFirst();
@@ -157,22 +188,33 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
                         List<PathNode> pathNodes1 = path.subList(0, index + 1);
                         pathNodes1.clear();
                         pathBlockPos.subList(0, index + 1).clear();
+                        if(!path.isEmpty()) System.out.println("Current Node: " + path.getFirst());
                         flagPathfinderAlive();
                         prepareParkourJump = System.currentTimeMillis();
                         break;
                     }
                 }
 
-                PathNode preAimNode = aimNode;
-                int expandCount = 0;
-                while(expandCount < 5 && (preAimNode.type() == PathNodeType.FLY || preAimNode.type() == PathNodeType.MOVE || preAimNode.type() == PathNodeType.UP || preAimNode.type() == PathNodeType.DOWN)) {
-                    PathNode temp = getNextNode(preAimNode);
-                    if(!canBeSee(temp) || BlockHelper.areaHasCollision(aimNode.pos(), temp.pos().above(2))) {
-                        break;
-                    }
-                    preAimNode = temp;
-                    expandCount++;
-                }
+                double aimSpeed = 0.8;
+                BlockPos aimOffset = BlockPos.ZERO;
+
+//                List<PathNode> pendingPreAimNodes = new ArrayList<>();
+//                int expandCount = 0;
+//                while(expandCount < (canUseAOTE ? 15 : 5) && (preAimNode.type() == PathNodeType.FLY || preAimNode.type() == PathNodeType.MOVE || preAimNode.type() == PathNodeType.UP || preAimNode.type() == PathNodeType.DOWN)) {
+//                    PathNode temp = getNextNode(preAimNode);
+//                    if(!canBeSee(temp) || BlockHelper.areaHasCollision(aimNode.pos(), temp.pos().above(2))) {
+//                        break;
+//                    }
+//                    preAimNode = temp;
+//                    expandCount++;
+//                }
+                PathNode finalAimNode = aimNode;
+                PathNode preAimNode = path.subList(0, Math.min(path.size(), canUseAOTE ? 50 : 5))
+                        .stream()
+                        .filter(temp -> temp.type() == PathNodeType.FLY || temp.type() == PathNodeType.MOVE || temp.type() == PathNodeType.UP || temp.type() == PathNodeType.DOWN)
+                        .filter(temp -> canBeSee(temp) && !BlockHelper.areaHasCollision(finalAimNode.pos(), temp.pos().above(canUseAOTE ? 1 : 2)))
+                        .max(Comparator.comparingInt(path::indexOf)).orElse(aimNode);
+
 
                 if (!path.isEmpty() && path.size() < 30 && rePathInfoQueue.isEmpty()) {
                     PathNode lastNode = path.getLast();
@@ -189,10 +231,47 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
                 boolean enableAiming = true;
 
                 if(node.type() == PathNodeType.FLY) {
-                    if (!mc.player.getAbilities().mayfly) {
+                    if (!canDoFly() && !canUseAOTE) {
                         rePath(mc.player.blockPosition(), pathfinder.getEndPos(), true);
-                    }
-                    if (mc.player.getAbilities().flying) {
+                    } else if(canUseAOTE) {
+                        aimSpeed = 1.2;
+                        switchToAOTE();
+                        aimNode = preAimNode;
+                        PathNode nextNode = getNextNode(preAimNode);
+                        boolean useEWarpFlag = false;
+                        if(mc.player.getY() < nextNode.pos().getY()) {
+                            double currentHorDist = mc.player.position().horizontal().distanceTo(nextNode.pos().getCenter().horizontal());
+                            int tpYOff = (int) (Math.sqrt(teleportDist * teleportDist - currentHorDist * currentHorDist));
+                            int i;
+                            for (i = 1; i < tpYOff; i++) {
+                                if(!canBeSee(aimNode.pos().above(i)) || BlockHelper.hasCollision(aimNode.pos().above(i))) {
+                                    i--;
+                                    break;
+                                }
+                            }
+                            tpYOff = i;
+                            aimOffset = new BlockPos(0, tpYOff, 0);
+                        } else if(Math.abs(mc.player.getY() - nextNode.pos().getY()) < 0.1) {
+                            aimOffset = new BlockPos(0, -1, 0);
+                        }
+                        if(canUseEWarp && Stream.of(nextNode, preAimNode).anyMatch(temp -> temp.type() != PathNodeType.FLY && BlockHelper.hasCollision(temp.pos().below()) && canBeSee(temp.pos().below()))) {
+                            aimSpeed = 2.5;
+                            aimOffset = new BlockPos(0, -1, 0);
+                            aimNode = nextNode;
+                            InputSimulator.setShift(true);
+                            useEWarpFlag = true;
+                        }
+                        if(isWaitingAOTVSync()) {
+                            if(lastAimResult != null) {
+                                float absYaw = Math.abs(lastAimResult.yaw() - InputSimulator.getPlayerYaw()) % 360;
+                                float absPitch = Math.abs(lastAimResult.pitch() - InputSimulator.getPlayerPitch());
+                                if (Math.min(absYaw, Math.abs(absYaw - 360)) < (useEWarpFlag ? 5 : 20) && absPitch < (useEWarpFlag ? 4 : 16)) {
+                                    InputSimulator.singleRightClick();
+                                    waitAOTESync = System.currentTimeMillis();
+                                }
+                            }
+                        }
+                    } else if (canDoFly()) {
                         // InputSimulator.setForward(node.pos().getCenter().horizontal().distanceTo(mc.player.position().horizontal()) > getFlyPassDist());
                         InputSimulator.tryNoViewChangeControlMoveTo(node.pos(), 1);
                         aimNode = preAimNode;
@@ -235,7 +314,7 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
 
                     if(node.pos().getY() - 0.5 > mc.player.getY()) {
                         InputSimulator.setJump(true);
-                    } else if(mc.player.getAbilities().flying) {
+                    } else if(canDoFly()) {
                         if(node.pos().getY() > mc.player.getY()) {
                             InputSimulator.setJump(true);
                         } else {
@@ -243,7 +322,7 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
                         }
                     }
                 } else if(node.type() == PathNodeType.DOWN) {
-                    if(mc.player.getAbilities().flying) {
+                    if(canDoFly()) {
                         if(node.pos().getY() > mc.player.getY()) {
                             InputSimulator.setJump(true);
                         } else {
@@ -257,7 +336,9 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
 
                 InputSimulator.setSprint(useSprint);
                 if(enableAiming) {
-                    AimHelper.getYawPitchByBlockPos(aimNode.pos().above()).updateToAimHelper(aimHelper);
+                    lastAimResult = AimHelper.getYawPitchByVec3(Vec3.atBottomCenterOf(aimNode.pos().above().offset(aimOffset)));
+                    lastAimResult.updateToAimHelper(new AimHelper(aimSpeed));
+                    preAimToRender = aimNode;
                 }
 
                 try {
@@ -308,11 +389,12 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
         private final PathFinderV2 pathfinderInstance;
         private final CompletableFuture<PathNodes> preRunTask;
 
-        private RePathInfo(BlockPos from, BlockPos to, boolean stopCurrent) {
+        private RePathInfo(BlockPos from, BlockPos to, boolean stopCurrent, boolean forceFly) {
             this.from = from;
             this.to = to;
             this.stopCurrent = stopCurrent;
             this.pathfinderInstance = new PathFinderV2();
+            this.pathfinderInstance.setForceFly(forceFly);
             this.preRunTask = pathfinderInstance.findPathSync(from, to);
         }
 
@@ -339,7 +421,7 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
     }
 
     private void rePath(BlockPos from, BlockPos to, boolean stopCurrent) {
-        rePathInfoQueue.offer(new RePathInfo(from, to, stopCurrent));
+        rePathInfoQueue.offer(new RePathInfo(from, to, stopCurrent, canUseAOTE));
         if(stopCurrent) {
             stopExecution(false);
         }
@@ -350,20 +432,32 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
     }
 
     private boolean canBeSee(PathNode current) {
+        return canBeSee(current.pos());
+    }
+
+    private boolean canBeSee(BlockPos current) {
         return Stream.of(mc.player.getEyePosition(), mc.player.position(), mc.player.position().add(0, mc.player.getBbHeight(), 0))
                 .allMatch(pos -> Stream.of(
-                                current.pos().getCenter(),
-                                current.pos().above().getCenter(),
-                                current.pos().getCenter().add(0, 0.49, 0),
-                                current.pos().getBottomCenter().add(0, 0.01, 0)
+                                current.getCenter(),
+                                current.above().getCenter(),
+                                current.getCenter().add(0, 0.49, 0),
+                                current.getBottomCenter().add(0, 0.01, 0)
                         )
-                        .allMatch(pos2 -> Optional.ofNullable(ToolList.getInstance().predictPlayerAimBlock(pos, pos2)).map(HitResult::getType).orElse(HitResult.Type.MISS) != HitResult.Type.BLOCK));
+                        .allMatch(pos2 -> {
+                            Optional<HitResult> hitResult = Optional.ofNullable(ToolList.getInstance().predictPlayerAimBlock(pos, pos2));
+                            Optional<HitResult.Type> type = hitResult.map(HitResult::getType);
+                            if(type.orElse(HitResult.Type.MISS) != HitResult.Type.BLOCK) {
+                                return true;
+                            } else {;
+                                return hitResult.get() instanceof BlockHitResult blockHitResult && blockHitResult.getBlockPos().equals(current);
+                            }
+                        }));
     }
 
     private boolean checkPassed(BlockPos goal, PathNode current) {
 
         if(current.type().isJumpMove() && !mc.player.onGround()) return false;
-        // if(isFollowerAlive() && (follower.isAimingToEntity || (pathblocks.size() == 1 && follower.tryAttack && Math.sqrt(pathblocks.getFirst().distToCenterSqr(follower.currentEntity.getX(), follower.currentEntity.getY(), follower.currentEntity.getZ())) < 2))) return false;
+        // if(isFollowerAlive() && (follower.isAimingToEntity || (pathblocks.size() == 1 && follower.tryAttack && Math.tpYOff(pathblocks.getFirst().distToCenterSqr(follower.currentEntity.getX(), follower.currentEntity.getY(), follower.currentEntity.getZ())) < 2))) return false;
 
         double horizontalDis = mc.player.position().horizontal().distanceTo(current.pos().getCenter().horizontal());
         if(horizontalDis > 0.85) {
@@ -416,8 +510,8 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
         }
 
         if (current.type() == PathNodeType.FLY) {
-            if(!mc.player.getAbilities().flying) return false;
-            allowedDistance = getFlyPassDist() * (!currentIsGoal ? 3 : 1);
+            if(!canDoFly() && !canUseAOTE) return false;
+            allowedDistance = getFlyPassDist() * (!currentIsGoal ? 3 : 1) * (canUseAOTE ? 3 : 1);
             if(nextNode.type() != PathNodeType.FLY) {
                 allowedDistance = 1;
             }
@@ -483,6 +577,10 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
         return true;
     }
 
+    private boolean canDoFly() {
+        return mc.player.getAbilities().flying;
+    }
+
     public BlockPos getNextBlockPos(BlockPos blockPos) {
         try {
             int index = pathBlockPos.indexOf(blockPos);
@@ -532,11 +630,65 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
 
                 }
             }
+            waitAOTESync = 0;
+            updateAOTEEWarpState();
             pathfinder = new PathFinderV2();
+            pathfinder.setForceFly(canUseAOTE);
             task = pathfinder.findPathSync(mc.player.blockPosition(), target);
 
             interrupt();
         }, null);
+    }
+
+    private void updateAOTEEWarpState() {
+
+        boolean tempCanUseAOTE = false;
+        boolean tempCanUseEWarp = false;
+        a:for (ItemStack itemStack : mc.player.getInventory()) {
+            if(isItemAOTV(itemStack) || isItemAOTE(itemStack)) {
+                tempCanUseAOTE = true;
+                for (Component line : itemStack.getTooltipLines(Item.TooltipContext.of(mc.level), mc.player, TooltipFlag.NORMAL)) {
+                    if (line.getString().endsWith("SNEAK RIGHT CLICK")) {
+                        tempCanUseEWarp = true;
+                        break a;
+                    }
+                    if (line.getString().startsWith("Teleport")) {
+                        try {
+                            teleportDist = Integer.parseInt(line.getString().split(" ")[1]);
+                        } catch (Exception e) {
+                            logger.catching(e);
+                        }
+                    }
+                }
+            }
+        }
+        canUseAOTE = tempCanUseAOTE;
+        canUseEWarp = tempCanUseEWarp;
+    }
+
+    private void switchToAOTE() {
+        if(canUseAOTE) {
+            for (int i = 0; i < 9; i++) {
+                if(isItemAOTE(mc.player.getInventory().getItem(i))) {
+                    InputSimulator.switchItem(i);
+                    return;
+                }
+                if(isItemAOTV(mc.player.getInventory().getItem(i))) {
+                    InputSimulator.switchItem(i);
+                    return;
+                }
+            }
+        }
+    }
+
+    private boolean isItemAOTE(ItemStack itemStack) {
+        return ToolList.getInstance().tryGetSkyblockItemId(itemStack).equals("ASPECT_OF_THE_END")
+                || (ToolList.getInstance().isDevEnvironment() && itemStack.getItem().equals(Items.WOODEN_SHOVEL));
+    }
+
+    private boolean isItemAOTV(ItemStack itemStack) {
+        return ToolList.getInstance().tryGetSkyblockItemId(itemStack).equals("ASPECT_OF_THE_VOID")
+                || (ToolList.getInstance().isDevEnvironment() && itemStack.getItem().equals(Items.STONE_SHOVEL));
     }
 
     public void stopExecution() {
@@ -549,7 +701,7 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
             task = null;
         }
 
-        rePathInfoQueue.clear();
+        if(stopAll) rePathInfoQueue.clear();
 
         pathfinder = null;
         pathBlockPos.clear();
@@ -567,7 +719,11 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
 
     @Override
     public boolean onMacroCheck(PositionInfo beforeTP, PositionInfo afterTP) {
-        return false;
+        return isWaitingAOTVSync();
+    }
+
+    private boolean isWaitingAOTVSync() {
+        return System.currentTimeMillis() - waitAOTESync > 500;
     }
 
     @Override

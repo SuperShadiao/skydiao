@@ -73,10 +73,19 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
                 Throwable lastError = null;
                 while(tries++ < 3) {
                     try {
-                        log.info("Downloading lib " + name);
+                        log.info("Downloading lib " + name + " from " + url + " to " + getPrepareFile().getAbsolutePath());
+                        log.info("If this is take too long, please try to download it and put it in the folder manually");
                         // FileUtils.copyURLToFile(new URL(url), getPrepareFile());
-                        Throwable throwable = MultiThreadDownloader.download(url, getPrepareFile(), md5);
-                        if(throwable != null) throw throwable;
+                        MultiThreadDownloader.DownloadInfo download = MultiThreadDownloader.download(url, getPrepareFile(), md5);
+                        new Thread(() -> {
+                            while(!download.isDone()) {
+                                try {
+                                    Thread.sleep(3000);
+                                } catch (InterruptedException e) {}
+                                log.info(name + ": " + download.getDownloadedByteSizeString() + "/" + download.getTotalByteSizeString());
+                            }
+                        }, "Lib Download Process").start();
+                        download.waitOrThrowThrowableIfFailed();
                         verifyOrThrow(getPrepareFile());
                         break;
                     } catch (Throwable e) {

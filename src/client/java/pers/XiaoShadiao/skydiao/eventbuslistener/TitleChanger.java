@@ -5,8 +5,8 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.utils.IDownloadProcess;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
-import pers.XiaoShadiao.skydiao.utils.URLFetchProcess;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.PlayerThread;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.StringLyric;
 
@@ -191,20 +191,20 @@ public class TitleChanger extends AbstractListener {
 
     public static class DownloadProcess implements Part {
 
-        private final List<URLFetchProcess> process = new ArrayList<>();
+        private final List<IDownloadProcess> process = new ArrayList<>();
 
-        public void addProcess(URLFetchProcess process) {
+        public void addProcess(IDownloadProcess process) {
             this.process.add(process);
         }
 
         @Override
         public String getContent() {
-            return process.isEmpty() ? "" : (process.size() == 1 ? "正在获取资源 (" : "正在获取" + process.size() + "个资源 (") + process.getFirst().getProcessString() + ")";
+            return process.isEmpty() ? "" : (process.size() == 1 ? "正在获取资源 (" : "正在获取" + process.size() + "个资源 (") + (process.getFirst().isMaxByteSizeUnknown() ? process.getFirst().getDownloadedByteSizeString() + "/" + process.getFirst().getTotalByteSizeString() : process.getFirst().getDownloadedByteSizeString()) + ")";
         }
 
         @Override
         public void tick() {
-            if(!process.isEmpty()) process.removeIf(URLFetchProcess::isDone);
+            if(!process.isEmpty()) process.removeIf(IDownloadProcess::isDone);
         }
 
         @Override

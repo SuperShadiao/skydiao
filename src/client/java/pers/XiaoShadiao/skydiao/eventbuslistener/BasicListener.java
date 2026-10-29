@@ -192,9 +192,10 @@ public class BasicListener extends AbstractListener {
                         ToolList.printChatMessage(Component.literal("§a[小沙雕] §eHypixel官材: " + packet2.url()));
                         if(disableHashCheck || !target.isFile() || !hashFunction.hashBytes(FileUtils.readFileToByteArray(target)).equals(hashCode)) {
                             XSDHUD.bigTitle.updateTitleMsg("§e正在获取Hypixel官材...如果长时间未完成, 请检查网络", 120000);
-                            InputStream source = ToolList.getInstance().makeReqToURL(packet2.url());
-                            URLFetchProcess process = new URLFetchProcess(source).addToTitle();
-                            FileUtils.copyInputStreamToFile(process, temp);
+                            // InputStream source = ToolList.getInstance().makeReqToURL(packet2.url());
+                            // URLFetchProcess process = new URLFetchProcess(source).addToTitle();
+                            // FileUtils.copyInputStreamToFile(process, temp);
+                            MultiThreadDownloader.download(packet2.url(), temp, null).addToTitle().waitOrThrowExceptionIfFailed();
                             // System.out.println(mc.getResourcePackRepository().getAvailableIds());
                             // [cardinal-components-base, cardinal-components-entity, dandelion, fabric-api, fabric-api-base, fabric-api-lookup-api-v1, fabric-biome-api-v1, fabric-block-api-v1, fabric-block-getter-api-v2, fabric-client-gametest-api-v1, fabric-command-api-v2, fabric-content-registries-v0, fabric-convention-tags-v2, fabric-crash-report-info-v1, fabric-creative-tab-api-v1, fabric-creative-tab-api-v1_programmer_art, fabric-data-attachment-api-v1, fabric-data-generation-api-v1, fabric-debug-api-v1, fabric-dimensions-v1, fabric-entity-events-v1, fabric-events-interaction-v0, fabric-game-rule-api-v1, fabric-gametest-api-v1, fabric-item-api-v1, fabric-key-mapping-api-v1, fabric-language-kotlin, fabric-lifecycle-events-v1, fabric-loot-api-v3, fabric-menu-api-v1, fabric-message-api-v1, fabric-model-loading-api-v1, fabric-networking-api-v1, fabric-object-builder-api-v1, fabric-particles-v1, fabric-permission-api-v1, fabric-recipe-api-v1, fabric-registry-sync-v0, fabric-renderer-api-v1, fabric-renderer-indigo, fabric-rendering-fluids-v1, fabric-rendering-v1, fabric-resource-conditions-api-v1, fabric-resource-loader-v0, fabric-resource-loader-v1, fabric-screen-api-v1, fabric-serialization-api-v1, fabric-sound-api-v1, fabric-tag-api-v1, fabric-transfer-api-v1, fabric-transitive-access-wideners-v1, fabricloader, file/hypixel_resoucepack.zip, forgeconfigapiport, high_contrast, hm-api, hypixel-mod-api, iris, modmenu, modmenu_high_contrast, modmenu_programmer_art, org_apache_commons_commons-math3, placeholder-api, programmer_art, skyblockaddons, skyblocker, skyblocker:recolored_dungeon_items, skydiao, skyhanni, sodium, sparkle_morpher, vanilla, yet_another_config_lib_v3]
                             if (!FileUtils.contentEquals(temp, target)) {
@@ -223,14 +224,15 @@ public class BasicListener extends AbstractListener {
                     try {
                         File temp = File.createTempFile("pack2", ".zip");
                         File target = new File(mc.getResourcePackDirectory().toFile(), "SkyBlock Legacy.zip");
-                        InputStream source = ToolList.getInstance().makeReqToURL("https://xiaoshadiao.club/3rd_lib/pack/SkyBlockLegacy.zip");
-                        URLFetchProcess process = new URLFetchProcess(source).addToTitle();
-                        FileUtils.copyInputStreamToFile(process, temp);
+                        // InputStream source = ToolList.getInstance().makeReqToURL("https://xiaoshadiao.club/3rd_lib/pack/SkyBlockLegacy.zip");
+                        // URLFetchProcess process = new URLFetchProcess(source).addToTitle();
+                        // FileUtils.copyInputStreamToFile(process, temp);
+                        MultiThreadDownloader.download("https://xiaoshadiao.club/3rd_lib/pack/SkyBlockLegacy.zip", temp).addToTitle().waitOrThrowExceptionIfFailed();
                         if(!FileUtils.contentEquals(temp, target)) {
                             Files.move(temp.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
                             XSDHUD.bigTitle.updateTitleMsg("§eLegacy (原版) 材质包获取成功, 请前往材质包页面查看", 3000);
                         }
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         errorLines.add("下载Legacy (原版) 材质包失败, 请检查你的网络后重新进入Skyblock: " + e);
                         errorLines.add("如果提示文件已被占用, 则当前官方材质包已发生更新, 请前往材质包选择页面卸载材质包后重新进入Skyblock, 并在弹出消息后重新安装材质包!");
                         logger.catching(e);
@@ -314,7 +316,7 @@ public class BasicListener extends AbstractListener {
             }
         }
 
-        if(message.contains("加入了组队") || message.contains("离开了组队") || message.contains("解散") || message.endsWith("joined the party.") || message.endsWith("left the party.") || message.contains("disband")) {
+        if(message.contains("加入了组队") || message.contains("离开了组队") || message.contains("解散") || message.endsWith("joined the party.") || message.endsWith("left the party.") || message.contains("disband") || message.contains("disconnect")) {
             delayTickExecutor.delayExec(() -> ToolList.getInstance().updatePartyInfo(), 5);
         }
     }

@@ -331,6 +331,10 @@ public class InputSimulator {
         hasPitchValue = true;
     }
 
+    public static void stopAiming() {
+        currentAimingInstance = null;
+    }
+
     public static void updatePlayerRotation() {
         if (currentAimingInstance != null) {
             if(currentAimingInstance.shouldUpdate()) {
@@ -490,7 +494,6 @@ public class InputSimulator {
         sprint = false;
         isMouseLeftHolding = false;
         isMouseRightHolding = false;
-        rightClickCounter = leftClickCounter = 0;
     }
 
     public static List<Direction> tryNoViewChangeControlMoveTo(BlockPos pos, double requireDist) {

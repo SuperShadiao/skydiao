@@ -43,7 +43,6 @@ public class XSDSafeSession extends User {
     );
 
     private static final Logger log = LogManager.getLogger();
-    private boolean ticket = false;
 
     public XSDSafeSession(String name, UUID uuid, String accessToken) {
         super(name, uuid, encodeString(accessToken), ToolList.mc.getUser().getXuid(), ToolList.mc.getUser().getClientId());
@@ -89,9 +88,8 @@ public class XSDSafeSession extends User {
         boolean allow = (boolean) objects[0];
         String stack = (String) objects[1];
 
-        if (allow || ticket) {
+        if (allow) {
             printGetterStack("getAccessToken", stack);
-            ticket = false;
             return ToolList.getInstance().decodeString(super.getAccessToken());
         }
 
@@ -118,22 +116,17 @@ public class XSDSafeSession extends User {
         boolean allow = (boolean) objects[0];
         String stack = (String) objects[1];
 
-        if (allow || ticket) {
+        if (allow) {
             // public String getSessionId() {
             //		return "token:" + this.accessToken + ":" + UndashedUuid.toString(this.uuid);
             //	}
             printGetterStack("getSessionId", stack);
-            ticket = false;
             return "token:" + ToolList.getInstance().decodeString(super.getAccessToken()) + ":" + UndashedUuid.toString(this.getProfileId());
         }
 
 
         throwException("getSessionId", stack);
         return "token:" + randToken + ":" + UndashedUuid.toString(this.getProfileId());
-    }
-
-    public void openTicket() {
-        ticket = true;
     }
 
     public boolean equals(Object session) {
@@ -148,11 +141,7 @@ public class XSDSafeSession extends User {
         if(stackPrintCount.computeInt(stack, (_, value) -> (value == null ? 0 : value) + 1) < 4) {
             ToolList.printChatMessage(Component.literal("§a[小沙雕] §e椎栈" + stack + "在刚才通过" + str + "()获取了你的Token"));
             ToolList.printChatMessage(Component.literal("§a[小沙雕] §e可能来自于Mod: §6" + getSuspiciousInfo(stack)));
-            if (ticket) {
-                ToolList.printChatMessage(Component.literal("§a[小沙雕] §e该椎栈通过Ticket成功获取了Token, 但如果你不认识该mod, 请检查你的mod列表"));
-            } else {
-                ToolList.printChatMessage(Component.literal("§a[小沙雕] §e该椎栈位于小沙雕白名单内, 你无需过多担心"));
-            }
+            ToolList.printChatMessage(Component.literal("§a[小沙雕] §e该椎栈位于小沙雕白名单内, 你无需过多担心"));
         }
     }
 

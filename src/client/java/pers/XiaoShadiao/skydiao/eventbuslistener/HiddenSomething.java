@@ -11,9 +11,9 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.io.FileUtils;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.utils.MultiThreadDownloader;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
-import pers.XiaoShadiao.skydiao.utils.URLFetchProcess;
 import pers.XiaoShadiao.skydiao.utils.renderutils.Gif;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 
@@ -83,9 +83,9 @@ public class HiddenSomething extends AbstractListener {
         ToolList.addThreadedTask(() -> {
             int tries = 0;
             while (tries < 3) {
-                try(URLFetchProcess process = new URLFetchProcess(ToolList.getInstance().makeReqToURL("https://xiaoshadiao.club/gifs.zip")).addToTitle()) {
+                try {
                     File temp = File.createTempFile("gifs", ".zip");
-                    FileUtils.copyInputStreamToFile(process, temp);
+                    MultiThreadDownloader.download("https://xiaoshadiao.club/gifs.zip", temp).addToTitle().waitOrThrowExceptionIfFailed();
                     if(gifFileSystem != null) {
                         isInitedFromRemote = false;
                         gifFileSystem.close();

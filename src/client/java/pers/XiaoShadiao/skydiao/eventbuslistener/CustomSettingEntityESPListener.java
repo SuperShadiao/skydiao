@@ -78,7 +78,10 @@ public class CustomSettingEntityESPListener extends AbstractListener {
         public boolean match(LivingEntity livingEntity) {
             return switch (filterType) {
                 case ENTITY_TYPE -> entityType.equals(EntityType.getKey(livingEntity.getType()).toString());
-                default -> Optional.ofNullable(e2AMappingListener.getMobInfo(livingEntity)).map(m -> m.armorStand).map(armorStand -> ToolList.getInstance().deleteColorCode(armorStand.getName().getString()).toLowerCase().contains(entityType.toLowerCase())).orElse(false);
+                default -> Optional.ofNullable(e2AMappingListener.getMobInfo(livingEntity)).map(m -> m.armorStand).map(armorStand -> {
+                    String name = ToolList.getInstance().deleteColorCode(armorStand.getName().getString());
+                    return name.toLowerCase().contains(entityType.toLowerCase()) || name.toLowerCase().contains(entityType.replace("_", " ").toLowerCase());
+                }).orElse(false);
             };
         }
     }

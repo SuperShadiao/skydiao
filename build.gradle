@@ -113,6 +113,11 @@ tasks.register('processTextFiles', Copy) {
 }
 
 tasks.register('zipGifs', Zip) {
+    // 打包前先把文件名规整为 1~n.gif，保证 zip 内的编号与 data.json 一致
+    doFirst {
+        normalizeGifNaming()
+    }
+
     // 要打包的源目录
     from 'hiddensomething/gifs'
 
@@ -128,8 +133,58 @@ tasks.register('zipGifs', Zip) {
 
 import groovy.json.JsonSlurper
 
+// 将 gifs 目录下所有 X.gif 按序号升序重命名为 1~n.gif，并把 data.json 的 gif 总数更新为 n
+def normalizeGifNaming() {
+    def gifDir = project.file('hiddensomething/gifs')
+    def jsonFile = new File(gifDir, 'data.json')
+    if (!jsonFile.exists()) {
+        throw new GradleException("data.json 不存在: ${jsonFile}")
+    }
+
+    def gifFiles = (gifDir.listFiles() ?: []).findAll { it.isFile() && it.name ==~ /\d+\.gif/ }
+    gifFiles.sort { a, b -> (a.name - '.gif') as int <=> (b.name - '.gif') as int }
+
+    // 文件名已经是 1~n 时跳过重命名，避免无谓的文件改动
+    boolean alreadyOrdered = true
+    gifFiles.eachWithIndex { f, i ->
+        if (f.name != "${i + 1}.gif") {
+            alreadyOrdered = false
+        }
+    }
+
+    if (!alreadyOrdered) {
+        // 两阶段重命名：先统一改成临时名，避免目标名与尚未处理的文件重名
+        def tempFiles = []
+        gifFiles.eachWithIndex { f, i ->
+            def temp = new File(gifDir, ".renaming_${i}.tmp")
+            if (!f.renameTo(temp)) {
+                throw new GradleException("重命名失败: ${f.name} -> ${temp.name}")
+            }
+            tempFiles << temp
+        }
+        tempFiles.eachWithIndex { temp, i ->
+            def target = new File(gifDir, "${i + 1}.gif")
+            if (!temp.renameTo(target)) {
+                throw new GradleException("重命名失败: ${temp.name} -> ${target.name}")
+            }
+        }
+        println "已按顺序重命名 ${tempFiles.size()} 个 gif 文件为 1~${tempFiles.size()}.gif"
+    }
+
+    // 更新 data.json 中的 gif 总数（只替换数字，保留原有格式）
+    def text = jsonFile.getText('UTF-8')
+    def newCount = gifFiles.size()
+    if ((new JsonSlurper().parseText(text).gif as Number).intValue() != newCount) {
+        jsonFile.setText(text.replaceFirst(/"gif"\s*:\s*\d+/, '"gif": ' + newCount), 'UTF-8')
+        println "已更新 data.json: gif = ${newCount}"
+    }
+}
+
 tasks.register('checkGifsZipSize') {
     doLast {
+        // 0. 先把 gif 文件规整为 1~n.gif 并同步 data.json 的 gif 总数
+        normalizeGifNaming()
+
         // 1. 读取 JSON 配置
         def jsonFile = file('hiddensomething/gifs/data.json')
         if (!jsonFile.exists()) {

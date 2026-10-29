@@ -3,6 +3,8 @@ package pers.XiaoShadiao.skydiao.utils;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
+import java.util.function.BooleanSupplier;
+
 public enum OreTypes {
 
     // ======================= 矿石 (Ores) =======================
@@ -46,6 +48,9 @@ public enum OreTypes {
     TUNGSTEN_COBBLESTONE("Tungsten (Cobblestone)", 5600, 336001, Blocks.INFESTED_COBBLESTONE),
     TUNGSTEN_COBBLESTONE_SLAB("Tungsten (Cobblestone SLAB)", 5600, 336001, Blocks.COBBLESTONE_SLAB),
 
+    TUNGSTEN_COBBLESTONE2("Tungsten (Cobblestone2)", 5600, 336001, Blocks.COBBLESTONE, () -> "mineshaft".equals(StatusManager.get().getMode())),
+    TUNGSTEN_COBBLESTONE_STAIRS("Tungsten (Cobblestone Stairs)", 5600, 336001, Blocks.COBBLESTONE_STAIRS, () -> "mineshaft".equals(StatusManager.get().getMode())),
+
     // ========================= Glacite =========================
     GLACITE_PACKED_ICE("Glacite (Packed Ice)", 6000, 360001, Blocks.PACKED_ICE),
 
@@ -73,18 +78,25 @@ public enum OreTypes {
     ONYX("Onyx", 5200, 312001, Blocks.BLACK_STAINED_GLASS),
     ONYX_PANE("Onyx", 5200, 312001, Blocks.BLACK_STAINED_GLASS_PANE),
     PERIDOT("Peridot", 5200, 312001, Blocks.GREEN_STAINED_GLASS),
-    PERIDOT_PANE("Peridot", 5200, 312001, Blocks.GREEN_STAINED_GLASS_PANE);
+    PERIDOT_PANE("Peridot", 5200, 312001, Blocks.GREEN_STAINED_GLASS_PANE),
+    ;
 
     private final String name;
     private final double blockStrength;         // 破坏强度
     private final double minMiningSpeed;        // 瞬挖所需最低挖掘速度
     private final Block block;
+    private final BooleanSupplier tester;
 
     OreTypes(String name, double blockStrength, double minMiningSpeed, Block block) {
+        this(name, blockStrength, minMiningSpeed, block, () -> true);
+    }
+
+    OreTypes(String name, double blockStrength, double minMiningSpeed, Block block, BooleanSupplier tester) {
         this.block = block;
         this.name = name;
         this.blockStrength = blockStrength;
         this.minMiningSpeed = minMiningSpeed;
+        this.tester = tester;
     }
 
     public String getName() {
@@ -101,7 +113,7 @@ public enum OreTypes {
 
     public static OreTypes byBlock(Block block) {
         for (OreTypes ore : values()) {
-            if (ore.block == block) {
+            if (ore.block == block && ore.tester.getAsBoolean()) {
                 return ore;
             }
         }

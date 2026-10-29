@@ -30,79 +30,167 @@ public final class MultiThreadDownloader {
     private static final int MAX_REDIRECTS = 10;
     private static final long TOO_MANY_REQUESTS_WAIT_MILLIS = 10_000L; // 429 时的等待时间
 
+    /** 承载下载任务的后台执行器（守护线程，避免阻止进程退出）。 */
+    private static final ExecutorService DOWNLOAD_EXECUTOR = Executors.newCachedThreadPool(r -> {
+        Thread thread = new Thread(r, "MultiThreadDownloader");
+        thread.setDaemon(true);
+        return thread;
+    });
+
     private MultiThreadDownloader() {
     }
 
+    /** 下载任务信息：完成状态与实时进度。 */
+    public static final class DownloadInfo implements IDownloadProcess {
+        private CompletableFuture<Throwable> future;
+        private volatile long totalByteSize;
+        private volatile long downloadedByteSize;
+
+        /** 下载完成的结果：成功为 null，否则为失败原因。 */
+        public CompletableFuture<Throwable> getFuture() {
+            return future;
+        }
+
+        /** 文件总字节数；未知时为 0。 */
+        public long getTotalByteSize() {
+            return totalByteSize;
+        }
+
+        /** 已下载字节数。 */
+        public long getDownloadedByteSize() {
+            return downloadedByteSize;
+        }
+
+        @Override
+        public boolean isDone() {
+            return future.isDone();
+        }
+
+        @Override
+        public boolean isMaxByteSizeUnknown() {
+            return true;
+        }
+
+        private void setTotal(long total) {
+            totalByteSize = Math.max(0, total);
+        }
+
+        private synchronized void addDownloaded(long bytes) {
+            downloadedByteSize += bytes;
+        }
+
+        public void waitOrThrowThrowableIfFailed() throws Throwable {
+            Throwable result = future.join();
+            if (result != null) {
+                throw result;
+            }
+        }
+
+        public void waitOrThrowExceptionIfFailed() throws Exception {
+            Throwable result = future.join();
+            if(result instanceof Exception ex) {
+                throw ex;
+            } else if (result != null) {
+                throw new RuntimeException(result);
+            }
+        }
+
+        @Override
+        public DownloadInfo addToTitle() {
+            IDownloadProcess.super.addToTitle();
+            return this;
+        }
+    }
+
     /** 下载到文件，支持断点式覆盖写入与分段并行写。 */
-    public static Throwable download(String url, File dest) {
+    public static DownloadInfo download(String url, File dest) {
         return download(url, dest, null);
     }
 
     /**
-     * 下载到文件，并在下载完成后校验 MD5。
+     * 下载到文件，并在下载完成后校验 MD5。下载在后台线程执行。
      *
      * @param md5 期望的 MD5，为 null 或空时跳过校验
-     * @return 成功返回 null；请求失败返回对应的异常；MD5 不匹配返回包含 "MD5不匹配" 的异常
      */
-    public static Throwable download(String url, File dest, String md5) {
+    public static DownloadInfo download(String url, File dest, String md5) {
         Objects.requireNonNull(url, "url");
         Objects.requireNonNull(dest, "dest");
 
-        if(verify(dest, md5)) return null;
-        try {
-            if(!dest.exists()) {
-                File parentFile = dest.getParentFile();
-                if(parentFile != null && !parentFile.exists()) parentFile.mkdirs();
-                dest.createNewFile();
+        DownloadInfo info = new DownloadInfo();
+        info.future = CompletableFuture.supplyAsync(() -> {
+            try {
+                return downloadToFile(url, dest, md5, info);
+            } catch (Throwable t) {
+                return fail(url, t);
             }
-            Probe probe = probe(url);
-            if (!probe.rangeSupported()) {
-                // 服务器不支持 Range，只能单连接完整下载
-                try (OutputStream out = new BufferedOutputStream(new FileOutputStream(dest))) {
-                    downloadWhole(url, out);
-                }
-            } else {
-                try (RandomAccessFile raf = new RandomAccessFile(dest, "rw");
-                     FileChannel channel = raf.getChannel()) {
-                    raf.setLength(probe.total()); // 预分配文件，稀疏写入
-                    Throwable failure = downloadSegments(url, probe.total(), channel);
-                    if (failure != null) {
-                        return fail(url, failure);
-                    }
-                    channel.force(true);
-                }
-            }
-            if (md5 != null && !md5.isBlank()) {
-                if (!verify(dest, md5)) {
-                    return new IOException("MD5不匹配");
-                }
-            }
-            return null;
-        } catch (Exception e) {
-            return fail(url, e);
-        }
+        }, DOWNLOAD_EXECUTOR);
+        return info;
     }
 
     /** 下载到输出流。分段乱序并行下载，再按分段顺序依次写出。 */
-    public static Throwable download(String url, OutputStream dest) {
+    public static DownloadInfo download(String url, OutputStream dest) {
         Objects.requireNonNull(url, "url");
         Objects.requireNonNull(dest, "dest");
 
-        try {
-            Probe probe = probe(url);
-            if (!probe.rangeSupported()) {
-                downloadWhole(url, dest);
-                return null;
+        DownloadInfo info = new DownloadInfo();
+        info.future = CompletableFuture.supplyAsync(() -> {
+            try {
+                return downloadToStream(url, dest, info);
+            } catch (Throwable t) {
+                return fail(url, t);
             }
-            Throwable failure = downloadSegmentsInOrder(url, probe.total(), dest);
-            return failure == null ? null : fail(url, failure);
-        } catch (Exception e) {
-            return fail(url, e);
+        }, DOWNLOAD_EXECUTOR);
+        return info;
+    }
+
+    private static Throwable downloadToFile(String url, File dest, String md5, DownloadInfo info) throws Exception {
+        if (verify(dest, md5)) {
+            info.setTotal(dest.length());
+            info.addDownloaded(dest.length());
+            return null;
         }
+        if (!dest.exists()) {
+            File parentFile = dest.getParentFile();
+            if (parentFile != null && !parentFile.exists()) parentFile.mkdirs();
+            dest.createNewFile();
+        }
+        Probe probe = probe(url);
+        info.setTotal(probe.total());
+        if (!probe.rangeSupported()) {
+            // 服务器不支持 Range，只能单连接完整下载
+            try (OutputStream out = new BufferedOutputStream(new FileOutputStream(dest))) {
+                downloadWhole(url, out, info);
+            }
+        } else {
+            try (RandomAccessFile raf = new RandomAccessFile(dest, "rw");
+                 FileChannel channel = raf.getChannel()) {
+                raf.setLength(probe.total()); // 预分配文件，稀疏写入
+                Throwable failure = downloadSegments(url, probe.total(), channel, info);
+                if (failure != null) {
+                    return fail(url, failure);
+                }
+                channel.force(true);
+            }
+        }
+        if (md5 != null && !md5.isBlank() && !verify(dest, md5)) {
+            return new IOException("MD5不匹配");
+        }
+        return null;
+    }
+
+    private static Throwable downloadToStream(String url, OutputStream dest, DownloadInfo info) throws Exception {
+        Probe probe = probe(url);
+        info.setTotal(probe.total());
+        if (!probe.rangeSupported()) {
+            downloadWhole(url, dest, info);
+            return null;
+        }
+        Throwable failure = downloadSegmentsInOrder(url, probe.total(), dest, info);
+        return failure == null ? null : fail(url, failure);
     }
 
     /** 分段并行写入文件（位置写由 FileChannel 保证线程安全）。 */
-    private static Throwable downloadSegments(String url, long total, FileChannel channel) {
+    private static Throwable downloadSegments(String url, long total, FileChannel channel, DownloadInfo info) {
         int threads = threadCount();
         long chunk = chunkSizeBytes(threads);
         int count = segmentCount(total, chunk);
@@ -117,7 +205,7 @@ public final class MultiThreadDownloader {
                 long start = i * chunk;
                 long end = Math.min(start + chunk, total) - 1;
                 futures.add(pool.submit(() -> {
-                    byte[] data = fetchSegment(url, start, end);
+                    byte[] data = fetchSegment(url, start, end, info);
                     ByteBuffer buffer = ByteBuffer.wrap(data);
                     long writePos = start;
                     while (buffer.hasRemaining()) {
@@ -146,7 +234,7 @@ public final class MultiThreadDownloader {
      * 分段并行下载后按顺序写入输出流。
      * 只维持一个窗口内的分段在内存中，避免某个慢分段导致整份文件堆积。
      */
-    private static Throwable downloadSegmentsInOrder(String url, long total, OutputStream dest) throws IOException {
+    private static Throwable downloadSegmentsInOrder(String url, long total, OutputStream dest, DownloadInfo info) throws IOException {
         int threads = threadCount();
         long chunk = chunkSizeBytes(threads);
         int count = segmentCount(total, chunk);
@@ -164,7 +252,7 @@ public final class MultiThreadDownloader {
         int written = 0;
         try {
             while (submitted < count && submitted < window) {
-                completion.submit(segmentTask(url, submitted, chunk, total));
+                completion.submit(segmentTask(url, submitted, chunk, total, info));
                 submitted++;
             }
             while (written < count) {
@@ -179,7 +267,7 @@ public final class MultiThreadDownloader {
                     dest.write(pending.remove(written));
                     written++;
                     if (submitted < count && submitted < written + window) {
-                        completion.submit(segmentTask(url, submitted, chunk, total));
+                        completion.submit(segmentTask(url, submitted, chunk, total, info));
                         submitted++;
                     }
                 }
@@ -194,14 +282,15 @@ public final class MultiThreadDownloader {
         }
     }
 
-    private static java.util.concurrent.Callable<SegmentResult> segmentTask(String url, int index, long chunk, long total) {
+    private static java.util.concurrent.Callable<SegmentResult> segmentTask(
+            String url, int index, long chunk, long total, DownloadInfo info) {
         long start = index * chunk;
         long end = Math.min(start + chunk, total) - 1;
-        return () -> new SegmentResult(index, fetchSegment(url, start, end));
+        return () -> new SegmentResult(index, fetchSegment(url, start, end, info));
     }
 
     /** 下载单个分段，失败后从已下载位置继续重试。 */
-    private static byte[] fetchSegment(String url, long start, long end) throws IOException {
+    private static byte[] fetchSegment(String url, long start, long end, DownloadInfo info) throws IOException {
         long length = end - start + 1;
         if (length <= 0 || length > Integer.MAX_VALUE - 8) {
             throw new IOException("分段大小非法: " + start + "-" + end);
@@ -212,7 +301,7 @@ public final class MultiThreadDownloader {
         while (true) {
             long before = pos;
             try {
-                pos = fetchRange(url, start, pos, end, data);
+                pos = fetchRange(url, start, pos, end, data, info);
                 return data;
             } catch (IOException e) {
                 if (e instanceof RateLimitedException) {
@@ -233,8 +322,9 @@ public final class MultiThreadDownloader {
     }
 
     /** 拉取 [pos, end] 区间并写入 data，返回新的已下载位置。 */
-    private static long fetchRange(String url, long start, long pos, long end, byte[] data) throws IOException {
+    private static long fetchRange(String url, long start, long pos, long end, byte[] data, DownloadInfo info) throws IOException {
         HttpURLConnection conn = open(url, "bytes=" + pos + "-" + end);
+        long counted = 0; // 本次尝试已计入的字节，失败时回滚，避免重试重复计数
         try {
             int code = conn.getResponseCode();
             if (code == 429) {
@@ -258,6 +348,8 @@ public final class MultiThreadDownloader {
                     }
                     System.arraycopy(buffer, 0, data, (int) (current - start), len);
                     current += len;
+                    counted += len;
+                    info.addDownloaded(len); // 实时累加，不必等整个分段下载完
                 }
             }
             if (current != end + 1) {
@@ -267,6 +359,9 @@ public final class MultiThreadDownloader {
                 throw new IOException("分段未下载完整: " + current + "/" + (end + 1));
             }
             return current;
+        } catch (IOException | RuntimeException e) {
+            info.addDownloaded(-counted);
+            throw e;
         } finally {
             conn.disconnect();
         }
@@ -305,7 +400,7 @@ public final class MultiThreadDownloader {
     }
 
     /** 单连接完整下载，用于服务器不支持 Range 的情况。 */
-    private static void downloadWhole(String url, OutputStream out) throws IOException {
+    private static void downloadWhole(String url, OutputStream out, DownloadInfo info) throws IOException {
         while (true) {
             HttpURLConnection conn = open(url, null);
             try {
@@ -322,6 +417,7 @@ public final class MultiThreadDownloader {
                     int len;
                     while ((len = in.read(buffer)) != -1) {
                         out.write(buffer, 0, len);
+                        info.addDownloaded(len);
                     }
                 }
                 out.flush();

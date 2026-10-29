@@ -38,7 +38,6 @@ import pers.XiaoShadiao.skydiao.utils.Banned;
 import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.Wiped;
-import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.XSDSafeSession;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicInfo;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicListManager;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.PlayerThread;
@@ -96,16 +95,6 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                 getArgConstantInstance("simulategettoken")
                         .then(getArgConstantInstance("get").executes((c) -> {
                             try {
-                                String token = mc.getUser().getAccessToken().substring(0, 5);
-                                c.getSource().sendFeedback(Component.literal("§a[小沙雕] §e获取到的Token: " + token + "..."));
-                            } catch (Throwable e) {
-                                c.getSource().sendError(Component.literal("§a[小沙雕] §c获取Token失败: " + e.getMessage()));
-                            }
-                            return 0;
-                        }))
-                        .then(getArgConstantInstance("getwithticket").executes(c -> {
-                            try {
-                                if(mc.getUser() instanceof XSDSafeSession xsdSafeSession) xsdSafeSession.openTicket();
                                 String token = mc.getUser().getAccessToken().substring(0, 5);
                                 c.getSource().sendFeedback(Component.literal("§a[小沙雕] §e获取到的Token: " + token + "..."));
                             } catch (Throwable e) {
@@ -236,7 +225,7 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
             } else {
                 AbstractListener.customSettingEntityESPListener.add(entity, entityType, new Color(color_red, color_green, color_blue));
             }
-            context.getSource().sendFeedback(Component.literal("§a[小沙雕] 已添加" + (temp ? "临时" : "") + "实体§e" + entity + "§a的ESP " + (entityType == CustomSettingEntityESPListener.FilterType.ARMORSTAND ? "(根据目标头顶盔甲架搜索包含该内容的目标)" : "(根据实体类别搜索目标)")));
+            context.getSource().sendFeedback(Component.literal("§a[小沙雕] 已添加" + (temp ? "临时" : "") + "实体§e" + entity + "§a的ESP " + (entityType == CustomSettingEntityESPListener.FilterType.ARMORSTAND ? "(根据目标头顶盔甲架搜索包含该内容的目标, 如果目标名字包含空格请使用下划线 (_) 代替, 例如Miner_Zombie)" : "(根据实体类别搜索目标)")));
         }
         return 0;
 
