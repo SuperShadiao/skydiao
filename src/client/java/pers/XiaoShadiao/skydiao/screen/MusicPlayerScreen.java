@@ -28,7 +28,7 @@ import static pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager.translate;
 
 public class MusicPlayerScreen extends Screen {
 
-    private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
+    private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 33, 60);
     private LinearLayout footerButtonLayout;
     private MusicList musicList;
 
@@ -48,7 +48,12 @@ public class MusicPlayerScreen extends Screen {
     @Override
     protected void init() {
         MusicListManager.loadMusicFromFolder();
-        LinearLayout linearLayout = footerButtonLayout =  this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
+        LinearLayout linearLayout = footerButtonLayout = this.layout.addToFooter(LinearLayout.vertical().spacing(4));
+
+        linearLayout.defaultCellSetting().alignHorizontallyCenter();
+        LinearLayout top = linearLayout.addChild(LinearLayout.horizontal().spacing(4));
+        LinearLayout bottom = linearLayout.addChild(LinearLayout.horizontal().spacing(4));
+
         linearLayout.addChild(LinearLayout.horizontal().spacing(8));
         EditBox editBox = new EditBox(ToolList.mc.font, 0, 0, 100, 20, Component.literal("音乐目录"));
         editBox.setMaxLength(10000);
@@ -59,9 +64,8 @@ public class MusicPlayerScreen extends Screen {
             ConfigManager.hypixelhelpermusicfolder.setValue(text);
             MusicListManager.loadMusicFromFolder();
         });
-        linearLayout.addChild(editBox);
-        linearLayout.addChild(Button.builder(Component.literal("返回"), b -> onClose()).size(50, 20).build());
-        linearLayout.addChild(Button.builder(Component.literal(PlayerThread.isPlaying() ? "§a播放" : "§c播放"), b -> {
+        top.addChild(editBox);
+        top.addChild(Button.builder(Component.literal(PlayerThread.isPlaying() ? "§a播放" : "§c播放"), b -> {
             if (PlayerThread.isPlaying()) {
                 PlayerThread.stopPlay();
                 b.setMessage(Component.literal("§c播放"));
@@ -70,13 +74,14 @@ public class MusicPlayerScreen extends Screen {
                 b.setMessage(Component.literal("§a播放"));
             }
         }).size(50, 20).build());
-        linearLayout.addChild(Button.builder(Component.literal(ConfigManager.musicplayermode.getCurrentDisplayString()), b -> {
+        top.addChild(Button.builder(Component.literal(ConfigManager.musicplayermode.getCurrentDisplayString()), b -> {
             ConfigManager.musicplayermode.switchOption();
             b.setMessage(Component.literal(ConfigManager.musicplayermode.getCurrentDisplayString()));
             PlayerThread.clearQueue();
         }).size(70, 20).build());
-        linearLayout.addChild(Button.builder(Component.literal("下载音乐"), b -> MusicListManager.ensureMusicFolderVaildAndRun(() -> minecraft.gui.setScreen(new MusicSearchScreen(this)), () -> minecraft.gui.setScreen(this))).size(70, 20).build());
-        linearLayout.addChild(
+        bottom.addChild(Button.builder(Component.literal("返回"), b -> onClose()).size(50, 20).build());
+        bottom.addChild(Button.builder(Component.literal("下载音乐"), b -> MusicListManager.ensureMusicFolderVaildAndRun(() -> minecraft.gui.setScreen(new MusicSearchScreen(this)), () -> minecraft.gui.setScreen(this))).size(70, 20).build());
+        bottom.addChild(
                 new XSDSliderButton(0, 0, 120, 20, Component.literal("音量"), 0.5)
                         .valueGetter(() -> ConfigManager.xsdmusicvolume.getValue() / 200.0d)
                         .valueSetter(value -> ConfigManager.xsdmusicvolume.setValue((int) (200 * value)))

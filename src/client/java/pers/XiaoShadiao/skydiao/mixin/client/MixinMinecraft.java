@@ -1,6 +1,5 @@
 package pers.XiaoShadiao.skydiao.mixin.client;
 
-import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.minecraft.UserApiService;
@@ -16,13 +15,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ProfileKeyPairManager;
-import net.minecraft.client.resources.SplashManager;
 import net.minecraft.client.telemetry.ClientTelemetryManager;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.server.Services;
-import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.util.Util;
 import net.minecraft.util.profiling.ActiveProfiler;
@@ -36,7 +32,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
-import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
 import pers.XiaoShadiao.skydiao.screen.MinecraftCrashedScreen;
 import pers.XiaoShadiao.skydiao.utils.ClientRenderCrashFixer;
@@ -138,10 +133,12 @@ public class MixinMinecraft {
         this.profileKeyPairManager = ProfileKeyPairManager.create(this.userApiService, this.user, mc.gameDirectory.toPath());
 
         Gui gui = mc.gui;
-        if(gui.splashManager() instanceof XSDSplashManager xsdSplashManager0) {
-            xsdSplashManager0.setUser(user);
-        } else {
-            ((XSDGuiAccess) (Object) gui).skydiao$setSplashManager(new XSDSplashManager(user));
+        if(gui != null) {
+            if (gui.splashManager() instanceof XSDSplashManager xsdSplashManager0) {
+                xsdSplashManager0.setUser(user);
+            } else {
+                ((MixinSplashManagerAccessor) gui).setSplashManager(new XSDSplashManager(user));
+            }
         }
 
         try {

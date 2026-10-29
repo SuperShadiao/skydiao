@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
@@ -48,11 +47,11 @@ public class AutoClickerListener extends AbstractListener {
         return ToolList.getInstance().random.nextInt(4);
     }
 
-    private boolean onMouseClick(long windows, MouseButtonInfo mouseButtonInfo, int state) {
+    private boolean onMouseClick(long windows, CustomFabricEvents.ClickType clickType, int state) {
         if(mc.gui.screen() == null) {
             boolean flag = false;
             if (isRightAutoClickingEnabled()) {
-                if (mouseButtonInfo.button() == 1) {
+                if (clickType == CustomFabricEvents.ClickType.RIGHT) {
                     isRightAutoClicking = state == 1;
                     if(isRightAutoClicking) {
                         flag = true;
@@ -62,7 +61,7 @@ public class AutoClickerListener extends AbstractListener {
                 }
             }
             if (isLeftAutoClickingEnabled()) {
-                if (mouseButtonInfo.button() == 0) {
+                if (clickType == CustomFabricEvents.ClickType.LEFT) {
                     isLeftAutoClicking = state == 1;
                     if(isLeftAutoClicking) {
                         flag = true;

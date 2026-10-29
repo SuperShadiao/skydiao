@@ -12,7 +12,6 @@ import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
-import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.PacketListener;
@@ -153,8 +152,8 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         return false;
     }
 
-    private boolean onMouseButton(long windwos, MouseButtonInfo mouseButtonInfo, int state) {
-        if (mouseButtonInfo.button() == 0 && isHoldingMouseMat()) {
+    private boolean onMouseButton(long windwos, CustomFabricEvents.ClickType clickType, int state) {
+        if (clickType == CustomFabricEvents.ClickType.LEFT && isHoldingMouseMat()) {
             lastSendCommandTime = System.currentTimeMillis();
         }
         return false;

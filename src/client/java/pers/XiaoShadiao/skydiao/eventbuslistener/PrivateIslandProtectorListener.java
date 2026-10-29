@@ -1,6 +1,5 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener;
 
-import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
@@ -22,11 +21,10 @@ public class PrivateIslandProtectorListener extends AbstractListener {
         CustomFabricEvents.MOUSE_BUTTON_EVENT.register(this::onMouseButton);
     }
 
-    private boolean onMouseButton(long l, MouseButtonInfo mouseButtonInfo, int i) {
-        int button = mouseButtonInfo.button();
-        if(ConfigManager.skyblockSafeIsland.getValue() && i == 1 && button == 1 && Optional.ofNullable(mc.player).map(Player::getMainHandItem).map(a -> (a.getItem().getDescriptionId().endsWith("pickaxe") || a.getDisplayName().getString().contains("Drill")) && !ToolList.getInstance().deleteColorCode(a.getHoverName().getString()).equals("Dungeonbreaker")).orElse(false)) {
+    private boolean onMouseButton(long l, CustomFabricEvents.ClickType clickType, int i) {
+        if(ConfigManager.skyblockSafeIsland.getValue() && i == 1 && clickType == CustomFabricEvents.ClickType.RIGHT && Optional.ofNullable(mc.player).map(Player::getMainHandItem).map(a -> (a.getItem().getDescriptionId().endsWith("pickaxe") || a.getDisplayName().getString().contains("Drill")) && !ToolList.getInstance().deleteColorCode(a.getHoverName().getString()).equals("Dungeonbreaker")).orElse(false)) {
             StatusManager statusManager = StatusManager.get();
-            if("dynamic".equals(statusManager.getMode())) {
+            if("dynamic".equals(statusManager.getMode()) && mc.gui.screen() == null) {
                ToolList.printChatMessage(Component.literal("§a[小沙雕] §c已阻止你在私人岛屿中使用镐子技能"));
                 return true;
             }

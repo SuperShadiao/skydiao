@@ -137,6 +137,7 @@ public class ClientReceiveHandler {
                     packet2.message = packet.sender;
                     packet2.initSender();
                     ChatClientManager.trySendOrWarning(packet2);
+                    PartyFinderManager.selfPartyData.players.add(packet.sender);
                     try { Thread.sleep(2000); } catch (InterruptedException e) {}
                     ToolList.getInstance().updatePartyInfo();
                 }

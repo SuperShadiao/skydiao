@@ -3,7 +3,6 @@ package pers.XiaoShadiao.skydiao.eventbuslistener;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
-import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.inventory.Slot;
@@ -43,7 +42,7 @@ public class DungeonAutoCloseChest extends AbstractListener implements IDungeonL
         CustomFabricEvents.MOUSE_BUTTON_EVENT.register(this::onMouseButton);
     }
 
-    private boolean onMouseButton(long window, MouseButtonInfo mouseButtonInfo, int state) {
+    private boolean onMouseButton(long window, CustomFabricEvents.ClickType clickType, int state) {
         if(ConfigManager.dungeonAutoCloseChest.getValue() && mc.level != null && mc.hitResult instanceof BlockHitResult blockHitResult && blockHitResult.getType() == HitResult.Type.BLOCK) {
             if(mc.level.getBlockState(blockHitResult.getBlockPos()).getBlock() instanceof ChestBlock) {
                 lastClickedChestPos = blockHitResult.getBlockPos();

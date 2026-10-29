@@ -20,7 +20,7 @@ import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.XSDSafeSession;
 import pers.XiaoShadiao.skydiao.utils.screen.XSDSplashManager;
 
 @Mixin(Gui.class)
-public class MixinGui implements XSDGuiAccess {
+public class MixinGui {
 
     @Mutable
     @Final
@@ -41,8 +41,4 @@ public class MixinGui implements XSDGuiAccess {
         original.call(CustomFabricEvents.REPLACE_SCREEN.invoker().replaceScreen(screen));
     }
 
-    @Override
-    public void skydiao$setSplashManager(SplashManager manager) {
-        this.splashManager = manager;
-    }
 }

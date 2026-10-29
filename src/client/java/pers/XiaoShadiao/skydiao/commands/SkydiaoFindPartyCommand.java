@@ -29,14 +29,16 @@ public class SkydiaoFindPartyCommand extends BaseRootRunnableCommand {
                 }),
                 getArgConstantInstance("find").executes(this::executeCommand),
                 getArgConstantInstance("broadcast").executes(context -> {
-                    if(PartyFinderManager.isPublic) {
+                    if (!PartyFinderManager.isPublic) {
+                        context.getSource().sendError(Component.literal("§a[小沙雕] §c队伍当前未公开, 不能进行广播, 请使用§6/skydiaofp§c设置并公开队伍"));
+                    } else if(PartyFinderManager.selfPartyData.isPartyFull()) {
+                        context.getSource().sendError(Component.literal("§a[小沙雕] §c队伍已满, 不能进行广播"));
+                    } else {
                         ChatPacket packet = new ChatPacket();
                         packet.message = PartyFinderManager.selfPartyData.toJson().toString();
                         packet.packetType = "find_party_broadcast";
                         packet.initSender();
                         ChatClientManager.trySendOrWarning(packet);
-                    } else {
-                        context.getSource().sendError(Component.literal("§a[小沙雕] §c队伍当前未公开, 不能进行广播, 请使用§6/skydiaofp§c设置并公开队伍"));
                     }
                     return 0;
                 }),

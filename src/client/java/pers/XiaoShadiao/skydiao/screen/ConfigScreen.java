@@ -6,7 +6,10 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.components.tabs.*;
+import net.minecraft.client.gui.components.tabs.GridLayoutTab;
+import net.minecraft.client.gui.components.tabs.Tab;
+import net.minecraft.client.gui.components.tabs.TabManager;
+import net.minecraft.client.gui.components.tabs.TabNavigationBar;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -22,6 +25,7 @@ import pers.XiaoShadiao.skydiao.config.option.*;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
+import pers.XiaoShadiao.skydiao.utils.screen.FullWidthTabBar;
 import pers.XiaoShadiao.skydiao.utils.screen.XSDSliderButton;
 
 import java.awt.*;
@@ -38,7 +42,7 @@ import static pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager.translate;
 
 public class ConfigScreen extends Screen {
 
-    private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
+    private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 33, 60);
     private final TabManager tabManager = new TabManager(this::addRenderableWidget, this::removeWidget);
     private TabNavigationBar tabNavigationBar;
 
@@ -93,15 +97,18 @@ public class ConfigScreen extends Screen {
     @Override
     protected void init() {
         tabs = getTabs();
-        this.tabNavigationBar = MenuTabBar.builder(this.tabManager, this.width)
+        this.tabNavigationBar = FullWidthTabBar.builder2(this.tabManager, this.width)
                 .addTabs(tabs)
                 .build();
         this.addRenderableWidget(this.tabNavigationBar);
         this.tabNavigationBar.selectTab(0, false);
 
-        LinearLayout linearLayout = this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
+        LinearLayout linearLayout = this.layout.addToFooter(LinearLayout.vertical().spacing(4));
 
-        linearLayout.addChild(Button.builder(Component.literal("§c" + translate("gui.configsettings.disableall")), (button) -> {
+        LinearLayout topFooterButtons = linearLayout.addChild(LinearLayout.horizontal().spacing(6));
+        LinearLayout bottomFooterButtons = linearLayout.addChild(LinearLayout.horizontal().spacing(4));
+
+        topFooterButtons.addChild(Button.builder(Component.literal("§c" + translate("gui.configsettings.disableall")), (button) -> {
             minecraft.gui.setScreen(new ConfirmScreen(result -> {
                 if(result) {
                     List<ConfigOption<?>> list = ConfigManager.categories.stream().flatMap(entry -> entry.getValue().stream()).toList();
@@ -114,13 +121,13 @@ public class ConfigScreen extends Screen {
                 }
                 minecraft.gui.setScreen(new ConfigScreen(lastScreen));
             }, Component.literal("§c" + translate("gui.configsettings.disableall")), Component.literal("§c" + translate("gui.configsettings.disableallconfirm"))));
-        }).size(100, 20).build());
+        }).size(151, 20).build());
 
-        linearLayout.addChild(Button.builder(Component.literal("§eQQ | Discord"), (button) -> Blaze3D.openUri(URI.create("https://xiaoshadiao.club/about"))).size(100, 20).build());
-        linearLayout.addChild(Button.builder(Component.literal("§6" + translate("gui.configsettings.buttonsaveback")), this::onClose).size(100, 20).build());
-        linearLayout.addChild(Button.builder(Component.literal("§a" + translate("gui.configsettings.buttonfriendlink")), (button) -> Blaze3D.openUri(URI.create("https://xiaoshadiao.club/friendlinks"))).size(100, 20).build());
+        bottomFooterButtons.addChild(Button.builder(Component.literal("§eQQ | Discord"), (button) -> Blaze3D.openUri(URI.create("https://xiaoshadiao.club/about"))).size(100, 20).build());
+        bottomFooterButtons.addChild(Button.builder(Component.literal("§6" + translate("gui.configsettings.buttonsaveback")), this::onClose).size(100, 20).build());
+        bottomFooterButtons.addChild(Button.builder(Component.literal("§a" + translate("gui.configsettings.buttonfriendlink")), (button) -> Blaze3D.openUri(URI.create("https://xiaoshadiao.club/friendlinks"))).size(100, 20).build());
 
-        linearLayout.addChild(Button.builder(Component.literal("§c" + translate("gui.configsettings.resetalltodefault")), (button) -> {
+        topFooterButtons.addChild(Button.builder(Component.literal("§c" + translate("gui.configsettings.resetalltodefault")), (button) -> {
             minecraft.gui.setScreen(new ConfirmScreen(result -> {
                 if(result) {
                     List<ConfigOption<?>> list = ConfigManager.categories.stream().flatMap(entry -> entry.getValue().stream()).toList();
@@ -131,7 +138,7 @@ public class ConfigScreen extends Screen {
                 }
                 minecraft.gui.setScreen(new ConfigScreen(lastScreen));
             }, Component.literal("§c" + translate("gui.configsettings.resetalltodefault")), Component.literal("§c" + translate("gui.configsettings.resetalltodefaultconfirm"))));
-        }).size(100, 20).build());
+        }).size(151, 20).build());
 
         this.layout.visitWidgets(abstractWidget -> {
             abstractWidget.setTabOrderGroup(1);

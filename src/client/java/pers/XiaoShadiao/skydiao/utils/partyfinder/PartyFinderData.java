@@ -95,23 +95,34 @@ public class PartyFinderData implements Cloneable {
     }
 
     public enum Type {
-        DUNGEON("Dungeon", Color.RED, List.of(
+        DUNGEON("Dungeon", Color.RED, 5, false,List.of(
                 SubType.F0, SubType.F1, SubType.F2, SubType.F3, SubType.F4, SubType.F5, SubType.F6, SubType.F7,
                 SubType.M1, SubType.M2, SubType.M3, SubType.M4, SubType.M5, SubType.M6, SubType.M7, SubType.CHILL)),
-        FISHING("Fishing", Color.GREEN, List.of(SubType.BAYOU, SubType.LOTUS, SubType.SPOOKY, SubType.GALATEA, SubType.CANYON, SubType.ISLE, SubType.CRYSTAL_HOLLOW)),
-        DIANA("Diana", Color.YELLOW, List.of(SubType.LEGENDARY_PET, SubType.MYTHIC_PET)),
-        SAFARI("Safari", Color.GREEN, List.of()),
-        KUUDRA("Kuudra", new Color(255, 106, 0), List.of(SubType.KUUDRA_BASIC, SubType.KUUDRA_HOT, SubType.KUUDRA_BURNING, SubType.KUUDRA_FIERY, SubType.KUUDRA_INFERNAL))
+        FISHING("Fishing", Color.GREEN, 2, true, List.of(SubType.BAYOU, SubType.LOTUS, SubType.SPOOKY, SubType.GALATEA, SubType.CANYON, SubType.ISLE, SubType.CRYSTAL_HOLLOW)),
+        DIANA("Diana", Color.YELLOW, 2, true, List.of(SubType.LEGENDARY_PET, SubType.MYTHIC_PET)),
+        SAFARI("Safari", Color.GREEN, 4, false, List.of()),
+        KUUDRA("Kuudra", new Color(255, 106, 0), 4, false, List.of(SubType.KUUDRA_BASIC, SubType.KUUDRA_HOT, SubType.KUUDRA_BURNING, SubType.KUUDRA_FIERY, SubType.KUUDRA_INFERNAL))
         ;
 
         public final Color color;
+        public final int recommendMaxPlayers;
+        public final boolean recommendMoreMaxPlayers;
         public final List<SubType> subTypes;
         public final String displayName;
 
-        Type(String displayName, Color color, List<SubType> subTypes) {
+        Type(String displayName, Color color, int recommendMaxPlayers, boolean recommendMoreMaxPlayers, List<SubType> subTypes) {
             this.color = color;
+            this.recommendMaxPlayers = recommendMaxPlayers;
+            this.recommendMoreMaxPlayers = recommendMoreMaxPlayers;
             this.subTypes = subTypes;
             this.displayName = displayName;
+        }
+
+        public boolean isMaxPlayerRecommend(int maxPlayers) {
+            if(recommendMoreMaxPlayers) {
+                return maxPlayers >= recommendMaxPlayers;
+            }
+            return maxPlayers == recommendMaxPlayers;
         }
     }
 

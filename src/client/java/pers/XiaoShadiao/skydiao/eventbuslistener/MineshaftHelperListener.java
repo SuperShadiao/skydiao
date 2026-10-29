@@ -10,7 +10,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.network.chat.TextColor;
@@ -85,7 +84,7 @@ public class MineshaftHelperListener extends AbstractListener {
         wr2.finishDraw();
     }
 
-    private boolean onMouseEvent(long windows, MouseButtonInfo mouseButtonInfo, int state) {
+    private boolean onMouseEvent(long windows, CustomFabricEvents.ClickType clickType, int state) {
         if(!ConfigManager.mineshaftHelper.getValue()) return false;
 
         if(state == 1) {

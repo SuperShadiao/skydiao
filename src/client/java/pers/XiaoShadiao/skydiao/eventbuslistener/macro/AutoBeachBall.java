@@ -3,7 +3,6 @@ package pers.XiaoShadiao.skydiao.eventbuslistener.macro;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -106,7 +105,7 @@ public class AutoBeachBall extends AbstractListener implements IMacro {
         }
     }
 
-    private boolean onMouseClick(long hwnd, MouseButtonInfo mouseButtonInfo, int state) {
+    private boolean onMouseClick(long hwnd, CustomFabricEvents.ClickType clickType, int state) {
         if(mc.player == null || mc.level == null || mc.gui.screen() != null || !ConfigManager.autoPlayBeachBall.getValue()) return false;
         if("BOUNCY_BEACH_BALL".equals(ToolList.getInstance().tryGetSkyblockItemId(mc.player.getMainHandItem()))) {
             hasRightClickedBeachBall = true;

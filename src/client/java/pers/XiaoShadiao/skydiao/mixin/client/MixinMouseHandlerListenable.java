@@ -18,7 +18,7 @@ public class MixinMouseHandlerListenable {
 
     @Inject(method = "onButton", at = @At("HEAD"), cancellable = true)
     private void onButton(long handle, MouseButtonInfo rawButtonInfo, int action, CallbackInfo ci) {
-        if (CustomFabricEvents.MOUSE_BUTTON_EVENT.invoker().onMouseButton(handle, rawButtonInfo, action)) {
+        if (CustomFabricEvents.MOUSE_BUTTON_EVENT.invoker().onMouseButton(handle, CustomFabricEvents.ClickType.from(rawButtonInfo), action)) {
             ci.cancel();
         }
     }

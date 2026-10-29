@@ -7,10 +7,15 @@ import net.minecraft.client.gui.screens.inventory.BookSignScreen;
 import net.minecraft.client.gui.screens.inventory.BookViewScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.protocol.game.ServerboundPunchPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.AttackRange;
+import net.minecraft.world.item.component.PiercingWeapon;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -144,6 +149,7 @@ public class InputSimulator {
             rightClickCounter = 0;
         } else {
             while (leftClickCounter > 0) {
+                System.out.println("click");
                 leftClickCounter--;
                 if(!mc.gameMode.isDestroying() && (((MixinMultiPlayerGameModeDestroyBlockDelayAccessor) mc.gameMode).getDestroyDelay() <= 1 || !(mc.hitResult instanceof BlockHitResult result) || result.getType() != HitResult.Type.BLOCK)) bl3 |= startAttack();
             }
@@ -169,24 +175,28 @@ public class InputSimulator {
         }
     }
 
-    public static void continueAttack(boolean bl) {
-        if (!bl) {
+    public static void continueAttack(final boolean down) {
+        if (!down) {
             missTime = 0;
         }
 
         if (missTime <= 0 && !mc.player.isUsingItem()) {
-            if (bl && mc.hitResult != null && mc.hitResult.getType() == HitResult.Type.BLOCK) {
-                BlockHitResult blockHitResult = (BlockHitResult)mc.hitResult;
-                BlockPos blockPos = blockHitResult.getBlockPos();
-                if (!mc.level.getBlockState(blockPos).isAir()) {
-                    Direction direction = blockHitResult.getDirection();
-                    if (mc.gameMode.continueDestroyBlock(blockPos, direction)) {
-                        mc.level.addBreakingBlockEffects(blockPos, direction, true);
-                        mc.player.swing(InteractionHand.MAIN_HAND, mc.player.getItemInHand(InteractionHand.MAIN_HAND).getAttackAnimation(), false);
+            ItemStack heldItem = mc.player.getItemInHand(InteractionHand.MAIN_HAND);
+            if (!heldItem.has(DataComponents.PIERCING_WEAPON)) {
+                SwingAnimation swingAnimation = heldItem.getAttackAnimation();
+                if (down && mc.hitResult != null && mc.hitResult.getType() == HitResult.Type.BLOCK) {
+                    BlockHitResult blockHit = (BlockHitResult)mc.hitResult;
+                    BlockPos pos = blockHit.getBlockPos();
+                    if (!mc.level.getBlockState(pos).isAir()) {
+                        Direction direction = blockHit.getDirection();
+                        if (mc.gameMode.continueDestroyBlock(pos, direction)) {
+                            mc.player.swing(InteractionHand.MAIN_HAND, swingAnimation, false);
+                            mc.player.connection.send(ServerboundPunchPacket.INSTANCE);
+                        }
                     }
+                } else {
+                    mc.gameMode.stopDestroyBlock();
                 }
-            } else {
-                mc.gameMode.stopDestroyBlock();
             }
         }
     }
@@ -201,25 +211,51 @@ public class InputSimulator {
             }
 
             return false;
-        } else if (mc.player.isHandsBusy()) {
-            return false;
         } else {
-            ItemStack itemStack = mc.player.getItemInHand(InteractionHand.MAIN_HAND);
-            if (!itemStack.isItemEnabled(mc.level.enabledFeatures())) {
+            if (mc.player.isHandsBusy()) {
                 return false;
+            }
+
+            if (mc.gameMode.isSpectator()) {
+                if (mc.hitResult instanceof EntityHitResult entityHitResult) {
+                    mc.gameMode.spectate(entityHitResult.getEntity());
+                } else {
+                    mc.gameMode.spectatorNoAction();
+                }
+
+                return true;
             } else {
-                boolean bl = false;
+                ItemStack heldItem = mc.player.getItemInHand(InteractionHand.MAIN_HAND);
+                if (!heldItem.isItemEnabled(mc.level.enabledFeatures())) {
+                    return false;
+                }
+
+                if (mc.player.cannotAttackWithItem(heldItem, 0)) {
+                    return false;
+                }
+
+                SwingAnimation attackAnimation = heldItem.getAttackAnimation();
+                boolean endAttack = false;
+                PiercingWeapon piercingWeapon = (PiercingWeapon)heldItem.get(DataComponents.PIERCING_WEAPON);
+                if (piercingWeapon != null) {
+                    mc.gameMode.piercingAttack(attackAnimation, piercingWeapon);
+                    return true;
+                }
+
                 switch (mc.hitResult.getType()) {
                     case ENTITY:
-                        mc.gameMode.attack(mc.player, ((EntityHitResult)mc.hitResult).getEntity());
+                        AttackRange customItemRange = (AttackRange)heldItem.get(DataComponents.ATTACK_RANGE);
+                        if (customItemRange == null || customItemRange.isInRange(mc.player, mc.hitResult.getLocation())) {
+                            mc.gameMode.attack(mc.player, ((EntityHitResult)mc.hitResult).getEntity());
+                        }
                         break;
                     case BLOCK:
-                        BlockHitResult blockHitResult = (BlockHitResult)mc.hitResult;
-                        BlockPos blockPos = blockHitResult.getBlockPos();
-                        if (!mc.level.getBlockState(blockPos).isAir()) {
-                            mc.gameMode.startDestroyBlock(blockPos, blockHitResult.getDirection());
-                            if (mc.level.getBlockState(blockPos).isAir()) {
-                                bl = true;
+                        BlockHitResult blockHit = (BlockHitResult)mc.hitResult;
+                        BlockPos pos = blockHit.getBlockPos();
+                        if (!mc.level.getBlockState(pos).isAir()) {
+                            mc.gameMode.startDestroyBlock(pos, blockHit.getDirection());
+                            if (mc.level.getBlockState(pos).isAir()) {
+                                endAttack = true;
                             }
                             break;
                         }
@@ -231,8 +267,9 @@ public class InputSimulator {
                         mc.player.resetAttackStrengthTicker();
                 }
 
-                mc.player.swing(InteractionHand.MAIN_HAND, itemStack.getAttackAnimation(), false);
-                return bl;
+                mc.player.swing(InteractionHand.MAIN_HAND, attackAnimation, false);
+                mc.player.connection.send(ServerboundPunchPacket.INSTANCE);
+                return endAttack;
             }
         }
     }
@@ -245,56 +282,57 @@ public class InputSimulator {
                     ToolList.getInstance().log.warn("Null returned as 'hitResult', mc shouldn't happen!");
                 }
 
-                for (InteractionHand interactionHand : InteractionHand.values()) {
-                    ItemStack itemStack = mc.player.getItemInHand(interactionHand);
-                    if (!itemStack.isItemEnabled(mc.level.enabledFeatures())) {
+                for (InteractionHand hand : InteractionHand.values()) {
+                    ItemStack heldItem = mc.player.getItemInHand(hand);
+                    if (!heldItem.isItemEnabled(mc.level.enabledFeatures())) {
                         return;
                     }
 
+                    SwingAnimation swingAnimation = heldItem.getInteractAnimation();
                     if (mc.hitResult != null) {
                         switch (mc.hitResult.getType()) {
                             case ENTITY:
-                                EntityHitResult entityHitResult = (EntityHitResult)mc.hitResult;
-                                Entity entity = entityHitResult.getEntity();
+                                EntityHitResult entityHit = (EntityHitResult)mc.hitResult;
+                                Entity entity = entityHit.getEntity();
                                 if (!mc.level.getWorldBorder().isWithinBounds(entity.blockPosition())) {
                                     return;
                                 }
 
-                                if (mc.player.isWithinEntityInteractionRange(entity, 0.0) && mc.gameMode.interact(mc.player, entity, entityHitResult, interactionHand) instanceof InteractionResult.Success success) {
+                                if (mc.player.isWithinEntityInteractionRange(entity, 0.0) && mc.gameMode.interact(mc.player, entity, entityHit, hand) instanceof InteractionResult.Success success) {
                                     if (success.swingSource() == InteractionResult.SwingSource.PREDICTED) {
-                                        mc.player.swing(interactionHand, itemStack.getInteractAnimation(), false);
+                                        mc.player.swing(hand, swingAnimation, false);
                                     }
 
                                     return;
                                 }
                                 break;
                             case BLOCK:
-                                BlockHitResult blockHitResult = (BlockHitResult)mc.hitResult;
-                                int i = itemStack.getCount();
-                                InteractionResult interactionResult2 = mc.gameMode.useItemOn(mc.player, interactionHand, blockHitResult);
-                                if (interactionResult2 instanceof InteractionResult.Success success2) {
-                                    if (success2.swingSource() == InteractionResult.SwingSource.PREDICTED) {
-                                        mc.player.swing(interactionHand, itemStack.getInteractAnimation(), false);
-                                        if (!itemStack.isEmpty() && (itemStack.getCount() != i || mc.player.hasInfiniteMaterials())) {
-                                            mc.player.itemUsed(interactionHand);
+                                BlockHitResult blockHit = (BlockHitResult)mc.hitResult;
+                                int oldCount = heldItem.getCount();
+                                InteractionResult useResult = mc.gameMode.useItemOn(mc.player, hand, blockHit);
+                                if (useResult instanceof InteractionResult.Success success) {
+                                    if (success.swingSource() == InteractionResult.SwingSource.PREDICTED) {
+                                        mc.player.swing(hand, swingAnimation, false);
+                                        if (!heldItem.isEmpty() && (heldItem.getCount() != oldCount || mc.player.hasInfiniteMaterials())) {
+                                            mc.player.itemUsed(hand);
                                         }
                                     }
 
                                     return;
                                 }
 
-                                if (interactionResult2 instanceof InteractionResult.Fail) {
+                                if (useResult instanceof InteractionResult.Fail) {
                                     return;
                                 }
                         }
                     }
 
-                    if (!itemStack.isEmpty() && mc.gameMode.useItem(mc.player, interactionHand) instanceof InteractionResult.Success success3) {
-                        if (success3.swingSource() == InteractionResult.SwingSource.PREDICTED) {
-                            mc.player.swing(interactionHand, itemStack.getInteractAnimation(), false);
+                    if (!heldItem.isEmpty() && mc.gameMode.useItem(mc.player, hand) instanceof InteractionResult.Success success) {
+                        if (success.swingSource() == InteractionResult.SwingSource.PREDICTED) {
+                            mc.player.swing(hand, swingAnimation, false);
                         }
 
-                        mc.player.itemUsed(interactionHand);
+                        mc.player.itemUsed(hand);
                         return;
                     }
                 }

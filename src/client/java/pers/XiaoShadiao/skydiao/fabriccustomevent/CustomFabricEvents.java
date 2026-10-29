@@ -27,9 +27,6 @@ public final class CustomFabricEvents {
         public void onPacket(ClientboundHypixelPacket packet);
     }
 
-    /**
-     * mouseButtonInfo 0 left 1 right 2 mid
-     */
     public static final Event<@NotNull MouseButtonEvent> MOUSE_BUTTON_EVENT = EventFactory.createArrayBacked(MouseButtonEvent.class, callbacks -> (windowsHandle, mouseButtonInfo, pressState) -> {
         boolean cancelled = false;
         for (MouseButtonEvent callback : callbacks) {
@@ -41,10 +38,7 @@ public final class CustomFabricEvents {
     });
 
     public interface MouseButtonEvent {
-        /**
-         * @param mouseButtonInfo 0 left 1 right 2 mid
-         */
-        public boolean onMouseButton(long windowsHandle, MouseButtonInfo mouseButtonInfo, int pressState);
+        public boolean onMouseButton(long windowsHandle, ClickType clickType, int pressState);
     }
 
     public static final Event<@NotNull MouseScrollEvent> MOUSE_SCROLL_EVENT = EventFactory.createArrayBacked(MouseScrollEvent.class, callbacks -> (windowsHandle, idk, scrollCount) -> {
@@ -107,7 +101,17 @@ public final class CustomFabricEvents {
 
     public enum ClickType {
         LEFT,
+        MIDDLE,
         RIGHT,
+        ;
+
+        public static ClickType from(MouseButtonInfo rawButtonInfo) {
+            return switch (rawButtonInfo.input()) {
+                case 1 -> LEFT;
+                case 3 -> RIGHT;
+                default -> MIDDLE;
+            };
+        }
     }
 
     public static final Event<@NotNull SimulatorClickEvent> ON_SIMULATOR_CLICK = EventFactory.createArrayBacked(SimulatorClickEvent.class, callbacks -> (type) -> {

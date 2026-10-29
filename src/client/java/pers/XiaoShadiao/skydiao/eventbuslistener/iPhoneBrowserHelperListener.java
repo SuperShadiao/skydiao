@@ -3,7 +3,6 @@ package pers.XiaoShadiao.skydiao.eventbuslistener;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
-import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -55,7 +54,7 @@ public class iPhoneBrowserHelperListener extends AbstractForagingListener {
         CustomFabricEvents.MOUSE_BUTTON_EVENT.register(this::onMouseClick);
     }
 
-    private boolean onMouseClick(long l, MouseButtonInfo mouseButtonInfo, int state) {
+    private boolean onMouseClick(long l, CustomFabricEvents.ClickType clickType, int state) {
         if(mc.gui.screen() == null) {
             if(mc.hitResult instanceof EntityHitResult entityHitResult) {
                 Entity entity = entityHitResult.getEntity();

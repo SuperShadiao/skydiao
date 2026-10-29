@@ -23,6 +23,7 @@ import net.minecraft.client.renderer.BindGroupLayouts;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
+import net.minecraft.resources.Identifier;
 import org.joml.Matrix3x2f;
 import org.joml.Vector2f;
 import org.lwjgl.system.MemoryStack;
@@ -62,7 +63,7 @@ public final class BlurredRoundedSurface {
     private static final float DEFAULT_GLOW_RADIUS = 1.8F;
     /** 每个 GUI 状态每帧待处理的面板；顺序即哨兵管线槽位顺序。 */
     private static final Map<GuiRenderState, List<Panel>> PENDING = new WeakHashMap<>();
-    private static final RenderPipeline BLUR = pipeline("blurred_rounded_blur", false);
+    private static final RenderPipeline BLUR = RenderPipelines.registerOptional(pipeline("blurred_rounded_blur", false));
     /**
      * 供哨兵元素使用的管线。每个槽位一条独立管线，这样 {@code executeDraw} 里只凭管线就能定位到
      * 对应面板的参数；同时也避免 {@code GuiRenderer} 把多个面板合批进同一次绘制。
@@ -279,9 +280,9 @@ public final class BlurredRoundedSurface {
 
     private static RenderPipeline pipeline(String name, boolean translucent) {
         return RenderPipeline.builder()
-                .withLocation("skydiao:pipeline/" + name)
+                .withLocation(Identifier.fromNamespaceAndPath("skydiao", "pipeline/" + name))
                 .withVertexShader("core/screenquad")
-                .withFragmentShader("skydiao:core/blurred_rounded")
+                .withFragmentShader(Identifier.fromNamespaceAndPath("skydiao", "core/blurred_rounded"))
                 .withBindGroupLayout(glassBindGroupLayout())
                 .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
                 .withCull(false)
@@ -300,12 +301,12 @@ public final class BlurredRoundedSurface {
     private static RenderPipeline guiPipeline(int slot) {
         while (GUI_PIPELINES.size() <= slot) {
             int index = GUI_PIPELINES.size();
-            GUI_PIPELINES.add(RenderPipeline.builder()
-                    .withLocation("skydiao:pipeline/blurred_rounded_gui_" + index)
+            GUI_PIPELINES.add(RenderPipelines.registerOptional(RenderPipeline.builder()
+                    .withLocation(Identifier.fromNamespaceAndPath("skydiao", "pipeline/blurred_rounded_gui_" + index))
                     // 不能用 core/screenquad：它靠 gl_VertexID 生成三角形，而 GuiRenderer 会用非零
                     // baseVertex 绘制哨兵网格，导致 gl_VertexID 整体偏移、三角形沿屏幕对角线被切掉。
-                    .withVertexShader("skydiao:core/blurred_rounded_gui")
-                    .withFragmentShader("skydiao:core/blurred_rounded")
+                    .withVertexShader(Identifier.fromNamespaceAndPath("skydiao", "core/blurred_rounded_gui"))
+                    .withFragmentShader(Identifier.fromNamespaceAndPath("skydiao", "core/blurred_rounded"))
                     .withBindGroupLayout(BindGroupLayouts.GLOBALS)
                     .withBindGroupLayout(glassBindGroupLayout())
                     // 顶点着色器直接消费 Position（当作 NDC），哨兵写入一个覆盖全屏的三角形。
@@ -314,7 +315,7 @@ public final class BlurredRoundedSurface {
                     .withCull(false)
                     .withDepthStencilState(Optional.empty())
                     .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
-                    .build());
+                    .build()));
         }
         return GUI_PIPELINES.get(slot);
     }

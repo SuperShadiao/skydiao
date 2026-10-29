@@ -10,7 +10,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.core.BlockPos;
@@ -67,8 +66,8 @@ public class AutoBloodfiendListener extends AbstractListener implements IMacro {
 
     private LivingEntity currentAttackedEntity;
 
-    private boolean onMouseClick(long hwid, MouseButtonInfo mouseButtonInfo, int state) {
-        if(mouseButtonInfo.button() == 0 && state == 1 && mc.gui.screen() == null) {
+    private boolean onMouseClick(long hwid, CustomFabricEvents.ClickType clickType, int state) {
+        if(clickType == CustomFabricEvents.ClickType.LEFT && state == 1 && mc.gui.screen() == null) {
             if(mc.hitResult instanceof EntityHitResult entityHitResult) {
                 currentAttackedEntity = entityHitResult.getEntity().asLivingEntity();
             }

@@ -13,8 +13,10 @@ import net.irisshaders.iris.api.v0.IrisProgram;
 import net.irisshaders.iris.apiimpl.IrisApiV0Impl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BindGroupLayouts;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -32,21 +34,22 @@ public class CustomRenderPipeline {
     private static final Matrix4f TEXTURE_MATRIX = new Matrix4f();
 
     // :::custom-pipelines:define-pipeline
-    public static final RenderPipeline THROUGH_WALLS_FILL = fillPipeline("pipeline/THROUGH_WALLS_FILL", Optional.empty());
-    public static final RenderPipeline NO_THROUGH_WALLS_FILL = fillPipeline("pipeline/NO_THROUGH_WALLS_FILL", Optional.of(DepthStencilState.DEFAULT));
+    public static final RenderPipeline THROUGH_WALLS_FILL = RenderPipelines.register(fillPipeline("pipeline/THROUGH_WALLS_FILL", Optional.empty()));
+    public static final RenderPipeline NO_THROUGH_WALLS_FILL = RenderPipelines.register(fillPipeline("pipeline/NO_THROUGH_WALLS_FILL", Optional.of(DepthStencilState.DEFAULT)));
 
-    public static final RenderPipeline THROUGH_WALLS_LINE = linePipeline("pipeline/THROUGH_WALLS_LINE", Optional.empty());
-    public static final RenderPipeline NO_THROUGH_WALLS_LINE = linePipeline("pipeline/NO_THROUGH_WALLS_LINE", Optional.of(DepthStencilState.DEFAULT));
+    public static final RenderPipeline THROUGH_WALLS_LINE = RenderPipelines.register(linePipeline("pipeline/THROUGH_WALLS_LINE", Optional.empty()));
+    public static final RenderPipeline NO_THROUGH_WALLS_LINE = RenderPipelines.register(linePipeline("pipeline/NO_THROUGH_WALLS_LINE", Optional.of(DepthStencilState.DEFAULT)));
 
     private static RenderPipeline fillPipeline(String location, Optional<DepthStencilState> depthState) {
         return RenderPipeline.builder()
-                .withLocation("skydiao:" + location.toLowerCase())
+                .withLocation(Identifier.fromNamespaceAndPath("skydiao", location.toLowerCase()))
                 .withVertexShader("core/position_color")
                 .withFragmentShader("core/position_color")
                 .withBindGroupLayout(BindGroupLayouts.GLOBALS)
                 .withBindGroupLayout(BindGroupLayouts.PROJECTION)
+                .withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
                 .withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR)
-                .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
+                .withPrimitiveTopology(PrimitiveTopology.TRIANGLE_STRIP)
                 .withCull(false)
                 .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
                 .withDepthStencilState(depthState)
@@ -55,11 +58,13 @@ public class CustomRenderPipeline {
 
     private static RenderPipeline linePipeline(String location, Optional<DepthStencilState> depthState) {
         return RenderPipeline.builder()
-                .withLocation("skydiao:" + location.toLowerCase())
+                .withLocation(Identifier.fromNamespaceAndPath("skydiao", location.toLowerCase()))
                 .withVertexShader("core/rendertype_lines")
                 .withFragmentShader("core/rendertype_lines")
                 .withBindGroupLayout(BindGroupLayouts.GLOBALS)
                 .withBindGroupLayout(BindGroupLayouts.PROJECTION)
+                .withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
+                .withBindGroupLayout(BindGroupLayouts.FOG)
                 .withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR_NORMAL_LINE_WIDTH)
                 .withPrimitiveTopology(PrimitiveTopology.LINES)
                 .withCull(false)
@@ -255,7 +260,7 @@ public class CustomRenderPipeline {
     }
 
     private void draw(Minecraft client, RenderPipeline pipeline, MeshData builtBuffer, MeshData.DrawState drawParameters, GpuBuffer vertices) {
-        // 本类只用 TRIANGLES / LINES，索引统一使用通用顺序索引缓冲
+        // 本类只用 TRIANGLE_STRIP / LINES，索引统一使用通用顺序索引缓冲
         RenderSystem.AutoStorageIndexBuffer shapeIndexBuffer = RenderSystem.getSequentialBuffer(pipeline.getPrimitiveTopology());
         GpuBuffer indices = shapeIndexBuffer.getBuffer(drawParameters.indexCount());
         IndexType indexType = shapeIndexBuffer.type();

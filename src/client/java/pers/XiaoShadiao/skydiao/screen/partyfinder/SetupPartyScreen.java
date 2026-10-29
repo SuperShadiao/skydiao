@@ -9,6 +9,7 @@ import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
+import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
@@ -74,14 +75,29 @@ public class SetupPartyScreen extends Screen {
         openPartyButton = Button.builder(
                 Component.literal("开放队伍"),
                 onPress -> {
-                    openPartyButton.active = false;
-                    closePartyButton.active = true;
+                    Runnable runnable = () -> {
+                        openPartyButton.active = false;
+                        closePartyButton.active = true;
 
-                    PartyFinderManager.selfPartyData.leaderPlayerName = ToolList.mc.getUser().getName();
-                    PartyFinderManager.selfPartyData.partyId = UUID.randomUUID();
-                    PartyFinderManager.isPublic = true;
+                        PartyFinderManager.selfPartyData.leaderPlayerName = ToolList.mc.getUser().getName();
+                        PartyFinderManager.selfPartyData.partyId = UUID.randomUUID();
+                        PartyFinderManager.isPublic = true;
 
-                    ToolList.printChatMessage(Component.literal("§a[小沙雕] 队伍已开放, 可以使用§e/skydiaofp broadcast§a来广播你的队伍!"));
+                        ToolList.printChatMessage(Component.literal("§a[小沙雕] 队伍已开放, 可以使用§e/skydiaofp broadcast§a来广播你的队伍!"));
+                    };
+                    if(PartyFinderManager.selfPartyData.partyType.isMaxPlayerRecommend(PartyFinderManager.selfPartyData.maxPlayers)) {
+                        runnable.run();
+                    } else {
+                        minecraft.setScreenAndShow(new ConfirmScreen(
+                                (accept) -> {
+                                    if(accept) {
+                                        runnable.run();
+                                    }
+                                    minecraft.setScreenAndShow(this);
+                                },
+                                Component.literal("当前队伍类型推荐最大人数为" + PartyFinderManager.selfPartyData.partyType.recommendMaxPlayers + (PartyFinderManager.selfPartyData.partyType.recommendMoreMaxPlayers ? "人或以上" : "人")), Component.literal("但你当前队伍最大人数为" + PartyFinderManager.selfPartyData.maxPlayers + "人, 是否仍要开放队伍?")
+                        ));
+                    }
                 }
         ).size(100, 20).build();
         closePartyButton = Button.builder(

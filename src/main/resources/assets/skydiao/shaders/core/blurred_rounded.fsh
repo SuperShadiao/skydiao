@@ -1,12 +1,13 @@
 #version 330
+#extension GL_ARB_separate_shader_objects : require
 
 layout(std140) uniform Blur {
     vec4 data[37];
 };
 
 uniform sampler2D Scene;
-in vec2 texCoord;
-out vec4 fragColor;
+layout(location = 0) in vec2 texCoord;
+layout(location = 0) out vec4 fragColor;
 
 float roundedDistance(vec2 p, vec4 bounds, float radius) {
     vec2 q = abs(p - bounds.xy - bounds.zw * 0.5) - bounds.zw * 0.5 + radius;

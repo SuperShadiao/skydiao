@@ -10,14 +10,10 @@ import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
@@ -73,8 +69,8 @@ public class CustomBossbar extends XSDHUD {
         CustomFabricEvents.MOUSE_BUTTON_EVENT.register(this::onMouseClick);
     }
 
-    private boolean onMouseClick(long windowsHandler, MouseButtonInfo mouseButtonInfo, int state) {
-        if(ConfigManager.bossbarAddTargetEntity.getValue() && mc.gui.screen() == null && mc.player != null && mouseButtonInfo.button() == 1 && state == 1) {
+    private boolean onMouseClick(long windowsHandler, CustomFabricEvents.ClickType clickType, int state) {
+        if(ConfigManager.bossbarAddTargetEntity.getValue() && mc.gui.screen() == null && mc.player != null && clickType == CustomFabricEvents.ClickType.RIGHT && state == 1) {
             if(小沙雕没有神剑_咕咕嘎嘎()) {
                 Vec3 thisPos = mc.player.position();
                 Vec3 forward = thisPos.add(mc.player.getForward().multiply(10, 10, 10));

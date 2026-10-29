@@ -5,7 +5,6 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -87,13 +86,12 @@ public class AutoDojo extends AbstractListener implements IMacro {
         CustomFabricEvents.MOUSE_BUTTON_EVENT.register(this::onMouseEvent);
     }
 
-    private boolean onMouseEvent(long windowsHandle, MouseButtonInfo mouseButtonInfo, int pressState) {
-        int button = mouseButtonInfo.button();
+    private boolean onMouseEvent(long windowsHandle, CustomFabricEvents.ClickType clickType, int pressState) {
         switch(currentDojo) {
             case DISCIPLINE -> {
                 int targetItemIndex = getDisciplineItemSlotIndex();
                 if (targetItemIndex == -1) return true;
-                if (button == 0 && pressState == 1 && InputSimulator.getCurrentItemSlotIndex() != targetItemIndex) {
+                if (clickType == CustomFabricEvents.ClickType.LEFT && pressState == 1 && InputSimulator.getCurrentItemSlotIndex() != targetItemIndex) {
                     InputSimulator.switchItem(targetItemIndex);
                     return true;
                 }
