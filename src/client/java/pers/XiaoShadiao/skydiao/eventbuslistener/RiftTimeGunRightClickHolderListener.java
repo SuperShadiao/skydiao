@@ -30,7 +30,7 @@ public class RiftTimeGunRightClickHolderListener extends AbstractListener {
         if (mc.player.getMainHandItem().getHoverName().getString().contains("Time Gun")) {
             if (mc.hitResult instanceof BlockHitResult blockHitResult && blockHitResult.getType() == HitResult.Type.BLOCK) {
                 Block block = mc.level.getBlockState(blockHitResult.getBlockPos()).getBlock();
-                if (block == Blocks.LIGHT_BLUE_STAINED_GLASS_PANE || block == Blocks.BLUE_STAINED_GLASS_PANE) {
+                if (block == Blocks.STAINED_GLASS_PANE.lightBlue() || block == Blocks.STAINED_GLASS_PANE.blue()) {
                     InputSimulator.pressRightClick();
                     isRightClicking = temp = true;
                 }

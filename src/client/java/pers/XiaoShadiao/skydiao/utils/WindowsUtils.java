@@ -1,22 +1,23 @@
 package pers.XiaoShadiao.skydiao.utils;
 
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.Window;
+import org.lwjgl.sdl.SDLVideo;
 
 public class WindowsUtils {
 
     public static boolean isWindowsFocused() {
-        return GLFW.glfwGetWindowAttrib(ToolList.mc.getWindow().handle(), GLFW.GLFW_FOCUSED) != 0;
+        return ToolList.mc.getWindow().isFocused();
     }
 
     public static boolean isWindowsIconfied() {
-        return GLFW.glfwGetWindowAttrib(ToolList.mc.getWindow().handle(), GLFW.GLFW_ICONIFIED) != 0;
+        return ToolList.mc.getWindow().isIconified();
     }
 
     public static void focusWindows() {
         ToolList.mc.execute(() -> {
-            long handle = ToolList.mc.getWindow().handle();
-            if(isWindowsIconfied()) GLFW.glfwRestoreWindow(handle);
-            GLFW.glfwFocusWindow(handle);
+            Window window = ToolList.mc.getWindow();
+            if(window.isIconified()) SDLVideo.SDL_RestoreWindow(window.handle());
+            SDLVideo.SDL_RaiseWindow(window.handle());
         });
     }
 

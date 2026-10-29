@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
@@ -98,7 +99,7 @@ public class AutoFindLobbyEventEgg extends AbstractListener {
                 out:for(int i : new int[] {1, 2}) {
                     for (BlockPos pos : BlockPos.betweenClosed(target.offset(-i, -i, -i), target.offset(i, i, i))) {
                         if (mc.level.getBlockState(pos).is(Blocks.PLAYER_HEAD)) {
-                            AimHelper.getYawPitchByVec3(pos.getBottomCenter().add(0, pos.getY() > mc.player.getY() ? 0 : -0.3, 0)).updateToAimHelper(new AimHelper());
+                            AimHelper.getYawPitchByVec3(Vec3.atBottomCenterOf(pos).add(0, pos.getY() > mc.player.getY() ? 0 : -0.3, 0)).updateToAimHelper(new AimHelper());
 
                             InputSimulator.tryNoViewChangeControlMoveTo(pos, 0.5);
                             if (mc.hitResult instanceof BlockHitResult blockHitResult

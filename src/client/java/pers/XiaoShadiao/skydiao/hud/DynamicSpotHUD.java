@@ -441,7 +441,7 @@ public final class DynamicSpotHUD extends XSDHUD {
         PlayerTeam team = playerName == null ? null : scoreboard.getPlayersTeam(playerName);
         Objective objective = null;
         if (team != null) {
-            DisplaySlot slot = DisplaySlot.teamColorToSlot(team.getColor());
+            DisplaySlot slot = team.getColor().map(TeamColor::displaySlot).orElse(null);
             if (slot != null) objective = scoreboard.getDisplayObjective(slot);
         }
         if (objective == null) objective = scoreboard.getDisplayObjective(DisplaySlot.SIDEBAR);

@@ -24,12 +24,12 @@ public class MixinTooltipScroll {
     private Matrix3x2fStack pose;
 
     @WrapMethod(method = "tooltip")
-    public void drawTooltip(Font font, List<ClientTooltipComponent> list, int i, int j, ClientTooltipPositioner clientTooltipPositioner, @Nullable Identifier identifier, Operation<Void> original) {
+    public void drawTooltip(Font font, List<ClientTooltipComponent> list, int i, int j, ClientTooltipPositioner clientTooltipPositioner, @Nullable Identifier identifier, boolean bl, Operation<Void> original) {
         int scroll = AbstractListener.tooltipScrollController.getOffsetScroll(font, list);
         pose.pushMatrix();
         pose.translate(0, scroll);
 
-        original.call(font, list, i, j, clientTooltipPositioner, identifier);
+        original.call(font, list, i, j, clientTooltipPositioner, identifier, bl);
 
         pose.popMatrix();
     }

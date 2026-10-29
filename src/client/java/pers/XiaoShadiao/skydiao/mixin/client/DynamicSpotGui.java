@@ -2,7 +2,7 @@ package pers.XiaoShadiao.skydiao.mixin.client;
 
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.world.scores.DisplaySlot;
@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pers.XiaoShadiao.skydiao.hud.DynamicSpotHUD;
 
 /** Continues extracting the player list until its shell has folded back into the HUD. */
-@Mixin(Gui.class)
+@Mixin(Hud.class)
 public abstract class DynamicSpotGui {
     @Shadow @Final private Minecraft minecraft;
     @Shadow @Final private PlayerTabOverlay tabList;

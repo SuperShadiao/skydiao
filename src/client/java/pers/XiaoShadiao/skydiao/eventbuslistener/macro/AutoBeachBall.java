@@ -16,7 +16,7 @@ import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.Items;
@@ -107,7 +107,7 @@ public class AutoBeachBall extends AbstractListener implements IMacro {
     }
 
     private boolean onMouseClick(long hwnd, MouseButtonInfo mouseButtonInfo, int state) {
-        if(mc.player == null || mc.level == null || mc.screen != null || !ConfigManager.autoPlayBeachBall.getValue()) return false;
+        if(mc.player == null || mc.level == null || mc.gui.screen() != null || !ConfigManager.autoPlayBeachBall.getValue()) return false;
         if("BOUNCY_BEACH_BALL".equals(ToolList.getInstance().tryGetSkyblockItemId(mc.player.getMainHandItem()))) {
             hasRightClickedBeachBall = true;
             clickExpireTick = 100;
@@ -125,7 +125,7 @@ public class AutoBeachBall extends AbstractListener implements IMacro {
         LocalPlayer player = mc.player;
         if(level != null && player != null) {
             if(packet instanceof ClientboundAddEntityPacket addEntityPacket) {
-                if (addEntityPacket.getType() == EntityType.ARMOR_STAND) {
+                if (addEntityPacket.getType() == EntityTypes.ARMOR_STAND) {
                     delayTickExecutor.delayExec(() -> {
                         Entity entity = level.getEntity(addEntityPacket.getId());
                         if(entity instanceof ArmorStand armorStand && player.distanceTo(armorStand) < 6) {

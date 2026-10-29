@@ -271,7 +271,7 @@ public class BFTaskManiaHandler extends BFTask {
 
         /** 检查是否是深绿色硬化粘土（meta=13） */
         private static boolean isSafeBlock(Level world, BlockPos pos) {
-            return world.getBlockState(pos).getBlock() == Blocks.GREEN_TERRACOTTA;
+            return world.getBlockState(pos).getBlock() == Blocks.DYED_TERRACOTTA.green();
         }
 
         /** 检查是否可行走（上方是空气或可穿透方块） */

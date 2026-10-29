@@ -26,7 +26,7 @@ public class AutoLoadoutListener extends AbstractListener {
     @Override
     public void registerListeners() {
         ScreenEvents.AFTER_INIT.register(this::onLoadoutGuiOpen);
-        CustomFabricEvents.MOUSE_BUTTON_EVENT.register((hwnd, button, state) -> state == 1 && mc.screen != null && futureTask != null && !futureTask.future.isDone());
+        CustomFabricEvents.MOUSE_BUTTON_EVENT.register((hwnd, button, state) -> state == 1 && mc.gui.screen() != null && futureTask != null && !futureTask.future.isDone());
     }
 
     public int loadout = 0;
@@ -108,7 +108,7 @@ public class AutoLoadoutListener extends AbstractListener {
                                 mc.gameMode.handleContainerInput(finalMenu.containerId, 44, 0, ContainerInput.PICKUP, mc.player);
                             }
                         });
-                        if(mc.screen == null) {
+                        if(mc.gui.screen() == null) {
                             call(CallbackResult.TERMINATED);
                             return null;
                         }
@@ -120,7 +120,7 @@ public class AutoLoadoutListener extends AbstractListener {
                         }
                         menu = ((ContainerScreen) screen).getMenu();
                     }
-                    if(mc.screen == null) {
+                    if(mc.gui.screen() == null) {
                         call(CallbackResult.TERMINATED);
                         return null;
                     }
@@ -132,7 +132,7 @@ public class AutoLoadoutListener extends AbstractListener {
                     });
                     Thread.sleep(100 + ToolList.getInstance().random.nextInt(50));
                     mc.execute(() -> {
-                        if (mc.screen != null) mc.screen.onClose();
+                        if (mc.gui.screen() != null) mc.gui.screen().onClose();
                         call(CallbackResult.DONE);
                     });
                 } catch (Throwable e) {

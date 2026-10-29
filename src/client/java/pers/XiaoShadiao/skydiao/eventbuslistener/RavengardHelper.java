@@ -59,7 +59,7 @@ public class RavengardHelper extends AbstractListener {
     }
 
     private void onClientTick(Minecraft mc) {
-        if(!ConfigManager.ravengardHelper.getValue() || !(mc.screen instanceof AbstractContainerScreen<?> abstractContainerScreen) || !StatusManager.get().isInRavengard()) {
+        if(!ConfigManager.ravengardHelper.getValue() || !(mc.gui.screen() instanceof AbstractContainerScreen<?> abstractContainerScreen) || !StatusManager.get().isInRavengard()) {
             caches.clear();
             return;
         }
@@ -67,7 +67,7 @@ public class RavengardHelper extends AbstractListener {
         AbstractContainerMenu menu = abstractContainerScreen.getMenu();
 
         for (SlotFilter slotFilter : SlotFilter.values()) {
-            caches.put(slotFilter, slotFilter.shouldEnable.test(mc.screen) ? slotFilter.filter.apply(menu) : List.of());
+            caches.put(slotFilter, slotFilter.shouldEnable.test(mc.gui.screen()) ? slotFilter.filter.apply(menu) : List.of());
         }
     }
 

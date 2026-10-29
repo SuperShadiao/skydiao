@@ -13,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.RemotePlayer;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -56,8 +57,9 @@ public class MineshaftHelperListener extends AbstractListener {
         corpseList.forEach((entityId, type) -> {
             if(!claimedCorpse.contains(entityId)) {
                 Entity entity = mc.level.getEntity(entityId);
-                if(entity == null || type.color.getColor() == null) return;
-                Color color = new Color(type.color.getColor());
+                TextColor textColor = TextColor.fromLegacyFormat(type.color);
+                if(entity == null || textColor == null) return;
+                Color color = new Color(textColor.getValue());
                 float r = color.getRed() / 255f;
                 float g = color.getGreen() / 255f;
                 float b = color.getBlue() / 255f;

@@ -112,7 +112,7 @@ public class AutoFillBottleOfWater extends AbstractListener implements IMacro {
 
                 Thread.sleep(2000);
 
-                if(!(mc.screen instanceof ContainerScreen containerScreen)) {
+                if(!(mc.gui.screen() instanceof ContainerScreen containerScreen)) {
                     enabled = false;
                     ToolList.printChatMessage(Component.literal("§a[小沙雕] §c箱子打开超时, 请检查你的位置..."));
                     return null;
@@ -121,14 +121,14 @@ public class AutoFillBottleOfWater extends AbstractListener implements IMacro {
                 for (Slot slot : containerScreen.getMenu().slots) {
                     if(slot.container == mc.player.getInventory() && slot.getItem().getItem() == Items.POTION) {
                         mc.execute(() -> {
-                            if (mc.screen == containerScreen && mc.player != null && mc.gameMode != null) {
+                            if (mc.gui.screen() == containerScreen && mc.player != null && mc.gameMode != null) {
                                 mc.gameMode.handleContainerInput(containerScreen.getMenu().containerId, slot.index, 0, ContainerInput.QUICK_MOVE, mc.player);
                             }
                         });
                         Thread.sleep(260 + ToolList.getInstance().random.nextInt(100));
                     }
                 }
-                if(mc.screen == containerScreen) mc.execute(() -> mc.screen.onClose()); else {
+                if(mc.gui.screen() == containerScreen) mc.execute(() -> mc.gui.screen().onClose()); else {
                     enabled = false;
                     ToolList.printChatMessage(Component.literal("§a[小沙雕] §c箱子似乎被手动关闭了..."));
                     return null;

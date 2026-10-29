@@ -1,9 +1,10 @@
 package pers.XiaoShadiao.skydiao.utils.renderutils;
 
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.GpuFence;
-import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.commands.GpuFence;
+import com.mojang.renderpearl.api.device.GpuDevice;
+
 import java.util.function.Supplier;
 
 public class XSDMappableRingBuffer implements AutoCloseable {
@@ -13,7 +14,7 @@ public class XSDMappableRingBuffer implements AutoCloseable {
 	private final int size;
 	private int current = 0;
 
-	public XSDMappableRingBuffer(final Supplier<String> label, @GpuBuffer.Usage final int usage, final int size, int bufferCount) {
+	public XSDMappableRingBuffer(final Supplier<String> label, final int usage, final int size, int bufferCount) {
 		this.bufferCount = bufferCount;
 		this.buffers = new GpuBuffer[bufferCount];
 		this.fences = new GpuFence[bufferCount];
@@ -38,7 +39,7 @@ public class XSDMappableRingBuffer implements AutoCloseable {
 	public GpuBuffer currentBuffer() {
 		GpuFence fence = this.fences[this.current];
 		if (fence != null) {
-			fence.awaitCompletion(Long.MAX_VALUE);
+			fence.awaitCompletion(GpuFence.NO_TIMEOUT);
 			fence.close();
 			this.fences[this.current] = null;
 		}

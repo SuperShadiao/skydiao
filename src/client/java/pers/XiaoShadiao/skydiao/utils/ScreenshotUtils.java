@@ -1,11 +1,12 @@
 package pers.XiaoShadiao.skydiao.utils;
 
-import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.commands.CommandEncoder;
+import com.mojang.renderpearl.api.textures.GpuTexture;
 import net.minecraft.util.ARGB;
 
 import java.nio.ByteBuffer;
@@ -21,17 +22,16 @@ public class ScreenshotUtils {
         takeScreenshot(target, 1, callback);
     }
 
-    public static void takeScreenshot2(final RenderTarget target, final Consumer<GpuBuffer.MappedView> callback) {
+    public static void takeScreenshot2(final RenderTarget target, final Consumer<GpuBufferSlice.MappedView> callback) {
         int width = target.width;
         int height = target.height;
         GpuTexture sourceTexture = target.getColorTexture();
         if (sourceTexture == null) {
             throw new IllegalStateException("Tried to capture screenshot of an incomplete framebuffer");
         } else {
-            GpuBuffer buffer = RenderSystem.getDevice().createBuffer(() -> "Screenshot buffer", 9, (long)width * height * sourceTexture.getFormat().pixelSize());
-            CommandEncoder commandEncoder = RenderSystem.getDevice().createCommandEncoder();
+            GpuBuffer buffer = RenderSystem.getDevice().createBuffer(() -> "Screenshot buffer", 9, (long)width * height * sourceTexture.getFormat().blockSize());
             RenderSystem.getDevice().createCommandEncoder().copyTextureToBuffer(sourceTexture, buffer, 0L, () -> {
-                GpuBuffer.MappedView read0 = commandEncoder.mapBuffer(buffer, true, false);
+                GpuBufferSlice.MappedView read0 = buffer.map(true, false);
 
                 callback.accept(read0);
 
@@ -47,12 +47,12 @@ public class ScreenshotUtils {
         if (sourceTexture == null) {
             throw new IllegalStateException("Tried to capture screenshot of an incomplete framebuffer");
         } else if (width % downscaleFactor == 0 && height % downscaleFactor == 0) {
-            GpuBuffer buffer = RenderSystem.getDevice().createBuffer(() -> "Screenshot buffer", 9, (long)width * height * sourceTexture.getFormat().pixelSize());
+            GpuBuffer buffer = RenderSystem.getDevice().createBuffer(() -> "Screenshot buffer", 9, (long)width * height * sourceTexture.getFormat().blockSize());
             CommandEncoder commandEncoder = RenderSystem.getDevice().createCommandEncoder();
             RenderSystem.getDevice().createCommandEncoder().copyTextureToBuffer(sourceTexture, buffer, 0L, () -> {
-                GpuBuffer.MappedView read0 = commandEncoder.mapBuffer(buffer, true, false);
+                GpuBufferSlice.MappedView read0 = buffer.map(true, false);
                 ToolList.addThreadedTask(() -> {
-                    try (GpuBuffer.MappedView read = read0) {
+                    try (GpuBufferSlice.MappedView read = read0) {
                         int outputHeight = height / downscaleFactor;
                         int outputWidth = width / downscaleFactor;
                         NativeImage image = new NativeImage(outputWidth, outputHeight, false);
@@ -61,7 +61,7 @@ public class ScreenshotUtils {
                         for (int y = 0; y < outputHeight; y++) {
                             for (int x = 0; x < outputWidth; x++) {
                                 if (downscaleFactor == 1) {
-                                    int argb = data.getInt((x + y * width) * sourceTexture.getFormat().pixelSize());
+                                    int argb = data.getInt((x + y * width) * sourceTexture.getFormat().blockSize());
                                     image.setPixelABGR(x, height - y - 1, argb | 0xFF000000);
                                 } else {
                                     int red = 0;
@@ -70,7 +70,7 @@ public class ScreenshotUtils {
 
                                     for (int i = 0; i < downscaleFactor; i++) {
                                         for (int j = 0; j < downscaleFactor; j++) {
-                                            int argb = data.getInt((x * downscaleFactor + i + (y * downscaleFactor + j) * width) * sourceTexture.getFormat().pixelSize());
+                                            int argb = data.getInt((x * downscaleFactor + i + (y * downscaleFactor + j) * width) * sourceTexture.getFormat().blockSize());
                                             red += ARGB.red(argb);
                                             green += ARGB.green(argb);
                                             blue += ARGB.blue(argb);

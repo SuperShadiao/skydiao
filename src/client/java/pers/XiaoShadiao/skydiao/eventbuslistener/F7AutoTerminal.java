@@ -33,11 +33,11 @@ import java.util.regex.Pattern;
 public class F7AutoTerminal extends AbstractListener implements IDungeonListener {
 
     private final List<Item> CHANGE_COLOR_LIST = List.of(
-            Items.ORANGE_STAINED_GLASS_PANE,
-            Items.YELLOW_STAINED_GLASS_PANE,
-            Items.GREEN_STAINED_GLASS_PANE,
-            Items.BLUE_STAINED_GLASS_PANE,
-            Items.RED_STAINED_GLASS_PANE
+            Items.STAINED_GLASS_PANE.orange(),
+            Items.STAINED_GLASS_PANE.yellow(),
+            Items.STAINED_GLASS_PANE.green(),
+            Items.STAINED_GLASS_PANE.blue(),
+            Items.STAINED_GLASS_PANE.red()
     );
 
     private int clickedCounter = 0;
@@ -120,8 +120,8 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
     private int currentMelodyLine;
 
     private void onClientTick(Minecraft mc) {
-        if(mc.player == null || mc.level == null || !(mc.screen instanceof AbstractContainerScreen<?> containerScreen)) {
-            if(currentTerminal == TerminalType.MELODY && mc.screen == null) {
+        if(mc.player == null || mc.level == null || !(mc.gui.screen() instanceof AbstractContainerScreen<?> containerScreen)) {
+            if(currentTerminal == TerminalType.MELODY && mc.gui.screen() == null) {
                 if(currentMelodyLine == 2) {
                     sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotmelody[3].getValue());
                 } else if(currentMelodyLine == 1 && enableNoForceDelayClick()) {
@@ -151,7 +151,7 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                         int col = -1;
                         for (int i = 0; i < slots.length; i++) {
                             Slot slot = slots[i][0];
-                            if (slot.getItem().getItem() == Items.MAGENTA_STAINED_GLASS_PANE) {
+                            if (slot.getItem().getItem() == Items.STAINED_GLASS_PANE.magenta()) {
                                 col = i;
                                 break;
                             }
@@ -160,13 +160,13 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                             for (int i = 0; i < slots[col].length; i++) {
                                 boolean breakFlag = false;
                                 Slot slot = slots[col][i];
-                                if (slot.getItem().getItem() == Items.LIME_STAINED_GLASS_PANE) {
-                                    if (slots[7][i].getItem().getItem() == Items.LIME_TERRACOTTA) {
+                                if (slot.getItem().getItem() == Items.STAINED_GLASS_PANE.lime()) {
+                                    if (slots[7][i].getItem().getItem() == Items.DYED_TERRACOTTA.lime()) {
                                         pendingClick = new Click(false, menu.containerId, slots[7][i]);
                                         breakFlag = true;
                                     }
                                 }
-                                if (slot.getItem().getItem() == Items.LIME_STAINED_GLASS_PANE || slot.getItem().getItem() == Items.RED_STAINED_GLASS_PANE) {
+                                if (slot.getItem().getItem() == Items.STAINED_GLASS_PANE.lime() || slot.getItem().getItem() == Items.STAINED_GLASS_PANE.red()) {
                                     int tempLine = Mth.clamp(i - 2, -1, 2);
                                     if (currentMelodyLine != tempLine) {
                                         currentMelodyLine = tempLine;
@@ -180,7 +180,7 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                     }
                     case ON_OFF -> {
                         for (Slot slot : slots1) {
-                            if (slot.getItem().getItem() == Items.RED_STAINED_GLASS_PANE && !blacklistedSlots.contains(slot.index)) {
+                            if (slot.getItem().getItem() == Items.STAINED_GLASS_PANE.red() && !blacklistedSlots.contains(slot.index)) {
                                 pendingClick = new Click(true, menu.containerId, slot);
                                 break;
                             }
@@ -204,7 +204,7 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                         }
                     }
                     case CLICK_ORDER -> {
-                        slots1.stream().filter(slot -> slot.getItem().getItem() == Items.RED_STAINED_GLASS_PANE && (!enableNoForceDelayClick() || !blacklistedSlots.contains(slot.index))).min(Comparator.comparingInt(slot -> slot.getItem().getCount())).ifPresent(slot -> {
+                        slots1.stream().filter(slot -> slot.getItem().getItem() == Items.STAINED_GLASS_PANE.red() && (!enableNoForceDelayClick() || !blacklistedSlots.contains(slot.index))).min(Comparator.comparingInt(slot -> slot.getItem().getCount())).ifPresent(slot -> {
                             pendingClick = new Click(true, menu.containerId, slot);
                         });
                     }
@@ -250,7 +250,7 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
 
                                     if ((enableNoForceDelayClick() || !ToolList.hasGlint(item))
                                             && !blacklistedSlots.contains(slot.index)
-                                            && item.getItem() != Items.BLACK_STAINED_GLASS_PANE
+                                            && item.getItem() != Items.STAINED_GLASS_PANE.black()
                                             && (itemUpCase.startsWith(colorUpperCase) || itemUpCase.endsWith(colorUpperCase) || (item.getItem().getDescriptionId().contains(colorItemID.toLowerCase()) && !item.getItem().getDescriptionId().contains("_" + colorItemID.toLowerCase()))
                                             || matchesSpecialCase(dye.get(), item))) {
                                         pendingClick = new Click(true, menu.containerId, slot);
@@ -274,7 +274,7 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
             case DyeColor.BLACK -> item.getItem() == Items.INK_SAC;
             case DyeColor.BLUE -> item.getItem() == Items.LAPIS_LAZULI;
             case DyeColor.BROWN -> item.getItem() == Items.COCOA_BEANS;
-            case DyeColor.WHITE -> item.getItem() == Items.BONE_MEAL || item.getItem() == Items.WHITE_WOOL;
+            case DyeColor.WHITE -> item.getItem() == Items.BONE_MEAL || item.getItem() == Items.WOOL.white();
             case DyeColor.GREEN -> item.getItem() == Items.CACTUS;
             case DyeColor.RED -> item.getItem() == Items.POPPY;
             case DyeColor.YELLOW -> item.getItem() == Items.DANDELION;

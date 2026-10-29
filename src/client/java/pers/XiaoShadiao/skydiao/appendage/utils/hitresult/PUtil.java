@@ -156,7 +156,7 @@ public class PUtil {
         }
 
         AABB searchArea = AABB.ofSize(from, entityMargin, entityMargin, entityMargin).expandTowards(to.subtract(from)).inflate(1.0);
-        Collection<EntityHitResult> entityHit = ProjectileUtil.getManyEntityHitResult(level, source, from, to, searchArea, matching, entityMargin, clipType, true);
+        Collection<EntityHitResult> entityHit = ProjectileUtil.getManyEntityHitResult(level, source, from, to, searchArea, matching, entityMargin, clipType, true, true);
         return !entityHit.isEmpty() ? Either.right(entityHit) : Either.left(hitResult);
     }
 

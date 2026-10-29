@@ -50,7 +50,7 @@ public class InventoryRegexSearcherConfigScreen extends Screen {
         ConfigManager.inventoryFilterRegexList.setValue(ja.toString());
         ConfigManager.saveConfig();
         // super.onClose();
-        ToolList.mc.setScreen(parent);
+        ToolList.mc.gui.setScreen(parent);
     }
 
     @Override

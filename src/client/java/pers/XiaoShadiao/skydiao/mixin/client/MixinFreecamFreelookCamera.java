@@ -39,7 +39,7 @@ public class MixinFreecamFreelookCamera {
     }
 
     @Inject(method = "extractRenderState", at = @At("HEAD"))
-    private void extractRenderState(CameraRenderState cameraState, float cameraEntityPartialTicks, CallbackInfo ci) {
+    private void extractRenderState(CameraRenderState cameraState, DeltaTracker deltaTracker, CallbackInfo ci) {
         tempStore2 = entity;
         FreecamAndFreelook.CameraEntity cameraEntity = AbstractListener.freecamAndFreelook.getCameraEntity();
         if(cameraEntity != null) {
@@ -48,7 +48,7 @@ public class MixinFreecamFreelookCamera {
     }
 
     @Inject(method = "extractRenderState", at = @At("TAIL"))
-    private void extractRenderStatePost(CameraRenderState cameraState, float cameraEntityPartialTicks, CallbackInfo ci) {
+    private void extractRenderStatePost(CameraRenderState cameraState, DeltaTracker deltaTracker, CallbackInfo ci) {
         entity = tempStore2;
     }
 

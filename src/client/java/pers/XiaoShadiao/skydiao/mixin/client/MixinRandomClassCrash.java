@@ -11,7 +11,7 @@ public class MixinRandomClassCrash {
 
     @WrapMethod(method = "next")
     public int next(int i, Operation<Integer> original) {
-        boolean flag = Minecraft.getInstance() == null || Minecraft.getInstance().isSingleplayer() || Minecraft.getInstance().level == null;
+        boolean flag = Minecraft.getInstance() == null || Minecraft.getInstance().isLocalServer() || Minecraft.getInstance().level == null;
         while(true) {
             try {
                 return original.call(i);
@@ -24,7 +24,7 @@ public class MixinRandomClassCrash {
 
     @WrapMethod(method = "setSeed")
     public void setSeed(long l, Operation<Void> original) {
-        boolean flag = Minecraft.getInstance() == null || Minecraft.getInstance().isSingleplayer() || Minecraft.getInstance().level == null;
+        boolean flag = Minecraft.getInstance() == null || Minecraft.getInstance().isLocalServer() || Minecraft.getInstance().level == null;
         while(true) {
             try {
                 original.call(l);

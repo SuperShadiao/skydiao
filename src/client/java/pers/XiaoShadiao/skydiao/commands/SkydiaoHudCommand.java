@@ -20,7 +20,7 @@ public class SkydiaoHudCommand extends BaseRootRunnableCommand {
 
     @Override
     public int executeCommand(CommandContext<FabricClientCommandSource> context) {
-        mc.schedule(() -> mc.setScreen(new HudConfigScreen(mc.screen)));
+        mc.schedule(() -> mc.gui.setScreen(new HudConfigScreen(mc.gui.screen())));
         return 0;
     }
 }

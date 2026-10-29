@@ -224,7 +224,7 @@ public class CrystalHollowHelperListener extends AbstractListener {
     private final BiPredicate<ClientLevel, BlockPos> lavaFinder = (level, bp) -> level.getBlockState(bp).getBlock() == Blocks.LAVA;
     private final BiPredicate<ClientLevel, BlockPos> pinkGlassPaneFinder = (level, bp) -> {
         Block block = level.getBlockState(bp).getBlock();
-        return block == Blocks.MAGENTA_STAINED_GLASS_PANE || block == Blocks.MAGENTA_STAINED_GLASS;
+        return block == Blocks.STAINED_GLASS_PANE.magenta() || block == Blocks.STAINED_GLASS.magenta();
     };
 
     private BlockPos scanCrystal(ScannerInfo info, BooleanSupplier cancelled) throws InterruptedException {
@@ -343,7 +343,7 @@ public class CrystalHollowHelperListener extends AbstractListener {
                     if(NUCLEUS_BB.isInside(info.currentScanning) || !HOLLOWS_BB.isInside(info.currentScanning)) continue;
 
                     Block block = currentLevel.getBlockState(info.currentScanning).getBlock();
-                    if(block == Blocks.RED_WOOL) {
+                    if(block == Blocks.WOOL.red()) {
                         block = currentLevel.getBlockState(info.currentScanning.move(0, -1, 0)).getBlock();
                     }
                     if(block == Blocks.STONE_BRICKS) {
@@ -366,7 +366,7 @@ public class CrystalHollowHelperListener extends AbstractListener {
                                     unloadedQueue.enqueue(info.currentScanning.immutable());
                                     continue label_z;
                                 }
-                                if(currentLevel.getBlockState(temp).getBlock() == Blocks.RED_WOOL) redWoolCount++;
+                                if(currentLevel.getBlockState(temp).getBlock() == Blocks.WOOL.red()) redWoolCount++;
                             }
                         }
                         if(redWoolCount == 6) {
@@ -384,7 +384,7 @@ public class CrystalHollowHelperListener extends AbstractListener {
             if(ToolList.getInstance().isChunkLoaded(currentLevel, info.currentScanning)) {
                 if(NUCLEUS_BB.isInside(info.currentScanning) || !HOLLOWS_BB.isInside(info.currentScanning)) continue;
                 Block block = currentLevel.getBlockState(info.currentScanning).getBlock();
-                if(block == Blocks.RED_WOOL) {
+                if(block == Blocks.WOOL.red()) {
                     block = currentLevel.getBlockState(info.currentScanning.move(0, -1, 0)).getBlock();
                 }
                 if(block == Blocks.STONE_BRICKS) {
@@ -409,7 +409,7 @@ public class CrystalHollowHelperListener extends AbstractListener {
                                 queueWait();
                                 continue label;
                             }
-                            if(currentLevel.getBlockState(temp).getBlock() == Blocks.RED_WOOL) redWoolCount++;
+                            if(currentLevel.getBlockState(temp).getBlock() == Blocks.WOOL.red()) redWoolCount++;
                         }
                     }
                     if(redWoolCount == 6) {
@@ -573,7 +573,7 @@ public class CrystalHollowHelperListener extends AbstractListener {
                     if(NUCLEUS_BB.isInside(info.currentScanning) || !HOLLOWS_BB.isInside(info.currentScanning)) continue;
 
                     Block block = currentLevel.getBlockState(info.currentScanning).getBlock();
-                    if(block == Blocks.RED_TERRACOTTA) {
+                    if(block == Blocks.DYED_TERRACOTTA.red()) {
                         block = currentLevel.getBlockState(info.currentScanning.move(0, -1, 0)).getBlock();
                     }
                     if(block == Blocks.SMOOTH_SANDSTONE) {
@@ -598,7 +598,7 @@ public class CrystalHollowHelperListener extends AbstractListener {
                                     unloadedQueue.enqueue(info.currentScanning.immutable());
                                     continue label_z;
                                 }
-                                if(currentLevel.getBlockState(temp).getBlock() == Blocks.RED_TERRACOTTA) redClayCount++;
+                                if(currentLevel.getBlockState(temp).getBlock() == Blocks.DYED_TERRACOTTA.red()) redClayCount++;
                             }
                         }
                         if(redClayCount >= 8) {
@@ -616,7 +616,7 @@ public class CrystalHollowHelperListener extends AbstractListener {
             if(ToolList.getInstance().isChunkLoaded(currentLevel, info.currentScanning)) {
                 if(NUCLEUS_BB.isInside(info.currentScanning) || !HOLLOWS_BB.isInside(info.currentScanning)) continue;
                 Block block = currentLevel.getBlockState(info.currentScanning).getBlock();
-                if(block == Blocks.RED_TERRACOTTA) {
+                if(block == Blocks.DYED_TERRACOTTA.red()) {
                     block = currentLevel.getBlockState(info.currentScanning.move(0, -1, 0)).getBlock();
                 }
                 if(block == Blocks.SMOOTH_SANDSTONE) {
@@ -643,7 +643,7 @@ public class CrystalHollowHelperListener extends AbstractListener {
                                 queueWait();
                                 continue label;
                             }
-                            if(currentLevel.getBlockState(temp).getBlock() == Blocks.RED_TERRACOTTA) redClayCount++;
+                            if(currentLevel.getBlockState(temp).getBlock() == Blocks.DYED_TERRACOTTA.red()) redClayCount++;
                         }
                     }
                     if(redClayCount >= 8) {
@@ -691,7 +691,7 @@ public class CrystalHollowHelperListener extends AbstractListener {
                     if(NUCLEUS_BB.isInside(info.currentScanning) || !HOLLOWS_BB.isInside(info.currentScanning)) continue;
 
                     Block block = currentLevel.getBlockState(info.currentScanning).getBlock();
-                    if(block == Blocks.CYAN_TERRACOTTA) {
+                    if(block == Blocks.DYED_TERRACOTTA.cyan()) {
                         int count = 0;
                         for (int xOff = -2; xOff <= 2; xOff++) {
                             for (int zOff = -2; zOff <= 2; zOff++) {
@@ -700,7 +700,7 @@ public class CrystalHollowHelperListener extends AbstractListener {
                                     unloadedQueue.enqueue(info.currentScanning.immutable());
                                     continue label_z;
                                 }
-                                if(currentLevel.getBlockState(temp).getBlock() == Blocks.CYAN_TERRACOTTA) count++;
+                                if(currentLevel.getBlockState(temp).getBlock() == Blocks.DYED_TERRACOTTA.cyan()) count++;
                             }
                         }
                         if(count < 20) continue label_z;
@@ -753,7 +753,7 @@ public class CrystalHollowHelperListener extends AbstractListener {
             if(ToolList.getInstance().isChunkLoaded(currentLevel, info.currentScanning)) {
                 if(NUCLEUS_BB.isInside(info.currentScanning) || !HOLLOWS_BB.isInside(info.currentScanning)) continue;
                 Block block = currentLevel.getBlockState(info.currentScanning).getBlock();
-                if(block == Blocks.CYAN_TERRACOTTA) {
+                if(block == Blocks.DYED_TERRACOTTA.cyan()) {
                     int count = 0;
                     for (int xOff = -2; xOff <= 2; xOff++) {
                         for (int zOff = -2; zOff <= 2; zOff++) {
@@ -762,7 +762,7 @@ public class CrystalHollowHelperListener extends AbstractListener {
                                 unloadedQueue.enqueue(info.currentScanning.immutable());
                                 continue label;
                             }
-                            if(currentLevel.getBlockState(temp).getBlock() == Blocks.CYAN_TERRACOTTA) count++;
+                            if(currentLevel.getBlockState(temp).getBlock() == Blocks.DYED_TERRACOTTA.cyan()) count++;
                         }
                     }
                     if(count >= 20) {

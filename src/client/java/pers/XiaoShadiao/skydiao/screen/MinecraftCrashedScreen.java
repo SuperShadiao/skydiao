@@ -1,5 +1,6 @@
 package pers.XiaoShadiao.skydiao.screen;
 
+import com.mojang.blaze3d.Blaze3D;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
@@ -12,7 +13,6 @@ import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Util;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.XSDSafeSession;
@@ -61,11 +61,11 @@ public class MinecraftCrashedScreen extends Screen {
         layout.addTitleHeader(Component.literal("§e§k|§e Minecraft爆炸了 §e§k|"), font);
 
         this.addRenderableWidget(Button.builder(Component.literal("§b打开因爆炸生成的文件"), button -> {
-            Util.getPlatform().openUri(file.toUri());
+            Blaze3D.openUri(file.toUri());
         }).bounds(10, this.height - 30, 200, 20).build()).active = file != null;
 
         this.addRenderableWidget(Button.builder(Component.literal("§a§kA§a 谢谢小沙雕! §a§kA"), button -> {
-            mc.setScreen(new TitleScreen());
+            mc.gui.setScreen(new TitleScreen());
         }).bounds(this.width - 210, this.height - 30, 200, 20).build());
 
         this.addRenderableWidget(Button.builder(Component.literal("强制关闭客户端"), button -> {

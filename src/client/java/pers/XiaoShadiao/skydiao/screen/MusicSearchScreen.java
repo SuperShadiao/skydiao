@@ -42,7 +42,7 @@ public class MusicSearchScreen extends Screen {
 
     @Override
     public void onClose() {
-        minecraft.setScreen(new MusicPlayerScreen());
+        minecraft.gui.setScreen(new MusicPlayerScreen());
     }
 
     @Override

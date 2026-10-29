@@ -51,7 +51,7 @@ public class AutoEvaluateScrapListener extends AbstractListener {
         if(!ConfigManager.autoEvaluateFossils.getValue()) return;
         if(mc.player == null || mc.level == null || mc.gameMode == null) return;
 
-        if(mc.screen instanceof ContainerScreen containerScreen && ToolList.getInstance().deleteColorCode(containerScreen.getTitle().getString()).equals("Fossil Excavator")) {
+        if(mc.gui.screen() instanceof ContainerScreen containerScreen && ToolList.getInstance().deleteColorCode(containerScreen.getTitle().getString()).equals("Fossil Excavator")) {
             IntSet dirts = new IntOpenHashSet();
             IntSet firstClickDirts = new IntOpenHashSet();
             IntSet fossils = new IntOpenHashSet();
@@ -64,10 +64,10 @@ public class AutoEvaluateScrapListener extends AbstractListener {
                 boolean isDirt = itemName.equals("Dirt");
                 boolean isFossil = itemName.equals("Fossil");
 
-                boolean isStart = itemName.equals("Start Excavator") && slot.getItem().getItem() == Items.GREEN_TERRACOTTA;
+                boolean isStart = itemName.equals("Start Excavator") && slot.getItem().getItem() == Items.DYED_TERRACOTTA.green();
 
                 if(isDirt || isStart) {
-                    if(slot.getItem().getItem() == Items.LIME_STAINED_GLASS_PANE) {
+                    if(slot.getItem().getItem() == Items.STAINED_GLASS_PANE.lime()) {
                         firstClickDirts.add(slot.index);
                     }
                     dirts.add(slot.index);
@@ -108,7 +108,7 @@ public class AutoEvaluateScrapListener extends AbstractListener {
     }
 
     private void closeScreenAndReRun() {
-        if(mc.screen != null) mc.screen.onClose();
+        if(mc.gui.screen() != null) mc.gui.screen().onClose();
         if(ConfigManager.autoEvaluateFossilsAutoRestart.getValue()) {
             ToolList.addThreadedTask(() -> {
                 Thread.sleep(1500);

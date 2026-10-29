@@ -7,7 +7,6 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.numbers.StyledFormat;
 import net.minecraft.world.scores.Objective;
-import net.minecraft.world.scores.ReadOnlyScoreInfo;
 import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
@@ -93,7 +92,7 @@ public abstract class DynamicSpotPlayerTabOverlay {
             for (PlayerInfo player : players) {
                 nameWidth = Math.max(nameWidth, minecraft.font.width(getNameForDisplay(player)));
                 var score = scoreboard.getPlayerScoreInfo(ScoreHolder.fromGameProfile(player.getProfile()), objective);
-                Component formatted = ReadOnlyScoreInfo.safeFormatValue(score, numberFormat);
+                Component formatted = score == null ? null : score.formatValue(numberFormat);
                 if (formatted != null) {
                     int formattedWidth = minecraft.font.width(formatted);
                     if (formattedWidth > 0) {
@@ -107,7 +106,7 @@ public abstract class DynamicSpotPlayerTabOverlay {
         }
 
         boolean showFaces = minecraft.isLocalServer() || minecraft.getConnection() != null
-                && minecraft.getConnection().getConnection().isEncrypted();
+                && minecraft.getConnection().onlineMode();
         int columnWidth = Math.min(columns * ((showFaces ? 9 : 0) + nameWidth + scoreWidth + 13),
                 Math.max(1, screenWidth - 50)) / columns;
         int tableWidth = columnWidth * columns + 5 * (columns - 1);

@@ -123,7 +123,7 @@ public class ClientReceiveHandler {
                 break;
             case "find_party_check_callbackinfo":
                 PartyFinderData data = PartyFinderData.fromJson(JsonParser.parseString(packet.message).getAsJsonObject());
-                if(ToolList.mc.screen instanceof PartyListScreen partyListScreen) {
+                if(ToolList.mc.gui.screen() instanceof PartyListScreen partyListScreen) {
                     partyListScreen.addData(data);
                 }
                 break;

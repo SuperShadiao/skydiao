@@ -17,6 +17,7 @@
     "MixinDeleteWallEffect",
     "MixinFireOverlaySettings",
     "MixinGameRenderer",
+    "MixinGui",
     "MixinMinecraft",
     "MixinMinecraftSessionAccessor",
     "MixinMouseHandlerListenable",
@@ -26,9 +27,7 @@
     "MixinRealmStatusReset",
     "MixinTooltipScroll",
     "blivemode.MixinPlayerTabOverlay",
-    "blivemode.MixinScoreboardRender",
-    "debug.MixinTest2",
-    "debug.MixinTest3"
+    "blivemode.MixinScoreboardRender"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -3,7 +3,9 @@ package pers.XiaoShadiao.skydiao.mixin.client;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Ticker;
 import com.mojang.blaze3d.TracyBootstrap;
+import com.mojang.blaze3d.platform.ClientShutdownWatchdog;
 import com.mojang.blaze3d.platform.DisplayData;
+import com.mojang.blaze3d.platform.NativeLibrariesBootstrap;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.jtracy.TracyClient;
 import com.mojang.logging.LogUtils;
@@ -12,9 +14,11 @@ import joptsimple.ArgumentAcceptingOptionSpec;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import joptsimple.util.EnumConverter;
 import net.minecraft.*;
 import net.minecraft.client.ClientBootstrap;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.PreferredGraphicsApi;
 import net.minecraft.client.User;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.main.Main;
@@ -56,7 +60,23 @@ public class MixinUserDataSecurer {
 
     @Overwrite
     public static void main(final String[] args) {
-        OptionParser parser = new OptionParser();
+        try {
+            SharedConstants.tryDetectVersion();
+        } catch (Throwable throwable) {
+            logEarlyException(throwable);
+            System.exit(-7);
+            return;
+        }
+
+        OptionParser parser;
+        try {
+            parser = new OptionParser();
+        } catch (Throwable throwable) {
+            logEarlyException(throwable);
+            System.exit(-4);
+            return;
+        }
+
         parser.allowsUnrecognizedOptions();
         parser.accepts("demo");
         parser.accepts("disableMultiplayer");
@@ -64,6 +84,11 @@ public class MixinUserDataSecurer {
         parser.accepts("fullscreen");
         parser.accepts("checkGlErrors");
         OptionSpec<Void> renderDebugLabelsOption = parser.accepts("renderDebugLabels");
+        OptionSpec<Void> vulkanValidationOption = parser.accepts("vulkanValidation");
+        OptionSpec<PreferredGraphicsApi> graphicsBackendOption = parser.accepts("graphicsBackend")
+                .withRequiredArg()
+                .withValuesConvertedBy(new EnumConverter<PreferredGraphicsApi>(PreferredGraphicsApi.class) {
+                });
         OptionSpec<Void> jfrProfilingOption = parser.accepts("jfrProfile");
         OptionSpec<Void> tracyProfilingOption = parser.accepts("tracy");
         OptionSpec<Void> tracyNoImageOption = parser.accepts("tracyNoImages");
@@ -92,11 +117,30 @@ public class MixinUserDataSecurer {
         OptionSpec<String> assetIndexOption = parser.accepts("assetIndex").withRequiredArg();
         OptionSpec<String> versionTypeString = parser.accepts("versionType").withRequiredArg().defaultsTo("release");
         OptionSpec<String> nonOption = parser.nonOptions();
-        OptionSet optionSet = parser.parse(args);
+        OptionSet optionSet;
+        try {
+            optionSet = parser.parse(args);
+        } catch (Throwable throwable) {
+            logEarlyException(throwable);
+            System.exit(-5);
+            return;
+        }
+
         File gameDir = parseArgument(optionSet, gameDirOption);
         String launchedVersion = parseArgument(optionSet, versionOption);
-        String stage = "Pre-bootstrap";
 
+        try {
+            NativeLibrariesBootstrap.loadLibraries();
+        } catch (Throwable throwable) {
+            CrashReport report = CrashReport.forThrowable(throwable, "Loading native libraries");
+            CrashReportCategory initialization = report.addCategory("Initialization");
+            NativeModuleLister.addCrashSection(initialization);
+            Minecraft.fillReport(null, null, launchedVersion, null, report);
+            Minecraft.crash(null, gameDir, report, -3);
+            return;
+        }
+
+        String stage = "Pre-bootstrap";
         Logger logger;
         GameConfig gameConfig;
         try {
@@ -112,7 +156,6 @@ public class MixinUserDataSecurer {
             Stopwatch preWindowPreClassLoadTimer = Stopwatch.createStarted(Ticker.systemTicker());
             GameLoadTimesEvent.INSTANCE.beginStep(TelemetryProperty.LOAD_TIME_TOTAL_TIME_MS, totalTimePreClassLoadTimer);
             GameLoadTimesEvent.INSTANCE.beginStep(TelemetryProperty.LOAD_TIME_PRE_WINDOW_MS, preWindowPreClassLoadTimer);
-            SharedConstants.tryDetectVersion();
             TracyClient.reportAppInfo("Minecraft Java Edition " + SharedConstants.getCurrentVersion().name());
             CompletableFuture<?> dataFixerOptimization = DataFixers.optimize(DataFixTypes.TYPES_FOR_LEVEL_LIST);
             CrashReport.preload();
@@ -158,6 +201,8 @@ public class MixinUserDataSecurer {
             boolean captureTracyImages = !optionSet.has(tracyNoImageOption);
             boolean renderDebugLabels = optionSet.has(renderDebugLabelsOption);
             String versionType = parseArgument(optionSet, versionTypeString);
+            boolean vulkanValidation = optionSet.has(vulkanValidationOption);
+            PreferredGraphicsApi preferredGraphicsApi = parseArgument(optionSet, graphicsBackendOption);
             File assetsDir = optionSet.has(assetsDirOption) ? parseArgument(optionSet, assetsDirOption) : new File(gameDir, "assets/");
             File resourcePackDir = optionSet.has(resourcePackDirOption) ? parseArgument(optionSet, resourcePackDirOption) : new File(gameDir, "resourcepacks/");
             UUID uuid = hasValidUuid(uuidOption, optionSet, logger)
@@ -181,7 +226,8 @@ public class MixinUserDataSecurer {
                     new DisplayData(width, height, fullscreenWidth, fullscreenHeight, isFullscreen),
                     new GameConfig.FolderData(gameDir, resourcePackDir, assetsDir, assetIndex),
                     new GameConfig.GameData(
-                            isDemo, launchedVersion, versionType, disableMultiplayer, disableChat, captureTracyImages, renderDebugLabels, optionSet.has(offlineDeveloperMode)
+                            isDemo, launchedVersion, versionType, disableMultiplayer, disableChat, captureTracyImages, vulkanValidation, renderDebugLabels, preferredGraphicsApi,
+                            optionSet.has(offlineDeveloperMode)
                     ),
                     new GameConfig.QuickPlayData(quickPlayLogPath, quickPlayVariant)
             );
@@ -192,7 +238,7 @@ public class MixinUserDataSecurer {
             CrashReportCategory initialization = report.addCategory("Initialization");
             NativeModuleLister.addCrashSection(initialization);
             Minecraft.fillReport(null, null, launchedVersion, null, report);
-            Minecraft.crash(null, gameDir, report);
+            Minecraft.crash(null, gameDir, report, -1);
             return;
         }
 
@@ -224,18 +270,27 @@ public class MixinUserDataSecurer {
             CrashReportCategory initialization = report.addCategory("Initialization");
             NativeModuleLister.addCrashSection(initialization);
             Minecraft.fillReport(newMinecraft, null, gameConfig.game.launchVersion, null, report);
-            Minecraft.crash(newMinecraft, gameConfig.location.gameDirectory, report);
+            Minecraft.crash(newMinecraft, gameConfig.location.gameDirectory, report, -1);
             return;
         }
 
-        Minecraft minecraft = newMinecraft;
         newMinecraft.run();
 
         try {
-            minecraft.stop();
-        } finally {
-            newMinecraft.destroy();
+            newMinecraft.exitWorldAndClose();
+        } catch (Throwable var76) {
+            CrashReport report = CrashReport.forThrowable(var76, "Game shutdown");
+            Minecraft.fillReport(null, null, launchedVersion, null, report);
+            Minecraft.crash(null, gameDir, report, -6);
+            return;
         }
+
+        ClientShutdownWatchdog.startShutdownWatchdog("post-main", true, null, gameConfig, Thread.currentThread().threadId());
+    }
+
+    @Overwrite
+    private static void logEarlyException(final Throwable throwable) {
+        throwable.printStackTrace();
     }
 
     @Overwrite

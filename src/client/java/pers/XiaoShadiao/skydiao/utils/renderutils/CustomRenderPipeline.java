@@ -1,24 +1,20 @@
 package pers.XiaoShadiao.skydiao.utils.renderutils;
 
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.pipeline.BlendFunction;
-import com.mojang.blaze3d.pipeline.ColorTargetState;
-import com.mojang.blaze3d.pipeline.DepthStencilState;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.systems.CommandEncoder;
-import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.commands.RenderPass;
+import com.mojang.renderpearl.api.pipeline.*;
+import com.mojang.renderpearl.api.vertex.VertexFormat;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.loader.api.FabricLoader;
 import net.irisshaders.iris.api.v0.IrisProgram;
 import net.irisshaders.iris.apiimpl.IrisApiV0Impl;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.BindGroupLayouts;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -30,42 +26,47 @@ import org.lwjgl.system.MemoryUtil;
 import java.awt.*;
 import java.util.*;
 
-public class    CustomRenderPipeline {
+public class CustomRenderPipeline {
 
     private static final Vector3f MODEL_OFFSET = new Vector3f();
     private static final Matrix4f TEXTURE_MATRIX = new Matrix4f();
 
     // :::custom-pipelines:define-pipeline
-    public static final RenderPipeline THROUGH_WALLS_FILL = RenderPipelines.register(RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
-            .withLocation(Identifier.fromNamespaceAndPath("skydiao", "pipeline/THROUGH_WALLS_FILL".toLowerCase()))
-            .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLE_STRIP)
-            .withDepthStencilState(Optional.empty())
-            .build()
-    );
-    public static final RenderPipeline NO_THROUGH_WALLS_FILL = RenderPipelines.register(RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
-            .withLocation(Identifier.fromNamespaceAndPath("skydiao", "pipeline/NO_THROUGH_WALLS_FILL".toLowerCase()))
-            .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLE_STRIP)
-            .withDepthStencilState(DepthStencilState.DEFAULT)
-            .build()
-    );
+    public static final RenderPipeline THROUGH_WALLS_FILL = fillPipeline("pipeline/THROUGH_WALLS_FILL", Optional.empty());
+    public static final RenderPipeline NO_THROUGH_WALLS_FILL = fillPipeline("pipeline/NO_THROUGH_WALLS_FILL", Optional.of(DepthStencilState.DEFAULT));
 
-    public static final RenderPipeline THROUGH_WALLS_LINE = RenderPipelines.register(
-            RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
-                    .withLocation(Identifier.fromNamespaceAndPath("skydiao", "pipeline/THROUGH_WALLS_LINE".toLowerCase()))
-                    .withVertexFormat(DefaultVertexFormat.POSITION_COLOR_NORMAL_LINE_WIDTH, VertexFormat.Mode.LINES)
-                    .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
-                    .withDepthStencilState(Optional.empty())
-                    .build()
-    );
+    public static final RenderPipeline THROUGH_WALLS_LINE = linePipeline("pipeline/THROUGH_WALLS_LINE", Optional.empty());
+    public static final RenderPipeline NO_THROUGH_WALLS_LINE = linePipeline("pipeline/NO_THROUGH_WALLS_LINE", Optional.of(DepthStencilState.DEFAULT));
 
-    public static final RenderPipeline NO_THROUGH_WALLS_LINE = RenderPipelines.register(
-            RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
-                    .withLocation(Identifier.fromNamespaceAndPath("skydiao", "pipeline/NO_THROUGH_WALLS_LINE".toLowerCase()))
-                    .withVertexFormat(DefaultVertexFormat.POSITION_COLOR_NORMAL_LINE_WIDTH, VertexFormat.Mode.LINES)
-                    .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
-                    .withDepthStencilState(DepthStencilState.DEFAULT)
-                    .build()
-    );
+    private static RenderPipeline fillPipeline(String location, Optional<DepthStencilState> depthState) {
+        return RenderPipeline.builder()
+                .withLocation("skydiao:" + location.toLowerCase())
+                .withVertexShader("core/position_color")
+                .withFragmentShader("core/position_color")
+                .withBindGroupLayout(BindGroupLayouts.GLOBALS)
+                .withBindGroupLayout(BindGroupLayouts.PROJECTION)
+                .withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR)
+                .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
+                .withCull(false)
+                .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
+                .withDepthStencilState(depthState)
+                .build();
+    }
+
+    private static RenderPipeline linePipeline(String location, Optional<DepthStencilState> depthState) {
+        return RenderPipeline.builder()
+                .withLocation("skydiao:" + location.toLowerCase())
+                .withVertexShader("core/rendertype_lines")
+                .withFragmentShader("core/rendertype_lines")
+                .withBindGroupLayout(BindGroupLayouts.GLOBALS)
+                .withBindGroupLayout(BindGroupLayouts.PROJECTION)
+                .withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR_NORMAL_LINE_WIDTH)
+                .withPrimitiveTopology(PrimitiveTopology.LINES)
+                .withCull(false)
+                .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
+                .withDepthStencilState(depthState)
+                .build();
+    }
 
     static {
         try {
@@ -84,7 +85,7 @@ public class    CustomRenderPipeline {
         matrices.translate(-camera.x, -camera.y, -camera.z);
 
         if (buffer == null) {
-            buffer = new BufferBuilder(allocator, pipeline.getVertexFormatMode(), pipeline.getVertexFormat());
+            buffer = new BufferBuilder(allocator, pipeline.getPrimitiveTopology(), Objects.requireNonNull(pipeline.getVertexFormatBinding(0)));
         }
 
         renderCircle1(buffer, matrices.last(), center, radius, segments);
@@ -156,7 +157,7 @@ public class    CustomRenderPipeline {
         matrices.translate(-camera.x, -camera.y, -camera.z);
 
         if (buffer == null) {
-            buffer = new BufferBuilder(allocator, pipeline.getVertexFormatMode(), pipeline.getVertexFormat());
+            buffer = new BufferBuilder(allocator, pipeline.getPrimitiveTopology(), Objects.requireNonNull(pipeline.getVertexFormatBinding(0)));
         }
 
         if (fillBox) {
@@ -177,7 +178,7 @@ public class    CustomRenderPipeline {
         matrices.translate(-camera.x, -camera.y, -camera.z);
 
         if (buffer == null) {
-            buffer = new BufferBuilder(allocator, pipeline.getVertexFormatMode(), pipeline.getVertexFormat());
+            buffer = new BufferBuilder(allocator, pipeline.getPrimitiveTopology(), Objects.requireNonNull(pipeline.getVertexFormatBinding(0)));
         }
 
 //        for (float i = -0.0005f; i <= 0.0005f; i += 0.0005f) {
@@ -198,7 +199,7 @@ public class    CustomRenderPipeline {
         matrices.translate(-camera.x, -camera.y, -camera.z);
 
         if (buffer == null) {
-            buffer = new BufferBuilder(allocator, pipeline.getVertexFormatMode(), pipeline.getVertexFormat());
+            buffer = new BufferBuilder(allocator, pipeline.getPrimitiveTopology(), Objects.requireNonNull(pipeline.getVertexFormatBinding(0)));
         }
         int rgb1 = new Color(r1, g1, b1, a1).getRGB();
         int rgb2 = new Color(r2, g2, b2, a2).getRGB();
@@ -221,7 +222,7 @@ public class    CustomRenderPipeline {
 
             GpuBuffer vertices = upload(drawParameters, format, builtBuffer);
 
-            draw(client, pipeline, builtBuffer, drawParameters, vertices, format);
+            draw(client, pipeline, builtBuffer, drawParameters, vertices);
 
             // Rotate the vertex buffer so we are less likely to use buffers that the GPU is using
             vertexBuffer.rotate();
@@ -245,53 +246,37 @@ public class    CustomRenderPipeline {
         }
 
         // Copy vertex data into the vertex buffer
-        CommandEncoder commandEncoder = RenderSystem.getDevice().createCommandEncoder();
 
-        try (GpuBuffer.MappedView mappedView = commandEncoder.mapBuffer(vertexBuffer.currentBuffer().slice(0, builtBuffer.vertexBuffer().remaining()), false, true)) {
+        try (GpuBufferSlice.MappedView mappedView = vertexBuffer.currentBuffer().map(false, true)) {
             MemoryUtil.memCopy(builtBuffer.vertexBuffer(), mappedView.data());
         }
 
         return vertexBuffer.currentBuffer();
     }
 
-    private void draw(Minecraft client, RenderPipeline pipeline, MeshData builtBuffer, MeshData.DrawState drawParameters, GpuBuffer vertices, VertexFormat format) {
-        GpuBuffer indices;
-        VertexFormat.IndexType indexType;
-
-        if (pipeline.getVertexFormatMode() == VertexFormat.Mode.QUADS) {
-            // Sort the quads if there is translucency
-            builtBuffer.sortQuads(allocator, RenderSystem.getProjectionType().vertexSorting());
-            // Upload the index buffer
-            indices = pipeline.getVertexFormat().uploadImmediateIndexBuffer(builtBuffer.indexBuffer());
-            indexType = builtBuffer.drawState().indexType();
-        } else {
-            // Use the general shape index buffer for non-quad draw modes
-            RenderSystem.AutoStorageIndexBuffer shapeIndexBuffer = RenderSystem.getSequentialBuffer(pipeline.getVertexFormatMode());
-            indices = shapeIndexBuffer.getBuffer(drawParameters.indexCount());
-            indexType = shapeIndexBuffer.type();
-        }
+    private void draw(Minecraft client, RenderPipeline pipeline, MeshData builtBuffer, MeshData.DrawState drawParameters, GpuBuffer vertices) {
+        // 本类只用 TRIANGLES / LINES，索引统一使用通用顺序索引缓冲
+        RenderSystem.AutoStorageIndexBuffer shapeIndexBuffer = RenderSystem.getSequentialBuffer(pipeline.getPrimitiveTopology());
+        GpuBuffer indices = shapeIndexBuffer.getBuffer(drawParameters.indexCount());
+        IndexType indexType = shapeIndexBuffer.type();
 
         // Actually execute the draw
         GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms()
-                .writeTransform(RenderSystem.getModelViewMatrix(), COLOR_MODULATOR, MODEL_OFFSET, TEXTURE_MATRIX);
+                .writeTransform(RenderSystem.getModelViewMatrixCopy(), COLOR_MODULATOR, MODEL_OFFSET, TEXTURE_MATRIX);
         try (RenderPass renderPass = RenderSystem.getDevice()
                 .createCommandEncoder()
-                .createRenderPass(() -> "SkyDiao render pipeline rendering", client.getMainRenderTarget().getColorTextureView(), OptionalInt.empty(), client.getMainRenderTarget().getDepthTextureView(), OptionalDouble.empty())) {
-            renderPass.setPipeline(pipeline);
+                .createRenderPass(() -> "SkyDiao render pipeline rendering",
+                        client.gameRenderer.mainRenderTarget().getColorTextureView(), Optional.empty(),
+                        client.gameRenderer.mainRenderTarget().getDepthTextureView(), OptionalDouble.empty())) {
+            renderPass.setPipeline(RenderSystem.getCompiledPipeline(pipeline));
 
             RenderSystem.bindDefaultUniforms(renderPass);
             renderPass.setUniform("DynamicTransforms", dynamicTransforms);
 
-            // Bind texture if applicable:
-            // Sampler0 is used for texture inputs in vertices
-            // renderPass.bindSampler("Sampler0", textureView);
-
-            renderPass.setVertexBuffer(0, vertices);
+            renderPass.setVertexBuffer(0, vertices.slice());
             renderPass.setIndexBuffer(indices, indexType);
 
-            // The base vertex is the starting index when we copied the data into the vertex buffer divided by vertex size
-            //noinspection ConstantValue
-            renderPass.drawIndexed(0 / format.getVertexSize(), 0, drawParameters.indexCount(), 1);
+            renderPass.drawIndexed(drawParameters.indexCount(), 1, 0, 0, 0);
         }
 
         builtBuffer.close();

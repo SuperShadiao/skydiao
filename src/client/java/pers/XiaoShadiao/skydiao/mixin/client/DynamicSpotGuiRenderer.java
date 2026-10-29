@@ -1,8 +1,7 @@
 package pers.XiaoShadiao.skydiao.mixin.client;
 
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.systems.RenderPass;
+import com.mojang.renderpearl.api.commands.RenderPass;
+import com.mojang.renderpearl.api.pipeline.CompiledRenderPipeline;
 import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import org.spongepowered.asm.mixin.Final;
@@ -19,7 +18,7 @@ public abstract class DynamicSpotGuiRenderer {
     @Shadow @Final private GuiRenderState renderState;
 
     @Inject(method = "render", at = @At("HEAD"))
-    private void skydiao$renderGlassBeforeGui(GpuBufferSlice fog, CallbackInfo ci) {
+    private void skydiao$renderGlassBeforeGui(CallbackInfo ci) {
         BlurredRoundedSurface.renderPending(renderState);
     }
 
@@ -31,11 +30,9 @@ public abstract class DynamicSpotGuiRenderer {
             method = "executeDraw",
             at = @At(
                     value = "INVOKE",
-                    target = "Lcom/mojang/blaze3d/systems/RenderPass;setPipeline(Lcom/mojang/blaze3d/pipeline/RenderPipeline;)V"))
-    private void skydiao$bindGlassComposite(RenderPass pass, RenderPipeline pipeline) {
+                    target = "Lcom/mojang/renderpearl/api/commands/RenderPass;setPipeline(Lcom/mojang/renderpearl/api/pipeline/CompiledRenderPipeline;)V"))
+    private void skydiao$bindGlassComposite(RenderPass pass, CompiledRenderPipeline pipeline) {
         pass.setPipeline(pipeline);
-        if (BlurredRoundedSurface.isGlassGuiPipeline(pipeline)) {
-            BlurredRoundedSurface.bindGlassComposite(pass, pipeline);
-        }
+        BlurredRoundedSurface.bindGlassComposite(pass, pipeline);
     }
 }

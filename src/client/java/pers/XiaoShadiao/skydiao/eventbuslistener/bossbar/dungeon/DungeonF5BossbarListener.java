@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -23,15 +24,15 @@ public class DungeonF5BossbarListener extends AbstractDungeonBossbar {
 
     // Data from Skyblocker Mod
     private static final Map<Block, ChatFormatting> WOOL_TO_FORMATTING = Map.of(
-            Blocks.RED_WOOL, ChatFormatting.RED,
-            Blocks.YELLOW_WOOL, ChatFormatting.YELLOW,
-            Blocks.LIME_WOOL, ChatFormatting.GREEN,
-            Blocks.GREEN_WOOL, ChatFormatting.DARK_GREEN,
-            Blocks.BLUE_WOOL, ChatFormatting.BLUE,
-            Blocks.MAGENTA_WOOL, ChatFormatting.LIGHT_PURPLE,
-            Blocks.PURPLE_WOOL, ChatFormatting.DARK_PURPLE,
-            Blocks.GRAY_WOOL, ChatFormatting.GRAY,
-            Blocks.WHITE_WOOL, ChatFormatting.WHITE
+            Blocks.WOOL.red(), ChatFormatting.RED,
+            Blocks.WOOL.yellow(), ChatFormatting.YELLOW,
+            Blocks.WOOL.lime(), ChatFormatting.GREEN,
+            Blocks.WOOL.green(), ChatFormatting.DARK_GREEN,
+            Blocks.WOOL.blue(), ChatFormatting.BLUE,
+            Blocks.WOOL.magenta(), ChatFormatting.LIGHT_PURPLE,
+            Blocks.WOOL.purple(), ChatFormatting.DARK_PURPLE,
+            Blocks.WOOL.gray(), ChatFormatting.GRAY,
+            Blocks.WOOL.white(), ChatFormatting.WHITE
     );
     private static final Map<String, ChatFormatting> LIVID_TO_FORMATTING = Map.of(
             "Hockey Livid", ChatFormatting.RED,
@@ -201,7 +202,7 @@ public class DungeonF5BossbarListener extends AbstractDungeonBossbar {
         LivingEntity living = getTargetEntity();
         if(living == null) return name;
         ChatFormatting c = LIVID_TO_FORMATTING.get(ToolList.getInstance().deleteColorCode(living.getName().getString()));
-        if(c != null && c.getColor() != null) {
+        if(c != null) {
             name = Component.literal(c.toString()).append(name);
         }
         return name;
@@ -225,7 +226,9 @@ public class DungeonF5BossbarListener extends AbstractDungeonBossbar {
     public Color getRenderBossColor() {
         return Optional.ofNullable(getTargetEntity())
                 .map(entity -> LIVID_TO_FORMATTING.get(ToolList.getInstance().deleteColorCode(entity.getName().getString())))
-                .map(ChatFormatting::getColor)
+                .map(TextColor::fromLegacyFormat)
+                .filter(Objects::nonNull)
+                .map(TextColor::getValue)
                 .map(Color::new)
                 .orElse(super.getRenderBossColor());
     }

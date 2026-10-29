@@ -3,7 +3,7 @@ package pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -147,7 +147,7 @@ public class DungeonF2BossbarListener extends AbstractDungeonBossbar {
 
     @Override
     public Identifier getPowerUpPotionIcon() {
-        return Gui.getMobEffectSprite(!isImmuneState ? MobEffects.REGENERATION : MobEffects.RESISTANCE);
+        return Hud.getMobEffectSprite(!isImmuneState ? MobEffects.REGENERATION : MobEffects.RESISTANCE);
     }
 
     @Override

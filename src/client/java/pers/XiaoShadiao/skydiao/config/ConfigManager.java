@@ -321,7 +321,7 @@ public class ConfigManager {
     public static final BooleanConfigOption autoHypeTrainManbaOut = new BooleanConfigOption("autolobbytrainplaysoundaftercrash", true);
 
     public static final Function<String, Runnable> openChat = (msg) -> () -> ToolList.mc.setScreenAndShow(new ChatScreen(msg, false, true));
-    public static final Runnable openControl = () -> ToolList.mc.setScreenAndShow(new KeyBindsScreen(ToolList.mc.screen, ToolList.mc.options));
+    public static final Runnable openControl = () -> ToolList.mc.setScreenAndShow(new KeyBindsScreen(ToolList.mc.gui.screen(), ToolList.mc.options));
 
     public static final ActionConfigOption openFsCommandAction = new ActionConfigOption("openfscommandaction", openChat.apply("/skydiaofs"));
     public static final ActionConfigOption openFreelookAndFreecamAction = new ActionConfigOption("openfreelookandfreecamaction", openControl);
@@ -329,7 +329,7 @@ public class ConfigManager {
     public static final ActionConfigOption openAllAutoClickKeybindAction = new ActionConfigOption("openallautoclickkeybindaction", openControl);
     public static final ActionConfigOption openFsKeyBind = new ActionConfigOption("openfskeybind", openControl);
     public static final ActionConfigOption openClearStashCommand = new ActionConfigOption("openclearstashcommand", openChat.apply("/skydiao fastclearminingstash"));
-    public static final ActionConfigOption openHud = new ActionConfigOption("openhud", () -> ToolList.mc.setScreenAndShow(new HudConfigScreen(ToolList.mc.screen)));
+    public static final ActionConfigOption openHud = new ActionConfigOption("openhud", () -> ToolList.mc.setScreenAndShow(new HudConfigScreen(ToolList.mc.gui.screen())));
     public static final ActionConfigOption openfastcommandmenukeybinds = new ActionConfigOption("openfastcommandmenukeybinds", openControl);
 
     public static final BooleanConfigOption iAutoObsidian = new BooleanConfigOption("iautoobsidian", false) {

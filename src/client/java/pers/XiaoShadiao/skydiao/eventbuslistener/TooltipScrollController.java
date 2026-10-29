@@ -26,7 +26,7 @@ public class TooltipScrollController extends AbstractListener {
 
     private boolean mouseButtonScroll(long l, double idk, double scrollCount) {
         if (updateScroll(scrollCount) && System.currentTimeMillis() - lastUpdateHeightTime < 100) {
-            if (mc.screen instanceof ChatScreen screen) {
+            if (mc.gui.screen() instanceof ChatScreen screen) {
                 return true;
             }
         }

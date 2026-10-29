@@ -1,25 +1,28 @@
 package pers.XiaoShadiao.skydiao.utils.renderutils;
 
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.pipeline.BlendFunction;
-import com.mojang.blaze3d.pipeline.ColorTargetState;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.shaders.UniformType;
-import com.mojang.blaze3d.systems.CommandEncoder;
-import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.*;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.renderpearl.api.GpuFormat;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.commands.CommandEncoder;
+import com.mojang.renderpearl.api.commands.RenderPass;
+import com.mojang.renderpearl.api.pipeline.BindGroupLayout;
+import com.mojang.renderpearl.api.pipeline.BlendFunction;
+import com.mojang.renderpearl.api.pipeline.ColorTargetState;
+import com.mojang.renderpearl.api.pipeline.CompiledRenderPipeline;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.UniformType;
+import com.mojang.renderpearl.api.textures.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.TextureSetup;
+import net.minecraft.client.renderer.BindGroupLayouts;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
-import net.minecraft.resources.Identifier;
 import org.joml.Matrix3x2f;
 import org.joml.Vector2f;
 import org.lwjgl.system.MemoryStack;
@@ -172,20 +175,18 @@ public final class BlurredRoundedSurface {
         }
         if (panelList == null || panelList.isEmpty()) return;
         Minecraft client = Minecraft.getInstance();
-        var target = client.getMainRenderTarget();
+        var target = client.gameRenderer.mainRenderTarget();
         if (target == null || target.getColorTextureView() == null) return;
         // GuiRenderer's projection uses physical size / integer GUI scale, not
         // the rounded-up GUI dimensions returned during extraction.
-        var window = client.gameRenderer.getGameRenderState().windowRenderState;
+        var window = client.gameRenderer.gameRenderState().windowRenderState;
         if (window.guiScale <= 0 || window.width <= 0 || window.height <= 0) return;
         float guiWidth = window.width / (float) window.guiScale;
         float guiHeight = window.height / (float) window.guiScale;
         try {
             var device = RenderSystem.getDevice();
-            // These are cached by the device and recompiled normally after resource reloads.
-            if (!device.precompilePipeline(BLUR).isValid()) {
-                throw new IllegalStateException("BlurredRounded glass shader did not compile");
-            }
+            // 管线在使用时惰性编译；编译失败会抛出异常并走下方的回退逻辑
+            RenderSystem.getCompiledPipeline(BLUR);
             resize(target.width, target.height);
             var encoder = device.createCommandEncoder();
             // 全屏拷贝（顺便 4x 降采样）后做两趟可分离高斯；面板在合成时按需采样结果。
@@ -257,49 +258,63 @@ public final class BlurredRoundedSurface {
      * 在 {@code GuiRenderer.executeDraw} 绑定哨兵管线后调用：补上玻璃合成所需的采样器与参数。
      * 任一资源不可用时退回 {@link RenderPipelines#GUI}（哨兵顶点全为退化三角形，因此不可见）。
      */
-    public static void bindGlassComposite(RenderPass pass, RenderPipeline pipeline) {
-        int slot = GUI_PIPELINES.indexOf(pipeline);
+    public static void bindGlassComposite(RenderPass pass, CompiledRenderPipeline compiled) {
+        int slot = -1;
+        for (int i = 0; i < GUI_PIPELINES.size(); i++) {
+            if (RenderSystem.getCompiledPipelineNullable(GUI_PIPELINES.get(i)) == compiled) {
+                slot = i;
+                break;
+            }
+        }
         GpuTextureView scene = VIEWS[2] != null ? VIEWS[2] : VIEWS[0];
-        if (failed || slot < 0 || slot >= GLASS_UNIFORMS.size() || GLASS_UNIFORMS.get(slot) == null
+        if (slot < 0) return;
+        if (failed || slot >= GLASS_UNIFORMS.size() || GLASS_UNIFORMS.get(slot) == null
                 || scene == null || scene.isClosed() || sampler == null) {
-            pass.setPipeline(RenderPipelines.GUI);
+            pass.setPipeline(RenderSystem.getCompiledPipeline(RenderPipelines.GUI));
             return;
         }
-        pass.bindTexture("Scene", scene, sampler);
+        pass.setUniform("Scene", scene, sampler);
         pass.setUniform("Blur", GLASS_UNIFORMS.get(slot));
     }
 
     private static RenderPipeline pipeline(String name, boolean translucent) {
-        return RenderPipelines.register(RenderPipeline.builder()
-                .withLocation(Identifier.fromNamespaceAndPath("skydiao", "pipeline/" + name))
+        return RenderPipeline.builder()
+                .withLocation("skydiao:pipeline/" + name)
                 .withVertexShader("core/screenquad")
-                .withFragmentShader(Identifier.fromNamespaceAndPath("skydiao", "core/blurred_rounded"))
-                .withSampler("Scene")
-                .withUniform("Blur", UniformType.UNIFORM_BUFFER)
-                .withVertexFormat(DefaultVertexFormat.EMPTY, VertexFormat.Mode.TRIANGLES)
+                .withFragmentShader("skydiao:core/blurred_rounded")
+                .withBindGroupLayout(glassBindGroupLayout())
+                .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
                 .withCull(false)
                 .withDepthStencilState(Optional.empty())
                 .withColorTargetState(translucent ? new ColorTargetState(BlendFunction.TRANSLUCENT) : ColorTargetState.DEFAULT)
-                .build());
+                .build();
+    }
+
+    private static BindGroupLayout glassBindGroupLayout() {
+        return BindGroupLayout.builder()
+                .withUniform("Scene", UniformType.COMBINED_IMAGE_SAMPLER)
+                .withUniform("Blur", UniformType.UNIFORM_BUFFER)
+                .build();
     }
 
     private static RenderPipeline guiPipeline(int slot) {
         while (GUI_PIPELINES.size() <= slot) {
             int index = GUI_PIPELINES.size();
-            GUI_PIPELINES.add(RenderPipelines.register(RenderPipeline.builder()
-                    .withLocation(Identifier.fromNamespaceAndPath("skydiao", "pipeline/blurred_rounded_gui_" + index))
+            GUI_PIPELINES.add(RenderPipeline.builder()
+                    .withLocation("skydiao:pipeline/blurred_rounded_gui_" + index)
                     // 不能用 core/screenquad：它靠 gl_VertexID 生成三角形，而 GuiRenderer 会用非零
                     // baseVertex 绘制哨兵网格，导致 gl_VertexID 整体偏移、三角形沿屏幕对角线被切掉。
-                    .withVertexShader(Identifier.fromNamespaceAndPath("skydiao", "core/blurred_rounded_gui"))
-                    .withFragmentShader(Identifier.fromNamespaceAndPath("skydiao", "core/blurred_rounded"))
-                    .withSampler("Scene")
-                    .withUniform("Blur", UniformType.UNIFORM_BUFFER)
+                    .withVertexShader("skydiao:core/blurred_rounded_gui")
+                    .withFragmentShader("skydiao:core/blurred_rounded")
+                    .withBindGroupLayout(BindGroupLayouts.GLOBALS)
+                    .withBindGroupLayout(glassBindGroupLayout())
                     // 顶点着色器直接消费 Position（当作 NDC），哨兵写入一个覆盖全屏的三角形。
-                    .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLES)
+                    .withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR)
+                    .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
                     .withCull(false)
                     .withDepthStencilState(Optional.empty())
                     .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
-                    .build()));
+                    .build());
         }
         return GUI_PIPELINES.get(slot);
     }
@@ -325,7 +340,7 @@ public final class BlurredRoundedSurface {
         for (int i = 0; i < TEXTURES.length; i++) {
             TEXTURES[i] = device.createTexture("skydiao/blurred-rounded-" + i,
                     GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_RENDER_ATTACHMENT,
-                    TextureFormat.RGBA8, sampleWidth, sampleHeight, 1, 1);
+                    GpuFormat.RGBA8_UNORM, sampleWidth, sampleHeight, 1, 1);
             VIEWS[i] = device.createTextureView(TEXTURES[i]);
         }
     }
@@ -352,11 +367,11 @@ public final class BlurredRoundedSurface {
     private static void pass(CommandEncoder encoder, GpuTextureView source, GpuTextureView target,
                              float[] values, int uniformIndex) {
         writeUniform(encoder, BLUR_UNIFORMS[uniformIndex], values);
-        try (var pass = encoder.createRenderPass(() -> "skydiao/blurred-rounded-blur", target, OptionalInt.empty())) {
-            pass.setPipeline(BLUR);
-            pass.bindTexture("Scene", source, sampler);
+        try (var pass = encoder.createRenderPass(() -> "skydiao/blurred-rounded-blur", target, Optional.empty())) {
+            pass.setPipeline(RenderSystem.getCompiledPipeline(BLUR));
+            pass.setUniform("Scene", source, sampler);
             pass.setUniform("Blur", BLUR_UNIFORMS[uniformIndex]);
-            pass.draw(0, 3);
+            pass.draw(3, 1, 0, 0);
         }
     }
 

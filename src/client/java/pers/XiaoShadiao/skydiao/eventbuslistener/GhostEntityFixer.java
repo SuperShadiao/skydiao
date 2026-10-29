@@ -98,7 +98,7 @@ public class GhostEntityFixer extends AbstractListener {
                 int entityId = next.getIntKey();
                 Entity entity = mc.level.getEntity(entityId);
                 if (entity instanceof LivingEntity livingEntity) {
-                    if(livingEntity.hurtTime > 0 || livingEntity.swinging) {
+                    if(livingEntity.hurtTime > 0 || livingEntity.isSwinging()) {
                         it.remove();
                         continue;
                     }

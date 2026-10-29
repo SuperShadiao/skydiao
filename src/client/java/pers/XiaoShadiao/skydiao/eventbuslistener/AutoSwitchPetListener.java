@@ -29,7 +29,7 @@ public class AutoSwitchPetListener extends AbstractListener {
     @Override
     public void registerListeners() {
         ScreenEvents.AFTER_INIT.register(this::onLoadoutGuiOpen);
-        CustomFabricEvents.MOUSE_BUTTON_EVENT.register((hwnd, button, state) -> state == 1 && mc.screen != null && futureTask != null && !futureTask.future.isDone());
+        CustomFabricEvents.MOUSE_BUTTON_EVENT.register((hwnd, button, state) -> state == 1 && mc.gui.screen() != null && futureTask != null && !futureTask.future.isDone());
     }
 
     public String petName;
@@ -80,7 +80,7 @@ public class AutoSwitchPetListener extends AbstractListener {
                 ChestMenu menu = menu0;
                 try {
                     Thread.sleep(200 + ToolList.getInstance().random.nextInt(200));
-                    if(mc.screen == null) {
+                    if(mc.gui.screen() == null) {
                         call(CallbackResult.TERMINATED);
                         return null;
                     }
@@ -103,7 +103,7 @@ public class AutoSwitchPetListener extends AbstractListener {
                     Thread.sleep(100 + ToolList.getInstance().random.nextInt(50));
                     CallbackResult result = found ? CallbackResult.DONE : CallbackResult.NOT_FOUND;
                     mc.execute(() -> {
-                        if (mc.screen != null) mc.screen.onClose();
+                        if (mc.gui.screen() != null) mc.gui.screen().onClose();
                         call(result);
                     });
                 } catch (Throwable e) {

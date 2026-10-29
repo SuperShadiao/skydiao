@@ -769,11 +769,11 @@ public class ToolList {
 
     @SuppressWarnings("ConstantConditions")
     public static void printChatMessage(Component msg) {
-        if (ToolList.mc != null && ToolList.mc.gui != null && ToolList.mc.gui.getChat() != null) {
+        if (ToolList.mc != null && ToolList.mc.gui != null && ToolList.mc.gui.hud.getChat() != null) {
             ToolList.mc.execute(() -> {
                 Component msg1 = msg;
                 if(ConfigManager.blivemodechat.getValue()) msg1 = ComponentHelper.wrapAsSensitive(msg1, true, true);
-                ToolList.mc.gui.getChat().addClientSystemMessage(msg1);
+                ToolList.mc.gui.hud.getChat().addClientSystemMessage(msg1);
             });
         }
     }
@@ -873,7 +873,7 @@ public class ToolList {
         Objective objective = null;
         PlayerTeam playerTeam = scoreboard.getPlayersTeam(mc.player.getScoreboardName());
         if (playerTeam != null) {
-            DisplaySlot displaySlot = DisplaySlot.teamColorToSlot(playerTeam.getColor());
+            DisplaySlot displaySlot = playerTeam.getColor().map(TeamColor::displaySlot).orElse(null);
             if (displaySlot != null) {
                 objective = scoreboard.getDisplayObjective(displaySlot);
             }

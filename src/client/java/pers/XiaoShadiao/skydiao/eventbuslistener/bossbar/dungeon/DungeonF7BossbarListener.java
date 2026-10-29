@@ -9,7 +9,7 @@ import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.client.gui.components.LerpingBossEvent;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -24,7 +24,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
@@ -205,7 +205,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
     @Override
     public Identifier getPowerUpPotionIcon() {
-        return Gui.getMobEffectSprite(currentStage >= 4 ? MobEffects.STRENGTH : MobEffects.RESISTANCE);
+        return Hud.getMobEffectSprite(currentStage >= 4 ? MobEffects.STRENGTH : MobEffects.RESISTANCE);
     }
 
     @Override
@@ -508,7 +508,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
         masterFloorFlag |= isInMasterDungeonFloor();
 
-        MixinBossbarEventGetter bossbarEventGetter = (MixinBossbarEventGetter) mc.gui.getBossOverlay();
+        MixinBossbarEventGetter bossbarEventGetter = (MixinBossbarEventGetter) mc.gui.hud.getBossOverlay();
         boolean[] flag = new boolean[] {false};
         bossbarEventGetter.getEvents().forEach((uuid, bossEvent) -> {
             String name = ToolList.getInstance().deleteColorCode(bossEvent.getName().getString());
@@ -741,7 +741,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             return false;
         }
         if(packet instanceof ClientboundAddEntityPacket addEntityPacket) {
-            if (addEntityPacket.getType() == EntityType.ENDER_DRAGON) {
+            if (addEntityPacket.getType() == EntityTypes.ENDER_DRAGON) {
                 delayTickExecutor.delayExec(() -> {
                     int id = addEntityPacket.getId();
                     for (WitherDragonData witherDragon : witherDragons) {

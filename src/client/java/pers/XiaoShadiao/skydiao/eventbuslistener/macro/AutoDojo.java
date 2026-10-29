@@ -66,7 +66,7 @@ public class AutoDojo extends AbstractListener implements IMacro {
 
     private record MasteryBlockInfo(BlockPos pos, ArmorStand timer) {
         public boolean isVaild() {
-            return mc.level.getBlockState(pos).getBlock() == Blocks.YELLOW_WOOL;
+            return mc.level.getBlockState(pos).getBlock() == Blocks.WOOL.yellow();
         }
     }
     private final ObjectArrayFIFOQueue<MasteryBlockInfo> masteryTargetPoses = new ObjectArrayFIFOQueue<>();
@@ -316,7 +316,7 @@ public class AutoDojo extends AbstractListener implements IMacro {
                         if(entity.getName().getString().matches("\\d:\\d{3}")) {
                             for (BlockPos blockPos : BlockPos.betweenClosed(armorStand.getBoundingBox().inflate(2))) {
                                 Block block = mc.level.getBlockState(blockPos).getBlock();
-                                if(block == Blocks.YELLOW_WOOL) {
+                                if(block == Blocks.WOOL.yellow()) {
                                     MasteryBlockInfo x = new MasteryBlockInfo(blockPos.immutable(), armorStand);
                                     masteryTargetPoses.enqueue(x);
                                 }
@@ -333,18 +333,18 @@ public class AutoDojo extends AbstractListener implements IMacro {
             if(packet instanceof ClientboundBlockUpdatePacket blockPacket) {
                 BlockPos blockPos = blockPacket.getPos();
                 BlockState blockState = blockPacket.getBlockState();
-                if(blockState.getBlock().equals(Blocks.LIME_WOOL)) System.out.println(blockPos);
+                if(blockState.getBlock().equals(Blocks.WOOL.lime())) System.out.println(blockPos);
                 Block lastBlock = mc.level.getBlockState(blockPos).getBlock();
-                if((lastBlock == Blocks.AIR || lastBlock == Blocks.BARRIER) && Math.abs(blockPos.getY() - mc.player.getY()) <= 5 && blockState.getBlock().equals(Blocks.LIME_WOOL)) {
+                if((lastBlock == Blocks.AIR || lastBlock == Blocks.BARRIER) && Math.abs(blockPos.getY() - mc.player.getY()) <= 5 && blockState.getBlock().equals(Blocks.WOOL.lime())) {
                     lastSwiftBlockPos = currentSwiftBlockPos;
                     currentSwiftBlockPos = blockPos.immutable();
                 }
             }
             if(packet instanceof ClientboundSectionBlocksUpdatePacket blockPacket) {
                 blockPacket.runUpdates((blockPos, blockState) -> {
-                    if(blockState.getBlock().equals(Blocks.LIME_WOOL)) System.out.println(blockPos);
+                    if(blockState.getBlock().equals(Blocks.WOOL.lime())) System.out.println(blockPos);
                     Block lastBlock = mc.level.getBlockState(blockPos).getBlock();
-                    if((lastBlock == Blocks.AIR || lastBlock == Blocks.BARRIER) && Math.abs(blockPos.getY() - mc.player.getY()) <= 5 && blockState.getBlock().equals(Blocks.LIME_WOOL)) {
+                    if((lastBlock == Blocks.AIR || lastBlock == Blocks.BARRIER) && Math.abs(blockPos.getY() - mc.player.getY()) <= 5 && blockState.getBlock().equals(Blocks.WOOL.lime())) {
                         lastSwiftBlockPos = currentSwiftBlockPos;
                         currentSwiftBlockPos = blockPos.immutable(); // TRAP! 这玩意是mutable的
                     }

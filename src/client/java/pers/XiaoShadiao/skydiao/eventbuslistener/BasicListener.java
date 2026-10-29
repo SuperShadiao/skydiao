@@ -388,7 +388,7 @@ public class BasicListener extends AbstractListener {
             if(Util.getPlatform() == Util.OS.WINDOWS) {
                 buttons.add(Button.builder(
                         AccountSelectScreen.getTitle0(),
-                        (button) -> ToolList.mc.setScreen(new AccountSelectScreen(titleScreen))
+                        (button) -> ToolList.mc.gui.setScreen(new AccountSelectScreen(titleScreen))
                 ).bounds(scaledHeight < 270 ? 10 : scaledWidth / 2 - 50, scaledHeight - (scaledHeight < 270 ? 35 : 28), scaledHeight < 270 ? Math.min(100, left - 15) : 100, 20).build());
             }
         } else if(screen instanceof JoinMultiplayerScreen mpscreen) {
@@ -404,7 +404,7 @@ public class BasicListener extends AbstractListener {
                         .min(Comparator.comparingInt(AbstractWidget::getX)).get().getX();
                 buttons.add(Button.builder(
                         AccountSelectScreen.getTitle0(),
-                        (button) -> ToolList.mc.setScreen(new AccountSelectScreen(mpscreen))
+                        (button) -> ToolList.mc.gui.setScreen(new AccountSelectScreen(mpscreen))
                 ).bounds(10, scaledHeight - (25),Math.min(100, left - 15), 20).build());
             }
         } else if(screen instanceof DeathScreen deathScreen) {
@@ -413,7 +413,7 @@ public class BasicListener extends AbstractListener {
 
             buttons.add(Button.builder(
                     Component.literal("§a打开聊天栏"),
-                    (button) -> ToolList.mc.setScreen(new ChatScreen("/l", false))
+                    (button) -> ToolList.mc.gui.setScreen(new ChatScreen("/l", false))
             ).bounds(scaledHeight < 270 ? 10 : scaledWidth / 2 - 50, scaledHeight - (scaledHeight < 270 ? 35 : 28), scaledHeight < 270 ? Math.min(100, left - 15) : 100, 20).build());
         } else if(screen instanceof DisconnectedScreen disconnectedScreen && currentServerData != null) {
             List<AbstractWidget> buttons = Screens.getWidgets(disconnectedScreen);
@@ -543,16 +543,16 @@ public class BasicListener extends AbstractListener {
         while (KeyBindsManager.musicSwitch.consumeClick()) {
             if(ConfigManager.musicplayer.getValue()) PlayerThread.destoryCurrent();
         }
-        if(KeyBindsManager.fastMenu.isDown() && mc.screen == null) {
-            mc.setScreen(new FastCommandMenuScreen(false));
+        if(KeyBindsManager.fastMenu.isDown() && mc.gui.screen() == null) {
+            mc.gui.setScreen(new FastCommandMenuScreen(false));
         }
         while(KeyBindsManager.openConfigMenu.consumeClick()) {
-            mc.setScreen(new ConfigScreen(mc.screen));
+            mc.gui.setScreen(new ConfigScreen(mc.gui.screen()));
         }
         while(KeyBindsManager.openPartyFinderMenu.consumeClick()) {
-            mc.setScreen(new PartyListScreen());
+            mc.gui.setScreen(new PartyListScreen());
         }
-        if((!(mc.screen instanceof ChatScreen) || mc.screen.getClass().getName().startsWith("pers.XiaoShadiao")) && Arrays.stream(mc.options.keyMappings).anyMatch(KeyMapping::isDown))  {
+        if((!(mc.gui.screen() instanceof ChatScreen) || mc.gui.screen().getClass().getName().startsWith("pers.XiaoShadiao")) && Arrays.stream(mc.options.keyMappings).anyMatch(KeyMapping::isDown))  {
             if(afkHoldTick++ > 20) {
                 if (isAFK) {
                     isAFK = false;

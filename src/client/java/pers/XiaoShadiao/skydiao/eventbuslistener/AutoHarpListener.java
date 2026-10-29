@@ -41,7 +41,7 @@ public class AutoHarpListener extends AbstractListener {
 
     private void onClientEndTick(Minecraft mc) {
         if(mc.level != null && mc.player != null) {
-            if (mc.screen instanceof ContainerScreen containerScreen) {
+            if (mc.gui.screen() instanceof ContainerScreen containerScreen) {
                 ChestMenu menu = containerScreen.getMenu();
                 String chestName = ToolList.getInstance().deleteColorCode(containerScreen.getTitle().getString());
                 if ((chestName.contains("Harp -"))) {

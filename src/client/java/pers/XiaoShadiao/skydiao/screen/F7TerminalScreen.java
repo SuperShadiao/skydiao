@@ -173,7 +173,7 @@ public class F7TerminalScreen extends AbstractContainerScreen<@NotNull ChestMenu
             int melodyCol = 1;
             for (int i = 2; i <= 5; i++) {
                 ItemStack itemStack = getItemOrOldItem(menu.slots.get(getIndexByLineCol(i, 8)));
-                if(itemStack.getItem() == Items.LIME_TERRACOTTA) {
+                if(itemStack.getItem() == Items.DYED_TERRACOTTA.green()) {
                     melodyLine = i;
                     currentMelodyLine = i - 2;
                     break;
@@ -181,18 +181,18 @@ public class F7TerminalScreen extends AbstractContainerScreen<@NotNull ChestMenu
             }
             for (int i = 2; i <= 6; i++) {
                 ItemStack itemStack = getItemOrOldItem(menu.slots.get(getIndexByLineCol(1, i)));
-                if(itemStack.getItem() == Items.MAGENTA_STAINED_GLASS_PANE) {
+                if(itemStack.getItem() == Items.STAINED_GLASS_PANE.magenta()) {
                     melodyCol = i;
                     break;
                 }
             }
 
-//            if(getItemOrOldItem(menu.slots.get(getIndexByLineCol(melodyLine, melodyCol))).getItem() == Items.LIME_STAINED_GLASS_PANE) {
+//            if(getItemOrOldItem(menu.slots.get(getIndexByLineCol(melodyLine, melodyCol))).getItem() == Items.STAINED_GLASS_PANE.lime()) {
 //
 //            }
             for (int i = 2; i <= 6; i++) {
 //                ItemStack itemStack = getItemOrOldItem(menu.slots.get(getIndexByLineCol(melodyLine, i)));
-//                if(itemStack.getItem() == Items.LIME_STAINED_GLASS_PANE) {
+//                if(itemStack.getItem() == Items.STAINED_GLASS_PANE.lime()) {
 //                    melodyCol = i;
 //                    break;
 //                }
@@ -227,7 +227,7 @@ public class F7TerminalScreen extends AbstractContainerScreen<@NotNull ChestMenu
             List<Slot> slots = Stream.of(terminalButtons)
                     .filter(Objects::nonNull)
                     .filter(slot -> !clickedSlots.contains(slot))
-                    .filter(slot -> slot.getItem().getItem() == Items.RED_STAINED_GLASS_PANE)
+                    .filter(slot -> slot.getItem().getItem() == Items.STAINED_GLASS_PANE.red())
                     .sorted(Comparator.comparingInt(slot -> slot.getItem().getCount()))
                     .limit(3)
                     .toList();
@@ -255,7 +255,7 @@ public class F7TerminalScreen extends AbstractContainerScreen<@NotNull ChestMenu
                 customSlotIndex++;
                 if(button != null && !slots.contains(button)) {
                     ItemStack itemStack = getItemOrOldItem(button);
-                    if(itemStack.getItem() == Items.RED_STAINED_GLASS_PANE || itemStack.getItem() == Items.LIME_STAINED_GLASS_PANE) {
+                    if(itemStack.getItem() == Items.STAINED_GLASS_PANE.red() || itemStack.getItem() == Items.STAINED_GLASS_PANE.lime()) {
                         int[] customSlotLineCol = getCustomSlotIndexByIndex(customSlotIndex);
                         drawCustomSlot(graphics, customSlotLineCol, 15, 15, 15, 255);
                         drawTextAtCustomSlot(graphics, String.valueOf(itemStack.getCount()), customSlotLineCol);
@@ -310,7 +310,7 @@ public class F7TerminalScreen extends AbstractContainerScreen<@NotNull ChestMenu
                     }
                     case ON_OFF -> {
                         drawTitle(graphics, "开关...");
-                        if (item.getItem() == Items.RED_STAINED_GLASS_PANE && !clickedSlots.contains(slot)) {
+                        if (item.getItem() == Items.STAINED_GLASS_PANE.red() && !clickedSlots.contains(slot)) {
                             Color color = new Color(ConfigManager.dungeonf7termuionoffbuttoncolor.getValue());
                             drawCustomSlot(graphics, customSlotLineCol, color.getRed(), color.getGreen(), color.getBlue(), 255);
                         } else {
@@ -361,13 +361,13 @@ public class F7TerminalScreen extends AbstractContainerScreen<@NotNull ChestMenu
                             int y = getButtonY(customSlotLineCol[0]);
                             RenderUtils.drawOutlineRect(graphics, x, y, x + buttonSize, y + buttonSize * 3 + buttonSpacing * 2, 0xFFFF00AA);
                         } else {
-                            if(item.getItem() == Items.LIME_STAINED_GLASS_PANE) {
+                            if(item.getItem() == Items.STAINED_GLASS_PANE.lime()) {
                                 Color color = new Color(ConfigManager.dungeonf7termuimelodyflagcolor.getValue());
                                 drawCustomSlot(graphics, customSlotLineCol, color.getRed(), color.getGreen(), color.getBlue(), 255);
-                            } else if(item.getItem() == Items.LIME_TERRACOTTA) {
+                            } else if(item.getItem() == Items.DYED_TERRACOTTA.lime()) {
                                 Color color = new Color(ConfigManager.dungeonf7termuimelodybuttoncolor.getValue());
                                 drawCustomSlot(graphics, customSlotLineCol, color.getRed(), color.getGreen(), color.getBlue(), 255);
-                            } else if(item.getItem() == Items.RED_STAINED_GLASS_PANE) {
+                            } else if(item.getItem() == Items.STAINED_GLASS_PANE.red()) {
                                 drawCustomSlot(graphics, customSlotLineCol, 30, 30, 30, 255);
                             }
                         }
@@ -529,13 +529,6 @@ public class F7TerminalScreen extends AbstractContainerScreen<@NotNull ChestMenu
     }
 
     @Override
-    public void extractSnapbackItem(@NotNull GuiGraphicsExtractor graphics) {
-        if(debugMode) {
-            super.extractSnapbackItem(graphics);
-        }
-    }
-
-    @Override
     public boolean mouseClicked(@NotNull MouseButtonEvent event, boolean doubleClick) {
         if(autoMode) {
             return false;
@@ -582,7 +575,7 @@ public class F7TerminalScreen extends AbstractContainerScreen<@NotNull ChestMenu
             case DyeColor.BLACK -> item.getItem() == Items.INK_SAC;
             case DyeColor.BLUE -> item.getItem() == Items.LAPIS_LAZULI;
             case DyeColor.BROWN -> item.getItem() == Items.COCOA_BEANS;
-            case DyeColor.WHITE -> item.getItem() == Items.BONE_MEAL || item.getItem() == Items.WHITE_WOOL;
+            case DyeColor.WHITE -> item.getItem() == Items.BONE_MEAL || item.getItem() == Items.WOOL.white();
             case DyeColor.GREEN -> item.getItem() == Items.CACTUS;
             case DyeColor.RED -> item.getItem() == Items.POPPY;
             case DyeColor.YELLOW -> item.getItem() == Items.DANDELION;
@@ -609,19 +602,19 @@ public class F7TerminalScreen extends AbstractContainerScreen<@NotNull ChestMenu
     }
 
     private final List<Item> CHANGE_COLOR_LIST = List.of(
-            Items.ORANGE_STAINED_GLASS_PANE,
-            Items.YELLOW_STAINED_GLASS_PANE,
-            Items.GREEN_STAINED_GLASS_PANE,
-            Items.BLUE_STAINED_GLASS_PANE,
-            Items.RED_STAINED_GLASS_PANE
+            Items.STAINED_GLASS_PANE.orange(),
+            Items.STAINED_GLASS_PANE.yellow(),
+            Items.STAINED_GLASS_PANE.green(),
+            Items.STAINED_GLASS_PANE.blue(),
+            Items.STAINED_GLASS_PANE.red()
     );
 
     private final Map<Item, Color> COLOR_MAP = Map.of(
-            Items.ORANGE_STAINED_GLASS_PANE, Color.ORANGE,
-            Items.YELLOW_STAINED_GLASS_PANE, Color.YELLOW,
-            Items.GREEN_STAINED_GLASS_PANE, Color.GREEN,
-            Items.BLUE_STAINED_GLASS_PANE, Color.BLUE,
-            Items.RED_STAINED_GLASS_PANE, Color.RED
+            Items.STAINED_GLASS_PANE.orange(), Color.ORANGE,
+            Items.STAINED_GLASS_PANE.yellow(), Color.YELLOW,
+            Items.STAINED_GLASS_PANE.green(), Color.GREEN,
+            Items.STAINED_GLASS_PANE.blue(), Color.BLUE,
+            Items.STAINED_GLASS_PANE.red(), Color.RED
     );
 
     private int calcChangeColorLowestDistance(Item from, Item to) {

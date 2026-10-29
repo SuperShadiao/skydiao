@@ -4,14 +4,14 @@ import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.fabric.api.loot.v3.LootTableSource;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
-import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
-import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders;
+import org.jetbrains.annotations.NotNull;
 
 public class EndermanDropSomething extends AbstractListener {
 
@@ -25,12 +25,12 @@ public class EndermanDropSomething extends AbstractListener {
         LootTableEvents.MODIFY.register(this::modifyLootTable);
     }
 
-    private void modifyLootTable(ResourceKey<LootTable> key, LootTable.Builder lootTable, LootTableSource lootTableSource, HolderLookup.Provider provider) {
-        if(key.equals(EntityType.ENDERMAN.getDefaultLootTable().get())) {
+    private void modifyLootTable(ResourceKey<@NotNull LootTable> key, LootTable.Builder lootTable, LootTableSource lootTableSource, HolderLookup.Provider provider) {
+        if(key.equals(EntityTypes.ENDERMAN.getDefaultLootTable().get())) {
             lootTable.withPool(LootPool.lootPool()
-                    .add(LootItem.lootTableItem(Items.DIAMOND).setWeight(1000).apply(SetItemCountFunction.setCount(UniformGenerator.between(1, 10))))
-                    .add(LootItem.lootTableItem(Items.NETHERITE_INGOT).setWeight(100).apply(SetItemCountFunction.setCount(UniformGenerator.between(1, 100))))
-                    .setRolls(ConstantValue.exactly(1.0F))
+                    .add(LootItem.lootTableItem(Items.DIAMOND).setWeight(1000).apply(SetItemCountFunction.setCount(ContextIntProviders.between(1, 10))))
+                    .add(LootItem.lootTableItem(Items.NETHERITE_INGOT).setWeight(100).apply(SetItemCountFunction.setCount(ContextIntProviders.between(1, 100))))
+                    .setRolls(ContextIntProviders.exactly(1))
             );
         }
     }

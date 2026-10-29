@@ -57,7 +57,7 @@ public class DungeonAutoCloseChest extends AbstractListener implements IDungeonL
 
         if(ToolList.getInstance().isDevEnvironment() && mc.player.getMainHandItem().isEmpty()) return;
 
-        if(mc.screen instanceof ContainerScreen containerScreen) {
+        if(mc.gui.screen() instanceof ContainerScreen containerScreen) {
 //            System.out.println(containerScreen.getTitle().toString() + " & " + containerScreen.getTitle().getClass());
 //            System.out.println(containerScreen.getTitle().getContents().getClass());
 //            containerScreen.getTitle().getContents().visit(content -> {
@@ -71,7 +71,7 @@ public class DungeonAutoCloseChest extends AbstractListener implements IDungeonL
                     List<Slot> nonEmptySlots = containerScreen.getMenu().slots.stream().filter(slot -> slot.hasItem() && slot.container == containerScreen.getMenu().getContainer()).toList();
                     if (nonEmptySlots.size() == 1 || nonEmptySlots.size() == 2) {
                         if (nonEmptySlots.stream().allMatch(slot -> notValuedItems.contains(ToolList.getInstance().deleteColorCode(slot.getItem().getHoverName().getString())))) {
-                            mc.screen.onClose();
+                            mc.gui.screen().onClose();
                         }
                     }
                 }

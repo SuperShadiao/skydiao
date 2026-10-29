@@ -490,7 +490,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                     }
                 }, 500)
                 .addAction(() -> {
-                    if (mc.screen != null) mc.screen.onClose();
+                    if (mc.gui.screen() != null) mc.gui.screen().onClose();
                 }, 600);
     }
 

@@ -3,8 +3,8 @@ package pers.XiaoShadiao.skydiao.mixin.client;
 import net.minecraft.client.Camera;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.extract.LevelExtractor;
 import net.minecraft.client.renderer.state.level.LevelRenderState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -14,7 +14,7 @@ import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.FreecamAndFreelook;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
-@Mixin(LevelRenderer.class)
+@Mixin(LevelExtractor.class)
 public class MixinLevelRenderer {
 
     @Inject(method = "extractVisibleEntities", at = @At("HEAD"))

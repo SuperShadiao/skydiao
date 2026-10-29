@@ -121,7 +121,7 @@ public class InputSimulator {
             ((MixinMultiPlayerGameModeDestroyBlockDelayAccessor) mc.gameMode).setDestroyDelay(6);
         }
         lastBreakDelay = currentDestroyDelay;
-        if (mc.getOverlay() != null || isInventoryOpen()) {
+        if (mc.gui.overlay() != null || isInventoryOpen()) {
             missTime = 999999999;
             isMouseLeftHolding = isMouseRightHolding = false;
             leftClickCounter = rightClickCounter = 0;
@@ -154,13 +154,13 @@ public class InputSimulator {
             }
         }
 
-        if(mc.screen != null) {
+        if(mc.gui.screen() != null) {
             if (isMouseRightHolding && rightClickDelay == 0 && !mc.player.isUsingItem()) {
                 startUseItem();
             }
         }
         leftClickFlagMinecraft = !isInventoryOpen() && !bl3 && isMouseLeftHolding;
-        if(mc.screen != null) continueAttack(leftClickFlagMinecraft);
+        if(mc.gui.screen() != null) continueAttack(leftClickFlagMinecraft);
     }
 
     private static void postTick() {
@@ -181,8 +181,8 @@ public class InputSimulator {
                 if (!mc.level.getBlockState(blockPos).isAir()) {
                     Direction direction = blockHitResult.getDirection();
                     if (mc.gameMode.continueDestroyBlock(blockPos, direction)) {
-                        mc.level.addBreakingBlockEffect(blockPos, direction);
-                        mc.player.swing(InteractionHand.MAIN_HAND);
+                        mc.level.addBreakingBlockEffects(blockPos, direction, true);
+                        mc.player.swing(InteractionHand.MAIN_HAND, mc.player.getItemInHand(InteractionHand.MAIN_HAND).getAttackAnimation(), false);
                     }
                 }
             } else {
@@ -231,7 +231,7 @@ public class InputSimulator {
                         mc.player.resetAttackStrengthTicker();
                 }
 
-                mc.player.swing(InteractionHand.MAIN_HAND);
+                mc.player.swing(InteractionHand.MAIN_HAND, itemStack.getAttackAnimation(), false);
                 return bl;
             }
         }
@@ -261,8 +261,8 @@ public class InputSimulator {
                                 }
 
                                 if (mc.player.isWithinEntityInteractionRange(entity, 0.0) && mc.gameMode.interact(mc.player, entity, entityHitResult, interactionHand) instanceof InteractionResult.Success success) {
-                                    if (success.swingSource() == InteractionResult.SwingSource.CLIENT) {
-                                        mc.player.swing(interactionHand);
+                                    if (success.swingSource() == InteractionResult.SwingSource.PREDICTED) {
+                                        mc.player.swing(interactionHand, itemStack.getInteractAnimation(), false);
                                     }
 
                                     return;
@@ -273,10 +273,10 @@ public class InputSimulator {
                                 int i = itemStack.getCount();
                                 InteractionResult interactionResult2 = mc.gameMode.useItemOn(mc.player, interactionHand, blockHitResult);
                                 if (interactionResult2 instanceof InteractionResult.Success success2) {
-                                    if (success2.swingSource() == InteractionResult.SwingSource.CLIENT) {
-                                        mc.player.swing(interactionHand);
+                                    if (success2.swingSource() == InteractionResult.SwingSource.PREDICTED) {
+                                        mc.player.swing(interactionHand, itemStack.getInteractAnimation(), false);
                                         if (!itemStack.isEmpty() && (itemStack.getCount() != i || mc.player.hasInfiniteMaterials())) {
-                                            mc.gameRenderer.itemInHandRenderer.itemUsed(interactionHand);
+                                            mc.player.itemUsed(interactionHand);
                                         }
                                     }
 
@@ -290,11 +290,11 @@ public class InputSimulator {
                     }
 
                     if (!itemStack.isEmpty() && mc.gameMode.useItem(mc.player, interactionHand) instanceof InteractionResult.Success success3) {
-                        if (success3.swingSource() == InteractionResult.SwingSource.CLIENT) {
-                            mc.player.swing(interactionHand);
+                        if (success3.swingSource() == InteractionResult.SwingSource.PREDICTED) {
+                            mc.player.swing(interactionHand, itemStack.getInteractAnimation(), false);
                         }
 
-                        mc.gameRenderer.itemInHandRenderer.itemUsed(interactionHand);
+                        mc.player.itemUsed(interactionHand);
                         return;
                     }
                 }
@@ -309,9 +309,9 @@ public class InputSimulator {
     }
 
     private static void updateInventoryState() {
-        if (mc.screen instanceof AbstractContainerScreen || mc.screen instanceof BookEditScreen || mc.screen instanceof BookSignScreen || mc.screen instanceof BookViewScreen) {
+        if (mc.gui.screen() instanceof AbstractContainerScreen || mc.gui.screen() instanceof BookEditScreen || mc.gui.screen() instanceof BookSignScreen || mc.gui.screen() instanceof BookViewScreen) {
             isInventoryOpen = true;
-        } else if(mc.screen == null) {
+        } else if(mc.gui.screen() == null) {
             isInventoryOpen = false;
         }
     }
@@ -343,7 +343,7 @@ public class InputSimulator {
                 currentAimingInstance = null;
             }
         }
-        if (mc.getOverlay() != null || isInventoryOpen()) {
+        if (mc.gui.overlay() != null || isInventoryOpen()) {
             hasYawValue = false;
             hasPitchValue = false;
             return;
@@ -515,7 +515,7 @@ public class InputSimulator {
                 (Consumer<Boolean>) InputSimulator::setLeft
         );
 
-        Vec3 target = pos.getBottomCenter();
+        Vec3 target = Vec3.atBottomCenterOf(pos);
 
         for (Map.Entry<Direction, Consumer<Boolean>> entry : directionInput.entrySet()) {
             Vec3 original = playerPos;

@@ -49,7 +49,7 @@ public class AutoClickerListener extends AbstractListener {
     }
 
     private boolean onMouseClick(long windows, MouseButtonInfo mouseButtonInfo, int state) {
-        if(mc.screen == null) {
+        if(mc.gui.screen() == null) {
             boolean flag = false;
             if (isRightAutoClickingEnabled()) {
                 if (mouseButtonInfo.button() == 1) {

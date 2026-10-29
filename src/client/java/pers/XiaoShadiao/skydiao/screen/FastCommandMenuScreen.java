@@ -15,7 +15,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLMouse;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.keybinds.KeyBindsManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
@@ -247,7 +247,7 @@ public class FastCommandMenuScreen extends Screen {
             updateScrollButtonActive();
         }
         updateScrollState();
-        Runnable runnable = () -> GLFW.glfwSetCursorPos(minecraft.getWindow().handle(), minecraft.getWindow().getScreenWidth() / 2f, minecraft.getWindow().getScreenHeight() / 2f);
+        Runnable runnable = () -> SDLMouse.SDL_WarpMouseInWindow(minecraft.getWindow().handle(), minecraft.getWindow().getScreenWidth() / 2f, minecraft.getWindow().getScreenHeight() / 2f);
         minecraft.schedule(runnable);
         runnable.run();
     }

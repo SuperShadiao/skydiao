@@ -726,7 +726,7 @@ public class ObsidianListener extends AbstractListener implements IMacro {
         }
 
         public BlockPosWithFace(BlockPos blockPos, int face) {
-            super(blockPos);
+            super(blockPos.getX(), blockPos.getY(), blockPos.getZ());
             this.face = face;
         }
 

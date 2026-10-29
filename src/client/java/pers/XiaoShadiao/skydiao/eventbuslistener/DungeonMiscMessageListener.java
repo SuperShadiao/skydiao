@@ -19,7 +19,7 @@ import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.Item;
@@ -114,7 +114,7 @@ public class DungeonMiscMessageListener extends AbstractListener implements IDun
 
     private boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
         if(packet instanceof ClientboundAddEntityPacket addEntityPacket) {
-            if (StatusManager.get().isInDungeon() && addEntityPacket.getType() == EntityType.ARMOR_STAND) {
+            if (StatusManager.get().isInDungeon() && addEntityPacket.getType() == EntityTypes.ARMOR_STAND) {
                 delayTickExecutor.delayExec(() -> armorStandDungeonKey.enqueue(addEntityPacket.getId()), 2);
             }
         }

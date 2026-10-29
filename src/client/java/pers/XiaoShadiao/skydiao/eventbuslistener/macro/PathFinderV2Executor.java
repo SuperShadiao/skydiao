@@ -240,7 +240,7 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
                         PathNode nextNode = getNextNode(preAimNode);
                         boolean useEWarpFlag = false;
                         if(mc.player.getY() < nextNode.pos().getY()) {
-                            double currentHorDist = mc.player.position().horizontal().distanceTo(nextNode.pos().getCenter().horizontal());
+                            double currentHorDist = mc.player.position().horizontal().distanceTo(Vec3.atCenterOf(nextNode.pos()).horizontal());
                             int tpYOff = (int) (Math.sqrt(teleportDist * teleportDist - currentHorDist * currentHorDist));
                             int i;
                             for (i = 1; i < tpYOff; i++) {
@@ -292,7 +292,7 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
                     if(System.currentTimeMillis() - prepareParkourJump > 100) {
                         if(System.currentTimeMillis() - prepareParkourJump > 800) {
                             InputSimulator.tryNoViewChangeControlMoveTo(node.pos(), 0.5);
-                            boolean farAwayParkourGoal = mc.player.position().horizontal().distanceTo(node.pos().getBottomCenter().horizontal()) > 1;
+                            boolean farAwayParkourGoal = mc.player.position().horizontal().distanceTo(Vec3.atBottomCenterOf(node.pos()).horizontal()) > 1;
                             if (!BlockHelper.hasCollision(mc.player.blockPosition().below()) && farAwayParkourGoal) {
                                 InputSimulator.setJump(true);
                             }
@@ -438,10 +438,10 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
     private boolean canBeSee(BlockPos current) {
         return Stream.of(mc.player.getEyePosition(), mc.player.position(), mc.player.position().add(0, mc.player.getBbHeight(), 0))
                 .allMatch(pos -> Stream.of(
-                                current.getCenter(),
-                                current.above().getCenter(),
-                                current.getCenter().add(0, 0.49, 0),
-                                current.getBottomCenter().add(0, 0.01, 0)
+                                Vec3.atCenterOf(current),
+                                Vec3.atCenterOf(current.above()),
+                                Vec3.atCenterOf(current).add(0, 0.49, 0),
+                                Vec3.atBottomCenterOf(current).add(0, 0.01, 0)
                         )
                         .allMatch(pos2 -> {
                             Optional<HitResult> hitResult = Optional.ofNullable(ToolList.getInstance().predictPlayerAimBlock(pos, pos2));
@@ -459,7 +459,7 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
         if(current.type().isJumpMove() && !mc.player.onGround()) return false;
         // if(isFollowerAlive() && (follower.isAimingToEntity || (pathblocks.size() == 1 && follower.tryAttack && Math.tpYOff(pathblocks.getFirst().distToCenterSqr(follower.currentEntity.getX(), follower.currentEntity.getY(), follower.currentEntity.getZ())) < 2))) return false;
 
-        double horizontalDis = mc.player.position().horizontal().distanceTo(current.pos().getCenter().horizontal());
+        double horizontalDis = mc.player.position().horizontal().distanceTo(Vec3.atCenterOf(current.pos()).horizontal());
         if(horizontalDis > 0.85) {
             boolean canSee = canBeSee(current) && canBeSee(getNextNode(current)) && !BlockHelper.areaHasCollision(mc.player.blockPosition(), getNextNode(current).pos().above(2));
             if (!canSee) {
@@ -468,7 +468,7 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
             }
         }
 
-        double distanceToGoal = goal.getCenter().horizontal().distanceTo(current.pos().getCenter().horizontal());
+        double distanceToGoal = Vec3.atCenterOf(goal).horizontal().distanceTo(Vec3.atCenterOf(current.pos()).horizontal());
 
         boolean currentIsGoal = current.pos().equals(goal);
 
@@ -539,7 +539,7 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
             allowedDistance = Math.min(allowedDistance, 0.6);
         }
 
-        double horizontalDistance = current.pos().getCenter().horizontal()
+        double horizontalDistance = Vec3.atCenterOf(current.pos()).horizontal()
                 .distanceTo(mc.player.position().horizontal());
 
         if (horizontalDistance > allowedDistance) {

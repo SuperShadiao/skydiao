@@ -1,9 +1,9 @@
 package pers.XiaoShadiao.skydiao.utils.renderutils;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -206,7 +206,7 @@ public class RenderUtils {
         FreecamAndFreelook.CameraEntity cameraEntity1 = AbstractListener.freecamAndFreelook.getCameraEntity();
         Entity cameraEntity0 = cameraEntity1 == null ? Objects.requireNonNull(mc().getCameraEntity(), "Camera Entity") : cameraEntity1;
         LivingEntity cameraEntity = Objects.requireNonNull(cameraEntity0.asLivingEntity() == null ? ToolList.mc.player : cameraEntity0.asLivingEntity());
-        context.submitNodeCollector().submitNameTag(context.poseStack(), pos.subtract(cameraEntity.getEyePosition(ToolList.mc.getDeltaTracker().getGameTimeDeltaPartialTick(true))).subtract(0, 0.35, 0), 0, name, true, 15, 1000, context.levelState().cameraRenderState);
+        context.submitNodeCollector().submitNameTag(context.poseStack(), pos.subtract(cameraEntity.getEyePosition(ToolList.mc.getDeltaTracker().getGameTimeDeltaPartialTick(true))).subtract(0, 0.35, 0), 0, name, true, 15, context.levelState().cameraRenderState);
     }
 
     public static void renderClientLogoOnEntity(LevelRenderContext context, AbstractClientPlayer player) {
@@ -257,7 +257,7 @@ public class RenderUtils {
         poseStack.pushPose();
         poseStack.translate(anchorX, anchorY, anchorZ);
         // 与 NameTag 使用相同朝向，保证 logo 与文字处于同一平面
-        poseStack.mulPose(context.levelState().cameraRenderState.orientation);
+        poseStack.rotate(context.levelState().cameraRenderState.orientation);
         poseStack.scale(0.025f, -0.025f, 0.025f);
 
         // 复刻原生 NameTag 的遮挡规则（EntityRenderer.submitNameDisplay 传入 !state.isDiscrete）：
@@ -290,7 +290,7 @@ public class RenderUtils {
         if (distanceToCameraSq >= 4096.0
                 || player == minecraft.getCameraEntity()
                 || player.isVehicle()
-                || !Minecraft.renderNames()) {
+                || minecraft.gui.hud.isHidden()) {
             return false;
         }
 
@@ -371,12 +371,12 @@ public class RenderUtils {
         poseStack.pushPose();
         poseStack.translate(-context.levelState().cameraRenderState.pos.x + pos.x() + 0.5, -context.levelState().cameraRenderState.pos.y + pos.y() + 0.5, -context.levelState().cameraRenderState.pos.z + pos.z() + 0.5);
 
-        poseStack.mulPose(Axis.YP.rotationDegrees(direction.radius));
-        poseStack.mulPose(Axis.XP.rotationDegrees(topMode.angle));
+        poseStack.rotateDegrees(Axis.YP, direction.radius);
+        poseStack.rotateDegrees(Axis.XP, topMode.angle);
 
         poseStack.translate(-0.5, -0.5, -0.5);
         poseStack.translate(1, 1, 0);
-        poseStack.mulPose(Axis.ZP.rotationDegrees(180.0f));
+        poseStack.rotateDegrees(Axis.ZP, 180.0f);
 
         context.submitNodeCollector().submitCustomGeometry(poseStack, RenderTypes.text(texture), ((pose, buffer) -> {
             float z = 1f - 1 / 512f;

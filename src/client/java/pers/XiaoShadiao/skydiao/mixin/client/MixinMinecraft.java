@@ -4,9 +4,9 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.minecraft.UserApiService;
-import com.mojang.authlib.yggdrasil.ProfileResult;
-import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
-import com.mojang.blaze3d.GpuOutOfMemoryException;
+import com.mojang.authlib.services.MinecraftServicesDiscoveryService;
+import com.mojang.authlib.services.ProfileResult;
+import com.mojang.renderpearl.api.device.GpuOutOfMemoryException;
 import com.mojang.logging.LogUtils;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportType;
@@ -15,6 +15,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ProfileKeyPairManager;
 import net.minecraft.client.resources.SplashManager;
@@ -90,10 +91,9 @@ public class MixinMinecraft {
     @Final
     @Shadow
     private ProfileKeyPairManager profileKeyPairManager;
-    @Mutable
     @Final
     @Shadow
-    private SplashManager splashManager;
+    private boolean offlineDeveloperMode;
     @Final
     @Shadow
     private Proxy proxy;
@@ -109,21 +109,10 @@ public class MixinMinecraft {
     private final int MAX_EXCEPTION_COUNTER = 10;
     @Unique
     private MCThreadDumper dumperThread;
-    @Unique
-    private XSDSplashManager xsdSplashManager;
 
     @Inject(at = @At("HEAD"), method = "run")
     private void init(CallbackInfo info) {
         // This code is injected into the start of Minecraft.run()V
-    }
-
-    @WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/resources/ReloadableResourceManager;registerReloadListener(Lnet/minecraft/server/packs/resources/PreparableReloadListener;)V"))
-    public void initInstance(ReloadableResourceManager instance, PreparableReloadListener listener, Operation<Void> original) {
-        if(listener instanceof SplashManager && !(listener instanceof XSDSplashManager)) {
-            original.call(instance, xsdSplashManager);
-        } else {
-            original.call(instance, listener);
-        }
     }
 
     @Overwrite
@@ -142,14 +131,17 @@ public class MixinMinecraft {
         this.user = user;
         this.profileFuture = CompletableFuture.supplyAsync(() -> this.services.sessionService().fetchProfile(this.user.getProfileId(), true), Util.nonCriticalIoPool());
 
-        this.userApiService = new YggdrasilAuthenticationService(this.proxy).createUserApiService(user.getAccessToken());
+        this.userApiService = this.offlineDeveloperMode
+                ? UserApiService.OFFLINE
+                : MinecraftServicesDiscoveryService.create(this.proxy, true).createUserApiService(user.getAccessToken());
         this.telemetryManager = new ClientTelemetryManager(mc, this.userApiService, this.user);
         this.profileKeyPairManager = ProfileKeyPairManager.create(this.userApiService, this.user, mc.gameDirectory.toPath());
 
-        if(this.xsdSplashManager instanceof XSDSplashManager xsdSplashManager0) {
+        Gui gui = mc.gui;
+        if(gui.splashManager() instanceof XSDSplashManager xsdSplashManager0) {
             xsdSplashManager0.setUser(user);
         } else {
-            this.xsdSplashManager = new XSDSplashManager(user);
+            ((XSDGuiAccess) (Object) gui).skydiao$setSplashManager(new XSDSplashManager(user));
         }
 
         try {
@@ -192,7 +184,7 @@ public class MixinMinecraft {
             CustomRenderPipeline.closeAll();
             CrashReport report = var11.getReport();
             saveReport0(this.gameDirectory, report);
-            setScreen(new MinecraftCrashedScreen(var11.getCause(), report));
+            this.gui.setScreen(new MinecraftCrashedScreen(var11.getCause(), report));
             LOGGER.error(LogUtils.FATAL_MARKER, report.getFriendlyReport(ReportType.CRASH));
             LOGGER.error(LogUtils.FATAL_MARKER, "啊, 可莉炸客户端又被你发现了, 可莉又闯祸了...");
             LOGGER.error(LogUtils.FATAL_MARKER, "趁琴团长不在, 我帮你把客户端修好吧, 别告可莉状, 求求了qwq");
@@ -222,7 +214,7 @@ public class MixinMinecraft {
                 CustomRenderPipeline.closeAll();
                 CrashReport report = new CrashReport("Unexpected error", var12);
                 saveReport0(this.gameDirectory, report);
-                setScreen(new MinecraftCrashedScreen(var12, report));
+                this.gui.setScreen(new MinecraftCrashedScreen(var12, report));
                 LOGGER.error(LogUtils.FATAL_MARKER, report.getFriendlyReport(ReportType.CRASH));
                 LOGGER.error(LogUtils.FATAL_MARKER, "啊, 可莉炸客户端又被你发现了, 可莉又闯祸了...");
                 LOGGER.error(LogUtils.FATAL_MARKER, "趁琴团长不在, 我帮你把客户端修好吧, 别告可莉状, 求求了qwq");
@@ -262,17 +254,6 @@ public class MixinMinecraft {
         return AbstractListener.titleChanger.updateMCTitle(original.call(instance));
     }
 
-    @WrapMethod(method = "setScreen")
-    public void setScreen(Screen screen, Operation<Void> original) {
-        original.call(CustomFabricEvents.REPLACE_SCREEN.invoker().replaceScreen(screen));
-    }
-
-
-    @Overwrite
-    public SplashManager getSplashManager() {
-        return this.xsdSplashManager;
-    }
-
     @Inject(method = "startUseItem", at = @At("RETURN"))
     public void startUseItem(CallbackInfo ci) {
         InputSimulator.rightClickDelay = this.rightClickDelay;
@@ -308,9 +289,9 @@ public class MixinMinecraft {
     public void emergencySaveAndCrash(CrashReport report) {
     }
 
+    @Final
     @Shadow
-    public void setScreen(Screen screen) {
-    }
+    public Gui gui;
 
     @Shadow
     private void emergencySave() {

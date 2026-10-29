@@ -73,9 +73,9 @@ public class FastClearMiningStash extends AbstractListener {
         for (int i = clickTargets.size() - 1; i >= 0; i--) {
             int finalSlot = clickTargets.getInt(i);
 
-            if(mc.screen != containerScreen) return List.of();
+            if(mc.gui.screen() != containerScreen) return List.of();
             mc.execute(() -> {
-                if (mc.screen == containerScreen && mc.player != null && mc.gameMode != null) {
+                if (mc.gui.screen() == containerScreen && mc.player != null && mc.gameMode != null) {
                     mc.gameMode.handleContainerInput(menu0.containerId, finalSlot, 0, ContainerInput.PICKUP, mc.player);
                 }
             });
@@ -107,18 +107,18 @@ public class FastClearMiningStash extends AbstractListener {
                 if(ToolList.getInstance().deleteColorCode(item.getHoverName().getString()).equals("Supercraft")) {
                     int finalSlot = i;
                     mc.execute(() -> {
-                        if (mc.screen == containerScreen && mc.player != null && mc.gameMode != null) {
+                        if (mc.gui.screen() == containerScreen && mc.player != null && mc.gameMode != null) {
                             mc.gameMode.handleContainerInput(menu0.containerId, finalSlot, 0, ContainerInput.QUICK_MOVE, mc.player);
                         }
                     });
                     Thread.sleep(300);
                     mc.execute(() -> {
-                        if (mc.screen == containerScreen && mc.player != null && mc.gameMode != null) {
+                        if (mc.gui.screen() == containerScreen && mc.player != null && mc.gameMode != null) {
                             mc.gameMode.handleContainerInput(menu0.containerId, finalSlot, 0, ContainerInput.PICKUP, mc.player);
                         }
                     });
                     Thread.sleep(300);
-                    if(mc.screen == containerScreen) mc.execute(() -> mc.screen.onClose()); else return false;
+                    if(mc.gui.screen() == containerScreen) mc.execute(() -> mc.gui.screen().onClose()); else return false;
                     Thread.sleep(600);
                 }
             }

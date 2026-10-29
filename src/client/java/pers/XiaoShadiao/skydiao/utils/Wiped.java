@@ -51,7 +51,7 @@ public class Wiped {
             MutableComponent bookWipeDismiss = Component.literal("        §2§lDISMISS");
 
 
-            ToolList.mc.execute(() -> ToolList.mc.setScreen(new BookViewScreen(new BookViewScreen.BookAccess(List.of(Component.literal("\n").append(bookWipe1).append("\n").append(bookWipe2).append("\n\n").append(bookWipeDismiss))))));
+            ToolList.mc.execute(() -> ToolList.mc.gui.setScreen(new BookViewScreen(new BookViewScreen.BookAccess(List.of(Component.literal("\n").append(bookWipe1).append("\n").append(bookWipe2).append("\n\n").append(bookWipeDismiss))))));
 
             return null;
 

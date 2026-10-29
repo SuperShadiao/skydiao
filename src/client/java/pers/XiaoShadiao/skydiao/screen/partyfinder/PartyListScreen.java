@@ -41,7 +41,7 @@ public class PartyListScreen extends Screen {
         LinearLayout linearLayout = this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
         linearLayout.addChild(Button.builder(Component.literal("返回"), this::onClose).size(50, 20).build());
         linearLayout.addChild(Button.builder(Component.literal("创建自己的队伍"), (button) -> {
-            minecraft.setScreen(new SetupPartyScreen());
+            minecraft.gui.setScreen(new SetupPartyScreen());
         }).build());
         linearLayout.setX(width / 2);
         partyList = new PartyList();
@@ -113,7 +113,7 @@ public class PartyListScreen extends Screen {
                         Component.literal("加入"),
                         b -> {
                             PartyFinderManager.joinPlayerNameParty(data.leaderPlayerName);
-                            ToolList.mc.setScreen(null);
+                            ToolList.mc.gui.setScreen(null);
                         }
                 ).bounds(0, 0, 50, 20).build();
                 this.childs = List.of(joinParty);

@@ -10,23 +10,23 @@ public class KeyBindsManager {
 
     public static final KeyMapping.Category skydiaoCategory = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("skydiao", "skydiao"));
 
-    public static final KeyMapping leftAutoClickerSwap = new KeyMapping("key.category.skydiao.leftautoclicker", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
-    public static final KeyMapping rightAutoClickerSwap = new KeyMapping("key.category.skydiao.rightautoclicker", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
+    public static final KeyMapping leftAutoClickerSwap = new KeyMapping("key.category.skydiao.leftautoclicker", InputConstants.Type.KEYBOARD, 0, skydiaoCategory);
+    public static final KeyMapping rightAutoClickerSwap = new KeyMapping("key.category.skydiao.rightautoclicker", InputConstants.Type.KEYBOARD, 0, skydiaoCategory);
 
-    public static final KeyMapping toggleFarmingScript = new KeyMapping("key.category.skydiao.togglefarmingscript", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
-    public static final KeyMapping toggleKeepSprint = new KeyMapping("key.category.skydiao.toggleSprint", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
+    public static final KeyMapping toggleFarmingScript = new KeyMapping("key.category.skydiao.togglefarmingscript", InputConstants.Type.KEYBOARD, 0, skydiaoCategory);
+    public static final KeyMapping toggleKeepSprint = new KeyMapping("key.category.skydiao.toggleSprint", InputConstants.Type.KEYBOARD, 0, skydiaoCategory);
 
-    public static final KeyMapping toggleFreelook = new KeyMapping("key.toggleFreelook", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
-    public static final KeyMapping pressFreelook = new KeyMapping("key.freelook", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
-    public static final KeyMapping toggleFreecam = new KeyMapping("key.toggleFreecam", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
+    public static final KeyMapping toggleFreelook = new KeyMapping("key.toggleFreelook", InputConstants.Type.KEYBOARD, 0, skydiaoCategory);
+    public static final KeyMapping pressFreelook = new KeyMapping("key.freelook", InputConstants.Type.KEYBOARD, 0, skydiaoCategory);
+    public static final KeyMapping toggleFreecam = new KeyMapping("key.toggleFreecam", InputConstants.Type.KEYBOARD, 0, skydiaoCategory);
 
-    public static final KeyMapping musicPlayStop = new KeyMapping("key.musicPlayStop", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
-    public static final KeyMapping musicSwitch = new KeyMapping("key.musicSwitch", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
+    public static final KeyMapping musicPlayStop = new KeyMapping("key.musicPlayStop", InputConstants.Type.KEYBOARD, 0, skydiaoCategory);
+    public static final KeyMapping musicSwitch = new KeyMapping("key.musicSwitch", InputConstants.Type.KEYBOARD, 0, skydiaoCategory);
 
-    public static final KeyMapping fastMenu = new KeyMapping("key.fastMenu", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
+    public static final KeyMapping fastMenu = new KeyMapping("key.fastMenu", InputConstants.Type.KEYBOARD, 0, skydiaoCategory);
 
-    public static final KeyMapping openConfigMenu = new KeyMapping("key.openConfigMenu", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
-    public static final KeyMapping openPartyFinderMenu = new KeyMapping("key.openPartyFinderMenu", InputConstants.Type.KEYSYM, -1, skydiaoCategory);
+    public static final KeyMapping openConfigMenu = new KeyMapping("key.openConfigMenu", InputConstants.Type.KEYBOARD, 0, skydiaoCategory);
+    public static final KeyMapping openPartyFinderMenu = new KeyMapping("key.openPartyFinderMenu", InputConstants.Type.KEYBOARD, 0, skydiaoCategory);
 
     public static void registerKeyBinds() {
         Register.execRegister(KeyBindsManager.class, KeyMapping.class, KeyMappingHelper::registerKeyMapping);

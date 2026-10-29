@@ -30,7 +30,7 @@ public class HHMCommand extends SkydiaoCommand {
             ToolList.addThreadedTask(() -> {
                 mc.execute(() -> {
                     try {
-                        mc.setScreen((Screen) Class.forName("com.terraformersmc.modmenu.gui.ModsScreen").getConstructor(Screen.class).newInstance(mc.screen));
+                        mc.gui.setScreen((Screen) Class.forName("com.terraformersmc.modmenu.gui.ModsScreen").getConstructor(Screen.class).newInstance(mc.gui.screen()));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

@@ -24,7 +24,7 @@ public class SkydiaoFindPartyCommand extends BaseRootRunnableCommand {
     public List<ArgumentBuilder<FabricClientCommandSource, ?>> getArgs() {
         return List.of(
                 getArgConstantInstance("setup").executes(context -> {
-                    mc.schedule(() -> mc.setScreen(new SetupPartyScreen()));
+                    mc.schedule(() -> mc.gui.setScreen(new SetupPartyScreen()));
                     return 0;
                 }),
                 getArgConstantInstance("find").executes(this::executeCommand),
@@ -50,7 +50,7 @@ public class SkydiaoFindPartyCommand extends BaseRootRunnableCommand {
 
     @Override
     public int executeCommand(CommandContext<FabricClientCommandSource> context) {
-        mc.schedule(() -> mc.setScreen(new PartyListScreen()));
+        mc.schedule(() -> mc.gui.setScreen(new PartyListScreen()));
         return 0;
     }
 

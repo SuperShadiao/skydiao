@@ -1,9 +1,9 @@
 package pers.XiaoShadiao.skydiao.utils;
 
-import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.textures.GpuTexture;
 import net.minecraft.util.ARGB;
 
 import javax.imageio.ImageIO;
@@ -62,7 +62,7 @@ public class PicUtils {
         return baos.toByteArray();
     }
 
-    public static BufferedImage cloneMappedViewToBufferedImage(RenderTarget target, GpuBuffer.MappedView mappedView) {
+    public static BufferedImage cloneMappedViewToBufferedImage(RenderTarget target, GpuBufferSlice.MappedView mappedView) {
         int width = target.width;
         int height = target.height;
         GpuTexture sourceTexture = target.getColorTexture();
@@ -74,7 +74,7 @@ public class PicUtils {
         ByteBuffer data = cloneByteBuffer(mappedView.data()).join();
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                int argb = data.getInt((x + y * width) * sourceTexture.getFormat().pixelSize());
+                int argb = data.getInt((x + y * width) * sourceTexture.getFormat().blockSize());
                 image.setRGB(x, height - y - 1, (ARGB.blue(argb) << 16) | (ARGB.green(argb) << 8) | (ARGB.red(argb)) | 0xFF000000);
             }
         }

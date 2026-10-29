@@ -6,12 +6,10 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
-import org.lwjgl.glfw.GLFW;
 import pers.XiaoShadiao.skydiao.config.option.StringGetterSelectConfigOption;
 import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 public class StringListScreen extends Screen {
 
@@ -69,7 +67,7 @@ public class StringListScreen extends Screen {
 
         if(isInSquare((int) event.x(), (int) event.y(),x1+50,y2+6,x1+90,y2+26)){
             this.onClose();
-            mc.setScreenAndShow(new ConfigScreen(mc.screen));
+            mc.setScreenAndShow(new ConfigScreen(mc.gui.screen()));
         }
 
         isPressedYet = true;

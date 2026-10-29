@@ -81,7 +81,7 @@ public class BetterAFKPlaceListener extends AbstractListener {
                     continue;
                 }
                 Thread.sleep(5000);
-                if (!(mc.screen instanceof ContainerScreen containerScreen)) return null;
+                if (!(mc.gui.screen() instanceof ContainerScreen containerScreen)) return null;
                 ChestMenu menu0 = containerScreen.getMenu();
                 Container container0 = menu0.getContainer();
                 if (!(container0 instanceof SimpleContainer)) return null;

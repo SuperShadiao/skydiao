@@ -75,7 +75,7 @@ public class MusicPlayerScreen extends Screen {
             b.setMessage(Component.literal(ConfigManager.musicplayermode.getCurrentDisplayString()));
             PlayerThread.clearQueue();
         }).size(70, 20).build());
-        linearLayout.addChild(Button.builder(Component.literal("下载音乐"), b -> MusicListManager.ensureMusicFolderVaildAndRun(() -> minecraft.setScreen(new MusicSearchScreen(this)), () -> minecraft.setScreen(this))).size(70, 20).build());
+        linearLayout.addChild(Button.builder(Component.literal("下载音乐"), b -> MusicListManager.ensureMusicFolderVaildAndRun(() -> minecraft.gui.setScreen(new MusicSearchScreen(this)), () -> minecraft.gui.setScreen(this))).size(70, 20).build());
         linearLayout.addChild(
                 new XSDSliderButton(0, 0, 120, 20, Component.literal("音量"), 0.5)
                         .valueGetter(() -> ConfigManager.xsdmusicvolume.getValue() / 200.0d)
@@ -165,7 +165,7 @@ public class MusicPlayerScreen extends Screen {
                 }).size(20, 20).build();
                 deleteButton = Button.builder(Component.literal("-"), (b) -> {
                     MusicListManager.removeMusic(musicInfo);
-                    minecraft.setScreen(new MusicPlayerScreen());
+                    minecraft.gui.setScreen(new MusicPlayerScreen());
                 }).size(20, 20).build();
                 fixButton = Button.builder(Component.literal("F"), (b) -> {
                     musicInfo.fixMIFileVeriable();

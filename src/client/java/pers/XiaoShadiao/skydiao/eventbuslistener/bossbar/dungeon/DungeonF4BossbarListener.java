@@ -5,7 +5,7 @@ import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
@@ -271,7 +271,7 @@ public class DungeonF4BossbarListener extends AbstractDungeonBossbar {
 
     @Override
     public Identifier getPowerUpPotionIcon() {
-        return Gui.getMobEffectSprite(MobEffects.LUCK);
+        return Hud.getMobEffectSprite(MobEffects.LUCK);
     }
 
     @Override

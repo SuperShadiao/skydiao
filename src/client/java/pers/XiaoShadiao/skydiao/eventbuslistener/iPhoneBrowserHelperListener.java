@@ -56,7 +56,7 @@ public class iPhoneBrowserHelperListener extends AbstractForagingListener {
     }
 
     private boolean onMouseClick(long l, MouseButtonInfo mouseButtonInfo, int state) {
-        if(mc.screen == null) {
+        if(mc.gui.screen() == null) {
             if(mc.hitResult instanceof EntityHitResult entityHitResult) {
                 Entity entity = entityHitResult.getEntity();
                 if(entity instanceof RemotePlayer) {

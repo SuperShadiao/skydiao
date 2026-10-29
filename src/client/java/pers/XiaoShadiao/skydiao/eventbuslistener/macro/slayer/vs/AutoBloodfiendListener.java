@@ -68,7 +68,7 @@ public class AutoBloodfiendListener extends AbstractListener implements IMacro {
     private LivingEntity currentAttackedEntity;
 
     private boolean onMouseClick(long hwid, MouseButtonInfo mouseButtonInfo, int state) {
-        if(mouseButtonInfo.button() == 0 && state == 1 && mc.screen == null) {
+        if(mouseButtonInfo.button() == 0 && state == 1 && mc.gui.screen() == null) {
             if(mc.hitResult instanceof EntityHitResult entityHitResult) {
                 currentAttackedEntity = entityHitResult.getEntity().asLivingEntity();
             }

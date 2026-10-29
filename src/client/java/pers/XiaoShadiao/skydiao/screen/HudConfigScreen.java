@@ -35,7 +35,7 @@ public class HudConfigScreen extends Screen {
             } while (currentSelected.getHudName() == null);
             b.setMessage(Component.literal("当前选择: " + currentSelected.getHudName()));
         }).size(100, 20).build());
-        linearLayout.addChild(Button.builder(Component.literal("返回"), (b) -> minecraft.setScreen(parent)).size(50, 20).build());
+        linearLayout.addChild(Button.builder(Component.literal("返回"), (b) -> minecraft.gui.setScreen(parent)).size(50, 20).build());
         linearLayout.addChild(Button.builder(Component.literal("重置"), (b) -> XSDHUD.resetHudSetting(currentSelected)).size(50, 20).build());
         this.layout.visitWidgets(abstractWidget -> {
             abstractWidget.setTabOrderGroup(1);

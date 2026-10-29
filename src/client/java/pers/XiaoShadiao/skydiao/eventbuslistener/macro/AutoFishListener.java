@@ -16,6 +16,7 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
+import net.minecraft.network.protocol.game.VecDelta;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Entity;
@@ -586,7 +587,10 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
             Entity entity = movePacket.getEntity(mc.level);
             if(entity != null && mc.player.fishing == entity) {
                 if(entity.isInLiquid()) {
-                    short y = movePacket.getYa();
+                    short y = switch (movePacket.getPositionDelta()) {
+                        case VecDelta.Linear(short xa, short ya, short za) -> ya;
+                        case VecDelta.Stepped stepped -> stepped.steps().isEmpty() ? 0 : stepped.steps().get(stepped.steps().size() - 1).ya();
+                    };
                     if(y > 0) isReady = true; else if(isReady && y < -300) {
                         isReady = false;
                         fishHookOnGroundTick = 0;

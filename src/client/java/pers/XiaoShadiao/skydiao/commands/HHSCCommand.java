@@ -9,7 +9,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.text2speech.Narrator;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -263,7 +263,7 @@ public class HHSCCommand extends SkydiaoCommand {
 
             @Override
             public Identifier getPowerUpPotionIcon() {
-                return Gui.getMobEffectSprite(MobEffects.ABSORPTION);
+                return Hud.getMobEffectSprite(MobEffects.ABSORPTION);
             }
 
             @Override

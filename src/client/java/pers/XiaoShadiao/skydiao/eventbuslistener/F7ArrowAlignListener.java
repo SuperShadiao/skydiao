@@ -102,9 +102,9 @@ public class F7ArrowAlignListener extends AbstractListener implements IDungeonLi
         List<ItemFrame> startNode = new ArrayList<>();// itemFrames.stream().filter(frame -> frame.getItem().getItem() == Items.LIME_WOOL).toList();
         List<ItemFrame> endNode = new ArrayList<>();// itemFrames.stream().filter(frame -> frame.getItem().getItem() == Items.RED_WOOL).toList();
         for (ItemFrame itemFrame : itemFrames) {
-            if(itemFrame.getItem().getItem() == Items.LIME_WOOL) {
+            if(itemFrame.getItem().getItem() == Items.WOOL.lime()) {
                 startNode.add(itemFrame);
-            } else if(itemFrame.getItem().getItem() == Items.RED_WOOL) {
+            } else if(itemFrame.getItem().getItem() == Items.WOOL.red()) {
                 endNode.add(itemFrame);
             } else if(itemFrame.getItem().getItem() != Items.ARROW) {
                 continue;

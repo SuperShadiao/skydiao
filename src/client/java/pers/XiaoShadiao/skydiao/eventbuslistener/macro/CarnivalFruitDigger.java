@@ -99,7 +99,7 @@ public class CarnivalFruitDigger extends AbstractListener implements IMacro, Pat
         if(currentSlot != null) {
             if(currentSlot.isDigged()) {
                 tickToUpdate++;
-                if(tickToUpdate >= (mc.isSingleplayer() ? 20 * 10 : 10)) {
+                if(tickToUpdate >= (mc.isLocalServer() ? 20 * 10 : 10)) {
                     currentSlot = getNextSlot();
                     tickToUpdate = 0;
                 }
@@ -116,7 +116,7 @@ public class CarnivalFruitDigger extends AbstractListener implements IMacro, Pat
             if(isSlotInited) isSlotInited = false;
         }
 
-        if(currentSlot != null && !mc.isSingleplayer()) {
+        if(currentSlot != null && !mc.isLocalServer()) {
             if(!currentSlot.isDigged() && !MacroManagerListener.pathFinderExecutor.isRunning()) {
                 PathFinder.registerConfig(this);
                 MacroManagerListener.pathFinderExecutor.startExecution(new Vec3(currentSlot.pos), false);
@@ -491,7 +491,7 @@ public class CarnivalFruitDigger extends AbstractListener implements IMacro, Pat
 
         public boolean isDigged() {
             if(mc.level == null) return true;
-            return mc.level.getBlockState(pos).getBlock() != Blocks.SAND && (!ToolList.getInstance().isDevEnvironment() || mc.level.getBlockState(pos).getBlock() != Blocks.YELLOW_STAINED_GLASS);
+            return mc.level.getBlockState(pos).getBlock() != Blocks.SAND && (!ToolList.getInstance().isDevEnvironment() || mc.level.getBlockState(pos).getBlock() != Blocks.STAINED_GLASS.yellow());
         }
 
         public int getRealPriority() {

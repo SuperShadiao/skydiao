@@ -103,7 +103,7 @@ public class GhostEntityFixer_Backup extends AbstractListener {
     private boolean onPacket(Packet<?> packet, PacketListener listener, PacketProcessor packetProcessor) {
         if(mc.level != null) {
             if(packet instanceof ClientboundRemoveEntitiesPacket removeEntitiesPacket) {
-                IntIterator it = removeEntitiesPacket.getEntityIds().intIterator();
+                IntIterator it = removeEntitiesPacket.entityIds().intIterator();
                 while(it.hasNext()) {
                     int i = it.nextInt();
                     // log("id " + i);

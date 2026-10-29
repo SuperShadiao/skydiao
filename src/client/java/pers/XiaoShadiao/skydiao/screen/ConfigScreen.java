@@ -1,14 +1,12 @@
 package pers.XiaoShadiao.skydiao.screen;
 
+import com.mojang.blaze3d.Blaze3D;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.components.tabs.GridLayoutTab;
-import net.minecraft.client.gui.components.tabs.Tab;
-import net.minecraft.client.gui.components.tabs.TabManager;
-import net.minecraft.client.gui.components.tabs.TabNavigationBar;
+import net.minecraft.client.gui.components.tabs.*;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -18,7 +16,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.config.option.*;
@@ -28,6 +25,7 @@ import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 import pers.XiaoShadiao.skydiao.utils.screen.XSDSliderButton;
 
 import java.awt.*;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -58,7 +56,7 @@ public class ConfigScreen extends Screen {
     @Override
     public void onClose() {
         saveConfig();
-        ToolList.mc.setScreen(lastScreen);
+        ToolList.mc.gui.setScreen(lastScreen);
     }
 
     @Override
@@ -95,7 +93,7 @@ public class ConfigScreen extends Screen {
     @Override
     protected void init() {
         tabs = getTabs();
-        this.tabNavigationBar = TabNavigationBar.builder(this.tabManager, this.width)
+        this.tabNavigationBar = MenuTabBar.builder(this.tabManager, this.width)
                 .addTabs(tabs)
                 .build();
         this.addRenderableWidget(this.tabNavigationBar);
@@ -104,7 +102,7 @@ public class ConfigScreen extends Screen {
         LinearLayout linearLayout = this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
 
         linearLayout.addChild(Button.builder(Component.literal("§c" + translate("gui.configsettings.disableall")), (button) -> {
-            minecraft.setScreen(new ConfirmScreen(result -> {
+            minecraft.gui.setScreen(new ConfirmScreen(result -> {
                 if(result) {
                     List<ConfigOption<?>> list = ConfigManager.categories.stream().flatMap(entry -> entry.getValue().stream()).toList();
                     for (ConfigOption<?> option : list) {
@@ -114,16 +112,16 @@ public class ConfigScreen extends Screen {
                     }
                     saveConfig();
                 }
-                minecraft.setScreen(new ConfigScreen(lastScreen));
+                minecraft.gui.setScreen(new ConfigScreen(lastScreen));
             }, Component.literal("§c" + translate("gui.configsettings.disableall")), Component.literal("§c" + translate("gui.configsettings.disableallconfirm"))));
         }).size(100, 20).build());
 
-        linearLayout.addChild(Button.builder(Component.literal("§eQQ | Discord"), (button) -> Util.getPlatform().openUri("https://xiaoshadiao.club/about")).size(100, 20).build());
+        linearLayout.addChild(Button.builder(Component.literal("§eQQ | Discord"), (button) -> Blaze3D.openUri(URI.create("https://xiaoshadiao.club/about"))).size(100, 20).build());
         linearLayout.addChild(Button.builder(Component.literal("§6" + translate("gui.configsettings.buttonsaveback")), this::onClose).size(100, 20).build());
-        linearLayout.addChild(Button.builder(Component.literal("§a" + translate("gui.configsettings.buttonfriendlink")), (button) -> Util.getPlatform().openUri("https://xiaoshadiao.club/friendlinks")).size(100, 20).build());
+        linearLayout.addChild(Button.builder(Component.literal("§a" + translate("gui.configsettings.buttonfriendlink")), (button) -> Blaze3D.openUri(URI.create("https://xiaoshadiao.club/friendlinks"))).size(100, 20).build());
 
         linearLayout.addChild(Button.builder(Component.literal("§c" + translate("gui.configsettings.resetalltodefault")), (button) -> {
-            minecraft.setScreen(new ConfirmScreen(result -> {
+            minecraft.gui.setScreen(new ConfirmScreen(result -> {
                 if(result) {
                     List<ConfigOption<?>> list = ConfigManager.categories.stream().flatMap(entry -> entry.getValue().stream()).toList();
                     for (ConfigOption<?> option : list) {
@@ -131,7 +129,7 @@ public class ConfigScreen extends Screen {
                     }
                     saveConfig();
                 }
-                minecraft.setScreen(new ConfigScreen(lastScreen));
+                minecraft.gui.setScreen(new ConfigScreen(lastScreen));
             }, Component.literal("§c" + translate("gui.configsettings.resetalltodefault")), Component.literal("§c" + translate("gui.configsettings.resetalltodefaultconfirm"))));
         }).size(100, 20).build());
 
@@ -145,8 +143,7 @@ public class ConfigScreen extends Screen {
     @Override
     public void repositionElements() {
         if (this.tabNavigationBar != null) {
-            this.tabNavigationBar.updateWidth(this.width);
-            this.tabNavigationBar.arrangeElements();
+            this.tabNavigationBar.arrangeElements(this.width);
             int i = this.tabNavigationBar.getRectangle().bottom();
             ScreenRectangle screenRectangle = new ScreenRectangle(0, i, this.width, this.height - this.layout.getFooterHeight() - i);
             this.tabManager.setTabArea(screenRectangle);

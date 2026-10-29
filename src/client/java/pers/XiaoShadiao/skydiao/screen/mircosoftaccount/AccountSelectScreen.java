@@ -435,7 +435,7 @@ public class AccountSelectScreen extends Screen {
 
     @Override
     public void onClose() {
-        ToolList.mc.setScreen(lastScreen);
+        ToolList.mc.gui.setScreen(lastScreen);
         removed();
     }
 
@@ -536,7 +536,7 @@ public class AccountSelectScreen extends Screen {
     public void tick() {
         if(isAccountChanged) {
             isAccountChanged = false;
-            ToolList.mc.setScreen(new AccountSelectScreen(lastScreen));
+            ToolList.mc.gui.setScreen(new AccountSelectScreen(lastScreen));
         }
     }
 

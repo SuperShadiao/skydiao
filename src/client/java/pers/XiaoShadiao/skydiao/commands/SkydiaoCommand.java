@@ -1,5 +1,6 @@
 package pers.XiaoShadiao.skydiao.commands;
 
+import com.mojang.blaze3d.Blaze3D;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -14,7 +15,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.level.GameType;
@@ -49,6 +49,7 @@ import java.awt.*;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
@@ -150,7 +151,7 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                         .then(getArgConstantInstance("stop").executes(this::executeStopFindEventEgg)),
                 getArgConstantInstance("challenge_mc").redirect(HH_CHALLENGE_MC_COMMAND.getCommandNode()),
                 getArgConstantInstance("nodegraph")
-                        .then(getArgConstantInstance("openfolder").executes(_ -> owo(() -> Util.getPlatform().openFile(NodeGraphManager.graphsFolder))))
+                        .then(getArgConstantInstance("openfolder").executes(_ -> owo(() -> Blaze3D.openPath(NodeGraphManager.graphsFolder.toPath()))))
                         .then(getArgConstantInstance("reload").executes(_ -> owo(NodeGraphManager.INSTANCE::reloadFolder)))
                         .then(getArgConstantInstance("edit").executes(_ -> {
                             ToolList.printChatMessage(Component.literal("§a[小沙雕] 正在尝试拉起节点图编辑器..."));
@@ -159,9 +160,9 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                                 if(localServer != null) {
                                     try(InputStream is = ToolList.getInstance().makeReqToURL("http://localhost:8788")) {
                                         is.readAllBytes();
-                                        Util.getPlatform().openUri("http://localhost:8788/tools/NodeGraph?port=" + localServer.getPort());
+                                        Blaze3D.openUri(URI.create("http://localhost:8788/tools/NodeGraph?port=" + localServer.getPort()));
                                     } catch (Throwable e) {
-                                        Util.getPlatform().openUri("https://xiaoshadiao.club/tools/NodeGraph?port=" + localServer.getPort());
+                                        Blaze3D.openUri(URI.create("https://xiaoshadiao.club/tools/NodeGraph?port=" + localServer.getPort()));
                                     }
                                 } else {
                                     ToolList.printChatMessage(Component.literal("§a[小沙雕] §c当前设备环境不具备支持节点图编辑器的条件。"));
@@ -278,7 +279,7 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
     }
 
     private int executeEditFastCommand(CommandContext<FabricClientCommandSource> context) {
-        mc.schedule(() -> mc.setScreen(new FastCommandMenuScreen(true)));
+        mc.schedule(() -> mc.gui.setScreen(new FastCommandMenuScreen(true)));
         return 0;
     }
 
@@ -450,7 +451,7 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
             mc.execute(() -> context.getSource().sendFeedback(Component.literal("§c咕↓咕↓嘎→嘎↑!!")));
             Thread.sleep(2000);
             mc.execute(() -> context.getSource().sendFeedback(Component.literal("§c咕↑咕↑嘎↑嘎↑!!!!")));
-            Util.getPlatform().openUri("https://play-live.bilibili.com/");
+            Blaze3D.openUri(URI.create("https://play-live.bilibili.com/"));
             return null;
         });
         return 0;
@@ -463,13 +464,13 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
     }
 
     private int executeEditCape(CommandContext<FabricClientCommandSource> context) {
-        Util.getPlatform().openFile(ConfigManager.capeFolder);
+        Blaze3D.openPath(ConfigManager.capeFolder.toPath());
         return 0;
     }
 
     @Override
     public int executeCommand(CommandContext<FabricClientCommandSource> context) {
-        mc.schedule(() -> mc.setScreenAndShow(new ConfigScreen(mc.screen)));
+        mc.schedule(() -> mc.setScreenAndShow(new ConfigScreen(mc.gui.screen())));
         return 1;
     }
 

@@ -27,7 +27,7 @@ import java.util.zip.ZipInputStream;
 
 public class AutoUpdater {
 
-    public static final String FILE_VERSION = "26_1_2";
+    public static final String FILE_VERSION = "26_3";
 
     public static final AutoUpdater emptyInstance = new AutoUpdater(new String[0], SkyDiaoModClient.VERSION, false);
     public static final File modsFolder;

@@ -48,7 +48,7 @@ public class DungeonAutoGFSListener extends AbstractListener {
     private void onStartClientTick(Minecraft mc) {
         if(!ConfigManager.dungeonautogfs.getValue() || mc.level == null || mc.player == null || !StatusManager.get().isInDungeon()) return;
 
-        if(mc.screen != null) {
+        if(mc.gui.screen() != null) {
             tick = 100;
             return;
         }

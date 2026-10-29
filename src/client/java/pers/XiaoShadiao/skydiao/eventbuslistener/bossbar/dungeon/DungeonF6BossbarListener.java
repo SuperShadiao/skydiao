@@ -3,7 +3,7 @@ package pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.client.gui.components.LerpingBossEvent;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.network.chat.Component;
@@ -65,7 +65,7 @@ public class DungeonF6BossbarListener extends AbstractDungeonBossbar {
     private void onClientTick(Minecraft mc) {
         if (mc.level == null || !isInCorrectDungeon()) return;
 
-        MixinBossbarEventGetter bossbarEventGetter = (MixinBossbarEventGetter) mc.gui.getBossOverlay();
+        MixinBossbarEventGetter bossbarEventGetter = (MixinBossbarEventGetter) mc.gui.hud.getBossOverlay();
 
         bossbarEventGetter.getEvents().forEach((uuid, bossEvent) -> {
             String name = ToolList.getInstance().deleteColorCode(bossEvent.getName().getString());
@@ -163,7 +163,7 @@ public class DungeonF6BossbarListener extends AbstractDungeonBossbar {
 
     @Override
     public Identifier getPowerUpPotionIcon() {
-        return Gui.getMobEffectSprite(switch(stage) {
+        return Hud.getMobEffectSprite(switch(stage) {
             case 1 -> MobEffects.NIGHT_VISION;
             default -> MobEffects.STRENGTH;
         });

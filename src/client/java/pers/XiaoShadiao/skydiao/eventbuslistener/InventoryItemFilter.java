@@ -78,7 +78,7 @@ public class InventoryItemFilter extends AbstractListener {
         filterTextBox.setTooltip(Tooltip.create(Component.literal(String.join(", ", hints))));
 
         buttons.add(filterTextBox);
-        buttons.add(Button.builder(Component.literal(translate("skydiao.gui.itemfilter.buttonentrance")), (button) -> mc.setScreen(new InventoryRegexSearcherConfigScreen(mc.screen))).bounds(10, screen.height / 2, 80, 20).build());
+        buttons.add(Button.builder(Component.literal(translate("skydiao.gui.itemfilter.buttonentrance")), (button) -> mc.gui.setScreen(new InventoryRegexSearcherConfigScreen(mc.gui.screen()))).bounds(10, screen.height / 2, 80, 20).build());
         MutableComponent enabledCom = Component.literal("§a■");
         MutableComponent disabledCom = Component.literal("§c■");
         buttons.add(Button.builder(enabled ? enabledCom : disabledCom, (button) -> button.setMessage((enabled = !enabled) ? enabledCom : disabledCom)).bounds(10 + 80, screen.height / 2, 20, 20).build());

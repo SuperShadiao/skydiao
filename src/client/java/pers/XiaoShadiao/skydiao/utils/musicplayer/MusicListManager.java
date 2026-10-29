@@ -207,19 +207,19 @@ public class MusicListManager {
     }
 
     public static void ensureMusicFolderVaildAndRun(Runnable run) {
-        Screen screen = ToolList.mc.screen;
-        ensureMusicFolderVaildAndRun(run, () -> ToolList.mc.setScreen(screen));
+        Screen screen = ToolList.mc.gui.screen();
+        ensureMusicFolderVaildAndRun(run, () -> ToolList.mc.gui.setScreen(screen));
     }
 
     public static void ensureMusicFolderVaildAndRun(Runnable run, Runnable cancelled) {
         if(MusicListManager.isMusicFolderVaild()) {
-            ToolList.mc.schedule(() -> ToolList.mc.setScreen(new ConfirmScreen(flag -> {
+            ToolList.mc.schedule(() -> ToolList.mc.gui.setScreen(new ConfirmScreen(flag -> {
                 if(flag) {
                     File folder = new File(ToolList.mc.gameDirectory, "XSDKGMusic");
                     if(folder.mkdirs() || folder.isDirectory()) {
                         ConfigManager.hypixelhelpermusicfolder.setValue(folder.getAbsolutePath());
                         MusicListManager.loadMusicFromFolder();
-                        ToolList.mc.setScreen(null);
+                        ToolList.mc.gui.setScreen(null);
                         run.run();
                     } else {
                         cancelled.run();

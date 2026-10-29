@@ -45,12 +45,12 @@ public class DungeonTrollListener extends AbstractListener {
         poseStack.pushPose();
         poseStack.translate(-context.levelState().cameraRenderState.pos.x + pos.x() + 0.5, -context.levelState().cameraRenderState.pos.y + pos.y() + 0.5, -context.levelState().cameraRenderState.pos.z + pos.z() + 0.5);
 
-        poseStack.mulPose(Axis.YP.rotationDegrees(-90));
-        poseStack.mulPose(Axis.XP.rotationDegrees(0));
+        poseStack.rotateDegrees(Axis.YP, -90);
+        poseStack.rotateDegrees(Axis.XP, 0);
 
         poseStack.translate(-0.5, -0.5, -0.5);
         poseStack.translate(1, 1, 0);
-        poseStack.mulPose(Axis.ZP.rotationDegrees(180.0f));
+        poseStack.rotateDegrees(Axis.ZP, 180.0f);
 
         float renderWidth = (float) gifWidth / gifHeight;
 

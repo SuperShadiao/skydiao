@@ -9,7 +9,6 @@ import net.minecraft.client.renderer.fog.environment.*;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.material.FogType;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -61,7 +60,7 @@ public class MixinFogRendererRemoveBlindness {
             );
 
     @Inject(method = "setupFog", at = @At("HEAD"), require = 0)
-    public void setupFog(Camera camera, int i, DeltaTracker deltaTracker, float f, ClientLevel clientLevel, CallbackInfoReturnable<Vector4f> cir) {
+    public void setupFog(Camera camera, int i, DeltaTracker deltaTracker, float f, ClientLevel clientLevel, CallbackInfoReturnable<FogData> cir) {
         FOG_ENVIRONMENTS = new ArrayList<>(ConfigManager.noblind.getValue() ? modified : original);
     }
 

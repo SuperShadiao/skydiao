@@ -17,6 +17,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
@@ -73,7 +74,7 @@ public class CustomBossbar extends XSDHUD {
     }
 
     private boolean onMouseClick(long windowsHandler, MouseButtonInfo mouseButtonInfo, int state) {
-        if(ConfigManager.bossbarAddTargetEntity.getValue() && mc.screen == null && mc.player != null && mouseButtonInfo.button() == 1 && state == 1) {
+        if(ConfigManager.bossbarAddTargetEntity.getValue() && mc.gui.screen() == null && mc.player != null && mouseButtonInfo.button() == 1 && state == 1) {
             if(小沙雕没有神剑_咕咕嘎嘎()) {
                 Vec3 thisPos = mc.player.position();
                 Vec3 forward = thisPos.add(mc.player.getForward().multiply(10, 10, 10));
@@ -171,7 +172,7 @@ public class CustomBossbar extends XSDHUD {
         if(force) {
             addEntityToBossbar(mc.player);
         }
-        MixinBossbarEventGetter bossbarEventGetter = (MixinBossbarEventGetter) mc.gui.getBossOverlay();
+        MixinBossbarEventGetter bossbarEventGetter = (MixinBossbarEventGetter) mc.gui.hud.getBossOverlay();
         List<UUID> temp = new ArrayList<>(bossbarEventGetter.getEvents().size());
         bossbarEventGetter.getEvents().forEach((uuid, lerpingBossEvent) -> {
             // System.out.println(lerpingBossEvent);
@@ -203,7 +204,8 @@ public class CustomBossbar extends XSDHUD {
             }
             BossEvent.BossBarColor color1 = lerpingBossEvent.getColor();
             if (!color1.equals(BossEvent.BossBarColor.RED)) {
-                Integer color2 = color1.getFormatting().getColor();
+                TextColor textColor = TextColor.fromLegacyFormat(color1.getFormatting());
+                Integer color2 = textColor == null ? null : textColor.getValue();
                 if(null != color2) am.setHealthColor(new Color(color2));
             } else {
                 am.setHealthColor(AnimationManager.commonHealthColor);
