@@ -3,7 +3,7 @@ package pers.XiaoShadiao.skydiao.utils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import pers.XiaoShadiao.skydiao.irc.ChatPacket;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatPacket;
 
 import java.util.Collections;
 import java.util.Set;

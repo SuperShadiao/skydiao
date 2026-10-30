@@ -1,7 +1,6 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener.macro;
 
 import com.madgag.gif.fmsware.AnimatedGifEncoder;
-import com.mojang.renderpearl.api.buffers.GpuBuffer;
 import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import com.mojang.text2speech.Narrator;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -29,8 +28,8 @@ import pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.EasyFarmingScript
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.slayer.vs.AutoBloodfiendListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
-import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
-import pers.XiaoShadiao.skydiao.irc.ChatPacket;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatPacket;
 import pers.XiaoShadiao.skydiao.utils.*;
 
 import java.awt.image.BufferedImage;
@@ -186,7 +185,7 @@ public class MacroManagerListener extends AbstractListener {
             p.initSender();
             p.packetType = "macro_check";
             p.message = "Alert! Macro check! (Info: ActiveMacros: " + activeMacros.stream().map(IMacro::getMacroName).toList() + " " + message + ")";
-            ChatClientManager.getChatClient().sender.send(p);
+            ChatClientManager.trySend(p, false);
         }
     }
 

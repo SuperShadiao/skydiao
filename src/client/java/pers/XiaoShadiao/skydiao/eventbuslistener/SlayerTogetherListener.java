@@ -12,8 +12,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
-import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
-import pers.XiaoShadiao.skydiao.irc.ChatPacket;
+import pers.XiaoShadiao.skydiao.irc.XSDIRCConfig;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatPacket;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
@@ -97,7 +98,7 @@ public class SlayerTogetherListener extends AbstractListener {
         packet.message = jo.toString();
         packet.packetType = "slayer_together";
         packet.initSender();
-        ChatClientManager.trySendOrWarning(packet);
+        ChatClientManager.trySendOrWarning(packet, XSDIRCConfig.INSTANCE);
     }
 
     public void onSlayerTogetherPacket(ChatPacket packet) {

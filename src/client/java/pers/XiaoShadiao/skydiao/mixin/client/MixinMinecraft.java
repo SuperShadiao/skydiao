@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
-import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
 import pers.XiaoShadiao.skydiao.screen.MinecraftCrashedScreen;
 import pers.XiaoShadiao.skydiao.utils.ClientRenderCrashFixer;
 import pers.XiaoShadiao.skydiao.utils.MCThreadDumper;
@@ -119,7 +119,7 @@ public class MixinMinecraft {
         Minecraft mc = (Minecraft) (Object) this;
         XSDSafeSession user = user0 instanceof XSDSafeSession xs ? xs : new XSDSafeSession(user0);
         if (!user.equals(this.user)) {
-            try { ChatClientManager.getChatClient().socket.close(); } catch (Exception ignored) {}
+            ChatClientManager.closeClient();
         }
         MixinRealmStatusReset.setFuture(null);
         MixinRealmsClientReseter.setRealmsClientInstance(null);

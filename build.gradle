@@ -75,12 +75,37 @@ jar {
     def projectName = project.name
     inputs.property "projectName", projectName
 
+    // ircinner 单独打包成 skydiao-irc-<version>.jar, 不进入主 jar
+    exclude 'pers/XiaoShadiao/skydiao/ircinner/**'
+
     from("LICENSE") {
         rename { "${it}_$projectName"}
     }
     manifest.attributes(
             "Main-Class": "pers.XiaoShadiao.HypixelHelperMainClass"
     )
+}
+
+// ircinner 独立 jar, 由 SkydiaoPreLaunch 在 preLaunch 阶段注入
+// 当前 Loom/Minecraft 版本没有 remapJar 步骤(jar 产物即最终 mod jar), 因此直接打包编译产物即可
+tasks.register('ircJar', Jar) {
+    def baseName = project.base.archivesName.get()
+    archiveFileName = "${baseName}-irc-${project.version}.jar"
+    destinationDirectory = layout.buildDirectory.dir('libs')
+    from(sourceSets.client.output) {
+        include 'pers/XiaoShadiao/skydiao/ircinner/**'
+    }
+    dependsOn tasks.named('compileClientJava')
+    // src 中不存在 ircinner 包时跳过打包(该包已不在仓库中维护)
+    onlyIf {
+        def innerDir = file('src/client/java/pers/XiaoShadiao/skydiao/ircinner')
+        def files = innerDir.isDirectory() ? innerDir.listFiles() : null
+        files != null && files.length > 0
+    }
+}
+
+tasks.named('assemble') {
+    dependsOn tasks.named('ircJar')
 }
 
 // configure the maven publication

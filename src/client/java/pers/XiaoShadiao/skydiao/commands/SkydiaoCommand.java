@@ -30,8 +30,9 @@ import pers.XiaoShadiao.skydiao.eventbuslistener.CustomSettingEntityESPListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
-import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
-import pers.XiaoShadiao.skydiao.irc.ChatPacket;
+import pers.XiaoShadiao.skydiao.irc.XSDIRCConfig;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatPacket;
 import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
 import pers.XiaoShadiao.skydiao.screen.FastCommandMenuScreen;
 import pers.XiaoShadiao.skydiao.utils.Banned;
@@ -327,7 +328,7 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
             packet.initSender();
             packet.message = MusicListManager.MIToJson(PlayerThread.currentMusic).toString();
             packet.packetType = "sharemusic";
-            ChatClientManager.trySendOrWarning(packet);
+            ChatClientManager.trySendOrWarning(packet, XSDIRCConfig.INSTANCE);
         }
         return 0;
     }

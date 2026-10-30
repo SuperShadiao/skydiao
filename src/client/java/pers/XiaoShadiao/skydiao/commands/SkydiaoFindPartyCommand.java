@@ -5,8 +5,9 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
-import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
-import pers.XiaoShadiao.skydiao.irc.ChatPacket;
+import pers.XiaoShadiao.skydiao.irc.XSDIRCConfig;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatPacket;
 import pers.XiaoShadiao.skydiao.screen.partyfinder.PartyListScreen;
 import pers.XiaoShadiao.skydiao.screen.partyfinder.SetupPartyScreen;
 import pers.XiaoShadiao.skydiao.utils.partyfinder.PartyFinderManager;
@@ -38,7 +39,7 @@ public class SkydiaoFindPartyCommand extends BaseRootRunnableCommand {
                         packet.message = PartyFinderManager.selfPartyData.toJson().toString();
                         packet.packetType = "find_party_broadcast";
                         packet.initSender();
-                        ChatClientManager.trySendOrWarning(packet);
+                        ChatClientManager.trySendOrWarning(packet, XSDIRCConfig.INSTANCE);
                     }
                     return 0;
                 }),

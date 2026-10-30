@@ -17,8 +17,9 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
-import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
-import pers.XiaoShadiao.skydiao.irc.ChatPacket;
+import pers.XiaoShadiao.skydiao.irc.XSDIRCConfig;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatPacket;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.tab.TabReader;
@@ -449,7 +450,7 @@ public class MineshaftShareListener extends AbstractListener {
         p.message = customMessage;
         p.initSender();
 
-        ChatClientManager.trySendOrWarning(p);
+        ChatClientManager.trySendOrWarning(p, XSDIRCConfig.INSTANCE);
     }
 
     public void tryToJoinPlayersMineshaft(String playerName) {
@@ -459,7 +460,7 @@ public class MineshaftShareListener extends AbstractListener {
         p.message = "1_" + playerName;
         p.initSender();
 
-        ChatClientManager.trySendOrWarning(p);
+        ChatClientManager.trySendOrWarning(p, XSDIRCConfig.INSTANCE);
     }
 
     private void runCommand(String s) {

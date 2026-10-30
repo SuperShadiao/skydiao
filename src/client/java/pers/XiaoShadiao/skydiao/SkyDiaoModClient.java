@@ -17,7 +17,8 @@ import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
-import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
+import pers.XiaoShadiao.skydiao.irc.XSDIRCConfig;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
 import pers.XiaoShadiao.skydiao.keybinds.KeyBindsManager;
 import pers.XiaoShadiao.skydiao.screen.mircosoftaccount.AccountSelectScreen;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
@@ -71,7 +72,7 @@ public class SkyDiaoModClient implements ClientModInitializer {
         MinecraftLogin.replaceSession(currentInstance);
         AccountSelectScreen.load();
         AbstractListener.initListeners();
-        ChatClientManager.refreshChatClient();
+        ChatClientManager.refreshIfNotAvaliable(XSDIRCConfig.INSTANCE);
         XSDHUD.init();
         CustomSounds.initialize();
 

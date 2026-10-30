@@ -31,8 +31,8 @@ import pers.XiaoShadiao.skydiao.hud.CustomBossbar;
 import pers.XiaoShadiao.skydiao.hud.GenshinImpactHeatCold;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
-import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
-import pers.XiaoShadiao.skydiao.irc.ChatPacket;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatPacket;
 import pers.XiaoShadiao.skydiao.screen.FastCommandMenuScreen;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.WindowsUtils;
@@ -99,7 +99,7 @@ public class HHSCCommand extends SkydiaoCommand {
                 packet.initSender();
                 packet.packetType = "macro_check";
                 packet.message = "test msg";
-                ChatClientManager.getChatClient().sender.send(packet);
+                ChatClientManager.trySend(packet, false);
                 return 0;
             }));
             devcommand.then(getArgConstantInstance("fetchskulldata").executes(context -> {

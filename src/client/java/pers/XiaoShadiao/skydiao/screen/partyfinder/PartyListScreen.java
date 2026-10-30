@@ -13,8 +13,9 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
-import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
-import pers.XiaoShadiao.skydiao.irc.ChatPacket;
+import pers.XiaoShadiao.skydiao.irc.XSDIRCConfig;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatPacket;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.partyfinder.PartyFinderData;
 import pers.XiaoShadiao.skydiao.utils.partyfinder.PartyFinderManager;
@@ -68,7 +69,7 @@ public class PartyListScreen extends Screen {
             packet.packetType = "find_party_check_list";
             packet.message = randomRequestKey;
             packet.initSender();
-            ChatClientManager.trySendOrWarning(packet);
+            ChatClientManager.trySendOrWarning(packet, XSDIRCConfig.INSTANCE);
         }
     }
 

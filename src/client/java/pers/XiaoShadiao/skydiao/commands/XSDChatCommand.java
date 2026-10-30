@@ -6,7 +6,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
-import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
 
 import java.util.List;
 
@@ -28,11 +28,7 @@ public class XSDChatCommand extends BaseRootRunnableCommand {
 
     @Override
     public int executeCommand(CommandContext<FabricClientCommandSource> context) {
-        if(ChatClientManager.serverAvailable()) {
-            ChatClientManager.getChatClient().sender.sendMessage(StringArgumentType.getString(context, "chat"));
-        } else {
-            context.getSource().sendError(Component.literal("§a[小沙雕] §c当前服务器暂时不可用, 请稍后再试! 若仍然没有解决, 请联系小沙雕!"));
-        }
+        ChatClientManager.trySendMessage(StringArgumentType.getString(context, "chat"), true);
         return 1;
     }
 

@@ -57,8 +57,9 @@ import pers.XiaoShadiao.skydiao.eventbuslistener.bilibili.BLiveListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
-import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
-import pers.XiaoShadiao.skydiao.irc.ChatPacket;
+import pers.XiaoShadiao.skydiao.irc.XSDIRCConfig;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatPacket;
 import pers.XiaoShadiao.skydiao.keybinds.KeyBindsManager;
 import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
 import pers.XiaoShadiao.skydiao.screen.FastCommandMenuScreen;
@@ -477,7 +478,7 @@ public class BasicListener extends AbstractListener {
             cp.packetType = "hyp_party";
             cp.message = jo.toString();
             cp.initSender();
-            ChatClientManager.trySendOrWarning(cp);
+            ChatClientManager.trySendOrWarning(cp, XSDIRCConfig.INSTANCE);
             PartyManager.updatePartyMembers(partyInfoPacket.isInParty() ? new ArrayList<>(partyInfoPacket.getMemberMap().values()) : List.of());
         }
     }
@@ -485,7 +486,7 @@ public class BasicListener extends AbstractListener {
     private long lastNotifyPublicPartyTime;
 
     private void onWorldChange(Minecraft mc, ClientLevel clientLevel) {
-        ChatClientManager.getChatClient();
+        ChatClientManager.refreshIfNotAvaliable(XSDIRCConfig.INSTANCE);
         reloadCustomCape();
         InputSimulator.unpressAllKey();
         ServerIdSpoofer.generateServerIds();
@@ -556,7 +557,7 @@ public class BasicListener extends AbstractListener {
             if(afkHoldTick++ > 20) {
                 if (isAFK) {
                     isAFK = false;
-                    if (ChatClientManager.serverAvailable()) ChatClientManager.getChatClient().sender.sendAFK(false);
+                    ChatClientManager.trySendAFK(false, false);
                 }
                 lastOperationTime = System.currentTimeMillis();
             }
@@ -565,7 +566,7 @@ public class BasicListener extends AbstractListener {
         }
         if(System.currentTimeMillis() - lastOperationTime > 120000 && !isAFK) {
             isAFK = true;
-            if(ChatClientManager.serverAvailable()) ChatClientManager.getChatClient().sender.sendAFK(true);
+            ChatClientManager.trySendAFK(true, false);
         }
 
         if(tickCounter % 40 == 0) {

@@ -1,6 +1,6 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener;
 
-import pers.XiaoShadiao.skydiao.irc.ChatPacket;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatPacket;
 
 public interface ICustomSkinModelLoader {
     public boolean isSupportYSM();

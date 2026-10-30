@@ -8,8 +8,9 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
-import pers.XiaoShadiao.skydiao.irc.ChatClientManager;
-import pers.XiaoShadiao.skydiao.irc.ChatPacket;
+import pers.XiaoShadiao.skydiao.irc.XSDIRCConfig;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
+import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatPacket;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.List;
@@ -70,7 +71,7 @@ public class XSDCShowCommand extends BaseRootRunnableCommand {
             packet.packetType = "showitem";
             packet.message = jsonElement.toString();
             packet.initSender();
-            ChatClientManager.trySendOrWarning(packet);
+            ChatClientManager.trySendOrWarning(packet, XSDIRCConfig.INSTANCE);
         }
     }
 
