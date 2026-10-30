@@ -175,11 +175,13 @@ public class FastCommandMenuScreen extends Screen {
             }
             addRenderableWidget(editTitle);
             editButtonTitle = new EditBox(font, 100, 20, Component.literal("按钮标题"));
+            editButtonTitle.setMaxLength(200);
             editButtonTitle.setHint(Component.literal("按钮标题"));
             editButtonTitle.setResponder(string -> {
                 if(editingButton != null) editingButton.setTitle(string);
             });
             editButtonCommand = new EditBox(font, 100, 20, Component.literal("按钮指令"));
+            editButtonCommand.setMaxLength(500);
             editButtonCommand.setHint(Component.literal("按钮指令"));
             editButtonCommand.setResponder(string -> {
                 if(editingButton != null) editingButton.setCommand(string);

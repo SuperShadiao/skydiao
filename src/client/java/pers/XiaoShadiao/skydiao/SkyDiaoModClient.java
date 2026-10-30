@@ -34,6 +34,8 @@ import java.util.concurrent.TimeUnit;
 
 public class SkyDiaoModClient implements ClientModInitializer {
 
+    public static final int secret = 648219632;
+
     public static final String MOD_ID = "skydiao";
     public static final String VERSION = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow(AssertionError::new).getMetadata().getVersion().getFriendlyString();
 

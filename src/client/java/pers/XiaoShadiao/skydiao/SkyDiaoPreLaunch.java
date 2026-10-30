@@ -1,5 +1,6 @@
 package pers.XiaoShadiao.skydiao;
 
+import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import org.apache.commons.io.FileUtils;
@@ -29,6 +30,14 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
     public static final File libPrepareFolder = new File(libFolder, "1");
     public static final File libLoadFolder = new File(libFolder, "2");
 
+    public static final List<Lib> libs = List.of(
+            new Lib(false, "mrxiaom-bilibili-open-live-1.0.4.jar", "https://xiaoshadiao.club/3rd_lib/mrxiaom-bilibili-open-live-1.0.4.jar", "a8f72cfa9754d267f0b47703a96d519e"),
+            new Lib(false, "jlayer-1.0.1.jar", "https://xiaoshadiao.club/3rd_lib/jlayer-1.0.1.jar", "601db87031f231fbf7a61f9d8384dde6"),
+            new Lib(false, "Java-WebSocket-1.5.6.jar", "https://xiaoshadiao.club/3rd_lib/Java-WebSocket-1.5.6.jar", "0c663cf078f779f5d03fa4d02e1647e3"),
+            new Lib(false, "blivemode.jar", "https://xiaoshadiao.club/3rd_lib/blivemode.jar", "3f40b7f8d8c4a14da4bc4171ec3b300f"),
+            new Lib(true, "skydiao_irc.jar", "https://xiaoshadiao.club/skydiao_closed-source_irc_file/skydiao-irc-1.jar", "c04291ce0143fe2ad4cb299caa10b234")
+    );
+
     static {
         libLoadFolder.mkdirs();
         libPrepareFolder.mkdirs();
@@ -41,20 +50,22 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
         return instance;
     }
 
-    public Runnable initJars = null;
+    public BooleanConsumer initJars = null;
 
     public void execInitJars() {
         if(initJars == null) throw new AssertionError("不应该发生的错误, initJars 未初始化");
-        initJars.run();
+        initJars.accept(false);
     }
 
     public static class Lib {
+        public final boolean earlyLoad;
         public final String name;
         public final String url;
         public final String md5;
         public final File loadFile;
         public final File prepareFile;
-        public Lib(String name, String url, String md5) {
+        public Lib(boolean earlyLoad, String name, String url, String md5) {
+            this.earlyLoad = earlyLoad;
             this.name = name;
             this.url = url;
             this.md5 = md5;
@@ -173,13 +184,6 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
         }
     }
 
-    public static final List<Lib> libs = List.of(
-            new Lib("mrxiaom-bilibili-open-live-1.0.4.jar", "https://xiaoshadiao.club/3rd_lib/mrxiaom-bilibili-open-live-1.0.4.jar", "a8f72cfa9754d267f0b47703a96d519e"),
-            new Lib("jlayer-1.0.1.jar", "https://xiaoshadiao.club/3rd_lib/jlayer-1.0.1.jar", "601db87031f231fbf7a61f9d8384dde6"),
-            new Lib("Java-WebSocket-1.5.6.jar", "https://xiaoshadiao.club/3rd_lib/Java-WebSocket-1.5.6.jar", "0c663cf078f779f5d03fa4d02e1647e3"),
-            new Lib("blivemode.jar", "https://xiaoshadiao.club/3rd_lib/blivemode.jar", "3f40b7f8d8c4a14da4bc4171ec3b300f")
-    );
-
     @Override
     public void onPreLaunch() {
         instance = this;
@@ -187,8 +191,11 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
         if(!(classLoader instanceof URLClassLoader)) classLoader = classLoader.getParent();
         if(classLoader instanceof URLClassLoader urlClassLoader) {
             moveOldLibToNewLib();
-            initJars = () -> {
-                for (Lib lib : libs) {
+            List<Lib> earlyLoadLibs = libs.stream().filter(lib -> lib.earlyLoad).toList();
+            List<Lib> lateLoadLibs = libs.stream().filter(lib -> !lib.earlyLoad).toList();
+            initJars = (earlyLoad) -> {
+                List<Lib> loadLibs = earlyLoad ? earlyLoadLibs : lateLoadLibs;
+                for (Lib lib : loadLibs) {
                     try {
                         File loadFile = lib.getLoadFile();
                         if(loadFile.exists() && !lib.isLoadExist()) {
@@ -201,8 +208,9 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
                         throw new RuntimeException(e);
                     }
                 }
-                log.info("成功添加" + libs.size() + "个jar文件到" + urlClassLoader);
+                log.info("成功添加" + loadLibs.size() + "个jar文件到" + urlClassLoader + (earlyLoad ? " (EarlyLoad)" : " (LateLoad)"));
             };
+            initJars.accept(true);
         } else {
             throw new AssertionError("Can't lookup the URLClassLoader");
         }

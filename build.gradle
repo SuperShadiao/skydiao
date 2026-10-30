@@ -90,7 +90,7 @@ jar {
 // 当前 Loom/Minecraft 版本没有 remapJar 步骤(jar 产物即最终 mod jar), 因此直接打包编译产物即可
 tasks.register('ircJar', Jar) {
     def baseName = project.base.archivesName.get()
-    archiveFileName = "${baseName}-irc-${project.version}.jar"
+    archiveFileName = "${baseName}-irc.jar"
     destinationDirectory = layout.buildDirectory.dir('libs')
     from(sourceSets.client.output) {
         include 'pers/XiaoShadiao/skydiao/ircinner/**'
