@@ -15,12 +15,12 @@ public final class AlertCard implements IslandCard {
     private static final int ROW_GAP = 6;
     private static final int ROW_HEIGHT = 30;
 
-    private static final int ICON_SIZE = 20;
+    private static final int ICON_SIZE = 24;
     private static final int ICON_GAP = 8;
     private static final int ICON_TEXTURE_SIZE = 128;
 
-    private static final int TITLE_TOP = 4;
-    private static final int SUBTITLE_TOP = 16;
+    private static final int TITLE_TOP = 3;
+    private static final int SUBTITLE_TOP = 15;
     private static final int CONTENT_MIN_WIDTH = 80;
 
     private static final int TEXT = 0xFFF2F2F5;
