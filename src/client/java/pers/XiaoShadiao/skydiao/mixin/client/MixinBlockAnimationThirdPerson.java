@@ -53,22 +53,22 @@ public abstract class MixinBlockAnimationThirdPerson {
     private static void applyLegacyTransform(PoseStack poseStack, boolean leftHand) {
         poseStack.translate((leftHand ? 1.0F : -1.0F) / 16.0F, 0.4375F, 0.0625F);
         poseStack.translate(leftHand ? -0.035F : 0.05F, leftHand ? 0.045F : 0.0F, leftHand ? -0.135F : -0.1F);
-        poseStack.mulPose(Axis.YP.rotationDegrees((leftHand ? -1.0F : 1.0F) * -50.0F));
-        poseStack.mulPose(Axis.XP.rotationDegrees(-10.0F));
-        poseStack.mulPose(Axis.ZP.rotationDegrees((leftHand ? -1.0F : 1.0F) * -60.0F));
+        poseStack.rotateDegrees(Axis.YP, (leftHand ? -1.0F : 1.0F) * -50.0F);
+        poseStack.rotateDegrees(Axis.XP, -10.0F);
+        poseStack.rotateDegrees(Axis.ZP, (leftHand ? -1.0F : 1.0F) * -60.0F);
         poseStack.translate(0.0F, 0.1875F, 0.0F);
 
         poseStack.scale(0.625F, 0.625F, 0.625F);
-        poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
-        poseStack.mulPose(Axis.XN.rotationDegrees(-100.0F));
-        poseStack.mulPose(Axis.YN.rotationDegrees(leftHand ? 35.0F : 45.0F));
+        poseStack.rotateDegrees(Axis.XP, 180.0F);
+        poseStack.rotateDegrees(Axis.XN, -100.0F);
+        poseStack.rotateDegrees(Axis.YN, leftHand ? 35.0F : 45.0F);
         poseStack.translate(0.0F, -0.3F, 0.0F);
         poseStack.scale(1.5F, 1.5F, 1.5F);
-        poseStack.mulPose(Axis.YN.rotationDegrees(50.0F));
-        poseStack.mulPose(Axis.ZP.rotationDegrees(335.0F));
+        poseStack.rotateDegrees(Axis.YN, 50.0F);
+        poseStack.rotateDegrees(Axis.ZP, 335.0F);
         poseStack.translate(-0.9375F, -0.0625F, 0.0F);
         poseStack.translate(0.5F, 0.5F, 0.25F);
-        poseStack.mulPose(Axis.YN.rotationDegrees(180.0F));
+        poseStack.rotateDegrees(Axis.YN, 180.0F);
         poseStack.translate(0.0F, 0.0F, 0.28125F);
     }
 
@@ -86,7 +86,7 @@ public abstract class MixinBlockAnimationThirdPerson {
         quaternion.conjugate();
         poseStack.scale(1.0F / transform.scale().x(), 1.0F / transform.scale().y(),
                 1.0F / transform.scale().z());
-        poseStack.mulPose(quaternion);
+        poseStack.rotate(quaternion);
         poseStack.translate((leftHand ? -1.0F : 1.0F) * -transform.translation().x(),
                 -transform.translation().y(), -transform.translation().z());
     }

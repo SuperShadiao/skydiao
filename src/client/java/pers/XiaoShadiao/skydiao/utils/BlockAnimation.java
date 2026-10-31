@@ -41,6 +41,10 @@ public final class BlockAnimation {
         return ToolList.mc.options.keyUse.isDown();
     }
 
+    public static float itemSize() {
+        return Math.clamp(ConfigManager.blockAnimationItemSize.getValue() / 100.0F, 0.3F, 3.0F);
+    }
+
     public static boolean isSword(ItemStack stack) {
         if (stack.isEmpty()) return false;
         if (stack.is(ItemTags.SWORDS)) return true;
@@ -75,46 +79,6 @@ public final class BlockAnimation {
         return animation == ItemUseAnimation.EAT || animation == ItemUseAnimation.DRINK;
     }
 
-    public static float itemSize() {
-        return Math.clamp(ConfigManager.blockAnimationItemSize.getValue() / 100.0F, 0.3F, 3.0F);
-    }
-
-    public static boolean usingItem(Player player, InteractionHand hand) {
-        if (player == null || !player.isUsingItem()) return false;
-        return player.getUsedItemHand() == hand;
-    }
-
-    public static boolean usingFoodOrBow(Player player, InteractionHand hand, ItemStack stack) {
-        if (!usingItem(player, hand) || stack.isEmpty()) return false;
-        ItemUseAnimation animation = stack.getUseAnimation();
-        return animation == ItemUseAnimation.EAT || animation == ItemUseAnimation.DRINK
-                || animation == ItemUseAnimation.BOW || animation == ItemUseAnimation.CROSSBOW;
-    }
-
-    public static float useProgress(Player player, ItemStack stack) {
-        int duration = Math.max(1, stack.getUseDuration(player));
-        float remaining = player.getUseItemRemainingTicks();
-        return Math.clamp(1.0F - remaining / (float) duration, 0.0F, 1.0F);
-    }
-    public static boolean usingBow(Player player) {
-        if (player == null || !player.isUsingItem()) return false;
-        ItemStack stack = player.getUseItem();
-        if (stack.isEmpty()) return false;
-        ItemUseAnimation animation = stack.getUseAnimation();
-        return animation == ItemUseAnimation.BOW || animation == ItemUseAnimation.CROSSBOW;
-    }
-
-    public static boolean canFakeSwing(Player player) {
-        return player != null && (!player.swinging || player.swingTime < 0 || player.swingTime > 2);
-    }
-    public static boolean usingSwingable(Player player) {
-        if (player == null || !player.isUsingItem()) return false;
-        ItemStack stack = player.getUseItem();
-        if (stack.isEmpty()) return false;
-        ItemUseAnimation animation = stack.getUseAnimation();
-        return animation == ItemUseAnimation.EAT || animation == ItemUseAnimation.DRINK
-                || animation == ItemUseAnimation.BOW || animation == ItemUseAnimation.CROSSBOW;
-    }
     private static String skyblockId(ItemStack stack) {
         CustomData data = stack.get(DataComponents.CUSTOM_DATA);
         if (data == null) return "";

@@ -14,7 +14,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Blaze;
-import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Enderman;
 import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.animal.wolf.Wolf;
@@ -265,7 +265,7 @@ public final class SlayerInfoListener extends AbstractListener {
             case ZOMBIE -> entity instanceof Zombie;
             case SPIDER -> entity instanceof Spider;
             case WOLF -> entity instanceof Wolf;
-            case ENDERMAN -> entity instanceof EnderMan;
+            case ENDERMAN -> entity instanceof Enderman;
             case BLAZE -> entity instanceof Blaze;
             case VAMPIRE -> entity instanceof Player;
         };
