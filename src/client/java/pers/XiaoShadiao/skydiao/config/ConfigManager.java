@@ -199,7 +199,6 @@ public class ConfigManager {
     public static final BooleanConfigOption safariBoardcastTradeNPC = new BooleanConfigOption("safariboardcasttradenpc", true);
     public static final BooleanConfigOption safariRenderTargetESP = new BooleanConfigOption("safaritargetrenderepesp", true);
     public static final BooleanConfigOption floorDroppingRender = new BooleanConfigOption("floordroppingrender", true);
-    public static final BooleanConfigOption dungeonReviveItemCDRender = new BooleanConfigOption("dungeonreviveitemcdrender", true);
     public static final BooleanConfigOption isleVolcanoFinder =  new BooleanConfigOption("islevolcanofinder", true);
     public static final BooleanConfigOption isleVolcanoFinderCataOnlyMode = new BooleanConfigOption("islevolcanofindercataonlymode", true);
     public static final BooleanConfigOption isleDupServerTip = new BooleanConfigOption("isledupservertip", true);
@@ -239,6 +238,11 @@ public class ConfigManager {
     public static final BooleanConfigOption pinglessMining = new BooleanConfigOption("pinglessmining", false);
     public static final BooleanConfigOption dynamicSpot = new BooleanConfigOption("dynamicspot", false);
     public static final BooleanConfigOption dynamicSpotReplaceTabList = new BooleanConfigOption("dynamicspotreplacetablist", false);
+    public static final BooleanConfigOption maskTimer = new BooleanConfigOption("masktimer", true);
+    public static final BooleanConfigOption alertHud = new BooleanConfigOption("alerthud", true);
+    public static final BooleanConfigOption blockAnimation = new BooleanConfigOption("blockanimation", false);
+    public static final IntConfigOption blockAnimationItemSize = new IntConfigOption("blockanimationitemsize", 100);
+    public static final BooleanConfigOption slayerInfo = new BooleanConfigOption("slayerinfo", true);
     public static final BooleanConfigOption dungeonautogfs = new BooleanConfigOption("dungeonautogfs", false);
     public static final BooleanConfigOption dungeonautogfsleap = new BooleanConfigOption("dungeonautogfsleap", false);
     public static final BooleanConfigOption dungeonautogfstnt = new BooleanConfigOption("dungeonautogfstnt", false);
@@ -321,7 +325,7 @@ public class ConfigManager {
     public static final BooleanConfigOption autoHypeTrainManbaOut = new BooleanConfigOption("autolobbytrainplaysoundaftercrash", true);
 
     public static final Function<String, Runnable> openChat = (msg) -> () -> ToolList.mc.setScreenAndShow(new ChatScreen(msg, false, true));
-    public static final Runnable openControl = () -> ToolList.mc.setScreenAndShow(new KeyBindsScreen(ToolList.mc.gui.screen(), ToolList.mc.options));
+    public static final Runnable openControl = () -> ToolList.mc.setScreenAndShow(new KeyBindsScreen(ToolList.mc.screen, ToolList.mc.options));
 
     public static final ActionConfigOption openFsCommandAction = new ActionConfigOption("openfscommandaction", openChat.apply("/skydiaofs"));
     public static final ActionConfigOption openFreelookAndFreecamAction = new ActionConfigOption("openfreelookandfreecamaction", openControl);
@@ -329,7 +333,7 @@ public class ConfigManager {
     public static final ActionConfigOption openAllAutoClickKeybindAction = new ActionConfigOption("openallautoclickkeybindaction", openControl);
     public static final ActionConfigOption openFsKeyBind = new ActionConfigOption("openfskeybind", openControl);
     public static final ActionConfigOption openClearStashCommand = new ActionConfigOption("openclearstashcommand", openChat.apply("/skydiao fastclearminingstash"));
-    public static final ActionConfigOption openHud = new ActionConfigOption("openhud", () -> ToolList.mc.setScreenAndShow(new HudConfigScreen(ToolList.mc.gui.screen())));
+    public static final ActionConfigOption openHud = new ActionConfigOption("openhud", () -> ToolList.mc.setScreenAndShow(new HudConfigScreen(ToolList.mc.screen)));
     public static final ActionConfigOption openfastcommandmenukeybinds = new ActionConfigOption("openfastcommandmenukeybinds", openControl);
 
     public static final BooleanConfigOption iAutoObsidian = new BooleanConfigOption("iautoobsidian", false) {
@@ -390,7 +394,7 @@ public class ConfigManager {
                     dungeonautoswitchbackitem, resurrectionItemTriggeredTitle,
                     dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7InactiveTerminalRender,
                     f7TerminalESPTracer, f7ArrowAlignSolver, f7ArrowAlignSolverBlockWrongClicks,
-                    f7SimonSaysSolver, f7SimonSaysSolverBlockWrongClicks, dungeonReviveItemCDRender,
+                    f7SimonSaysSolver, f7SimonSaysSolverBlockWrongClicks,
                     f7DrawWitherDragonESP, f7DrawStormFireballTarget, f7DrawWitherDragonLightning, f7AutoSwapEnderDragonInWitherKing,
 
                     dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3,
@@ -404,7 +408,7 @@ public class ConfigManager {
                     dungeonUseRagnarock, dungeonUseRagnarockCancelled, dungeonUseRagnarockRecieveDamage
             )),
             Map.entry("rift", List.of(rifttimegunhelper)),
-            Map.entry("界面类", List.of(openHud, bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, bossDrawESP, customBossESPTracer, starrailNotification, starrailNotificationSound, dyingtip, noblind, nosuffoverlay, fireOverlay, lyricColor1, lyricColor2, dynamicSpot, dynamicSpotReplaceTabList)),
+            Map.entry("界面类", List.of(openHud, blockAnimation, blockAnimationItemSize, bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, bossDrawESP, customBossESPTracer, starrailNotification, starrailNotificationSound, dyingtip, noblind, nosuffoverlay, fireOverlay, lyricColor1, lyricColor2, dynamicSpot, dynamicSpotReplaceTabList, maskTimer, alertHud, slayerInfo)),
             Map.entry("ravengard", List.of(ravengardHelper, ravengardQueueMessage))
     );
 

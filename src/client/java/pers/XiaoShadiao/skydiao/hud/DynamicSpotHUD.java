@@ -12,8 +12,8 @@ import net.minecraft.world.scores.*;
 import org.jetbrains.annotations.Nullable;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
+import pers.XiaoShadiao.skydiao.utils.anim.BezierUtil;
 import pers.XiaoShadiao.skydiao.utils.renderutils.BlurredRoundedSurface;
-import pers.XiaoShadiao.skydiao.utils.renderutils.Gif;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -26,8 +26,8 @@ public final class DynamicSpotHUD extends XSDHUD {
     private static final int TAB_CARD_TOP = 15;
     private static final int IDLE_HEIGHT = 28;
     private static final int IDLE_MIN_WIDTH = 210;
-    private static final int IDLE_TEXT_LEFT = 17;
-    private static final int IDLE_RIGHT_PADDING = 22;
+    private static final int IDLE_TEXT_LEFT = 10;
+    private static final int IDLE_RIGHT_PADDING = 10;
     private static final int STATUS_ICON_SIZE = 12;
     private static final int STATUS_ICON_GAP = 4;
     private static final String SEPARATOR = "  ·  ";
@@ -43,16 +43,20 @@ public final class DynamicSpotHUD extends XSDHUD {
     private static final Identifier REFRESH_ICON = statusIcon("refresh");
     private static final Identifier FPS_ICON = statusIcon("fps");
     private static final Identifier TPS_ICON = statusIcon("tps");
-    private static final Identifier BAKED_TPS_ICON = Identifier.fromNamespaceAndPath("skydiao", "textures/gui/dynamic_spot/tps_baked.gif");
+
 
     private static final Pattern HYPIXEL = Pattern.compile(
             "(?i)(?<![\\w.-])www\\.hypixel\\.(?:net|com)(?![\\w.-])");
     private static final Queue<Notice> INCOMING = new ConcurrentLinkedQueue<>();
     private static final ArrayDeque<Notice> NOTICES = new ArrayDeque<>();
-    private static final DynamicSpotAnimation TAB_ANIMATION = new DynamicSpotAnimation();
+    private static final BezierUtil TAB_ANIMATION = new BezierUtil(3.5F, 0F);
+    private static final BezierUtil IDLE_WIDTH_ANIMATION = new BezierUtil(3.5F, IDLE_MIN_WIDTH);
+    private static final BezierUtil CARD_WIDTH_ANIMATION = new BezierUtil(3.5F, IDLE_MIN_WIDTH);
+    private static final BezierUtil CARD_HEIGHT_ANIMATION = new BezierUtil(3.5F, IDLE_HEIGHT);
     private static float tabProgress;
+    private static float tabBaseWidth = IDLE_MIN_WIDTH;
+    private static boolean tabMorphActive;
     private static List<IdlePart> idleParts = List.of();
-    private static float idleWidth = IDLE_MIN_WIDTH;
 
     public static final Identifier MOD_NAME_PART_ID = Identifier.fromNamespaceAndPath("skydiao", "dynamic_spot_mod_name");
     public static final Identifier USERNAME_PART_ID = Identifier.fromNamespaceAndPath("skydiao", "dynamic_spot_username");
@@ -80,27 +84,57 @@ public final class DynamicSpotHUD extends XSDHUD {
     @Override
     public void render(GuiGraphicsExtractor context, DeltaTracker tickCounter, boolean force) {
         if (!ConfigManager.dynamicSpot.getValue() || mc.player == null || mc.level == null) {
-            TAB_ANIMATION.reset();
+            TAB_ANIMATION.setAndUpdate(0F);
             tabProgress = 0F;
             if (mc.player == null || mc.level == null) clear();
             return;
         }
-        // Tab mixins and the HUD share this exact sample, including the closing frame.
-        tabProgress = TAB_ANIMATION.sample(isTabRequested(), System.nanoTime());
+
+        TAB_ANIMATION.update(isTabRequested() ? 1F : 0F);
+        TAB_ANIMATION.freeze();
+        tabProgress = TAB_ANIMATION.get();
+        boolean tabMorph = isTabAnimating();
+        if (tabMorph && !tabMorphActive) tabBaseWidth = idleCardWidth();
+        tabMorphActive = tabMorph;
         updateIdleContent(mc);
         drainNotices();
         expireNotices();
-        if (isTabAnimating()) {
+        if (tabMorph) {
             return;
-        } else if (!NOTICES.isEmpty()) {
+        }
+        IslandCard card = IslandCards.active();
+        if (card != null) {
+            renderCard(context, card);
+            return;
+        }
+        CARD_WIDTH_ANIMATION.update(idleCardWidth());
+        CARD_HEIGHT_ANIMATION.update(IDLE_HEIGHT);
+        if (!NOTICES.isEmpty()) {
             renderNotice(context, NOTICES.peek());
         } else {
             renderIdle(context);
         }
     }
 
-    public static boolean isTabRequested() {
-        Minecraft client = Minecraft.getInstance();
+    private static void renderCard(GuiGraphicsExtractor context, IslandCard card) {
+        int targetWidth = Math.max(160, card.width(mc));
+        int targetHeight = Math.max(IDLE_HEIGHT, card.height());
+        CARD_WIDTH_ANIMATION.update(targetWidth);
+        CARD_HEIGHT_ANIMATION.update(targetHeight);
+        CARD_WIDTH_ANIMATION.freeze();
+        CARD_HEIGHT_ANIMATION.freeze();
+
+        int cardWidth = Math.round(CARD_WIDTH_ANIMATION.get());
+        int cardHeight = Math.round(CARD_HEIGHT_ANIMATION.get());
+        int x = Math.round((mc.getWindow().getGuiScaledWidth() - cardWidth) / 2F);
+        int y = CARD_TOP;
+        BlurredRoundedSurface.draw(context, x, y, cardWidth, cardHeight, Math.min(cardHeight / 2F, 14F));
+        context.enableScissor(x, y, x + cardWidth, y + cardHeight);
+        card.render(context, x, y, 255);
+        context.disableScissor();
+    }
+
+    public static boolean isTabRequested() {        Minecraft client = Minecraft.getInstance();
         return client.player != null && client.level != null
                 && ConfigManager.dynamicSpotReplaceTabList.getValue()
                 && client.options.keyPlayerList.isDown()
@@ -126,7 +160,7 @@ public final class DynamicSpotHUD extends XSDHUD {
     }
 
     public static float idleCardWidth() {
-        return idleWidth;
+        return IDLE_WIDTH_ANIMATION.get();
     }
 
     public static Identifier statusIcon(String name) {
@@ -135,51 +169,18 @@ public final class DynamicSpotHUD extends XSDHUD {
 
     private static void updateIdleContent(Minecraft client) {
         String user = client.getUser() == null ? "Player" : client.getUser().getName();
-//        String server = serverLabel(client);
-//        int ping = ping(client);
-//        String pingText = ping < 0 ? "...ms" : ping + "ms";
-//        String connection = server == null ? "singleplayer" : server;
         String fpsText = Math.max(0, client.getFps()) + " FPS";
         String tpsText = AbstractListener.tpsListener.getCurrentFormattedTPS() + " TPS";
-//        int pingColor = server == null || ping < 0 ? TEXT : ping < 100 ? 0xFF80C810
-//                : ping <= 400 ? 0xFFC87D28 : 0xFFCA3E2E;
         int maxWidth = Math.max(1, client.getWindow().getGuiScaledWidth() - 16);
-//
-//        // Reserve the icons, separators, ping and FPS before shortening long names/addresses.
-//        int fixedWidth = IDLE_TEXT_LEFT + IDLE_RIGHT_PADDING + client.font.width("Skydiao")
-//                + 3 * (STATUS_ICON_SIZE + STATUS_ICON_GAP + client.font.width(SEPARATOR))
-//                + client.font.width(fpsText)
-//                + (server == null ? 0 : client.font.width(pingText) + client.font.width(" to "));
-//        int available = Math.max(0, maxWidth - fixedWidth);
-//        int userWidth = client.font.width(user);
-//        int connectionWidth = client.font.width(connection);
-//        if (userWidth + connectionWidth > available) {
-//            int userBudget = Math.min(userWidth, Math.max(available - connectionWidth, Math.round(available * 0.4F)));
-//            user = fit(user, userBudget);
-//            connection = fit(connection, Math.max(0, available - client.font.width(user)));
-//        }
 
         List<IdlePart> parts = new ArrayList<>();
         parts.add(iconPart(MOD_NAME_PART_ID, CLIENT_ICON, 18, TEXT, textPart(null, "Skydiao", TEXT, null)));
         parts.add(textPart(SEPARATOR_PART_ID, SEPARATOR, MUTED, null));
         parts.add(iconPart(USERNAME_PART_ID, USER_ICON, TEXT, textPart(null, user, TEXT, null)));
         parts.add(textPart(SEPARATOR_PART_ID, SEPARATOR, MUTED, null));
-//        parts.add(iconPart(LINK_ICON, pingColor));
-//        if (server != null) {
-//            parts.add(textPart(client, pingText, pingColor));
-//            parts.add(textPart(client, " to ", TEXT));
-//        }
-//        parts.add(textPart(client, connection, TEXT));
-//        parts.add(textPart(client, SEPARATOR, MUTED));
         parts.add(iconPart(FPS_PART_ID, FPS_ICON, TEXT, textPart(null, fpsText, TEXT, null)));
         parts.add(textPart(SEPARATOR_PART_ID, SEPARATOR, MUTED, null));
-        if(AbstractListener.tpsListener.getCurrentTPS() > 12) {
-            parts.add(iconPart(TPS_PART_ID, TPS_ICON, TEXT, textPart(null, tpsText, TEXT, null)));
-        } else {
-            Gif gif = Gif.create(BAKED_TPS_ICON);
-            parts.add(iconPart(TPS_PART_ID, gif.updateAndGetFrame().resourceId(), TEXT, textPart(null, tpsText, TEXT & 0xFFFF2222, null)));
-        }
-
+        parts.add(iconPart(TPS_PART_ID, TPS_ICON, TEXT, textPart(null, tpsText, TEXT, null)));
         replaceIdleParts.removeIf(entry -> entry.shouldRemove.shouldRemove());
         parts.replaceAll(part -> {
             for (ReplaceIdlePart replaceIdlePart : replaceIdleParts) {
@@ -207,10 +208,10 @@ public final class DynamicSpotHUD extends XSDHUD {
 
         float idleAnimationWidth = Math.min(maxWidth, Math.max(IDLE_MIN_WIDTH, contentWidth + IDLE_TEXT_LEFT + IDLE_RIGHT_PADDING));
 
-        float delta = idleAnimationWidth - idleWidth;
-
-        idleWidth = idleWidth + delta * 0.09F * mc.getDeltaTracker().getGameTimeDeltaTicks() * 3;
-        if(!Float.isFinite(idleWidth)) idleWidth = 0;
+        if (!tabMorphActive) {
+            IDLE_WIDTH_ANIMATION.update(idleAnimationWidth);
+            IDLE_WIDTH_ANIMATION.freeze();
+        }
     }
 
     public static IdlePart textPart(Identifier idHolder, String text, int color, IdlePart next) {
@@ -268,19 +269,19 @@ public final class DynamicSpotHUD extends XSDHUD {
         pose.pushMatrix();
         HudOffsetAndScale settings = hudOffsetAndScaleMap.getOrDefault("dynamic_spot", HudOffsetAndScale.DEFAULT);
         if (settings != null) {
-            // Start at the edited HUD position and finish at the normal Tab position.
+
             pose.scale(settings.scale() + (1F - settings.scale()) * progress);
             pose.translate(settings.x() * (1F - progress), (settings.y() + CARD_TOP - TAB_CARD_TOP) * (1F - progress));
         }
         float targetWidth = Math.min(screenWidth - 16F, Math.max(IDLE_MIN_WIDTH, naturalWidth + 18));
         float targetHeight = Math.max(IDLE_HEIGHT, naturalHeight + 12);
-        float currentWidth = idleCardWidth() + (targetWidth - idleCardWidth()) * progress;
+        float currentWidth = tabBaseWidth + (targetWidth - tabBaseWidth) * progress;
         float currentHeight = IDLE_HEIGHT + (targetHeight - IDLE_HEIGHT) * progress;
         float radius = Math.min(currentHeight / 2F, 14F + progress);
         int x = Math.round((screenWidth - currentWidth) / 2F);
         int y = TAB_CARD_TOP;
         BlurredRoundedSurface.draw(graphics, x, y, currentWidth, currentHeight, radius);
-        // Restore the watermark while the same shell contracts around it.
+
         float idleOpacity = Math.clamp(1F - progress / 0.18F, 0F, 1F);
         idleOpacity = idleOpacity * idleOpacity * (3F - 2F * idleOpacity);
         drawIdleContent(graphics, x, y, Math.round(currentWidth), idleOpacity);
@@ -303,7 +304,7 @@ public final class DynamicSpotHUD extends XSDHUD {
             NOTICES.clear();
         }
         tabProgress = 0F;
-        TAB_ANIMATION.reset();
+        TAB_ANIMATION.setAndUpdate(0F);
     }
 
     public static void showSuccess(String title, String detail, long durationMs) {
@@ -351,6 +352,7 @@ public final class DynamicSpotHUD extends XSDHUD {
     }
 
     private static void renderIdle(GuiGraphicsExtractor graphics) {
+        float idleWidth = idleCardWidth();
         int x = Math.round((Minecraft.getInstance().getWindow().getGuiScaledWidth() - idleWidth) / 2F);
         BlurredRoundedSurface.draw(graphics, x, CARD_TOP, idleWidth, IDLE_HEIGHT, IDLE_HEIGHT / 2F);
         drawIdleContent(graphics, x, CARD_TOP, Math.round(idleWidth), 1F);
@@ -375,10 +377,7 @@ public final class DynamicSpotHUD extends XSDHUD {
         Minecraft client = Minecraft.getInstance();
         graphics.enableScissor(x + 4, y + 2, x + width - 4, y + IDLE_HEIGHT - 2);
         try {
-            // Sample the complete transparent logo, including during the Tab crossfade.
-//            graphics.blit(RenderPipelines.GUI_TEXTURED, CLIENT_ICON, x + 8, y + 5,
-//                    0, 0, 18, 18, 64, 64, 64, 64, (alpha << 24) | 0xFFFFFF);
-            // int partX = x + IDLE_TEXT_LEFT;
+
             int partX = x + IDLE_TEXT_LEFT;
             for (IdlePart part1 : idleParts) {
                 IdlePart part = part1;
@@ -415,33 +414,11 @@ public final class DynamicSpotHUD extends XSDHUD {
         return info == null ? -1 : Math.max(0, info.getLatency());
     }
 
-//    private static String serverLabel(Minecraft client) {
-//        if (client.hasSingleplayerServer()) {
-//            lastConnection = null;
-//            hypixel = false;
-//            return null;
-//        }
-//        if (client.getConnection() == null) {
-//            lastConnection = null;
-//            hypixel = false;
-//            return "server";
-//        }
-//        if (lastConnection != client.getConnection()) {
-//            lastConnection = client.getConnection();
-//            hypixel = false;
-//        }
-//        if (!hypixel && client.level != null) {
-//            hypixel = hasHypixelFooter(client.level.getScoreboard(), client.player.getScoreboardName());
-//        }
-//        if (hypixel) return "mc.hypixel.net";
-//        return client.getCurrentServer() == null ? "server" : client.getCurrentServer().ip;
-//    }
-
     private static boolean hasHypixelFooter(Scoreboard scoreboard, String playerName) {
         PlayerTeam team = playerName == null ? null : scoreboard.getPlayersTeam(playerName);
         Objective objective = null;
         if (team != null) {
-            DisplaySlot slot = team.getColor().map(TeamColor::displaySlot).orElse(null);
+            DisplaySlot slot = DisplaySlot.teamColorToSlot(team.getColor());
             if (slot != null) objective = scoreboard.getDisplayObjective(slot);
         }
         if (objective == null) objective = scoreboard.getDisplayObjective(DisplaySlot.SIDEBAR);
