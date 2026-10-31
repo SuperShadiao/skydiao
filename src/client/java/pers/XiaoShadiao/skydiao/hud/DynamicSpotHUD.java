@@ -55,6 +55,7 @@ public final class DynamicSpotHUD extends XSDHUD {
     private static final BezierUtil CARD_HEIGHT_ANIMATION = new BezierUtil(3.5F, IDLE_HEIGHT);
     private static float tabProgress;
     private static float tabBaseWidth = IDLE_MIN_WIDTH;
+    private static float lastIdleTargetWidth = IDLE_MIN_WIDTH;
     private static boolean tabMorphActive;
     private static List<IdlePart> idleParts = List.of();
 
@@ -100,12 +101,21 @@ public final class DynamicSpotHUD extends XSDHUD {
             return;
         }
 
-        TAB_ANIMATION.update(isTabRequested() ? 1F : 0F);
+        boolean requested = isTabRequested();
+        TAB_ANIMATION.update(requested ? 1F : 0F);
         TAB_ANIMATION.freeze();
-        tabProgress = TAB_ANIMATION.get();
+        tabProgress = Math.clamp(TAB_ANIMATION.get(), 0F, 1F);
+        if (!requested && tabProgress < 0.002F) {
+            TAB_ANIMATION.setAndUpdate(0F);
+            tabProgress = 0F;
+        }
         boolean tabMorph = isTabAnimating();
         if (tabMorph && !tabMorphActive) tabBaseWidth = idleCardWidth();
+        boolean wasTabMorph = tabMorphActive;
         tabMorphActive = tabMorph;
+        if (wasTabMorph && !tabMorph) {
+            IDLE_WIDTH_ANIMATION.setAndUpdate(lastIdleTargetWidth);
+        }
         updateIdleContent(mc);
         drainNotices();
         expireNotices();
@@ -162,7 +172,7 @@ public final class DynamicSpotHUD extends XSDHUD {
     }
 
     public static boolean isTabAnimating() {
-        return isTabRequested() || tabProgress > 0F;
+        return isTabRequested() || tabProgress > 0.002F;
     }
 
     public static float tabProgress() {
@@ -218,6 +228,7 @@ public final class DynamicSpotHUD extends XSDHUD {
 
         float idleAnimationWidth = Math.min(maxWidth, Math.max(IDLE_MIN_WIDTH, contentWidth + IDLE_TEXT_LEFT + IDLE_RIGHT_PADDING));
 
+        lastIdleTargetWidth = idleAnimationWidth;
         if (!tabMorphActive) {
             IDLE_WIDTH_ANIMATION.update(idleAnimationWidth);
             IDLE_WIDTH_ANIMATION.freeze();

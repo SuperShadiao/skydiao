@@ -21,6 +21,13 @@ public class FullBrightListener extends AbstractListener {
 
     private void onTick(Minecraft client) {
         if (client.options == null) return;
+        if (client.level == null) {
+            if (previousGamma != null) {
+                ((MixinOptionInstanceAccessor) (Object) client.options.gamma()).skydiao$setRawValue(previousGamma);
+                previousGamma = null;
+            }
+            return;
+        }
         if (ConfigManager.fullLight.getValue()) {
             Double current = client.options.gamma().get();
             if (current < 100.0D) {
