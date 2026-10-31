@@ -105,7 +105,7 @@ public class AutoLoadoutListener extends AbstractListener {
                         mc.execute(() -> {
                             if (mc.player != null && mc.gameMode != null) {
                                 AutoLoadoutListener.this.pageSwitchCallback = pageSwitchCallback;
-                                mc.gameMode.handleContainerInput(finalMenu.containerId, 44, 0, ContainerInput.PICKUP, mc.player);
+                                mc.gameMode.handleContainerInput(finalMenu.containerId, 44, CustomFabricEvents.ClickType.LEFT.button(), ContainerInput.PICKUP, mc.player);
                             }
                         });
                         if(mc.gui.screen() == null) {
@@ -127,7 +127,7 @@ public class AutoLoadoutListener extends AbstractListener {
                     ChestMenu finalMenu1 = menu;
                     mc.execute(() -> {
                         if (mc.player != null && mc.gameMode != null) {
-                            mc.gameMode.handleContainerInput(finalMenu1.containerId, slot, 0, ContainerInput.PICKUP, mc.player);
+                            mc.gameMode.handleContainerInput(finalMenu1.containerId, slot, CustomFabricEvents.ClickType.LEFT.button(), ContainerInput.PICKUP, mc.player);
                         }
                     });
                     Thread.sleep(100 + ToolList.getInstance().random.nextInt(50));

@@ -20,6 +20,7 @@ import org.apache.commons.lang3.function.ToBooleanBiFunction;
 import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.F7AutoTerminal;
+import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
 
@@ -335,10 +336,10 @@ public class F7TerminalScreen extends AbstractContainerScreen<@NotNull ChestMenu
                             }
                             onSlotClick = (slot2, button) -> {
                                 int clicks = changeColorRemainClicks.getInt(slot2);
-                                if (button.button() == 0 && clicks > 0) {
+                                if (CustomFabricEvents.ClickType.from(button.buttonInfo()) == CustomFabricEvents.ClickType.LEFT && clicks > 0) {
                                     changeColorRemainClicks.put(slot2, clicks - 1);
                                     return false;
-                                } else if (button.button() == 1 && clicks < 0) {
+                                } else if (CustomFabricEvents.ClickType.from(button.buttonInfo()) == CustomFabricEvents.ClickType.RIGHT && clicks < 0) {
                                     changeColorRemainClicks.put(slot2, clicks + 1);
                                     return false;
                                 }

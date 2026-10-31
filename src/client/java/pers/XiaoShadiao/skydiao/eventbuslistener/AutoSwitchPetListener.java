@@ -93,7 +93,7 @@ public class AutoSwitchPetListener extends AbstractListener {
                             if(slot.getItem().getTooltipLines(Item.TooltipContext.of(mc.level), mc.player, TooltipFlag.NORMAL).stream().noneMatch(line -> ToolList.getInstance().deleteColorCode(line.getString()).equals("Click to despawn!")))  {
                                 mc.execute(() -> {
                                     if (mc.player != null && mc.gameMode != null) {
-                                        mc.gameMode.handleContainerInput(finalMenu1.containerId, slot.index, 0, ContainerInput.PICKUP, mc.player);
+                                        mc.gameMode.handleContainerInput(finalMenu1.containerId, slot.index, CustomFabricEvents.ClickType.LEFT.button(), ContainerInput.PICKUP, mc.player);
                                     }
                                 });
                             }

@@ -473,7 +473,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                     Container container = menu.getContainer();
                     if (!(container instanceof SimpleContainer)) return;
                     if (mc.gameMode != null && mc.player != null) {
-                        mc.execute(() -> mc.gameMode.handleContainerInput(menu.containerId, 50, 0, ContainerInput.PICKUP, mc.player));
+                        mc.execute(() -> mc.gameMode.handleContainerInput(menu.containerId, 50, CustomFabricEvents.ClickType.LEFT.button(), ContainerInput.PICKUP, mc.player));
                         this.pageSwitchCallback = new PageSwitchCallback();
                         ctx.put("screen", this.pageSwitchCallback.getScreen());
                     }
@@ -485,7 +485,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                     Container container = menu.getContainer();
                     if (!(container instanceof SimpleContainer)) return;
                     if (mc.gameMode != null && mc.player != null) {
-                        mc.execute(() -> mc.gameMode.handleContainerInput(menu.containerId, night ? 13 : 11, 0, ContainerInput.PICKUP, mc.player));
+                        mc.execute(() -> mc.gameMode.handleContainerInput(menu.containerId, night ? 13 : 11, CustomFabricEvents.ClickType.LEFT.button(), ContainerInput.PICKUP, mc.player));
                     }
                 }, 500)
                 .addAction(() -> {

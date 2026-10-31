@@ -16,6 +16,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 import pers.XiaoShadiao.skydiao.utils.scrapsolver.FossilSolver;
@@ -97,11 +98,11 @@ public class AutoEvaluateScrapListener extends AbstractListener {
 
             FossilTile bestTile = FossilSolver.findBestTile(fossils, dirts);
             if(bestTile != null) {
-                mc.gameMode.handleContainerInput(containerScreen.getMenu().containerId, bestTile.toSlotIndex(), 0, ContainerInput.PICKUP, mc.player);
+                mc.gameMode.handleContainerInput(containerScreen.getMenu().containerId, bestTile.toSlotIndex(), CustomFabricEvents.ClickType.LEFT.button(), ContainerInput.PICKUP, mc.player);
             } else if(!dirts.isEmpty()) {
                 IntList random = new IntArrayList(dirts);
                 int randomDirt = firstClickDirts.isEmpty() ? random.getInt(ToolList.getInstance().random.nextInt(random.size())) : firstClickDirts.iterator().nextInt();
-                mc.gameMode.handleContainerInput(containerScreen.getMenu().containerId, randomDirt, 0, ContainerInput.PICKUP, mc.player);
+                mc.gameMode.handleContainerInput(containerScreen.getMenu().containerId, randomDirt, CustomFabricEvents.ClickType.LEFT.button(), ContainerInput.PICKUP, mc.player);
             }
         }
 

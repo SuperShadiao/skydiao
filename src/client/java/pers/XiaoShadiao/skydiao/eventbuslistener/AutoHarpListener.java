@@ -14,6 +14,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.AbstractMap;
@@ -98,7 +99,7 @@ public class AutoHarpListener extends AbstractListener {
         if(nextClick != null) {
             Integer slotId = nextClick;
 
-            mc.gameMode.handleContainerInput(containerId, slotId, 0, ContainerInput.PICKUP, mc.player);
+            mc.gameMode.handleContainerInput(containerId, slotId, CustomFabricEvents.ClickType.LEFT.button(), ContainerInput.PICKUP, mc.player);
             clickLogger++;
             System.out.println("Click! " + clickLogger + " " + slotId);
             nextClick = null;

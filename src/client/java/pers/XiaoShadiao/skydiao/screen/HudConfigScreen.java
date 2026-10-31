@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
+import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 
 public class HudConfigScreen extends Screen {
@@ -62,10 +63,10 @@ public class HudConfigScreen extends Screen {
     public boolean mouseDragged(@NonNull MouseButtonEvent event, double dx, double dy) {
         if(super.mouseDragged(event, dx, dy)) return true;
         if(currentSelected != null) {
-            if(event.button() == 0) {
+            if(CustomFabricEvents.ClickType.from(event.buttonInfo()) == CustomFabricEvents.ClickType.LEFT) {
                 XSDHUD.saveHudAppendOffset(currentSelected, (float) dx, (float) dy);
                 return true;
-            } else if(event.button() == 1) {
+            } else if(CustomFabricEvents.ClickType.from(event.buttonInfo()) == CustomFabricEvents.ClickType.RIGHT) {
                 XSDHUD.saveHudAppendScale(currentSelected, (float) (dx + dy) / 1000);
                 return true;
             }

@@ -101,7 +101,7 @@ public class AutoSwapReviveHeadListener extends AbstractListener {
                                 if(((id.endsWith("_HEAD") && (id.startsWith("GOLD_") || id.startsWith("DIAMOND_"))))) {
                                     mc.execute(() -> {
                                         if (mc.player != null && mc.gameMode != null) {
-                                            mc.gameMode.handleContainerInput(finalMenu1.containerId, slot.index, 0, ContainerInput.PICKUP, mc.player);
+                                            mc.gameMode.handleContainerInput(finalMenu1.containerId, slot.index, CustomFabricEvents.ClickType.LEFT.button(), ContainerInput.PICKUP, mc.player);
                                         }
                                     });
                                     found = true;
@@ -123,7 +123,7 @@ public class AutoSwapReviveHeadListener extends AbstractListener {
                             found = true;
                             mc.execute(() -> {
                                 if (mc.player != null && mc.gameMode != null) {
-                                    mc.gameMode.handleContainerInput(finalMenu1.containerId, realSlot.index, 0, ContainerInput.PICKUP, mc.player);
+                                    mc.gameMode.handleContainerInput(finalMenu1.containerId, realSlot.index, CustomFabricEvents.ClickType.LEFT.button(), ContainerInput.PICKUP, mc.player);
                                 }
                             });
                         }

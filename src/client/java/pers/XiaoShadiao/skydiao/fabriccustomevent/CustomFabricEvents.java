@@ -100,10 +100,20 @@ public final class CustomFabricEvents {
     }
 
     public enum ClickType {
-        LEFT,
-        MIDDLE,
-        RIGHT,
+        LEFT(1),
+        MIDDLE(2),
+        RIGHT(3),
         ;
+
+        private final int button;
+
+        ClickType(int button) {
+            this.button = button;
+        }
+
+        public int button() {
+            return button;
+        }
 
         public static ClickType from(MouseButtonInfo rawButtonInfo) {
             return switch (rawButtonInfo.input()) {

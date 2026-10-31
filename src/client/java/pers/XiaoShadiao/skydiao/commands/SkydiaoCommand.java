@@ -161,9 +161,9 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                                 if(localServer != null) {
                                     try(InputStream is = ToolList.getInstance().makeReqToURL("http://localhost:8788")) {
                                         is.readAllBytes();
-                                        Blaze3D.openUri(URI.create("http://localhost:8788/tools/NodeGraph?port=" + localServer.getPort()));
+                                        Blaze3D.openUri(URI.create("http://localhost:8788/tools/nodegraph?port=" + localServer.getPort()));
                                     } catch (Throwable e) {
-                                        Blaze3D.openUri(URI.create("https://xiaoshadiao.club/tools/NodeGraph?port=" + localServer.getPort()));
+                                        Blaze3D.openUri(URI.create("https://xiaoshadiao.club/tools/nodegraph?port=" + localServer.getPort()));
                                     }
                                 } else {
                                     ToolList.printChatMessage(Component.literal("§a[小沙雕] §c当前设备环境不具备支持节点图编辑器的条件。"));

@@ -323,9 +323,9 @@ public class F7AutoTerminal extends AbstractListener implements IDungeonListener
                 logger.info("Clicked Slot " + temp.slot.index);
                 if(mc.gameMode != null && mc.player != null) {
                     if(!(screen instanceof F7TerminalScreen f7TerminalScreen)) {
-                        mc.gameMode.handleContainerInput(temp.containerId, temp.slot.index, temp.rightClick ? 1 : 0, ContainerInput.PICKUP, mc.player);
+                        mc.gameMode.handleContainerInput(temp.containerId, temp.slot.index, temp.rightClick ? CustomFabricEvents.ClickType.RIGHT.button() : CustomFabricEvents.ClickType.LEFT.button(), ContainerInput.PICKUP, mc.player);
                     } else {
-                        f7TerminalScreen.clickSlot(temp.slot, temp.rightClick ? 1 : 0);
+                        f7TerminalScreen.clickSlot(temp.slot, temp.rightClick ? CustomFabricEvents.ClickType.RIGHT.button() : CustomFabricEvents.ClickType.LEFT.button());
                     }
                 }
                 if(temp.addBlacklistAfterClick) blacklistedSlots.add(temp.slot.index);

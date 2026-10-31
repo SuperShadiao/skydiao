@@ -17,6 +17,7 @@ import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.sdl.SDLMouse;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.keybinds.KeyBindsManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
@@ -368,12 +369,12 @@ public class FastCommandMenuScreen extends Screen {
             editingButton = null;
         }
         if(!editMode) {
-            if(canScrollLeft && event.button() == 0) {
+            if(canScrollLeft && CustomFabricEvents.ClickType.from(event.buttonInfo()) == CustomFabricEvents.ClickType.LEFT) {
                 page--;
                 updateScrollState();
                 return true;
             }
-            if(canScrollRight && event.button() == 1) {
+            if(canScrollRight && CustomFabricEvents.ClickType.from(event.buttonInfo()) == CustomFabricEvents.ClickType.RIGHT) {
                 page++;
                 updateScrollState();
                 return true;

@@ -14,6 +14,7 @@ import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.utils.PageSwitchCallback;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
@@ -76,7 +77,7 @@ public class FastClearMiningStash extends AbstractListener {
             if(mc.gui.screen() != containerScreen) return List.of();
             mc.execute(() -> {
                 if (mc.gui.screen() == containerScreen && mc.player != null && mc.gameMode != null) {
-                    mc.gameMode.handleContainerInput(menu0.containerId, finalSlot, 0, ContainerInput.PICKUP, mc.player);
+                    mc.gameMode.handleContainerInput(menu0.containerId, finalSlot, CustomFabricEvents.ClickType.LEFT.button(), ContainerInput.PICKUP, mc.player);
                 }
             });
             Thread.sleep(400);
@@ -108,13 +109,13 @@ public class FastClearMiningStash extends AbstractListener {
                     int finalSlot = i;
                     mc.execute(() -> {
                         if (mc.gui.screen() == containerScreen && mc.player != null && mc.gameMode != null) {
-                            mc.gameMode.handleContainerInput(menu0.containerId, finalSlot, 0, ContainerInput.QUICK_MOVE, mc.player);
+                            mc.gameMode.handleContainerInput(menu0.containerId, finalSlot, CustomFabricEvents.ClickType.LEFT.button(), ContainerInput.QUICK_MOVE, mc.player);
                         }
                     });
                     Thread.sleep(300);
                     mc.execute(() -> {
                         if (mc.gui.screen() == containerScreen && mc.player != null && mc.gameMode != null) {
-                            mc.gameMode.handleContainerInput(menu0.containerId, finalSlot, 0, ContainerInput.PICKUP, mc.player);
+                            mc.gameMode.handleContainerInput(menu0.containerId, finalSlot, CustomFabricEvents.ClickType.LEFT.button(), ContainerInput.PICKUP, mc.player);
                         }
                     });
                     Thread.sleep(300);

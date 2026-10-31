@@ -16,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.*;
@@ -77,7 +78,7 @@ public class AutoEnchantmentTableGameListener extends AbstractListener {
                 if(System.currentTimeMillis() - pickupItemTestTime > 1000) {
                     pickupItemTestTime = System.currentTimeMillis();
                     Optional<Slot> slot = menu.slots.stream().filter(i -> !i.getItem().isEmpty()).findAny();
-                    slot.ifPresent(slot1 -> mc.gameMode.handleContainerInput(menu.containerId, slot1.index, 0, ContainerInput.PICKUP, mc.player));
+                    slot.ifPresent(slot1 -> mc.gameMode.handleContainerInput(menu.containerId, slot1.index, CustomFabricEvents.ClickType.LEFT.button(), ContainerInput.PICKUP, mc.player));
                 }
                 return;
             }
@@ -125,7 +126,7 @@ public class AutoEnchantmentTableGameListener extends AbstractListener {
 //                                0,
 //                                mc.thePlayer
 //                        );
-                        mc.gameMode.handleContainerInput(menu.containerId, chronomatronOrder.get(clicks).getKey(), 0, ContainerInput.PICKUP, mc.player);
+                        mc.gameMode.handleContainerInput(menu.containerId, chronomatronOrder.get(clicks).getKey(), CustomFabricEvents.ClickType.LEFT.button(), ContainerInput.PICKUP, mc.player);
                         lastClickTime = System.currentTimeMillis();
                         clicks++;
                     }
@@ -153,7 +154,7 @@ public class AutoEnchantmentTableGameListener extends AbstractListener {
 //                                    mc.thePlayer.openContainer.windowId,
 //                                    slot, 0, 0, mc.thePlayer
 //                            );
-                            mc.gameMode.handleContainerInput(menu.containerId, slot, 0, ContainerInput.PICKUP, mc.player);
+                            mc.gameMode.handleContainerInput(menu.containerId, slot, CustomFabricEvents.ClickType.LEFT.button(), ContainerInput.PICKUP, mc.player);
                         }
                         lastClickTime = System.currentTimeMillis();
                         clicks++;

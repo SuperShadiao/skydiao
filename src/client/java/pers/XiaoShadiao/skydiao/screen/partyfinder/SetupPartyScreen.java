@@ -14,7 +14,10 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
@@ -83,7 +86,9 @@ public class SetupPartyScreen extends Screen {
                         PartyFinderManager.selfPartyData.partyId = UUID.randomUUID();
                         PartyFinderManager.isPublic = true;
 
-                        ToolList.printChatMessage(Component.literal("§a[小沙雕] 队伍已开放, 可以使用§e/skydiaofp broadcast§a来广播你的队伍!"));
+                        ToolList.printChatMessage(Component.literal("§a[小沙雕] 队伍已开放, 可以使用§e/skydiaofp broadcast§a来广播你的队伍!")
+                                .withStyle(Style.EMPTY.withHoverEvent(new HoverEvent.ShowText(Component.literal("点击填充指令到聊天栏")))
+                                        .withClickEvent(new ClickEvent.SuggestCommand("/skydiaofp broadcast"))));
                     };
                     if(PartyFinderManager.selfPartyData.partyType.isMaxPlayerRecommend(PartyFinderManager.selfPartyData.maxPlayers)) {
                         runnable.run();

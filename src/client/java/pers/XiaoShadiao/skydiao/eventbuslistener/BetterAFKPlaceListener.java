@@ -13,6 +13,7 @@ import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.Items;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.utils.OnlinePlayerList;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
@@ -89,7 +90,7 @@ public class BetterAFKPlaceListener extends AbstractListener {
                     if (mc.player != null && mc.gameMode != null) {
                         for (int i = 11; i < 15; i++) {
                             if (menu0.slots.get(i).getItem().getItem() == Items.PLAYER_HEAD) {
-                                mc.gameMode.handleContainerInput(menu0.containerId, i, 0, ContainerInput.PICKUP, mc.player);
+                                mc.gameMode.handleContainerInput(menu0.containerId, i, CustomFabricEvents.ClickType.LEFT.button(), ContainerInput.PICKUP, mc.player);
                                 break;
                             }
                         }
