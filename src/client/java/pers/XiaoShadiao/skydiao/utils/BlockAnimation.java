@@ -79,6 +79,14 @@ public final class BlockAnimation {
         return animation == ItemUseAnimation.EAT || animation == ItemUseAnimation.DRINK;
     }
 
+    public static boolean usingBow(Player player) {
+        if (player == null || !player.isUsingItem()) return false;
+        ItemStack stack = player.getUseItem();
+        if (stack.isEmpty()) return false;
+        ItemUseAnimation animation = stack.getUseAnimation();
+        return animation == ItemUseAnimation.BOW || animation == ItemUseAnimation.CROSSBOW;
+    }
+
     private static String skyblockId(ItemStack stack) {
         CustomData data = stack.get(DataComponents.CUSTOM_DATA);
         if (data == null) return "";
