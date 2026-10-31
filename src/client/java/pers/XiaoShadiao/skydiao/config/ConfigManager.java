@@ -199,7 +199,6 @@ public class ConfigManager {
     public static final BooleanConfigOption safariBoardcastTradeNPC = new BooleanConfigOption("safariboardcasttradenpc", true);
     public static final BooleanConfigOption safariRenderTargetESP = new BooleanConfigOption("safaritargetrenderepesp", true);
     public static final BooleanConfigOption floorDroppingRender = new BooleanConfigOption("floordroppingrender", true);
-    public static final BooleanConfigOption dungeonReviveItemCDRender = new BooleanConfigOption("dungeonreviveitemcdrender", true);
     public static final BooleanConfigOption isleVolcanoFinder =  new BooleanConfigOption("islevolcanofinder", true);
     public static final BooleanConfigOption isleVolcanoFinderCataOnlyMode = new BooleanConfigOption("islevolcanofindercataonlymode", true);
     public static final BooleanConfigOption isleDupServerTip = new BooleanConfigOption("isledupservertip", true);
@@ -239,6 +238,16 @@ public class ConfigManager {
     public static final BooleanConfigOption pinglessMining = new BooleanConfigOption("pinglessmining", false);
     public static final BooleanConfigOption dynamicSpot = new BooleanConfigOption("dynamicspot", false);
     public static final BooleanConfigOption dynamicSpotReplaceTabList = new BooleanConfigOption("dynamicspotreplacetablist", false);
+    public static final BooleanConfigOption maskTimer = new BooleanConfigOption("masktimer", true);
+    public static final BooleanConfigOption alertHud = new BooleanConfigOption("alerthud", true);
+    public static final BooleanConfigOption blockAnimation = new BooleanConfigOption("blockanimation", false);
+    public static final BooleanConfigOption fullLight = new BooleanConfigOption("fulllight", false);
+    public static final IntConfigOption autoClickerMinCps = new IntConfigOption("autoclickermincps", 10);
+    public static final IntConfigOption autoClickerMaxCps = new IntConfigOption("autoclickermaxcps", 16);
+    public static final BooleanConfigOption autoClickerBreakBlocks = new BooleanConfigOption("autoclickerbreakblocks", false);
+    public static final BooleanConfigOption autoClickerVanilla = new BooleanConfigOption("autoclickervanilla", true);
+    public static final IntConfigOption blockAnimationItemSize = new IntConfigOption("blockanimationitemsize", 100);
+    public static final BooleanConfigOption slayerInfo = new BooleanConfigOption("slayerinfo", true);
     public static final BooleanConfigOption dungeonautogfs = new BooleanConfigOption("dungeonautogfs", false);
     public static final BooleanConfigOption dungeonautogfsleap = new BooleanConfigOption("dungeonautogfsleap", false);
     public static final BooleanConfigOption dungeonautogfstnt = new BooleanConfigOption("dungeonautogfstnt", false);
@@ -321,7 +330,7 @@ public class ConfigManager {
     public static final BooleanConfigOption autoHypeTrainManbaOut = new BooleanConfigOption("autolobbytrainplaysoundaftercrash", true);
 
     public static final Function<String, Runnable> openChat = (msg) -> () -> ToolList.mc.setScreenAndShow(new ChatScreen(msg, false, true));
-    public static final Runnable openControl = () -> ToolList.mc.setScreenAndShow(new KeyBindsScreen(ToolList.mc.gui.screen(), ToolList.mc.options));
+    public static final Runnable openControl = () -> ToolList.mc.setScreenAndShow(new KeyBindsScreen(null, ToolList.mc.options));
 
     public static final ActionConfigOption openFsCommandAction = new ActionConfigOption("openfscommandaction", openChat.apply("/skydiaofs"));
     public static final ActionConfigOption openFreelookAndFreecamAction = new ActionConfigOption("openfreelookandfreecamaction", openControl);
@@ -329,7 +338,7 @@ public class ConfigManager {
     public static final ActionConfigOption openAllAutoClickKeybindAction = new ActionConfigOption("openallautoclickkeybindaction", openControl);
     public static final ActionConfigOption openFsKeyBind = new ActionConfigOption("openfskeybind", openControl);
     public static final ActionConfigOption openClearStashCommand = new ActionConfigOption("openclearstashcommand", openChat.apply("/skydiao fastclearminingstash"));
-    public static final ActionConfigOption openHud = new ActionConfigOption("openhud", () -> ToolList.mc.setScreenAndShow(new HudConfigScreen(ToolList.mc.gui.screen())));
+    public static final ActionConfigOption openHud = new ActionConfigOption("openhud", () -> ToolList.mc.setScreenAndShow(new HudConfigScreen(null)));
     public static final ActionConfigOption openfastcommandmenukeybinds = new ActionConfigOption("openfastcommandmenukeybinds", openControl);
 
     public static final BooleanConfigOption iAutoObsidian = new BooleanConfigOption("iautoobsidian", false) {
@@ -358,7 +367,7 @@ public class ConfigManager {
 
     public static final List<Map.Entry<String, List<ConfigOption<?>>>> categories = List.of(
             Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip, enableircafktip, enableircmacrochecktip, cooltitle, customTitleText, autoHypeTrain, autoHypeTrainManbaOut)),
-            Map.entry("工具类", List.of(inventoryFilter, itemStarCountRender, itemStarCountRenderColor1, itemStarCountRenderColor2, openfastcommandmenukeybinds, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodescoreboard, blivemodehideserverid, bliveboardcastdankumu, keepSprint, autoReconnect, afkInOtherPlace, freecamFlySpeed, openFreelookAndFreecamAction, preventShortbowDrawing, openAutoClickAction, openAllAutoClickKeybindAction, openClearStashCommand)),
+            Map.entry("工具类", List.of(inventoryFilter, itemStarCountRender, itemStarCountRenderColor1, itemStarCountRenderColor2, openfastcommandmenukeybinds, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodescoreboard, blivemodehideserverid, bliveboardcastdankumu, keepSprint, autoReconnect, afkInOtherPlace, freecamFlySpeed, openFreelookAndFreecamAction, preventShortbowDrawing, openAutoClickAction, openAllAutoClickKeybindAction, openClearStashCommand, autoClickerMinCps, autoClickerMaxCps, autoClickerBreakBlocks, autoClickerVanilla)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
             Map.entry("自动类", List.of(macroReplay, macroReplaySelfCleaning, autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, autoCarnivalAutoRestart, carnivalAutoFruitDigger, carnivalAutoShootZombie, carnivalAutoShootZombieOffset, skyblockautobloodfiend, skyblockautobloodfiendlowhealth, iAutoObsidian, iAutoObsidianWR, obsidianPositionHelper, autoObsidianPositionsFile, drillSlot, lanternSlot, obsidianPlayerCheckRange, obsidianPlayerCheck, obsidianTheEndCheck, obsidianCycleTicks, autoPickupPhoneRing, autoPlayBeachBall, autoPlayBeachBallAutoStopAt40, autoEvaluateFossils, autoEvaluateFossilsAutoRestart)),
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareCorpseInChat, mineshaftShareAnnounce,
@@ -390,7 +399,7 @@ public class ConfigManager {
                     dungeonautoswitchbackitem, resurrectionItemTriggeredTitle,
                     dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7InactiveTerminalRender,
                     f7TerminalESPTracer, f7ArrowAlignSolver, f7ArrowAlignSolverBlockWrongClicks,
-                    f7SimonSaysSolver, f7SimonSaysSolverBlockWrongClicks, dungeonReviveItemCDRender,
+                    f7SimonSaysSolver, f7SimonSaysSolverBlockWrongClicks,
                     f7DrawWitherDragonESP, f7DrawStormFireballTarget, f7DrawWitherDragonLightning, f7AutoSwapEnderDragonInWitherKing,
 
                     dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3,
@@ -404,7 +413,7 @@ public class ConfigManager {
                     dungeonUseRagnarock, dungeonUseRagnarockCancelled, dungeonUseRagnarockRecieveDamage
             )),
             Map.entry("rift", List.of(rifttimegunhelper)),
-            Map.entry("界面类", List.of(openHud, bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, bossDrawESP, customBossESPTracer, starrailNotification, starrailNotificationSound, dyingtip, noblind, nosuffoverlay, fireOverlay, lyricColor1, lyricColor2, dynamicSpot, dynamicSpotReplaceTabList)),
+            Map.entry("界面类", List.of(openHud, blockAnimation, blockAnimationItemSize, fullLight, bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, bossDrawESP, customBossESPTracer, starrailNotification, starrailNotificationSound, dyingtip, noblind, nosuffoverlay, fireOverlay, lyricColor1, lyricColor2, dynamicSpot, dynamicSpotReplaceTabList, maskTimer, alertHud, slayerInfo)),
             Map.entry("ravengard", List.of(ravengardHelper, ravengardQueueMessage))
     );
 

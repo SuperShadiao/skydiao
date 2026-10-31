@@ -1073,10 +1073,6 @@
       "configname": "§eSafari广播Trade NPC",
       "description": "§e在Safari中自动发送Trade NPC位置和所需物品方便队友更好的找到它"
     },
-    "dungeonreviveitemcdrender": {
-      "configname": "§e地牢复活物品倒计时渲染",
-      "description": "§e地牢复活物品 (Bonzo, Phoenix, Spirit) 触发后, 显示倒计时"
-    },
     "iautoobsidian": {
       "configname": "§e自动挖黑曜石",
       "description": "§e自动挖掘末地岛的黑曜石.注意:本功能仅用于测试,请使用自动挖黑曜石自动重试."
@@ -1313,6 +1309,46 @@
     "dynamicspotreplacetablist": {
       "configname": "§e灵动岛替换Tab列表",
       "description": "§e将Tab列表也替换成灵动岛显示 (部分Mod可能会覆写该功能导致动画异常)"
+    },
+    "masktimer": {
+      "configname": "§e复活甲计时HUD",
+      "description": "§e独立竖排显示 Spirit / Bonzo / Phoenix 的无敌剩余时间与冷却倒计时（可在编辑Hud里拖动位置）"
+    },
+    "alerthud": {
+      "configname": "§e告警提示HUD",
+      "description": "§e顶部显示低 TPS 警告与 Autopet 切换提示（可在编辑Hud里拖动位置）"
+    },
+    "slayerinfo": {
+      "configname": "§eSlayer 信息",
+      "description": "§e显示当前 Slayer 首领的名称/阶级、血量、阶段与吸血鬼技能计时（可在编辑Hud里拖动位置）"
+    },
+    "fulllight": {
+      "configname": "§e夜视",
+      "description": "§e无视亮度限制，把 gamma 拉到最大，效果等同于夜视"
+    },
+    "autoclickermincps": {
+      "configname": "§e连点最小 CPS",
+      "description": "§e自动连点的最低每秒点击次数（1-40）"
+    },
+    "autoclickermaxcps": {
+      "configname": "§e连点最大 CPS",
+      "description": "§e自动连点的最高每秒点击次数（1-40）"
+    },
+    "autoclickerbreakblocks": {
+      "configname": "§e挖方块时持续按住",
+      "description": "§e准星指向方块时直接按住左键，不按 CPS 点击"
+    },
+    "autoclickervanilla": {
+      "configname": "§e支持原版物品",
+      "description": "§e没有 Skyblock UUID 的物品（原版武器/工具）也允许连点"
+    },
+    "blockanimation": {
+      "configname": "§e旧版格挡动画",
+      "description": "§e按住右键手持剑时显示 1.7/1.8 格挡动画（不减伤），格挡时不会疾跑"
+    },
+    "blockanimationitemsize": {
+      "configname": "§e手持物品大小",
+      "description": "§e第一人称手持物品的显示大小（百分比，100 = 原版）"
     },
     "dungeonautogfs": {
       "configname": "§e地牢自动取Sack物品总开关",

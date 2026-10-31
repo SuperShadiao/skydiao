@@ -28,8 +28,10 @@ public class AutoClickerListener extends AbstractListener {
     private boolean isLeftAutoClicking = false;
     private boolean isRightAutoClicking = false;
 
-    private int leftClickDelay = 0;
-    private int rightClickDelay = 0;
+    private long nextLeftClickTime = 0L;
+    private long nextRightClickTime = 0L;
+
+    private boolean breakKeyHeld = false;
 
     @Override
     public String getListenerName() {
@@ -43,8 +45,28 @@ public class AutoClickerListener extends AbstractListener {
         load();
     }
 
-    private int getRandomDelay() {
-        return ToolList.getInstance().random.nextInt(4);
+    private long clickIntervalMillis() {
+        int min = Math.max(1, Math.min(40, ConfigManager.autoClickerMinCps.getValue()));
+        int max = Math.max(min, Math.min(40, ConfigManager.autoClickerMaxCps.getValue()));
+        int cps = min;
+        if (max > min) cps = min + ToolList.getInstance().random.nextInt(max - min + 1);
+        return Math.max(1L, (long) (1000.0D / cps));
+    }
+
+    private boolean holdingBreakKey() {
+        if (!ConfigManager.autoClickerBreakBlocks.getValue()) return false;
+        if (mc.hitResult == null) return false;
+        return mc.hitResult.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK;
+    }
+
+    private void setAttackKey(boolean pressed) {
+        com.mojang.blaze3d.platform.InputConstants.Key key =
+                com.mojang.blaze3d.platform.InputConstants.Type.MOUSE.getOrCreate(0);
+        net.minecraft.client.KeyMapping.set(key, pressed);
+    }
+
+    private void pressAttackKey() {
+        InputSimulator.singleLeftClick();
     }
 
     private boolean onMouseClick(long windows, CustomFabricEvents.ClickType clickType, int state) {
@@ -55,7 +77,7 @@ public class AutoClickerListener extends AbstractListener {
                     isRightAutoClicking = state == 1;
                     if(isRightAutoClicking) {
                         flag = true;
-                        rightClickDelay = getRandomDelay();
+                        nextRightClickTime = System.currentTimeMillis() + clickIntervalMillis();
                         InputSimulator.singleRightClick();
                     }
                 }
@@ -65,7 +87,7 @@ public class AutoClickerListener extends AbstractListener {
                     isLeftAutoClicking = state == 1;
                     if(isLeftAutoClicking) {
                         flag = true;
-                        leftClickDelay = getRandomDelay();
+                        nextLeftClickTime = System.currentTimeMillis() + clickIntervalMillis();
                         InputSimulator.singleLeftClick();
                     }
                 }
@@ -86,29 +108,47 @@ public class AutoClickerListener extends AbstractListener {
         }
         if(isRightAutoClickingEnabled()) {
             if(isRightAutoClicking) {
-                if (rightClickDelay > 0) {
-                    rightClickDelay--;
-                } else {
-                    rightClickDelay = getRandomDelay();
+                if (System.currentTimeMillis() >= nextRightClickTime) {
+                    nextRightClickTime = System.currentTimeMillis() + clickIntervalMillis();
                     InputSimulator.singleRightClick();
                 }
             }
         } else {
-            rightClickDelay = 0;
+            nextRightClickTime = 0L;
             isRightAutoClicking = false;
         }
         if(isLeftAutoClickingEnabled()) {
             if(isLeftAutoClicking) {
-                if (leftClickDelay > 0) {
-                    leftClickDelay--;
+                if (holdingBreakKey()) {
+                    if (!breakKeyHeld) {
+                        setAttackKey(true);
+                        breakKeyHeld = true;
+                    }
                 } else {
-                    leftClickDelay = getRandomDelay();
-                    InputSimulator.singleLeftClick();
+                    if (breakKeyHeld) {
+                        setAttackKey(false);
+                        breakKeyHeld = false;
+                    }
+                    if (System.currentTimeMillis() >= nextLeftClickTime) {
+                        nextLeftClickTime = System.currentTimeMillis() + clickIntervalMillis();
+                        InputSimulator.singleLeftClick();
+                    }
+                }
+            } else {
+                nextLeftClickTime = 0L;
+                isLeftAutoClicking = false;
+                if (breakKeyHeld) {
+                    setAttackKey(false);
+                    breakKeyHeld = false;
                 }
             }
         } else {
-            leftClickDelay = 0;
+            nextLeftClickTime = 0L;
             isLeftAutoClicking = false;
+            if (breakKeyHeld) {
+                setAttackKey(false);
+                breakKeyHeld = false;
+            }
         }
     }
 
@@ -116,7 +156,7 @@ public class AutoClickerListener extends AbstractListener {
         if(leftAutoClickingEnabled) return true;
         if(mc.player == null) return false;
         String itemUUID = ToolList.getInstance().tryGetSkyblockItemUUID(mc.player.getMainHandItem());
-        if(!ToolList.getInstance().stringHasContext(itemUUID)) return false;
+        if(!ToolList.getInstance().stringHasContext(itemUUID)) return ConfigManager.autoClickerVanilla.getValue();
         for(AutoClickItemEntry entry : itemConfig) {
             if(entry.itemUUID().equals(itemUUID)) {
                 return entry.leftClick();
@@ -129,7 +169,7 @@ public class AutoClickerListener extends AbstractListener {
         if(rightAutoClickingEnabled) return true;
         if(mc.player == null) return false;
         String itemUUID = ToolList.getInstance().tryGetSkyblockItemUUID(mc.player.getMainHandItem());
-        if(!ToolList.getInstance().stringHasContext(itemUUID)) return false;
+        if(!ToolList.getInstance().stringHasContext(itemUUID)) return ConfigManager.autoClickerVanilla.getValue();
         for(AutoClickItemEntry entry : itemConfig) {
             if(entry.itemUUID().equals(itemUUID)) {
                 return entry.rightClick();
