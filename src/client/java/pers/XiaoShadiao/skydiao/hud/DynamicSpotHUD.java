@@ -77,6 +77,16 @@ public final class DynamicSpotHUD extends XSDHUD {
     }
 
     @Override
+    public float scaleAnchorX() {
+        return Minecraft.getInstance().getWindow().getGuiScaledWidth() / 2F;
+    }
+
+    @Override
+    public float scaleAnchorY() {
+        return CARD_TOP + IDLE_HEIGHT / 2F;
+    }
+
+    @Override
     public String getHudName() {
         return "dynamic_spot";
     }
@@ -267,12 +277,6 @@ public final class DynamicSpotHUD extends XSDHUD {
         float progress = tabProgress();
         var pose = graphics.pose();
         pose.pushMatrix();
-        HudOffsetAndScale settings = hudOffsetAndScaleMap.getOrDefault("dynamic_spot", HudOffsetAndScale.DEFAULT);
-        if (settings != null) {
-
-            pose.scale(settings.scale() + (1F - settings.scale()) * progress);
-            pose.translate(settings.x() * (1F - progress), (settings.y() + CARD_TOP - TAB_CARD_TOP) * (1F - progress));
-        }
         float targetWidth = Math.min(screenWidth - 16F, Math.max(IDLE_MIN_WIDTH, naturalWidth + 18));
         float targetHeight = Math.max(IDLE_HEIGHT, naturalHeight + 12);
         float currentWidth = tabBaseWidth + (targetWidth - tabBaseWidth) * progress;

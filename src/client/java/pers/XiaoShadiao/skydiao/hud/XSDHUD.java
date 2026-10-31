@@ -61,12 +61,23 @@ public abstract class XSDHUD implements HudElement {
         Matrix3x2fStack pose = graphics.pose();
         pose.pushMatrix();
         if(settings != null) {
+            float anchorX = scaleAnchorX();
+            float anchorY = scaleAnchorY();
+            pose.translate(settings.x + anchorX, settings.y + anchorY);
             pose.scale(settings.scale);
-            pose.translate(settings.x, settings.y);
+            pose.translate(-anchorX, -anchorY);
         }
         render(graphics, deltaTracker, force);
         pose.popMatrix();
         renderEffect(graphics, deltaTracker, force, settings == null ? new HudOffsetAndScale(0, 0, 1) : settings);
+    }
+
+    public float scaleAnchorX() {
+        return 0F;
+    }
+
+    public float scaleAnchorY() {
+        return 0F;
     }
 
     public record HudOffsetAndScale(float x, float y, float scale) {
