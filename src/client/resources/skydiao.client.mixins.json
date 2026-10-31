@@ -35,7 +35,8 @@
     "MixinBlockAnimationAccessors$StackState",
     "MixinBlockAnimationHand",
     "MixinBlockAnimationItemSize",
-    "MixinBlockAnimationConsumableSwing"
+    "MixinBlockAnimationConsumableSwing",
+    "MixinOptionInstanceAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

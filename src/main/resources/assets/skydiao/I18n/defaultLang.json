@@ -1323,8 +1323,8 @@
       "description": "§e显示当前 Slayer 首领的名称/阶级、血量、阶段与吸血鬼技能计时（可在编辑Hud里拖动位置）"
     },
     "fulllight": {
-      "configname": "§e全亮",
-      "description": "§e无视亮度限制，把 gamma 拉到最大"
+      "configname": "§e夜视",
+      "description": "§e无视亮度限制，把 gamma 拉到最大，效果等同于夜视"
     },
     "autoclickermincps": {
       "configname": "§e连点最小 CPS",

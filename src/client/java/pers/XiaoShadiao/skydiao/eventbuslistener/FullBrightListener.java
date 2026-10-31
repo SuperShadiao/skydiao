@@ -3,6 +3,7 @@ package pers.XiaoShadiao.skydiao.eventbuslistener;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.mixin.client.MixinOptionInstanceAccessor;
 
 public class FullBrightListener extends AbstractListener {
 
@@ -24,10 +25,10 @@ public class FullBrightListener extends AbstractListener {
             Double current = client.options.gamma().get();
             if (current < 100.0D) {
                 if (previousGamma == null) previousGamma = current;
-                client.options.gamma().set(100.0D);
+                ((MixinOptionInstanceAccessor) (Object) client.options.gamma()).skydiao$setRawValue(100.0D);
             }
         } else if (previousGamma != null) {
-            client.options.gamma().set(previousGamma);
+            ((MixinOptionInstanceAccessor) (Object) client.options.gamma()).skydiao$setRawValue(previousGamma);
             previousGamma = null;
         }
     }
