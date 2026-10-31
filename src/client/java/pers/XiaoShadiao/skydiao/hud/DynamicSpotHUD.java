@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 public final class DynamicSpotHUD extends XSDHUD {
-    private static final int CARD_TOP = 75;
+    private static final int CARD_TOP = 10;
     private static final int TAB_CARD_TOP = 15;
     private static final int IDLE_HEIGHT = 28;
     private static final int IDLE_MIN_WIDTH = 210;

@@ -1322,6 +1322,26 @@
       "configname": "§eSlayer 信息",
       "description": "§e显示当前 Slayer 首领的名称/阶级、血量、阶段与吸血鬼技能计时（可在编辑Hud里拖动位置）"
     },
+    "fulllight": {
+      "configname": "§e全亮",
+      "description": "§e无视亮度限制，把 gamma 拉到最大"
+    },
+    "autoclickermincps": {
+      "configname": "§e连点最小 CPS",
+      "description": "§e自动连点的最低每秒点击次数（1-40）"
+    },
+    "autoclickermaxcps": {
+      "configname": "§e连点最大 CPS",
+      "description": "§e自动连点的最高每秒点击次数（1-40）"
+    },
+    "autoclickerbreakblocks": {
+      "configname": "§e挖方块时持续按住",
+      "description": "§e准星指向方块时直接按住左键，不按 CPS 点击"
+    },
+    "autoclickervanilla": {
+      "configname": "§e支持原版物品",
+      "description": "§e没有 Skyblock UUID 的物品（原版武器/工具）也允许连点"
+    },
     "blockanimation": {
       "configname": "§e旧版格挡动画",
       "description": "§e按住右键手持剑时显示 1.7/1.8 格挡动画（不减伤），格挡时不会疾跑"
