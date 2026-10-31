@@ -31,6 +31,8 @@ public class AutoClickerListener extends AbstractListener {
     private long nextLeftClickTime = 0L;
     private long nextRightClickTime = 0L;
 
+    private boolean breakKeyHeld = false;
+
     @Override
     public String getListenerName() {
         return "AutoClickerListener";
@@ -64,11 +66,7 @@ public class AutoClickerListener extends AbstractListener {
     }
 
     private void pressAttackKey() {
-        com.mojang.blaze3d.platform.InputConstants.Key key =
-                com.mojang.blaze3d.platform.InputConstants.Type.MOUSE.getOrCreate(0);
-        net.minecraft.client.KeyMapping.set(key, true);
-        net.minecraft.client.KeyMapping.click(key);
-        net.minecraft.client.KeyMapping.set(key, false);
+        InputSimulator.singleLeftClick();
     }
 
     private boolean onMouseClick(long windows, CustomFabricEvents.ClickType clickType, int state) {
@@ -122,15 +120,35 @@ public class AutoClickerListener extends AbstractListener {
         if(isLeftAutoClickingEnabled()) {
             if(isLeftAutoClicking) {
                 if (holdingBreakKey()) {
-                    setAttackKey(true);
-                } else if (System.currentTimeMillis() >= nextLeftClickTime) {
-                    nextLeftClickTime = System.currentTimeMillis() + clickIntervalMillis();
-                    pressAttackKey();
+                    if (!breakKeyHeld) {
+                        setAttackKey(true);
+                        breakKeyHeld = true;
+                    }
+                } else {
+                    if (breakKeyHeld) {
+                        setAttackKey(false);
+                        breakKeyHeld = false;
+                    }
+                    if (System.currentTimeMillis() >= nextLeftClickTime) {
+                        nextLeftClickTime = System.currentTimeMillis() + clickIntervalMillis();
+                        InputSimulator.singleLeftClick();
+                    }
+                }
+            } else {
+                nextLeftClickTime = 0L;
+                isLeftAutoClicking = false;
+                if (breakKeyHeld) {
+                    setAttackKey(false);
+                    breakKeyHeld = false;
                 }
             }
         } else {
             nextLeftClickTime = 0L;
             isLeftAutoClicking = false;
+            if (breakKeyHeld) {
+                setAttackKey(false);
+                breakKeyHeld = false;
+            }
         }
     }
 

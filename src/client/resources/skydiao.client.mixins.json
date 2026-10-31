@@ -36,7 +36,8 @@
     "MixinBlockAnimationHand",
     "MixinBlockAnimationItemSize",
     "MixinBlockAnimationConsumableSwing",
-    "MixinOptionInstanceAccessor"
+    "MixinOptionInstanceAccessor",
+    "MixinChatListenerIrc"
   ],
   "injectors": {
     "defaultRequire": 1

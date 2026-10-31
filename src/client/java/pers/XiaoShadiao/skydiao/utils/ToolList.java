@@ -771,7 +771,7 @@ public class ToolList {
     public static void printChatMessage(Component msg) {
         if (ToolList.mc != null && ToolList.mc.gui != null && ToolList.mc.gui.hud.getChat() != null) {
             ToolList.mc.execute(() -> {
-                Component msg1 = msg;
+                Component msg1 = LegacyChat.parse(msg);
                 if(ConfigManager.blivemodechat.getValue()) msg1 = ComponentHelper.wrapAsSensitive(msg1, true, true);
                 ToolList.mc.gui.hud.getChat().addClientSystemMessage(msg1);
             });
