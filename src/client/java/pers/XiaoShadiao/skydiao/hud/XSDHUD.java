@@ -31,7 +31,6 @@ public abstract class XSDHUD implements HudElement {
     public static final AutoBloodfiendListener.TaskRender abfTaskRender = MacroManagerListener.autoBloodfiendListener.new TaskRender();
     public static final GenshinImpactHeatCold genshinImpactHeatCold = new GenshinImpactHeatCold();
     public static final MusicLyricDisplay musicLyricDisplay = new MusicLyricDisplay();
-    public static final DungeonReviveItemCD dungeonReviveItemCD = new DungeonReviveItemCD();
     public static final PinglessMiningHUD pinglessMiningHUD = new PinglessMiningHUD();
     public static final DynamicSpotHUD dynamicSpotHUD = new DynamicSpotHUD();
 
@@ -46,7 +45,6 @@ public abstract class XSDHUD implements HudElement {
 
     public abstract void render(GuiGraphicsExtractor context, DeltaTracker tickCounter, boolean force);
 
-    /* 不受HUD位置和缩放影响的渲染效果 */
     public abstract void renderEffect(GuiGraphicsExtractor context, DeltaTracker tickCounter, boolean force, HudOffsetAndScale settings);
 
     public @Nullable abstract String getHudName();

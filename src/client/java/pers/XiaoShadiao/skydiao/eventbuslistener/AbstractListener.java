@@ -90,7 +90,9 @@ public abstract class AbstractListener extends Thread {
     public static final NodeGraphTriggerListener nodeGraphTriggerListener = new NodeGraphTriggerListener();
     public static final DungeonAutoGFSListener dungeonAutoGFSListener = new DungeonAutoGFSListener();
     public static final DungeonNoSwapItemInEndListener dungeonNoSwapItemInEndListener = new DungeonNoSwapItemInEndListener();
-    public static final AutoPetToDynamicSpotListener autoPetToDynamicSpotListener = new AutoPetToDynamicSpotListener();
+    public static final AlertListener alertListener = new AlertListener();
+    public static final SlayerInfoListener slayerInfoListener = new SlayerInfoListener();
+    public static final MaskTimerListener maskTimerListener = new MaskTimerListener();
     public static final AutoTipListener autoTipListener = new AutoTipListener();
     public static final ShaftHOTMSwitchListener shaftHOTMSwitchListener = new ShaftHOTMSwitchListener();
 
@@ -118,14 +120,7 @@ public abstract class AbstractListener extends Thread {
     }
 
     public static void initListeners() {
-//        listeners = List.of(
-//                basicListener,
-//                mineshaftShareListener
-//        );
-//
-//        for (AbstractListener listener : listeners) {
-//            listener.registerListeners();
-//        }
+
         Register.execRegister(AbstractListener.class, AbstractListener.class, listener -> {
             listeners.add(listener);
             listener.registerListeners();
