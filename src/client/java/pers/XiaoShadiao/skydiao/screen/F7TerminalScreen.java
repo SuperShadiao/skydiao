@@ -174,7 +174,7 @@ public class F7TerminalScreen extends AbstractContainerScreen<@NotNull ChestMenu
             int melodyCol = 1;
             for (int i = 2; i <= 5; i++) {
                 ItemStack itemStack = getItemOrOldItem(menu.slots.get(getIndexByLineCol(i, 8)));
-                if(itemStack.getItem() == Items.DYED_TERRACOTTA.green()) {
+                if(itemStack.getItem() == Items.DYED_TERRACOTTA.lime()) {
                     melodyLine = i;
                     currentMelodyLine = i - 2;
                     break;
@@ -546,7 +546,8 @@ public class F7TerminalScreen extends AbstractContainerScreen<@NotNull ChestMenu
                     if(onSlotClick != null && onSlotClick.applyAsBoolean(slot, event)) {
                         return false;
                     }
-                    clickSlot(slot, event.button());
+
+                    clickSlot(slot, event.button() == 1 ? 0 : event.button() == 3 ? 1 : event.button());
                     if(!cancelledUpdate) terminalButtons[customSlotIndex] = null;
                     return true;
                 }

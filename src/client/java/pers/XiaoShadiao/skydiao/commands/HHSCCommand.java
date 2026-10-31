@@ -242,6 +242,11 @@ public class HHSCCommand extends SkydiaoCommand {
             }
 
             @Override
+            public double getHealthFlagScale() {
+                return getHealth() / getMaxHealth() - 0.08;
+            }
+
+            @Override
             public Identifier getHeadIcon() {
                 return DungeonF7BossbarListener.F7_BOSS_ICON;
             }

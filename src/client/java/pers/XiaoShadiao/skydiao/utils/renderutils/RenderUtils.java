@@ -8,12 +8,15 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -29,9 +32,11 @@ import net.minecraft.world.entity.boss.enderdragon.EnderDragonPart;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.PlayerTeam;
+import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
 import org.joml.Vector3f;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
@@ -157,6 +162,19 @@ public class RenderUtils {
         context.fill(x1, y1, x1 - 1, y2, rgb);
         context.fill(x1, y2 + 1, x2, y2, rgb);
         context.fill(x2, y1, x2 + 1, y2, rgb);
+    }
+
+    // 绘制三角形：GUI 管线使用 QUADS 拓扑，若直接提交 3 个顶点会被当作不完整四边形丢弃，
+    // 因此提交 4 个顶点并让第 4 个与第 3 个重合，使第二个三角形退化
+    public static void drawTriangle(GuiGraphicsExtractor context, float x1, float y1, float x2, float y2, float x3, float y3,
+                                    float r, float g, float b, float a) {
+        int argb = ((int) (a * 255F) & 0xFF) << 24
+                | ((int) (r * 255F) & 0xFF) << 16
+                | ((int) (g * 255F) & 0xFF) << 8
+                | ((int) (b * 255F) & 0xFF);
+        context.guiRenderState.addGuiElement(new TriangleRenderState(
+                RenderPipelines.GUI, TextureSetup.noTexture(), new Matrix3x2f(context.pose()),
+                x1, y1, x2, y2, x3, y3, argb, context.scissorStack.peek()));
     }
 
     public static void renderSlot(GuiGraphicsExtractor guiGraphics, AbstractContainerScreen<?> abstractContainerScreen, Slot slot, int rgb) {
@@ -424,6 +442,10 @@ public class RenderUtils {
         worldRender.crpl.renderESP(worldRender.context, worldRender.pipeline, (float) x1, (float) y1, (float) z1, (float) x2, (float) y2, (float) z2, r, g, b, a, fillBox);
     }
 
+    public static void renderESP(WorldRender worldRender, BoundingBox box, float r, float g, float b, float a, boolean fillBox) {
+        renderESP(worldRender, box.minX(), box.minY(), box.minZ(), box.maxX() + 1, box.maxY() + 1, box.maxZ() + 1, r, g, b, a, fillBox);
+    }
+
     public static void renderESP(WorldRender worldRender, BlockPos pos, float r, float g, float b, float a, boolean fillBox, boolean followBlockOutline) {
         BlockState blockState = ToolList.mc.level == null ? Blocks.AIR.defaultBlockState() : ToolList.mc.level.getBlockState(pos);
         if(blockState.isAir() || !followBlockOutline) {
@@ -539,6 +561,73 @@ public class RenderUtils {
         double z = Mth.lerp(partialTicks, entity.zo, entity.getZ());
 
         renderTrace(worldRender, x, y, z, r, g, b, a);
+    }
+
+    /** 三角形 GUI 元素：用 GUI 四边形管线提交，第 4 个顶点与第 3 个重合以退化成 2 个三角形中的 1 个。 */
+    private static final class TriangleRenderState implements GuiElementRenderState {
+        private final RenderPipeline pipeline;
+        private final TextureSetup textureSetup;
+        private final Matrix3x2f pose;
+        private final float x1;
+        private final float y1;
+        private final float x2;
+        private final float y2;
+        private final float x3;
+        private final float y3;
+        private final int color;
+        private final ScreenRectangle scissorArea;
+        private final ScreenRectangle bounds;
+
+        private TriangleRenderState(RenderPipeline pipeline, TextureSetup textureSetup, Matrix3x2f pose,
+                                    float x1, float y1, float x2, float y2, float x3, float y3, int color,
+                                    ScreenRectangle scissorArea) {
+            this.pipeline = pipeline;
+            this.textureSetup = textureSetup;
+            this.pose = pose;
+            this.x1 = x1;
+            this.y1 = y1;
+            this.x2 = x2;
+            this.y2 = y2;
+            this.x3 = x3;
+            this.y3 = y3;
+            this.color = color;
+            this.scissorArea = scissorArea;
+
+            int minX = (int) Math.min(x1, Math.min(x2, x3));
+            int minY = (int) Math.min(y1, Math.min(y2, y3));
+            int maxX = (int) Math.max(x1, Math.max(x2, x3)) + 1;
+            int maxY = (int) Math.max(y1, Math.max(y2, y3)) + 1;
+            ScreenRectangle transformed = new ScreenRectangle(minX, minY, maxX - minX, maxY - minY).transformMaxBounds(pose);
+            this.bounds = scissorArea == null ? transformed : scissorArea.intersection(transformed);
+        }
+
+        @Override
+        public void buildVertices(VertexConsumer consumer) {
+            consumer.addVertexWith2DPose(pose, (float) x1, (float) y1).setColor(color);
+            consumer.addVertexWith2DPose(pose, (float) x2, (float) y2).setColor(color);
+            consumer.addVertexWith2DPose(pose, (float) x3, (float) y3).setColor(color);
+            consumer.addVertexWith2DPose(pose, (float) x3, (float) y3).setColor(color);
+        }
+
+        @Override
+        public RenderPipeline pipeline() {
+            return pipeline;
+        }
+
+        @Override
+        public TextureSetup textureSetup() {
+            return textureSetup;
+        }
+
+        @Override
+        public ScreenRectangle scissorArea() {
+            return scissorArea;
+        }
+
+        @Override
+        public ScreenRectangle bounds() {
+            return bounds;
+        }
     }
 
     public static Minecraft mc() {

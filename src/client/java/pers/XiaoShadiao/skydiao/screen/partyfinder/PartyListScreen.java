@@ -174,7 +174,7 @@ public class PartyListScreen extends Screen {
                 return children().size() - 1;
             }
             int added = super.addEntry(entry);
-            sort(Comparator.<PartyInfoEntry>comparingInt(e -> e.data.alreadyInThisParty() ? 0 : 1).thenComparingInt(e -> e.data.canJoin() ? 1 : 0));
+            sort(Comparator.<PartyInfoEntry>comparingInt(e -> e.data.alreadyInThisParty() ? 0 : 1).thenComparingInt(e -> e.data.canJoin() ? 0 : 1));
             return added;
         }
     }

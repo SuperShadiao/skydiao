@@ -24,6 +24,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -187,12 +188,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 
             RenderUtils.renderESP(
                     wr,
-                    Math.min(groupStartPos.getX(), groupEndPos.getX()),
-                    Math.min(groupStartPos.getY(), groupEndPos.getY()),
-                    Math.min(groupStartPos.getZ(), groupEndPos.getZ()),
-                    Math.max(groupStartPos.getX(), groupEndPos.getX()) + 1,
-                    Math.max(groupStartPos.getY(), groupEndPos.getY()) + 1,
-                    Math.max(groupStartPos.getZ(), groupEndPos.getZ()) + 1,
+                    BoundingBox.fromCorners(groupStartPos, groupEndPos),
                     1, 1, 1, 1, false
             );
 
@@ -473,7 +469,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                     Container container = menu.getContainer();
                     if (!(container instanceof SimpleContainer)) return;
                     if (mc.gameMode != null && mc.player != null) {
-                        mc.execute(() -> mc.gameMode.handleContainerInput(menu.containerId, 50, CustomFabricEvents.ClickType.LEFT.button(), ContainerInput.PICKUP, mc.player));
+                        mc.execute(() -> mc.gameMode.handleContainerInput(menu.containerId, 50, 0, ContainerInput.PICKUP, mc.player));
                         this.pageSwitchCallback = new PageSwitchCallback();
                         ctx.put("screen", this.pageSwitchCallback.getScreen());
                     }
@@ -485,7 +481,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                     Container container = menu.getContainer();
                     if (!(container instanceof SimpleContainer)) return;
                     if (mc.gameMode != null && mc.player != null) {
-                        mc.execute(() -> mc.gameMode.handleContainerInput(menu.containerId, night ? 13 : 11, CustomFabricEvents.ClickType.LEFT.button(), ContainerInput.PICKUP, mc.player));
+                        mc.execute(() -> mc.gameMode.handleContainerInput(menu.containerId, night ? 13 : 11, 0, ContainerInput.PICKUP, mc.player));
                     }
                 }, 500)
                 .addAction(() -> {

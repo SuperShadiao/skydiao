@@ -630,6 +630,10 @@ public class CustomBossbar extends XSDHUD {
         public int getWeakness();
         public int getMaxWeakness();
 
+        public default double getHealthFlagScale() {
+            return -1;
+        }
+
         public Identifier getHeadIcon();
 
         public boolean isImmune();
@@ -834,6 +838,17 @@ public class CustomBossbar extends XSDHUD {
                 RenderUtils.drawOutlineRect(context, (int) (x + length * currentHealthScale), -10, (int) (x + length * justDamagedEndScale) - 1, -6, new Color(0xC1, 0x48, 0x30, (int) (255f * animationGetDamaged / 20f)).getRGB());
                 context.fill((int) (x + length * currentHealthScale), -10, (int) (x + length * justDamagedEndScale), -6, new Color(255, 255, 255, (int) (255f * animationGetDamaged / 20f)).getRGB());
                 context.fill(x, -10, (int) (x + length * currentHealthScale), -6, new Color(0xC1, 0x48, 0x30, 255).getRGB());
+
+                double healthFlagScale = Math.min(1, bossBar.getHealthFlagScale());
+                if(healthFlagScale > 0) {
+                    context.fill((int) (x + length * healthFlagScale - 1), -11, (int) (x + length * healthFlagScale), -5, new Color(0xFF, 0xFF, 0xFF, 255).getRGB());
+                    RenderUtils.drawTriangle(context,
+                            (int) (x + length * healthFlagScale) - 0.5f, -4,
+                            (int) (x + length * healthFlagScale) - 0.5f - 3, 2,
+                            (int) (x + length * healthFlagScale) - 0.5f + 3, 2,
+                            1, 1, 1, 1
+                            );
+                }
                 if(hasWeakness) {
                     context.fill(x, -16, x + length, -12, new Color(8, 8, 8, 255).getRGB());
                     context.fill(x, -16, (int) (x + length * currentDamagedWeaknessScale), -12, new Color(0xD3, 0x91, 0x12, 255).getRGB());

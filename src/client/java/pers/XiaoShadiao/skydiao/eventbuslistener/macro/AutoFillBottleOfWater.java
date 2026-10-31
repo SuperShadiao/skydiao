@@ -123,7 +123,7 @@ public class AutoFillBottleOfWater extends AbstractListener implements IMacro {
                     if(slot.container == mc.player.getInventory() && slot.getItem().getItem() == Items.POTION) {
                         mc.execute(() -> {
                             if (mc.gui.screen() == containerScreen && mc.player != null && mc.gameMode != null) {
-                                mc.gameMode.handleContainerInput(containerScreen.getMenu().containerId, slot.index, CustomFabricEvents.ClickType.LEFT.button(), ContainerInput.QUICK_MOVE, mc.player);
+                                mc.gameMode.handleContainerInput(containerScreen.getMenu().containerId, slot.index, 0, ContainerInput.QUICK_MOVE, mc.player);
                             }
                         });
                         Thread.sleep(260 + ToolList.getInstance().random.nextInt(100));

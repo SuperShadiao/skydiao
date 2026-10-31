@@ -83,10 +83,11 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     private final BlockPos stage3LeapPositionCorn1 = new BlockPos(110, 125, 88);
     private final BlockPos stage3LeapPositionCorn2 = new BlockPos(102, 120, 99);
 
-    private final BoundingBox stage3Area2 = new BoundingBox(88, 152, 146, 19, 103, 121);
-    private final BoundingBox stage3Area3 = new BoundingBox(-4, 152, 50, 19, 103, 121);
-    private final BoundingBox stage3Area4 = new BoundingBox(19, 152, 51, 92, 103, 28);
-    private final List<BoundingBox> stage3Areas = List.of(stage3Area2, stage3Area3, stage3Area4);
+    private final BoundingBox stage3area1 = new BoundingBox(112, 152, 124, 88, 103, 55);
+    private final BoundingBox stage3Area2 = new BoundingBox(112, 152, 146, 19, 103, 121);
+    private final BoundingBox stage3Area3 = new BoundingBox(-4, 152, 49, 19, 103, 147);
+    private final BoundingBox stage3Area4 = new BoundingBox(-5, 152, 51, 90, 103, 28);
+    private final List<BoundingBox> stage3Areas = List.of(stage3area1, stage3Area2, stage3Area3, stage3Area4);
 
     private BoundingBox stage3CurrentArea = null;
 
@@ -94,6 +95,8 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
     private int stage5DragonCount = 0;
     private int ssCursor;
+
+    private double bossLockingHealthScale = 1;
 
     private record WitherDragonData(int entityId, ColorType colorType) {
         private enum ColorType {
@@ -256,12 +259,14 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     @Override
     public void onStageEnter(int stage) {
         if(stage == 1) currentStage = 1;
+        bossLockingHealthScale = 1;
         f7BossTarget = null;
         if(stage == 1) {
             currentWeakness = 2;
         }
         if(stage == 2) {
             currentWeakness = 1;
+            bossLockingHealthScale -= 0.55;
         }
         if(stage == 3) {
             remainTerminal = terminals = 29;
@@ -274,6 +279,9 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                 if(remainTerminal == terminals) addStarRailNotification("靠近Goldor将受到大量伤害, 通过攻击Goldor可延缓其移动速度!", StarRailNotification.Type.warning);
                 return null;
             });
+        }
+        if(stage == 4) {
+            bossLockingHealthScale -= 0.2;
         }
 
         if(currentStage == 2) {
@@ -296,6 +304,25 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                 autoSwitchPetListener.switchPet("Ender Dragon", null);
             }
         }
+    }
+
+    @Override
+    public double getHealthFlagScale() {
+        double DEFAULT_SCALE = super.getHealthFlagScale();
+        if(currentStage == 1) {
+            if(getWeakness() == 0) {
+                return bossLockingHealthScale;
+            }
+        }
+        if(currentStage == 2) {
+            if(getWeakness() == 0) {
+                return bossLockingHealthScale;
+            }
+        }
+        if(currentStage == 4) {
+            return bossLockingHealthScale;
+        }
+        return DEFAULT_SCALE;
     }
 
     @Override
@@ -389,6 +416,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         if(mc.level == null || mc.player == null || (!masterFloorFlag && !isInCorrectDungeon())) return;
 
         RenderUtils.WorldRender wr1 = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.NO_THROUGH_WALLS_LINE);
+        RenderUtils.WorldRender wrThrough1 = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.THROUGH_WALLS_LINE);
         RenderUtils.WorldRender wr2 = RenderUtils.createWorldRenderInstance(context, CustomRenderPipeline.NO_THROUGH_WALLS_FILL);
         boolean flag = false;
         for (BlockPos pos : BlockPos.betweenClosed(stage4PlatformCorn1, stage4PlatformCorn2)) {
@@ -398,6 +426,11 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                 flag = true;
             }
         }
+//        if(ToolList.getInstance().isDevEnvironment()) {
+//            for(BoundingBox box : stage3Areas) {
+//                RenderUtils.renderESP(wrThrough1, box, 1, 1, 1, 1, false);
+//            }
+//        }
         if(currentStage == 2 && ConfigManager.f7DrawStormFireballTarget.getValue()) {
             for (Entity entity : mc.level.entitiesForRendering()) {
                 if(!(entity instanceof Fireball fireball)) continue;
@@ -584,6 +617,9 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             if (!isNecronUsingUltimateSkill && mc.player.hasEffect(MobEffects.BLINDNESS)) {
                 addStarRailNotification("Necron陷入狂暴且不断增加杀伤范围, 使用高频攻击削弱其范围!", StarRailNotification.Type.warning);
                 isNecronUsingUltimateSkill = true;
+                delayTickExecutor.delayExec(() -> {
+                    bossLockingHealthScale -= 0.55;
+                }, 20);
             }
         }
 
@@ -623,7 +659,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             boolean inArea = ToolList.getInstance().isEntityInArea(mc.player, new BlockPos(50, 115, 54), new BlockPos(58, 122, 57));
             if (inArea && !enteredGoldorCoreTunnel) {
                 enteredGoldorCoreTunnel = true;
-                if(!mc.player.isInvisible()) sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotcoretunnel.getValue());
+                if(!mc.player.isInvisible() && getHealth() > 0 && currentStage >= 3) sendDungeonF7ChatMessage(ConfigManager.dungeonf7msgbotcoretunnel.getValue());
             } else if(!inArea && enteredGoldorCoreTunnel) {
                 enteredGoldorCoreTunnel = false;
             }
@@ -642,21 +678,23 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             if(getHealth() == 0 && tempCount == 0) stage5DragonCount = 0;
         }
 
-        for (BoundingBox area : stage3Areas) {
-            if(area.isInside(mc.player.blockPosition())) {
-                if(!Objects.equals(stage3CurrentArea, area)) {
-                    if(!mc.player.isInvisible()) {
-                        if (Objects.equals(area, stage3Area2)) {
-                            sendDungeonF7ChatMessage(ConfigManager.dungeonf7Stage3EnterArea2.getValue());
-                        } else if (Objects.equals(area, stage3Area3)) {
-                            sendDungeonF7ChatMessage(ConfigManager.dungeonf7Stage3EnterArea3.getValue());
-                        } else if (Objects.equals(area, stage3Area4)) {
-                            sendDungeonF7ChatMessage(ConfigManager.dungeonf7Stage3EnterArea4.getValue());
+        if(getHealth() > 0 && currentStage >= 3) {
+            for (BoundingBox area : stage3Areas) {
+                if(area.isInside(mc.player.blockPosition())) {
+                    if(!Objects.equals(stage3CurrentArea, area)) {
+                        if(!mc.player.isInvisible()) {
+                            if (Objects.equals(area, stage3Area2)) {
+                                sendDungeonF7ChatMessage(ConfigManager.dungeonf7Stage3EnterArea2.getValue());
+                            } else if (Objects.equals(area, stage3Area3)) {
+                                sendDungeonF7ChatMessage(ConfigManager.dungeonf7Stage3EnterArea3.getValue());
+                            } else if (Objects.equals(area, stage3Area4)) {
+                                sendDungeonF7ChatMessage(ConfigManager.dungeonf7Stage3EnterArea4.getValue());
+                            }
                         }
+                        stage3CurrentArea = area;
                     }
-                    stage3CurrentArea = area;
+                    break;
                 }
-                break;
             }
         }
         if(stage3CurrentArea != null && !stage3CurrentArea.isInside(mc.player.blockPosition())) {
@@ -709,6 +747,10 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             if(message.equals("[BOSS] Necron: ARGH!")) {
                 addStarRailNotification("Necron狂暴终止, 全力输出!", StarRailNotification.Type.success);
                 isNecronUsingUltimateSkill = false;
+            } else if(message.equals("[BOSS] Necron: Let's make some space!")) {
+                delayTickExecutor.delayExec(() -> {
+                    bossLockingHealthScale = getHealth() / getMaxHealth() - 0.2;
+                }, 20);
             }
         }
         if(currentStage == 5) {
@@ -785,8 +827,14 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             if(CrowdinI18nManager.getCurrentLang() == CrowdinI18nManager.LangCode.chinese) {
                 if (message.contains("Maxor")) {
                     turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("Maxor陷入了狂暴, 其附近所有玩家将受到大量伤害!", StarRailNotification.Type.warning);
+                    delayTickExecutor.delayExec(() -> {
+                        bossLockingHealthScale = getHealth() / getMaxHealth();
+                    }, 20);
                 } else if (message.contains("Storm")) {
                     turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("Storm陷入了狂暴, 其附近所有玩家将受到大量伤害!", StarRailNotification.Type.warning);
+                    delayTickExecutor.delayExec(() -> {
+                        bossLockingHealthScale = getHealth() / getMaxHealth() - 0.55;
+                    }, 20);
                 }
             }
         }
@@ -799,9 +847,10 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                 if(message.contains("1/2 Energy Crystals are now active!")) {
                     turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("一个水晶已激活!", StarRailNotification.Type.success);
                 } else if(message.contains("2/2 Energy Crystals are now active!")) {
-                    turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("两个水晶已激活!", StarRailNotification.Type.success);
+                    turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("两个水晶已激活, 激光即将进入充能完成!", StarRailNotification.Type.success);
                 } else if(message.contains("The Energy Laser is charging up!")) {
-                    turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("激光已激活, 将Maxor牵引至红色信标柱处使其眩晕!", StarRailNotification.Type.success);
+                    bossLockingHealthScale -= 0.75;
+                    turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("激光已充能, 将Maxor牵引至红色信标柱处使其眩晕!", StarRailNotification.Type.success);
                 } else if(message.contains("The Core entrance")) {
                     turnItToStarRailMsg = new AbstractMap.SimpleEntry<>("Goldor的金色核心入口已开启, 进入以解除Goldor的免疫状态!", StarRailNotification.Type.success);
                 } else if(message.contains("The gate will open in 5 seconds!")) {
