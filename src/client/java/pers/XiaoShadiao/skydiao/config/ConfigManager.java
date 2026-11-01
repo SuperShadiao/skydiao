@@ -239,6 +239,12 @@ public class ConfigManager {
     public static final BooleanConfigOption pinglessMining = new BooleanConfigOption("pinglessmining", false);
     public static final BooleanConfigOption dynamicSpot = new BooleanConfigOption("dynamicspot", false);
     public static final BooleanConfigOption dynamicSpotReplaceTabList = new BooleanConfigOption("dynamicspotreplacetablist", false);
+    public static final BooleanConfigOption maskTimer = new BooleanConfigOption("masktimer", true);
+    public static final BooleanConfigOption alertHud = new BooleanConfigOption("alerthud", true);
+    public static final BooleanConfigOption slayerInfo = new BooleanConfigOption("slayerinfo", true);
+    public static final BooleanConfigOption blockAnimation = new BooleanConfigOption("blockanimation", false);
+    public static final IntConfigOption blockAnimationItemSize = new IntConfigOption("blockanimationitemsize", 100);
+    public static final BooleanConfigOption fullLight = new BooleanConfigOption("fulllight", false);
     public static final BooleanConfigOption dungeonautogfs = new BooleanConfigOption("dungeonautogfs", false);
     public static final BooleanConfigOption dungeonautogfsleap = new BooleanConfigOption("dungeonautogfsleap", false);
     public static final BooleanConfigOption dungeonautogfstnt = new BooleanConfigOption("dungeonautogfstnt", false);
@@ -404,7 +410,7 @@ public class ConfigManager {
                     dungeonUseRagnarock, dungeonUseRagnarockCancelled, dungeonUseRagnarockRecieveDamage
             )),
             Map.entry("rift", List.of(rifttimegunhelper)),
-            Map.entry("界面类", List.of(openHud, bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, bossDrawESP, customBossESPTracer, starrailNotification, starrailNotificationSound, dyingtip, noblind, nosuffoverlay, fireOverlay, lyricColor1, lyricColor2, dynamicSpot, dynamicSpotReplaceTabList)),
+            Map.entry("界面类", List.of(openHud, bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, bossDrawESP, customBossESPTracer, starrailNotification, starrailNotificationSound, dyingtip, noblind, nosuffoverlay, fireOverlay, lyricColor1, lyricColor2, dynamicSpot, dynamicSpotReplaceTabList, blockAnimation, blockAnimationItemSize, fullLight, maskTimer, alertHud, slayerInfo)),
             Map.entry("ravengard", List.of(ravengardHelper, ravengardQueueMessage))
     );
 

@@ -27,7 +27,17 @@
     "MixinRealmStatusReset",
     "MixinTooltipScroll",
     "blivemode.MixinPlayerTabOverlay",
-    "blivemode.MixinScoreboardRender"
+    "blivemode.MixinScoreboardRender",
+    "MixinBlockAnimationHand",
+    "MixinBlockAnimationItemSize",
+    "MixinBlockAnimationConsumableSwing",
+    "MixinBlockAnimationModel",
+    "MixinBlockAnimationSprint",
+    "MixinBlockAnimationSprintStop",
+    "MixinBlockAnimationThirdPerson",
+    "MixinBlockAnimationAccessors$LayerState",
+    "MixinBlockAnimationAccessors$StackState",
+    "MixinOptionInstanceAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

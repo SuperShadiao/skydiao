@@ -19,6 +19,7 @@ public class DungeonReviveItemCD extends XSDHUD {
     @Override
     public void render(GuiGraphicsExtractor context, DeltaTracker tickCounter, boolean force) {
         if (!force && (!StatusManager.get().isInDungeon() || !ConfigManager.dungeonReviveItemCDRender.getValue())) return;
+        if (!force && ConfigManager.dynamicSpot.getValue() && ConfigManager.maskTimer.getValue()) return;
         context.text(mc.font, "§eBonzo§f: " + getCDMsg(AbstractListener.resurrectionItemListener.getBonzoCD()), context.guiWidth() / 2 + 25, context.guiHeight() / 2, 0xFFFFFFFF, true);
         context.text(mc.font, "§bSpirit§f: " + getCDMsg(AbstractListener.resurrectionItemListener.getSpiritCD()), context.guiWidth() / 2 + 25, context.guiHeight() / 2 + mc.font.lineHeight, 0xFFFFFFFF, true);
         context.text(mc.font, "§6Phoenix§f: " + getCDMsg(AbstractListener.resurrectionItemListener.getPhoenixCD()), context.guiWidth() / 2 + 25, context.guiHeight() / 2 + mc.font.lineHeight * 2, 0xFFFFFFFF, true);

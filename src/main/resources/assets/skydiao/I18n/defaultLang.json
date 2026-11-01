@@ -1306,6 +1306,30 @@
       "configname": "§e地牢F7自定义终端UI按钮大小",
       "description": "§e设置自定义终端UI的按钮大小"
     },
+    "masktimer": {
+      "configname": "§e复活甲计时",
+      "description": "§e在灵动岛内显示 Spirit / Bonzo / Phoenix 的冷却与无敌时间"
+    },
+    "alerthud": {
+      "configname": "§e告警提示",
+      "description": "§e在灵动岛内显示低 TPS 与 Autopet 提醒"
+    },
+    "slayerinfo": {
+      "configname": "§eSlayer 信息",
+      "description": "§e在灵动岛内显示 Slayer 血量与技能计时"
+    },
+    "blockanimation": {
+      "configname": "§e旧版格挡动画",
+      "description": "§e按住右键手持剑时显示 1.7/1.8 的格挡动画（不减伤），格挡时不疾跑"
+    },
+    "blockanimationitemsize": {
+      "configname": "§e手持物品大小",
+      "description": "§e第一人称手持物品的显示大小（百分比，100 = 原版）"
+    },
+    "fulllight": {
+      "configname": "§e夜视",
+      "description": "§e无视亮度限制，把 gamma 拉到最大，效果等同于夜视"
+    },
     "dynamicspot": {
       "configname": "§e灵动岛",
       "description": "§e在窗口上方显示灵动岛浮窗"
