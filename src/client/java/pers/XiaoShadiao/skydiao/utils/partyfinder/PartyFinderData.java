@@ -101,7 +101,8 @@ public class PartyFinderData implements Cloneable {
         FISHING("Fishing", Color.GREEN, 2, true, List.of(SubType.BAYOU, SubType.LOTUS, SubType.SPOOKY, SubType.GALATEA, SubType.CANYON, SubType.ISLE, SubType.CRYSTAL_HOLLOW)),
         DIANA("Diana", Color.YELLOW, 2, true, List.of(SubType.LEGENDARY_PET, SubType.MYTHIC_PET)),
         SAFARI("Safari", Color.GREEN, 4, false, List.of()),
-        KUUDRA("Kuudra", new Color(255, 106, 0), 4, false, List.of(SubType.KUUDRA_BASIC, SubType.KUUDRA_HOT, SubType.KUUDRA_BURNING, SubType.KUUDRA_FIERY, SubType.KUUDRA_INFERNAL))
+        KUUDRA("Kuudra", new Color(255, 106, 0), 4, false, List.of(SubType.KUUDRA_BASIC, SubType.KUUDRA_HOT, SubType.KUUDRA_BURNING, SubType.KUUDRA_FIERY, SubType.KUUDRA_INFERNAL)),
+        RAVENGURAD("Ravenguard", Color.ORANGE, 3, false, List.of()),
         ;
 
         public final Color color;

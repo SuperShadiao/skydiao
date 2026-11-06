@@ -29,6 +29,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.projectile.hurtingprojectile.Fireball;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -62,6 +63,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     public static final double[] MM_HEALTHES = new double[]{800_000_000, 1_000_000_000, 1_200_000_000, 1_400_000_000, 5_000_000_000d};
 
     private LerpingBossEvent f7Boss;
+    private ArmorStand f7BossRealHealth;
     private WitherBoss f7BossTarget;
 
     private int remainTerminal = 29;
@@ -157,10 +159,17 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     @Override
     public double getHealth() {
         // float health = f7Boss.getHealth();
-        if(f7Boss == null) return 0;
-        if(currentStage == 5 && Arrays.stream(WitherDragonData.ColorType.values()).allMatch(WitherDragonData.ColorType::isDragonDead)) return 0;
-        double scale = f7Boss.getProgress();
-        return getMaxHealth() * (scale < 0.02 ? 0 : scale);
+        if (currentStage == 5 && Arrays.stream(WitherDragonData.ColorType.values()).allMatch(WitherDragonData.ColorType::isDragonDead)) {
+            return 0;
+        }
+        if(f7BossRealHealth != null) {
+            double scale = f7BossRealHealth.getHealth() / f7BossRealHealth.getMaxHealth();
+            return getMaxHealth() * scale;
+        } else if(f7Boss != null) {
+            double scale = f7Boss.getProgress();
+            return getMaxHealth() * (scale < 0.02 ? 0 : scale);
+        }
+        return 0;
     }
 
     @Override
@@ -426,11 +435,9 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                 flag = true;
             }
         }
-//        if(ToolList.getInstance().isDevEnvironment()) {
-//            for(BoundingBox box : stage3Areas) {
-//                RenderUtils.renderESP(wrThrough1, box, 1, 1, 1, 1, false);
-//            }
-//        }
+        if(ToolList.getInstance().isDevEnvironment()) {
+            if(f7BossRealHealth != null) RenderUtils.renderTrace(wrThrough1, f7BossRealHealth, 1, 1, 1, 1);
+        }
         if(currentStage == 2 && ConfigManager.f7DrawStormFireballTarget.getValue()) {
             for (Entity entity : mc.level.entitiesForRendering()) {
                 if(!(entity instanceof Fireball fireball)) continue;
@@ -569,6 +576,14 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                     }
                 }
             }
+            if(temp instanceof ArmorStand armorStand) {
+                if(armorStand.position().equals(new Vec3(63.5, 69, 57.5))) {
+                    f7BossRealHealth = armorStand;
+                }
+            }
+        }
+        if(!ToolList.getInstance().isEntityOnWorld(f7BossRealHealth)) {
+            f7BossRealHealth = null;
         }
 
         if (f7BossTarget != null) {

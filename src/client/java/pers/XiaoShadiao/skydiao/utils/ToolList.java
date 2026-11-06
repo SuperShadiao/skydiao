@@ -217,10 +217,11 @@ public class ToolList {
                     boolean downloaded = false;
                     for(String url1 : new String[] {"https://xiaoshadiao.club/musicgetter.exe", "https://www.gitlink.org.cn/api/SuperShadiao/hypixelhelper/raw/musicgetter.exe?ref=main"}) {
                         try {
-                            FileUtils.writeByteArrayToFile(ConfigManager.musicGetter, downloadFileWithMD5(url1, "29acb841701512cca08d3abd54d92a7b"));
+                            // FileUtils.writeByteArrayToFile(ConfigManager.musicGetter, downloadFileWithMD5(url1, "29acb841701512cca08d3abd54d92a7b"));
+                            MultiThreadDownloader.download(url1, ConfigManager.musicGetter, "29acb841701512cca08d3abd54d92a7b").addToTitle().waitOrThrowExceptionIfFailed();
                             downloaded = true;
                             break;
-                        } catch(IOException e) {
+                        } catch(Exception e) {
                             e.printStackTrace();
                         }
                     }

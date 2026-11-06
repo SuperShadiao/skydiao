@@ -196,7 +196,7 @@ public class DungeonMiscMessageListener extends AbstractListener implements IDun
                     }
 
                     if (isKey) {
-                        addStarRailNotification("一个钥匙掉落了!", StarRailNotification.Type.success);
+                        if(ConfigManager.dungeonKeyNotification.getValue()) addStarRailNotification("一个钥匙掉落了!", StarRailNotification.Type.success);
                         currentArmorStandDungeonKey = armorStand;
                     }
                 }
@@ -227,7 +227,7 @@ public class DungeonMiscMessageListener extends AbstractListener implements IDun
                 msg.equals("RIGHT CLICK on the BLOOD DOOR to open it. This key can only be used to open 1 door!") ||
                         msg.equals("RIGHT CLICK on a WITHER door to open it. This key can only be used to open 1 door!")
         ) {
-            addStarRailNotification("成功拾取钥匙! 右键门来打开它...",  StarRailNotification.Type.success);
+            if(ConfigManager.dungeonKeyNotification.getValue()) addStarRailNotification("成功拾取钥匙! 右键门来打开它...",  StarRailNotification.Type.success);
         } else if(PartyManager.isInParty() && msg.matches("Starting in \\d seconds?\\.")) {
             List<String> playerList = ToolList.getInstance().fetchScoreboardLinesNoColor();
             List<String> missingPlayers = PartyManager.getPartyMembers().stream().map(PartyManager.Member::name).filter(member -> {

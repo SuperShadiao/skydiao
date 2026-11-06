@@ -3,7 +3,6 @@ package pers.XiaoShadiao.skydiao.mixin.client;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Ticker;
 import com.mojang.blaze3d.TracyBootstrap;
-import com.mojang.blaze3d.platform.ClientShutdownWatchdog;
 import com.mojang.blaze3d.platform.DisplayData;
 import com.mojang.blaze3d.platform.NativeLibrariesBootstrap;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -285,7 +284,7 @@ public class MixinUserDataSecurer {
             return;
         }
 
-        ClientShutdownWatchdog.startShutdownWatchdog("post-main", true, null, gameConfig, Thread.currentThread().threadId());
+        System.exit(0);
     }
 
     @Overwrite

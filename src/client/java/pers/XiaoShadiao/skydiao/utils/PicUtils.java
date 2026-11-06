@@ -85,10 +85,15 @@ public class PicUtils {
         CompletableFuture<ByteBuffer> future = new CompletableFuture<>();
         ToolList.mc.execute(() -> {
             ByteBuffer heapDst = ByteBuffer.allocate(buffer.remaining());
-            heapDst.order(buffer.order());
-            heapDst.put(buffer);
-            heapDst.position(0);
-            future.complete(heapDst);
+            try {
+                heapDst.order(buffer.order());
+                heapDst.put(buffer);
+                heapDst.position(0);
+            } catch (Exception e) {
+                ToolList.getInstance().log.catching(e);
+            } finally {
+                future.complete(heapDst);
+            }
         });
         return future;
     }

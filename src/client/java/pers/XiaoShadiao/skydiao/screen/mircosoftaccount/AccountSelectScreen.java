@@ -19,6 +19,7 @@ import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.utils.MultiThreadDownloader;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
@@ -485,7 +486,8 @@ public class AccountSelectScreen extends Screen {
                         for (String url : urls) {
                             try {
                                 ToolList.getInstance().log.info(url);
-                                FileUtils.writeByteArrayToFile(configLogin, ToolList.getInstance().downloadFileWithMD5(url, "6ac5548cff9ae693678111e6e101d48f"));
+                                // FileUtils.writeByteArrayToFile(configLogin, ToolList.getInstance().downloadFileWithMD5(url, "6ac5548cff9ae693678111e6e101d48f"));
+                                MultiThreadDownloader.download(url, configLogin, "6ac5548cff9ae693678111e6e101d48f").addToTitle().waitOrThrowExceptionIfFailed();
                                 flag = false;
                                 break;
                             } catch (Exception e) {

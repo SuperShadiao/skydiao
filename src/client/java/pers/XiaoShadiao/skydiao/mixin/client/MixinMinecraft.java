@@ -5,16 +5,15 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.minecraft.UserApiService;
 import com.mojang.authlib.services.MinecraftServicesDiscoveryService;
 import com.mojang.authlib.services.ProfileResult;
-import com.mojang.renderpearl.api.device.GpuOutOfMemoryException;
 import com.mojang.logging.LogUtils;
+import com.mojang.renderpearl.api.device.GpuOutOfMemoryException;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportType;
 import net.minecraft.ReportedException;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
-import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.client.multiplayer.ProfileKeyPairManager;
 import net.minecraft.client.telemetry.ClientTelemetryManager;
 import net.minecraft.server.Bootstrap;
@@ -36,9 +35,7 @@ import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
 import pers.XiaoShadiao.skydiao.screen.MinecraftCrashedScreen;
 import pers.XiaoShadiao.skydiao.utils.ClientRenderCrashFixer;
 import pers.XiaoShadiao.skydiao.utils.MCThreadDumper;
-import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.XSDSafeSession;
-import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 import pers.XiaoShadiao.skydiao.utils.screen.XSDSplashManager;
 
@@ -52,11 +49,7 @@ import java.util.concurrent.CompletableFuture;
 public class MixinMinecraft {
 
     @Shadow
-    private int rightClickDelay;
-    @Shadow
-    public int missTime;
-    @Shadow
-    static Minecraft instance;
+    private static Minecraft instance;
     @Final
     @Shadow
     private static Logger LOGGER;
@@ -219,41 +212,9 @@ public class MixinMinecraft {
         }
     }
 
-    @WrapOperation(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;continueAttack(Z)V"))
-    public void handleKeyBinds(Minecraft instance, boolean bl, Operation<Void> original) {
-        boolean click = bl || InputSimulator.leftClickFlagMinecraft;
-        boolean executed = false;
-        if(!bl && missTime > 1000) {
-            InputSimulator.continueAttack(click);
-            executed = click;
-        }
-        if(!executed) {
-            original.call(instance, click);
-            if(missTime == 0) {
-                InputSimulator.missTime = 0;
-            }
-        }
-    }
-
-    @WrapOperation(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;isDown()Z"))
-    public boolean handleKeyBinds2(KeyMapping instance, Operation<Boolean> original) {
-        if(InputSimulator.rightClickDelay != 0) {
-            this.rightClickDelay = InputSimulator.rightClickDelay;
-        }
-        if(instance == ToolList.mc.options.keyUse) {
-            return original.call(instance) || (InputSimulator.isMouseRightHolding && !InputSimulator.hasRemainRightClick() && !InputSimulator.isInventoryOpen());
-        }
-        return original.call(instance);
-    }
-
     @WrapOperation(method = "updateTitle", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;createTitle()Ljava/lang/String;"))
     public String updateTitle(Minecraft instance, Operation<String> original) {
         return AbstractListener.titleChanger.updateMCTitle(original.call(instance));
-    }
-
-    @Inject(method = "startUseItem", at = @At("RETURN"))
-    public void startUseItem(CallbackInfo ci) {
-        InputSimulator.rightClickDelay = this.rightClickDelay;
     }
 
     @Unique

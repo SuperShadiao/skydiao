@@ -257,6 +257,14 @@ public class ConfigManager {
     public static final BooleanConfigOption preventShortbowDrawing = new BooleanConfigOption("preventshortbowdrawing", true);
     public static final IntConfigOption mineshaftEnterLoadout = new IntConfigOption("mineshaftenterloadout", 0);
     public static final IntConfigOption mineshaftExitLoadout = new IntConfigOption("mineshaftexitloadout", 0);
+    public static final BooleanConfigOption endermanSlayerBeaconESP = new BooleanConfigOption("skyblockendermanslayerbeaconrenderer", true);
+    public static final BooleanConfigOption endermanSlayerEyeESP = new BooleanConfigOption("endermanslayereyeesp", true);
+    public static final BooleanConfigOption blazeSlayerFirePillarESP = new BooleanConfigOption("blazeslayerfirepillaresp", true);
+    public static final BooleanConfigOption blazeSlayerShieldColorESP = new BooleanConfigOption("blazeslayershieldcoloresp", true);
+    public static final BooleanConfigOption highSpeedDownload = new BooleanConfigOption("highspeeddownload", true);
+    public static final BooleanConfigOption dungeonKeyNotification = new BooleanConfigOption("dungeonkeynotification", true);
+    public static final BooleanConfigOption riftAutoDigMushroom = new BooleanConfigOption("riftautodigmushroom", false);
+    public static final BooleanConfigOption fullBright = new BooleanConfigOption("fullbright", true);
 
     // public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
@@ -358,7 +366,7 @@ public class ConfigManager {
 
     public static final List<Map.Entry<String, List<ConfigOption<?>>>> categories = List.of(
             Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip, enableircafktip, enableircmacrochecktip, cooltitle, customTitleText, autoHypeTrain, autoHypeTrainManbaOut)),
-            Map.entry("工具类", List.of(inventoryFilter, itemStarCountRender, itemStarCountRenderColor1, itemStarCountRenderColor2, openfastcommandmenukeybinds, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodescoreboard, blivemodehideserverid, bliveboardcastdankumu, keepSprint, autoReconnect, afkInOtherPlace, freecamFlySpeed, openFreelookAndFreecamAction, preventShortbowDrawing, openAutoClickAction, openAllAutoClickKeybindAction, openClearStashCommand)),
+            Map.entry("工具类", List.of(inventoryFilter, itemStarCountRender, itemStarCountRenderColor1, itemStarCountRenderColor2, openfastcommandmenukeybinds, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodescoreboard, blivemodehideserverid, bliveboardcastdankumu, keepSprint, autoReconnect, afkInOtherPlace, freecamFlySpeed, openFreelookAndFreecamAction, preventShortbowDrawing, highSpeedDownload, openAutoClickAction, openAllAutoClickKeybindAction, openClearStashCommand)),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
             Map.entry("自动类", List.of(macroReplay, macroReplaySelfCleaning, autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, autoCarnivalAutoRestart, carnivalAutoFruitDigger, carnivalAutoShootZombie, carnivalAutoShootZombieOffset, skyblockautobloodfiend, skyblockautobloodfiendlowhealth, iAutoObsidian, iAutoObsidianWR, obsidianPositionHelper, autoObsidianPositionsFile, drillSlot, lanternSlot, obsidianPlayerCheckRange, obsidianPlayerCheck, obsidianTheEndCheck, obsidianCycleTicks, autoPickupPhoneRing, autoPlayBeachBall, autoPlayBeachBallAutoStopAt40, autoEvaluateFossils, autoEvaluateFossilsAutoRestart)),
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareCorpseInChat, mineshaftShareAnnounce,
@@ -370,11 +378,16 @@ public class ConfigManager {
                     crystalHollowHelperDebug, crystalHollowDupServerTipper, crystalHollowHelperDisableThreadLimit,
                     genshinImpactHeatColdRender, miningCommissionEntityESP, autoEvaluateFossils,
                     autoEvaluateFossilsAutoRestart, pinglessMining)),
-            Map.entry("combat", List.of(slayerTogether, isleVolcanoFinder, isleVolcanoFinderCataOnlyMode, isleDupServerTip, endIslandDragonESPListener)),
+            Map.entry("combat", List.of(
+                    slayerTogether,
+                    isleVolcanoFinder, isleVolcanoFinderCataOnlyMode, isleDupServerTip,
+                    endIslandDragonESPListener, endermanSlayerBeaconESP, endermanSlayerEyeESP,
+                    blazeSlayerFirePillarESP, blazeSlayerShieldColorESP
+            )),
             Map.entry("foraging", List.of(galateashulker, treeProgress, autoReel, autoReelAutoAim, torrhusCanyonHelper, safariBoardcastHotspot, safariBoardcastTradeNPC, safariRenderTargetESP, floorDroppingRender)),
             Map.entry("farming", List.of(openFsCommandAction, openFsKeyBind, hubratesp, gardenPestESP, autoSprayonator, autoChangeLo, halfAutoKillPests, gardenTrapPrompt, gardenBonusPrompt, fsGardenMoonFlowerMode, fsGardenMoonFlowerModeKeepNightFarming, fsTPToPest)),
             Map.entry("fishing", List.of(hotspotrender, autogg, lotusAtollHelper, fishingBigFishRender, fishingBigFishTip)),
-            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonKeyRender, dungeonRenderTraps, necronLadderNotification,
+            Map.entry("dungeon", List.of(dungeonRenderDangerousEnemy, dungeonKeyRender, dungeonKeyNotification, dungeonRenderTraps, necronLadderNotification,
 
                     dungeonf7autoterm, dungeonf7autotermclickdelay,
 
@@ -403,8 +416,8 @@ public class ConfigManager {
                     dungeonUseRagnarock3s, dungeonUseRagnarock2s, dungeonUseRagnarock1s,
                     dungeonUseRagnarock, dungeonUseRagnarockCancelled, dungeonUseRagnarockRecieveDamage
             )),
-            Map.entry("rift", List.of(rifttimegunhelper)),
-            Map.entry("界面类", List.of(openHud, bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, bossDrawESP, customBossESPTracer, starrailNotification, starrailNotificationSound, dyingtip, noblind, nosuffoverlay, fireOverlay, lyricColor1, lyricColor2, dynamicSpot, dynamicSpotReplaceTabList)),
+            Map.entry("rift", List.of(rifttimegunhelper, riftAutoDigMushroom)),
+            Map.entry("界面类", List.of(openHud, bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, bossDrawESP, customBossESPTracer, starrailNotification, starrailNotificationSound, dyingtip, noblind, fullBright, nosuffoverlay, fireOverlay, lyricColor1, lyricColor2, dynamicSpot, dynamicSpotReplaceTabList)),
             Map.entry("ravengard", List.of(ravengardHelper, ravengardQueueMessage))
     );
 

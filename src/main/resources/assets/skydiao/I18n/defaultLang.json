@@ -1426,6 +1426,34 @@
       "configname": "§e退出Mineshaft自动切换Loadout",
       "description": "§e退出Mineshaft自动切换到指定序号的Loadout (设置为0关闭)"
     },
+    "endermanslayereyeesp": {
+      "configname": "§e末影人Slayer眼睛ESP",
+      "description": "§e高亮最后阶段的眼睛"
+    },
+    "blazeslayerfirepillaresp": {
+      "configname": "§e烈焰人Slayer Fire Pillar ESP",
+      "description": "§e高亮烈焰人Slayer的Fire Pillar"
+    },
+    "blazeslayershieldcoloresp": {
+      "configname": "§e烈焰人Slayer护盾颜色高亮",
+      "description": "§e高亮烈焰人Slayer的护盾属性对应的颜色, 手持对应物品时将会标记成实心, 否则为空心"
+    },
+    "highspeeddownload": {
+      "configname": "§e高速下崽器",
+      "description": "§e使用Skydiao多线程高速下崽器下载服务器资源包, 替换原版单线程下载, 提高下载速度"
+    },
+    "dungeonkeynotification": {
+      "configname": "§e地牢钥匙掉落提示",
+      "description": "§e地牢内钥匙掉落时弹出一个提示"
+    },
+    "riftautodigmushroom": {
+      "configname": "§eRift自动挖掘蘑菇",
+      "description": "§e当蘑菇变成红色时自动左键挖掘 (适用于反应慢且高Ping的玩家)"
+    },
+    "fullbright": {
+      "configname": "§e永久夜视",
+      "description": "§e远离菲林斯 (bushi"
+    },
 
     "about1": "§e小沙雕的QQ: 3381949033",
     "about2": "§e小沙雕の狗窝: https://xiaoshadiao.club/qqg",

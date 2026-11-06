@@ -35,10 +35,7 @@ import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
 import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatPacket;
 import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
 import pers.XiaoShadiao.skydiao.screen.FastCommandMenuScreen;
-import pers.XiaoShadiao.skydiao.utils.Banned;
-import pers.XiaoShadiao.skydiao.utils.HypixelRewardClaimer;
-import pers.XiaoShadiao.skydiao.utils.ToolList;
-import pers.XiaoShadiao.skydiao.utils.Wiped;
+import pers.XiaoShadiao.skydiao.utils.*;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicInfo;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicListManager;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.PlayerThread;
@@ -47,7 +44,9 @@ import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.NodeGraphManager;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
 
 import java.awt.*;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
@@ -97,9 +96,12 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                 getArgConstantInstance("simulategettoken")
                         .then(getArgConstantInstance("get").executes((c) -> {
                             try {
-                                String token = mc.getUser().getAccessToken().substring(0, 5);
+                                StringBuilder builder = new StringBuilder();
+                                builder.append("awa" + mc.getUser().getAccessToken());
+                                String token = builder.toString().substring(0, 5);
                                 c.getSource().sendFeedback(Component.literal("§a[小沙雕] §e获取到的Token: " + token + "..."));
                             } catch (Throwable e) {
+                                e.printStackTrace();
                                 c.getSource().sendError(Component.literal("§a[小沙雕] §c获取Token失败: " + e.getMessage()));
                             }
                             return 0;
@@ -171,8 +173,38 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                                 return 0;
                             });
                             return 0;
-                        }))
+                        })),
+                getArgConstantInstance("testdownloadspeed")
+                        .then(getArgInstance("byteSize_MB", IntegerArgumentType.integer(1, 95)).executes(this::executeTestDownloadSpeed))
+                        .then(getArgInstance("url", StringArgumentType.greedyString()).executes(this::executeTestDownloadSpeed))
         );
+    }
+
+    private int executeTestDownloadSpeed(CommandContext<FabricClientCommandSource> context) {
+        String url;
+        try {
+            url = context.getArgument("url", String.class);
+        } catch (Exception e) {
+            long byteSize = context.getArgument("byteSize_MB", Integer.class) * 1024 * 1024;
+            url = "https://speed.cloudflare.com/__down?bytes=" + byteSize;
+        }
+
+        context.getSource().sendFeedback(Component.literal("§a[小沙雕] 开始测速, 详情可查看标题栏!"));
+        long startTime = System.currentTimeMillis();
+        MultiThreadDownloader.DownloadInfo downloadInfo = MultiThreadDownloader.download(url, new OutputStream() {
+            @Override public void write(int b) throws IOException {}
+        }).addToTitle();
+        downloadInfo.getFuture().thenAccept(t -> {
+            long byteSize = downloadInfo.getTotalByteSize();
+            if(t != null) {
+                mc.execute(() -> context.getSource().sendError(Component.literal("§a[小沙雕] §c测速失败:" + t)));
+            } else {
+                double speed = byteSize * 1000.0 / (System.currentTimeMillis() - startTime);
+                mc.execute(() -> context.getSource().sendFeedback(Component.literal("§a[小沙雕] 测速成功, 大小: §e" + ToolList.getInstance().numberToByteString(byteSize) + "§a, 耗时: §e" + ToolList.getInstance().timeToString(System.currentTimeMillis() - startTime) + "§a, 平均速度: §e" + ToolList.getInstance().numberToByteString((long) speed) + "/s")));
+            }
+        });
+
+        return 0;
     }
 
     private int executeStartFindEventEgg(CommandContext<FabricClientCommandSource> context) {

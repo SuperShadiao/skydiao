@@ -7,13 +7,18 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.logging.LogUtils;
 import com.mojang.text2speech.Narrator;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.gui.Hud;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -22,6 +27,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ResolvableProfile;
+import net.minecraft.world.level.storage.TagValueOutput;
 import pers.XiaoShadiao.skydiao.commands.args.ClientBlockPosArgument;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
@@ -169,6 +175,21 @@ public class HHSCCommand extends SkydiaoCommand {
                 FastCommandMenuScreen.load();
                 return 0;
             }));
+            devcommand.then(getArgConstantInstance("testfastmenuload").executes(context -> {
+                FastCommandMenuScreen.load();
+                return 0;
+            }));
+            devcommand.then(getArgConstantInstance("testswitchitem").executes(context -> {
+                long startTime = System.currentTimeMillis();
+                ToolList.addThreadedTask(() -> {
+                    while(System.currentTimeMillis() - startTime < 10000) {
+                        InputSimulator.switchItem(ToolList.getInstance().random.nextInt(9));
+                        Thread.sleep(10);
+                    }
+                    return null;
+                });
+                return 0;
+            }));
         } else {
             devcommand.executes((context) -> owo(() -> context.getSource().sendFeedback(Component.literal("§a[小沙雕] §c当前不是Dev环境..."))));
         }
@@ -189,8 +210,80 @@ public class HHSCCommand extends SkydiaoCommand {
                     ConfigManager.debugFPSIssue.setValue(!ConfigManager.debugFPSIssue.getValue());
                     context.getSource().sendFeedback(Component.literal("§a[小沙雕] " + (ConfigManager.debugFPSIssue.getValue() ? "§a已开启" : "§c已关闭") + "FPS调试"));
                 })),
+                getArgConstantInstance("dumpentitynbt")
+                        .executes(this::executePrintTargetEntities)
+                        .then(getArgInstance("entityid", IntegerArgumentType.integer()).executes(this::executeDumpEntityNBT)),
+                getArgConstantInstance("dumpallentitynbt").executes(this::executeDumpAllEntityNBT),
                 devcommand
         );
+    }
+
+    private int executeDumpEntityNBT(CommandContext<FabricClientCommandSource> context) {
+        int entityid = IntegerArgumentType.getInteger(context, "entityid");
+        Entity entity = mc.level.getEntity(entityid);
+        if (entity == null) {
+            context.getSource().sendFeedback(Component.literal("§a[小沙雕] §c实体不存在"));
+            return 0;
+        }
+        TagValueOutput output = TagValueOutput.createWithContext(new ProblemReporter.ScopedCollector(LogUtils.getLogger()), mc.level.registryAccess());
+        entity.save(output);
+        mc.keyboardHandler.setClipboard(output.buildResult().toString());
+        context.getSource().sendFeedback(Component.literal("§a[小沙雕] 实体NBT已复制到剪切板"));
+
+        for (Entity entity1 : mc.level.entitiesForRendering()) {
+            LivingEntity living = entity1.asLivingEntity();
+            if(living != null) {
+                if(living.getMaxHealth() >= 100_000_000) {
+                    System.out.println(living);
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    private int executeDumpAllEntityNBT(CommandContext<FabricClientCommandSource> context) {
+        if (mc.level == null) {
+            context.getSource().sendFeedback(Component.literal("§a[小沙雕] §c世界不存在"));
+            return 0;
+        }
+        var logger = LogUtils.getLogger();
+        int count = 0;
+        logger.info("[ENTITYDUMP] ---- begin ----");
+        for (Entity entity : mc.level.entitiesForRendering()) {
+            try {
+                double health = -1;
+                double maxHealth = -1;
+                if (entity instanceof LivingEntity livingEntity) {
+                    health = livingEntity.getHealth();
+                    maxHealth = livingEntity.getMaxHealth();
+                }
+                E2AMappingListener.MobInfo mobInfo = AbstractListener.e2AMappingListener.getMobInfo(entity.asLivingEntity());
+                String armorStandName = mobInfo != null && mobInfo.armorStand != null ? mobInfo.armorStand.getName().getString() : "null";
+                String bossArmorStandName = mobInfo != null && mobInfo.armorStandForBoss != null ? mobInfo.armorStandForBoss.getName().getString() : "null";
+
+                TagValueOutput output = TagValueOutput.createWithContext(new ProblemReporter.ScopedCollector(logger), mc.level.registryAccess());
+                entity.save(output);
+                logger.info("[ENTITYDUMP] #{} class={} type={} name={} pos={} health={}/{} armorStand={} bossArmorStand={} nbt={}",
+                        entity.getId(), entity.getClass().getSimpleName(), entity.getType(), entity.getName().getString(), entity.position(),
+                        health, maxHealth, armorStandName, bossArmorStandName, output.buildResult());
+            } catch (Exception e) {
+                logger.error("[ENTITYDUMP] failed: {}", entity, e);
+            }
+            count++;
+        }
+        logger.info("[ENTITYDUMP] ---- end, count={} ----", count);
+        context.getSource().sendFeedback(Component.literal("§a[小沙雕] 已导出 " + count + " 个实体NBT到 latest.log"));
+        return count;
+    }
+
+    private int executePrintTargetEntities(CommandContext<FabricClientCommandSource> context) {
+        context.getSource().sendFeedback(Component.literal("§a[小沙雕] 以下是你半径5格内的实体, 选择一个复制其NBT"));
+        for (Entity entity : mc.level.getEntities(mc.player, mc.player.getBoundingBox().inflate(5, 5, 5))) {
+            context.getSource().sendFeedback(Component.literal("§a[小沙雕] §f- §e" + entity.getName().getString() + " (" + entity.getId() + ")")
+                    .withStyle(Style.EMPTY.withClickEvent(new ClickEvent.SuggestCommand("/hhsc dumpentitynbt " + entity.getId())).withHoverEvent(new HoverEvent.ShowText(Component.literal("§a点击复制其NBT")))));
+        }
+        return 0;
     }
 
     private int setHiddenSomethingIndex(CommandContext<FabricClientCommandSource> context) {

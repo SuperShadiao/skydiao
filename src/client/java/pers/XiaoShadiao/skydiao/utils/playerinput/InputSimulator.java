@@ -1,5 +1,6 @@
 package pers.XiaoShadiao.skydiao.utils.playerinput;
 
+import it.unimi.dsi.fastutil.booleans.BooleanBooleanPair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.BookEditScreen;
@@ -135,29 +136,24 @@ public class InputSimulator {
         return true;
     }
 
+    public static void decreaseTicks() {
+        if (rightClickDelay > 0) {
+            rightClickDelay--;
+        }
+        postTick();
+    }
+
     public static boolean leftClickFlagMinecraft;
 
     private static void midTick() {
         boolean bl3 = false;
         updateCurrentItemSlotIndex();
         if (mc.player.isUsingItem()) {
-            if (!mc.options.keyUse.isDown() && !isMouseRightHolding) {
-                mc.gameMode.releaseUsingItem(mc.player);
-            }
-
-            leftClickCounter = 0;
-            rightClickCounter = 0;
+            consumeDoNothing();
         } else {
-            while (leftClickCounter > 0) {
-                System.out.println("click");
-                leftClickCounter--;
-                if(!mc.gameMode.isDestroying() && (((MixinMultiPlayerGameModeDestroyBlockDelayAccessor) mc.gameMode).getDestroyDelay() <= 1 || !(mc.hitResult instanceof BlockHitResult result) || result.getType() != HitResult.Type.BLOCK)) bl3 |= startAttack();
-            }
+            bl3 = consumeLeftClick().leftBoolean();
 
-            while (rightClickCounter > 0) {
-                rightClickCounter--;
-                startUseItem();
-            }
+            consumeRightClick();
         }
 
         if(mc.gui.screen() != null) {
@@ -167,6 +163,55 @@ public class InputSimulator {
         }
         leftClickFlagMinecraft = !isInventoryOpen() && !bl3 && isMouseLeftHolding;
         if(mc.gui.screen() != null) continueAttack(leftClickFlagMinecraft);
+    }
+
+    public static void consumeDoNothing() {
+        if (!mc.options.keyUse.isDown() && !isMouseRightHolding) {
+            mc.gameMode.releaseUsingItem(mc.player);
+        }
+
+        leftClickCounter = 0;
+        rightClickCounter = 0;
+    }
+
+    public static boolean consumeRightClick() {
+        boolean clicked = false;
+        while (rightClickCounter > 0) {
+            rightClickCounter--;
+            startUseItem();
+            clicked = true;
+        }
+        return clicked;
+    }
+
+    public static BooleanBooleanPair consumeLeftClick() {
+        boolean bl3 = false;
+        boolean clicked = false;
+        while (leftClickCounter > 0) {
+            leftClickCounter--;
+            if(!mc.gameMode.isDestroying() && (((MixinMultiPlayerGameModeDestroyBlockDelayAccessor) mc.gameMode).getDestroyDelay() <= 1 || !(mc.hitResult instanceof BlockHitResult result) || result.getType() != HitResult.Type.BLOCK)) bl3 |= startAttack();
+            clicked = true;
+        }
+        return BooleanBooleanPair.of(bl3, clicked);
+    }
+
+    public static boolean consumeSingleRightClick() {
+        if (rightClickCounter > 0) {
+            rightClickCounter--;
+            startUseItem();
+            return true;
+        }
+        return false;
+    }
+
+    public static BooleanBooleanPair consumeSingleLeftClick() {
+        if (leftClickCounter > 0) {
+            leftClickCounter--;
+            if(!mc.gameMode.isDestroying() && (((MixinMultiPlayerGameModeDestroyBlockDelayAccessor) mc.gameMode).getDestroyDelay() <= 1 || !(mc.hitResult instanceof BlockHitResult result) || result.getType() != HitResult.Type.BLOCK)) {
+                return BooleanBooleanPair.of(startAttack(), true);
+            }
+        }
+        return BooleanBooleanPair.of(false, false);
     }
 
     private static void postTick() {
@@ -346,7 +391,7 @@ public class InputSimulator {
         return isInventoryOpen;
     }
 
-    private static void updateInventoryState() {
+    public static void updateInventoryState() {
         if (mc.gui.screen() instanceof AbstractContainerScreen || mc.gui.screen() instanceof BookEditScreen || mc.gui.screen() instanceof BookSignScreen || mc.gui.screen() instanceof BookViewScreen) {
             isInventoryOpen = true;
         } else if(mc.gui.screen() == null) {
@@ -511,7 +556,7 @@ public class InputSimulator {
         hasCurrentItemSlotIndex = true;
     }
 
-    private static void updateCurrentItemSlotIndex() {
+    public static void updateCurrentItemSlotIndex() {
         if(hasCurrentItemSlotIndex) {
             hasCurrentItemSlotIndex = false;
             if(mc.player != null) mc.player.getInventory().setSelectedSlot(currentItemSlotIndex);

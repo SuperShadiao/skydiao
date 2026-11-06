@@ -578,7 +578,7 @@ public class CustomBossbar extends XSDHUD {
 
                 if (mobInfo.armorStandForBoss != null) {
                     String name = mobInfo.armorStandForBoss.getDisplayName().getString();
-                    skyblockIsImmuneDmg = name.contains("Protected") || name.contains("MANIA");
+                    skyblockIsImmuneDmg = name.contains("Protected") || name.contains("MANIA") || name.toLowerCase().contains("immune");
                 } else skyblockIsImmuneDmg = false;
 
                 // System.out.println(ComponentRenderUtilss.wrapComponents((mobInfo.armorStand != null ? mobInfo.armorStand : mobInfo.theEntity).getName(), Integer.MAX_VALUE, mc.font).getFirst().getResultOrEmpty());

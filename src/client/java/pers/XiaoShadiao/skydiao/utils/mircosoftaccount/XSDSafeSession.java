@@ -1,5 +1,6 @@
 package pers.XiaoShadiao.skydiao.utils.mircosoftaccount;
 
+import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.exceptions.InvalidCredentialsException;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.util.UndashedUuid;
@@ -13,28 +14,45 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import sun.misc.Unsafe;
 
+import java.io.UnsupportedEncodingException;
+import java.lang.constant.Constable;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Field;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class XSDSafeSession extends User {
 
-    private final String randToken = Util.make(() -> {
-        StringBuilder tk = new StringBuilder();
-        Random random = new Random();
-        for (int i = 0; i < 20; i++) {
-            tk.append(Math.abs(random.nextInt()));
+    private static String fakeToken;
+
+    static {
+        // fakeToken = new FakeString();
+        FakeString fakeString = new FakeString();
+
+        try {
+            Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
+            unsafeField.setAccessible(true);
+            Unsafe unsafe = (Unsafe) unsafeField.get(null);
+
+            Field field = XSDSafeSession.class.getDeclaredField("fakeToken");
+            long staticFieldOffset = unsafe.staticFieldOffset(field);
+            unsafe.putObject(XSDSafeSession.class, staticFieldOffset, fakeString);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return tk.toString();
-    });
+    }
 
     private static final Object2IntMap<String> stackPrintCount = new Object2IntOpenHashMap<>();
 
@@ -94,7 +112,7 @@ public class XSDSafeSession extends User {
         }
 
         throwException("getAccessToken", stack);
-        return randToken;
+        return fakeToken;
     }
 
     @Override
@@ -126,7 +144,7 @@ public class XSDSafeSession extends User {
 
 
         throwException("getSessionId", stack);
-        return "token:" + randToken + ":" + UndashedUuid.toString(this.getProfileId());
+        return fakeToken;
     }
 
     public boolean equals(Object session) {
@@ -151,21 +169,6 @@ public class XSDSafeSession extends User {
             ToolList.printChatMessage(Component.literal("§a[小沙雕] §c可能来自于Mod: §6" + getSuspiciousInfo(stack)));
             ToolList.printChatMessage(Component.literal("§a[小沙雕] §c如果你不认识该Mod, 可能为恶意模组, 请立即删除"));
         }
-        if(!Minecraft.getInstance().isSameThread()) {
-            new Throwable().printStackTrace();
-            if(!Boolean.parseBoolean(System.getProperty("xiaoshadiao_return_fake_accesstoken"))) {
-                log.fatal("调用者来自非主线程, 已尝试强制冻结该线程");
-                while(true) {
-                    try {
-                        Thread.sleep(Long.MAX_VALUE);
-                    } catch (InterruptedException e) {
-                        continue;
-                    }
-                }
-            }
-        }
-        IllegalAccessError illegalAccessError = new IllegalAccessError(str + "() is not allowed in " + stack);
-        if(!Boolean.parseBoolean(System.getProperty("xiaoshadiao_return_fake_accesstoken"))) throw illegalAccessError; else illegalAccessError.printStackTrace();
     }
 
     public String toString() {
@@ -243,8 +246,8 @@ public class XSDSafeSession extends User {
         // 授予部分第三方类的权限用于鉴权
 
         if(_3rdClasses == null) {
-            _3rdClasses = Stream.of(
-                    "me.owdding.skyblockpv.api.PvAPI"
+            _3rdClasses = Stream.<String>of(
+                    // "me.owdding.skyblockpv.api.PvAPI"
             ).map(n -> {
                 try {
                     return Class.forName(n);
@@ -264,7 +267,7 @@ public class XSDSafeSession extends User {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 String serverId = serverId0.toString();
-                ToolList.mc.services().sessionService().joinServer(getProfileId(), ToolList.getInstance().decodeString(super.getAccessToken()), serverId);
+                joinServer(serverId);
                 ToolList.getInstance().log.info("Token有效");
                 return true;
             } catch (InvalidCredentialsException e) {
@@ -276,6 +279,10 @@ public class XSDSafeSession extends User {
                 return false;
             }
         });
+    }
+
+    public void joinServer(String serverId) throws AuthenticationException {
+        ToolList.mc.services().sessionService().joinServer(getProfileId(), ToolList.getInstance().decodeString(super.getAccessToken()), serverId);
     }
 
     public String getSuspiciousInfo(String stack) {
@@ -295,6 +302,377 @@ public class XSDSafeSession extends User {
         }
 
         return "Unknown";
+    }
+
+    public static class FakeString implements java.io.Serializable, Comparable<String>, CharSequence, Constable {
+
+        @Override
+        public int length() {
+            throw genException();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            throw genException();
+        }
+
+        @Override
+        public char charAt(int index) {
+            throw genException();
+        }
+
+        public int codePointAt(int index) {
+            throw genException();
+        }
+
+        public int codePointBefore(int index) {
+            throw genException();
+        }
+
+        public int codePointCount(int beginIndex, int endIndex) {
+            throw genException();
+        }
+
+        public int offsetByCodePoints(int index, int codePointOffset) {
+            throw genException();
+        }
+
+        @Override
+        public void getChars(int srcBegin, int srcEnd, char[] dst, int dstBegin) {
+            throw genException();
+        }
+
+        @Deprecated
+        public void getBytes(int srcBegin, int srcEnd, byte[] dst, int dstBegin) {
+            throw genException();
+        }
+
+        public byte[] getBytes(String charsetName) throws UnsupportedEncodingException {
+            throw genException();
+        }
+
+        public byte[] getBytes(Charset charset) {
+            throw genException();
+        }
+
+        public byte[] getBytes() {
+            throw genException();
+        }
+
+        @Override
+        public boolean equals(Object anObject) {
+            throw genException();
+        }
+
+        public boolean contentEquals(StringBuffer sb) {
+            throw genException();
+        }
+
+        public boolean contentEquals(CharSequence cs) {
+            throw genException();
+        }
+
+        public boolean equalsIgnoreCase(String anotherString) {
+            throw genException();
+        }
+
+        @Override
+        public int compareTo(String anotherString) {
+            throw genException();
+        }
+
+        public int compareToIgnoreCase(String str) {
+            throw genException();
+        }
+
+        public boolean regionMatches(int toffset, String other, int ooffset, int len) {
+            throw genException();
+        }
+
+        public boolean regionMatches(boolean ignoreCase, int toffset, String other, int ooffset, int len) {
+            throw genException();
+        }
+
+        public boolean startsWith(String prefix, int toffset) {
+            throw genException();
+        }
+
+        public boolean startsWith(String prefix) {
+            throw genException();
+        }
+
+        public boolean endsWith(String suffix) {
+            throw genException();
+        }
+
+        @Override
+        public int hashCode() {
+            throw genException();
+        }
+
+        public int indexOf(int ch) {
+            throw genException();
+        }
+
+        public int indexOf(int ch, int fromIndex) {
+            throw genException();
+        }
+
+        public int indexOf(int ch, int fromIndex, int endIndex) {
+            throw genException();
+        }
+
+        public int lastIndexOf(int ch) {
+            throw genException();
+        }
+
+        public int lastIndexOf(int ch, int fromIndex) {
+            throw genException();
+        }
+
+        public int indexOf(String str) {
+            throw genException();
+        }
+
+        public int indexOf(String str, int fromIndex) {
+            throw genException();
+        }
+
+        public int indexOf(String str, int fromIndex, int endIndex) {
+            throw genException();
+        }
+
+        public int lastIndexOf(String str) {
+            throw genException();
+        }
+
+        public int lastIndexOf(String str, int fromIndex) {
+            throw genException();
+        }
+
+        public String substring(int beginIndex) {
+            throw genException();
+        }
+
+        public String substring(int beginIndex, int endIndex) {
+            throw genException();
+        }
+
+        @Override
+        public CharSequence subSequence(int beginIndex, int endIndex) {
+            throw genException();
+        }
+
+        public String concat(String str) {
+            throw genException();
+        }
+
+        public String replace(char oldChar, char newChar) {
+            throw genException();
+        }
+
+        public boolean matches(String regex) {
+            throw genException();
+        }
+
+        public boolean contains(CharSequence s) {
+            throw genException();
+        }
+
+        public String replaceFirst(String regex, String replacement) {
+            throw genException();
+        }
+
+        public String replaceAll(String regex, String replacement) {
+            throw genException();
+        }
+
+        public String replace(CharSequence target, CharSequence replacement) {
+            throw genException();
+        }
+
+        public String[] split(String regex, int limit) {
+            throw genException();
+        }
+
+        public String[] splitWithDelimiters(String regex, int limit) {
+            throw genException();
+        }
+
+        public String[] split(String regex) {
+            throw genException();
+        }
+
+        public static String join(CharSequence delimiter, CharSequence... elements) {
+            throw genException();
+        }
+
+        public static String join(CharSequence delimiter, Iterable<? extends CharSequence> elements) {
+            throw genException();
+        }
+
+        public String toLowerCase(Locale locale) {
+            throw genException();
+        }
+
+        public String toLowerCase() {
+            throw genException();
+        }
+
+        public String toUpperCase(Locale locale) {
+            throw genException();
+        }
+
+        public String toUpperCase() {
+            throw genException();
+        }
+
+        public String trim() {
+            throw genException();
+        }
+
+        public String strip() {
+            throw genException();
+        }
+
+        public String stripLeading() {
+            throw genException();
+        }
+
+        public String stripTrailing() {
+            throw genException();
+        }
+
+        public boolean isBlank() {
+            throw genException();
+        }
+
+        public Stream<String> lines() {
+            throw genException();
+        }
+
+        public String indent(int n) {
+            throw genException();
+        }
+
+        public String stripIndent() {
+            throw genException();
+        }
+
+        public String translateEscapes() {
+            throw genException();
+        }
+
+        public <R> R transform(Function<? super String, ? extends R> transformer) {
+            throw genException();
+        }
+
+        @Override
+        public String toString() {
+            throw genException();
+        }
+
+        @Override
+        public IntStream chars() {
+            throw genException();
+        }
+
+        @Override
+        public IntStream codePoints() {
+            throw genException();
+        }
+
+        public char[] toCharArray() {
+            throw genException();
+        }
+
+        public static String format(String format, Object... args) {
+            throw genException();
+        }
+
+        public static String format(Locale l, String format, Object... args) {
+            throw genException();
+        }
+
+        public String formatted(Object... args) {
+            throw genException();
+        }
+
+        public static String valueOf(Object obj) {
+            throw genException();
+        }
+
+        public static String valueOf(char[] data) {
+            throw genException();
+        }
+
+        public static String valueOf(char[] data, int offset, int count) {
+            throw genException();
+        }
+
+        public static String copyValueOf(char[] data, int offset, int count) {
+            throw genException();
+        }
+
+        public static String copyValueOf(char[] data) {
+            throw genException();
+        }
+
+        public static String valueOf(boolean b) {
+            throw genException();
+        }
+
+        public static String valueOf(char c) {
+            throw genException();
+        }
+
+        public static String valueOf(int i) {
+            throw genException();
+        }
+
+        public static String valueOf(long l) {
+            throw genException();
+        }
+
+        public static String valueOf(float f) {
+            throw genException();
+        }
+
+        public static String valueOf(double d) {
+            throw genException();
+        }
+
+        public String intern() {
+            throw genException();
+        }
+
+        public String repeat(int count) {
+            throw genException();
+        }
+
+        @Override
+        public Optional<String> describeConstable() {
+            throw genException();
+        }
+
+        public String resolveConstantDesc(MethodHandles.Lookup lookup) throws ReflectiveOperationException {
+            throw genException();
+        }
+
+        private static UnsupportedOperationException genException() {
+            if(!Minecraft.getInstance().isSameThread()) {
+                log.fatal("调用者来自非主线程, 已尝试强制冻结该线程");
+                while(true) {
+                    try {
+                        Thread.sleep(Long.MAX_VALUE);
+                    } catch (InterruptedException e) {
+                        continue;
+                    }
+                }
+            }
+            return new UnsupportedOperationException();
+        }
+
     }
 
 }

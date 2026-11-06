@@ -181,6 +181,12 @@ public class E2AMappingListener extends AbstractListener {
                 mobInfo.health = key.getHealth();
                 mobInfo.maxHealth = Math.max(key.getMaxHealth(), Math.max(mobInfo.health, mobInfo.maxHealth));
                 mobInfo.theEntity = key;
+
+                if(mobInfo.armorStand != null && mobInfo.armorStandForBoss != null) {
+                    if(getXZDistance(key, mobInfo.armorStandForBoss) >= 1) {
+                        mobInfo.armorStandForBoss = null;
+                    }
+                }
             });
         }
 

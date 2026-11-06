@@ -4,12 +4,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.loader.api.FabricLoader;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
+import pers.XiaoShadiao.skydiao.utils.MultiThreadDownloader;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.io.File;
@@ -183,8 +183,7 @@ public class AutoUpdater {
 
     private static AutoUpdater download(AutoUpdater up, String[] updaterURLs, String md5) {
         for(String s1 : up.URL) {
-            try(InputStream is = ToolList.getInstance().makeReqToURL(s1, true)) {
-//
+            try {
                 a:{
                     Exception eee = null;
                     if(ToolList.getInstance().verifyFileWithMD5(updaterEXE, md5)) {
@@ -192,7 +191,8 @@ public class AutoUpdater {
                     }
                     for(String url : updaterURLs) {
                         try {
-                            FileUtils.writeByteArrayToFile(updaterEXE, ToolList.getInstance().downloadFileWithMD5(url, md5));
+                            // FileUtils.writeByteArrayToFile(updaterEXE, ToolList.getInstance().downloadFileWithMD5(url, md5));
+                            MultiThreadDownloader.download(url, updaterEXE, md5).addToTitle().waitOrThrowExceptionIfFailed();
                             log.info("更新器下载完成!");
                             break a;
                         } catch (Exception e) {
@@ -206,9 +206,12 @@ public class AutoUpdater {
                 newFile = new File(ToolList.mc.gameDirectory.getAbsolutePath(), "skydiao-" + up.newVer + ".jar");
                 log.info("新文件 -> " + newFile.getAbsolutePath());
 
-                byte[] bytes = is.readAllBytes();
+                // byte[] bytes = is.readAllBytes();
 
-                FileUtils.writeByteArrayToFile(newFile, bytes);
+                // FileUtils.writeByteArrayToFile(newFile, bytes);
+
+                MultiThreadDownloader.download(s1, newFile).addToTitle().waitOrThrowExceptionIfFailed();
+
                 FileInputStream fis;
                 ZipInputStream zis = new ZipInputStream(fis = new FileInputStream(newFile));
                 a:try {

@@ -162,7 +162,10 @@ public class MacroManagerListener extends AbstractListener {
         ToolList.printChatMessage(Component.literal("§a[小沙雕] §c请不要慌张, 如果你在当前状态第一次被check, 立即切换为手动并返回继续当前操作 (比如继续钓鱼), 发生第二次check再进行响应!"));
         ToolList.printChatMessage(Component.literal("§a[小沙雕] §c§l请不要离开当前服务器, 否则你会被直接封禁!"));
         WindowsUtils.focusWindows();
-        recordMoreFrame = 300;
+        // 受即时回放开关控制: 关闭即不额外录帧, 避免绕过开关进入截图/拷贝路径
+        if (ConfigManager.macroReplay.getValue()) {
+            recordMoreFrame = 300;
+        }
         // mc.getNarrator().saySystemNow("Alert! Macro check! 警告! 马口检查!");
         Narrator.getNarrator().say("Alert! Macro check! 警告! 马口检查!", false, 1);
         alertTasks.removeIf(t -> t.future.isDone());
@@ -278,7 +281,7 @@ public class MacroManagerListener extends AbstractListener {
 
         if(isRecording || recordMoreFrame > 0) {
             if(frameTasks.remainingCapacity() > 1) {
-                ScreenshotUtils.takeScreenshot2(mc.gameRenderer.mainRenderTarget(), image0 -> {
+                ScreenshotUtils.takeScreenshot2(mc.gameRenderer.mainRenderTarget(), (image0, close) -> {
                     int delay = Math.clamp(System.currentTimeMillis() - lastFrameTime, 1, 750);
                     if (frameTasks.offer(() -> {
                         try(GpuBufferSlice.MappedView image = image0) {
@@ -300,11 +303,13 @@ public class MacroManagerListener extends AbstractListener {
 
                                 new File(currentRecordInstance, (recordIndex - 5) + ".gif").delete();
                             }
+                        } finally {
+                            close.run();
                         }
                     })) {
                         lastFrameTime = System.currentTimeMillis();
                     } else {
-                        image0.close();
+                        close.run();
                     }
                 });
             }
@@ -321,7 +326,11 @@ public class MacroManagerListener extends AbstractListener {
     public void run() {
         while(true) {
             try {
-                if(frameTasks != null) handleFrame(frameTasks.take());
+                if(frameTasks != null) {
+                    handleFrame(frameTasks.take());
+                } else {
+                    Thread.sleep(100);
+                }
             } catch (Throwable e) {
                 logger.catching(e);
             }

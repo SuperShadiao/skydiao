@@ -93,6 +93,9 @@ public abstract class AbstractListener extends Thread {
     public static final AutoPetToDynamicSpotListener autoPetToDynamicSpotListener = new AutoPetToDynamicSpotListener();
     public static final AutoTipListener autoTipListener = new AutoTipListener();
     public static final ShaftHOTMSwitchListener shaftHOTMSwitchListener = new ShaftHOTMSwitchListener();
+    public static final BlazeSlayerFirePillarRender blazeSlayerFirePillarRender = new BlazeSlayerFirePillarRender();
+    public static final EndermanSlayerBeaconRender endermanSlayerBeaconRender = new EndermanSlayerBeaconRender();
+    public static final RiftAutoDigMushroom riftAutoDigMushroom = new RiftAutoDigMushroom();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();

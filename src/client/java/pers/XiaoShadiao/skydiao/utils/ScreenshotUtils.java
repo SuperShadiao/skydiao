@@ -1,28 +1,16 @@
 package pers.XiaoShadiao.skydiao.utils;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.renderpearl.api.buffers.GpuBuffer;
 import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
-import com.mojang.renderpearl.api.commands.CommandEncoder;
 import com.mojang.renderpearl.api.textures.GpuTexture;
-import net.minecraft.util.ARGB;
 
-import java.nio.ByteBuffer;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public class ScreenshotUtils {
 
-    public static void takeScreenshot2(final RenderTarget target) {
-        takeScreenshot2(target, null);
-    }
-
-    public static void takeScreenshot(final RenderTarget target, final Consumer<NativeImage> callback) {
-        takeScreenshot(target, 1, callback);
-    }
-
-    public static void takeScreenshot2(final RenderTarget target, final Consumer<GpuBufferSlice.MappedView> callback) {
+    public static void takeScreenshot2(final RenderTarget target, final BiConsumer<GpuBufferSlice.MappedView, Runnable> callback) {
         int width = target.width;
         int height = target.height;
         GpuTexture sourceTexture = target.getColorTexture();
@@ -33,65 +21,31 @@ public class ScreenshotUtils {
             RenderSystem.getDevice().createCommandEncoder().copyTextureToBuffer(sourceTexture, buffer, 0L, () -> {
                 GpuBufferSlice.MappedView read0 = buffer.map(true, false);
 
-                callback.accept(read0);
+                Runnable runnable = new Runnable() {
 
-                buffer.close();
-            }, 0);
-        }
-    }
+                    private boolean closed;
 
-    public static void takeScreenshot(final RenderTarget target, final int downscaleFactor, final Consumer<NativeImage> callback) {
-        int width = target.width;
-        int height = target.height;
-        GpuTexture sourceTexture = target.getColorTexture();
-        if (sourceTexture == null) {
-            throw new IllegalStateException("Tried to capture screenshot of an incomplete framebuffer");
-        } else if (width % downscaleFactor == 0 && height % downscaleFactor == 0) {
-            GpuBuffer buffer = RenderSystem.getDevice().createBuffer(() -> "Screenshot buffer", 9, (long)width * height * sourceTexture.getFormat().blockSize());
-            CommandEncoder commandEncoder = RenderSystem.getDevice().createCommandEncoder();
-            RenderSystem.getDevice().createCommandEncoder().copyTextureToBuffer(sourceTexture, buffer, 0L, () -> {
-                GpuBufferSlice.MappedView read0 = buffer.map(true, false);
-                ToolList.addThreadedTask(() -> {
-                    try (GpuBufferSlice.MappedView read = read0) {
-                        int outputHeight = height / downscaleFactor;
-                        int outputWidth = width / downscaleFactor;
-                        NativeImage image = new NativeImage(outputWidth, outputHeight, false);
-
-                        ByteBuffer data = PicUtils.cloneByteBuffer(read.data()).join();
-                        for (int y = 0; y < outputHeight; y++) {
-                            for (int x = 0; x < outputWidth; x++) {
-                                if (downscaleFactor == 1) {
-                                    int argb = data.getInt((x + y * width) * sourceTexture.getFormat().blockSize());
-                                    image.setPixelABGR(x, height - y - 1, argb | 0xFF000000);
-                                } else {
-                                    int red = 0;
-                                    int green = 0;
-                                    int blue = 0;
-
-                                    for (int i = 0; i < downscaleFactor; i++) {
-                                        for (int j = 0; j < downscaleFactor; j++) {
-                                            int argb = data.getInt((x * downscaleFactor + i + (y * downscaleFactor + j) * width) * sourceTexture.getFormat().blockSize());
-                                            red += ARGB.red(argb);
-                                            green += ARGB.green(argb);
-                                            blue += ARGB.blue(argb);
-                                        }
-                                    }
-
-                                    int sampleCount = downscaleFactor * downscaleFactor;
-                                    image.setPixelABGR(x, outputHeight - y - 1, ARGB.color(255, red / sampleCount, green / sampleCount, blue / sampleCount));
-                                }
-                            }
+                    @Override
+                    public void run() {
+                        if (closed) {
+                            return;
                         }
-
-                        callback.accept(image);
+                        closed = true;
+                        ToolList.mc.execute(() -> {
+                                    try {
+                                        read0.close();
+                                    } catch (Exception _) {
+                                    }
+                                    try {
+                                        buffer.close();
+                                    } catch (Exception _) {
+                                    }
+                                }
+                        );
                     }
-
-                    return null;
-                });
-                buffer.close();
+                };
+                callback.accept(read0, runnable);
             }, 0);
-        } else {
-            throw new IllegalArgumentException("Image size is not divisible by downscale factor");
         }
     }
 

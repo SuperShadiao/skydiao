@@ -1,5 +1,6 @@
 package pers.XiaoShadiao.skydiao.mixin.client;
 
+import net.minecraft.client.gui.render.GuiItemAtlas;
 import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.renderer.StagedVertexBuffer;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
@@ -22,5 +23,8 @@ public interface MixinGuiRendererAccessor {
 
     @Accessor("firstDrawIndexAfterBlur")
     void skydiao$setFirstDrawIndexAfterBlur(int value);
+
+    @Accessor("itemAtlas")
+    GuiItemAtlas skydiao$getItemAtlas();
 
 }

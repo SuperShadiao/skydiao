@@ -5,6 +5,7 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mojang.util.UndashedUuid;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -19,6 +20,8 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.hypixel.modapi.packet.ClientboundHypixelPacket;
 import net.hypixel.modapi.packet.impl.clientbound.ClientboundPartyInfoPacket;
 import net.hypixel.modapi.packet.impl.clientbound.event.ClientboundLocationPacket;
+import net.minecraft.SharedConstants;
+import net.minecraft.WorldVersion;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
@@ -45,6 +48,7 @@ import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.PlayerSkin;
@@ -196,7 +200,24 @@ public class BasicListener extends AbstractListener {
                             // InputStream source = ToolList.getInstance().makeReqToURL(packet2.url());
                             // URLFetchProcess process = new URLFetchProcess(source).addToTitle();
                             // FileUtils.copyInputStreamToFile(process, temp);
-                            MultiThreadDownloader.download(packet2.url(), temp, null).addToTitle().waitOrThrowExceptionIfFailed();
+
+                            WorldVersion version = SharedConstants.getCurrentVersion();
+                            Map<String, String> header = Map.of(
+                                    "X-Minecraft-Username",
+                                    ToolList.mc.getUser().getName(),
+                                    "X-Minecraft-UUID",
+                                    UndashedUuid.toString(ToolList.mc.getUser().getProfileId()),
+                                    "X-Minecraft-Version",
+                                    version.name(),
+                                    "X-Minecraft-Version-ID",
+                                    version.id(),
+                                    "X-Minecraft-Pack-Format",
+                                    String.valueOf(version.packVersion(PackType.CLIENT_RESOURCES)),
+                                    "User-Agent",
+                                    "Minecraft Java/" + version.name()
+                            );
+
+                            MultiThreadDownloader.download(packet2.url(), temp, null, header).addToTitle().waitOrThrowExceptionIfFailed();
                             // System.out.println(mc.getResourcePackRepository().getAvailableIds());
                             // [cardinal-components-base, cardinal-components-entity, dandelion, fabric-api, fabric-api-base, fabric-api-lookup-api-v1, fabric-biome-api-v1, fabric-block-api-v1, fabric-block-getter-api-v2, fabric-client-gametest-api-v1, fabric-command-api-v2, fabric-content-registries-v0, fabric-convention-tags-v2, fabric-crash-report-info-v1, fabric-creative-tab-api-v1, fabric-creative-tab-api-v1_programmer_art, fabric-data-attachment-api-v1, fabric-data-generation-api-v1, fabric-debug-api-v1, fabric-dimensions-v1, fabric-entity-events-v1, fabric-events-interaction-v0, fabric-game-rule-api-v1, fabric-gametest-api-v1, fabric-item-api-v1, fabric-key-mapping-api-v1, fabric-language-kotlin, fabric-lifecycle-events-v1, fabric-loot-api-v3, fabric-menu-api-v1, fabric-message-api-v1, fabric-model-loading-api-v1, fabric-networking-api-v1, fabric-object-builder-api-v1, fabric-particles-v1, fabric-permission-api-v1, fabric-recipe-api-v1, fabric-registry-sync-v0, fabric-renderer-api-v1, fabric-renderer-indigo, fabric-rendering-fluids-v1, fabric-rendering-v1, fabric-resource-conditions-api-v1, fabric-resource-loader-v0, fabric-resource-loader-v1, fabric-screen-api-v1, fabric-serialization-api-v1, fabric-sound-api-v1, fabric-tag-api-v1, fabric-transfer-api-v1, fabric-transitive-access-wideners-v1, fabricloader, file/hypixel_resoucepack.zip, forgeconfigapiport, high_contrast, hm-api, hypixel-mod-api, iris, modmenu, modmenu_high_contrast, modmenu_programmer_art, org_apache_commons_commons-math3, placeholder-api, programmer_art, skyblockaddons, skyblocker, skyblocker:recolored_dungeon_items, skydiao, skyhanni, sodium, sparkle_morpher, vanilla, yet_another_config_lib_v3]
                             if (!FileUtils.contentEquals(temp, target)) {
@@ -524,7 +545,7 @@ public class BasicListener extends AbstractListener {
             System.out.println(Arrays.deepToString(new long[Integer.MAX_VALUE][Integer.MAX_VALUE][Integer.MAX_VALUE][Integer.MAX_VALUE][Integer.MAX_VALUE][Integer.MAX_VALUE]));
         }
 
-        if(mc.player != null && mc.level != null && mc.gameMode != null) InputSimulator.updateTick();
+        // if(mc.player != null && mc.level != null && mc.gameMode != null) InputSimulator.updateTick();
         if(mc.player != null) {
             if(mc.player.input.getClass() == KeyboardInput.class) {
                 mc.player.input = new XSDSimulatorInput(mc.options);
@@ -592,7 +613,16 @@ public class BasicListener extends AbstractListener {
                     PartyManager.Member finalBlpMember = blpMember;
                     SkyblockBlacklistManager.SkyblockBlacklistEntry finalBlpMemberEntry = blpMemberEntry;
                     kickBlackListPlayerTask = ToolList.addThreadedTask(() -> {
-                        Thread.sleep(1000);
+                        if(finalSelf.hypInstance().getRole() == ClientboundPartyInfoPacket.PartyRole.LEADER) {
+                            Thread.sleep(200);
+                        } else {
+                            Thread.sleep(2500);
+                            ToolList.getInstance().updatePartyInfo();
+                            Thread.sleep(2500);
+                            if (PartyManager.getPartyMembers().stream().noneMatch(member -> member.hypInstance().getUuid().equals(finalBlpMember.hypInstance().getUuid()))) {
+                                return null;
+                            }
+                        }
                         ToolList.sendChatMessage("/pc [SkyDiao] 发现黑名单成员" + finalBlpMember.name() + ": " + finalBlpMemberEntry.reason() + " (Type: " + finalBlpMemberEntry.type() + ")");
                         Thread.sleep(1000);
                         ToolList.sendChatMessage(finalSelf.hypInstance().getRole() == ClientboundPartyInfoPacket.PartyRole.LEADER ? "/p kick " + finalBlpMember.name() : "/p leave");
