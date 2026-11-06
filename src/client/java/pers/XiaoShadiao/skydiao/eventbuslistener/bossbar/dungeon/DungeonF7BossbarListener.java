@@ -64,6 +64,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
     private LerpingBossEvent f7Boss;
     private ArmorStand f7BossRealHealth;
+    private boolean tempDisableRealHealthDetect;
     private WitherBoss f7BossTarget;
 
     private int remainTerminal = 29;
@@ -162,9 +163,13 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         if (currentStage == 5 && Arrays.stream(WitherDragonData.ColorType.values()).allMatch(WitherDragonData.ColorType::isDragonDead)) {
             return 0;
         }
+        if (tempDisableRealHealthDetect) return 0;
         if(f7BossRealHealth != null) {
             double scale = f7BossRealHealth.getHealth() / f7BossRealHealth.getMaxHealth();
-            return getMaxHealth() * scale;
+            double v = getMaxHealth() * scale;
+            double w = v < 2 ? 0 : v;
+            if(w <= 0) tempDisableRealHealthDetect = true;
+            return w;
         } else if(f7Boss != null) {
             double scale = f7Boss.getProgress();
             return getMaxHealth() * (scale < 0.02 ? 0 : scale);
@@ -267,6 +272,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
     @Override
     public void onStageEnter(int stage) {
+        tempDisableRealHealthDetect = false;
         if(stage == 1) currentStage = 1;
         bossLockingHealthScale = 1;
         f7BossTarget = null;
@@ -380,6 +386,7 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register((a,b) -> {
             passWatcherFlag = false;
             masterFloorFlag = false;
+            tempDisableRealHealthDetect = false;
             stage5DragonCount = 0;
             witherDragons.clear();
         });
