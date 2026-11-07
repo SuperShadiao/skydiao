@@ -3,6 +3,7 @@ package pers.XiaoShadiao.skydiao.mixin.client;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.minecraft.UserApiService;
+import com.mojang.authlib.services.FriendsService;
 import com.mojang.authlib.services.MinecraftServicesDiscoveryService;
 import com.mojang.authlib.services.ProfileResult;
 import com.mojang.logging.LogUtils;
@@ -14,6 +15,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
+import net.minecraft.client.gui.screens.social.PlayerSocialManager;
+import net.minecraft.client.gui.screens.social.RemoteFriendListUpdateHandler;
 import net.minecraft.client.multiplayer.ProfileKeyPairManager;
 import net.minecraft.client.telemetry.ClientTelemetryManager;
 import net.minecraft.server.Bootstrap;
@@ -40,7 +43,6 @@ import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 import pers.XiaoShadiao.skydiao.utils.screen.XSDSplashManager;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.net.Proxy;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
@@ -79,6 +81,10 @@ public class MixinMinecraft {
     @Final
     @Shadow
     private ProfileKeyPairManager profileKeyPairManager;
+    @Mutable
+    @Final
+    @Shadow
+    private PlayerSocialManager playerSocialManager;
     @Final
     @Shadow
     private boolean offlineDeveloperMode;
@@ -88,6 +94,10 @@ public class MixinMinecraft {
     @Final
     @Shadow
     private ReloadableResourceManager resourceManager;
+    @Final
+    @Shadow
+    @Mutable
+    private RemoteFriendListUpdateHandler remoteFriendListUpdateHandler;
 
     // =========== SHADOW END =============
 
@@ -119,11 +129,19 @@ public class MixinMinecraft {
         this.user = user;
         this.profileFuture = CompletableFuture.supplyAsync(() -> this.services.sessionService().fetchProfile(this.user.getProfileId(), true), Util.nonCriticalIoPool());
 
+        MinecraftServicesDiscoveryService service = MinecraftServicesDiscoveryService.create(this.proxy, true);
         this.userApiService = this.offlineDeveloperMode
                 ? UserApiService.OFFLINE
-                : MinecraftServicesDiscoveryService.create(this.proxy, true).createUserApiService(user.getAccessToken());
+                : service.createUserApiService(user.getAccessToken());
         this.telemetryManager = new ClientTelemetryManager(mc, this.userApiService, this.user);
         this.profileKeyPairManager = ProfileKeyPairManager.create(this.userApiService, this.user, mc.gameDirectory.toPath());
+
+        FriendsService friendsService = service.createFriendsService(user.getAccessToken());
+        this.remoteFriendListUpdateHandler = new RemoteFriendListUpdateHandler(friendsService, mc);
+        this.playerSocialManager = new PlayerSocialManager(mc, this.userApiService, friendsService, this.remoteFriendListUpdateHandler);
+        if (this.playerSocialManager.isFriendListEnabled()) {
+            this.remoteFriendListUpdateHandler.start();
+        }
 
         Gui gui = mc.gui;
         if(gui != null) {
@@ -131,17 +149,6 @@ public class MixinMinecraft {
                 xsdSplashManager0.setUser(user);
             } else {
                 ((MixinSplashManagerAccessor) gui).setSplashManager(new XSDSplashManager(user));
-            }
-        }
-
-        try {
-            Class<?> clazz = Class.forName("de.hysky.skyblocker.utils.ApiAuthentication");
-            Method method = clazz.getDeclaredMethod("updateToken");
-            method.setAccessible(true);
-            method.invoke(null);
-        } catch (Throwable e) {
-            if(!(e instanceof ClassNotFoundException)) {
-                e.printStackTrace();
             }
         }
     }

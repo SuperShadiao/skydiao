@@ -858,7 +858,10 @@ public class CustomBossbar extends XSDHUD {
 
             text: {
                 context.text(mc.font, bossBar.getDisplayName().getString(), x + (length - mc.font.width(bossBar.getDisplayName())) / 2, -17 - mc.font.lineHeight + (hasWeakness ? 0 : 4), 0xFFFFFFFF, true);
-                String text1 = (int)(Math.floor((bossBar.getHealth() / bossBar.getMaxHealth() * 100 + 0.05) * 10) / 10) + "%";
+                double percent = bossBar.getHealth() / bossBar.getMaxHealth() * 100;
+                double percentFloored = Math.floor(percent);
+                if(percentFloored < percent) percentFloored++;
+                String text1 = (int) (percentFloored) + "%";
                 context.text(mc.font, text1, x + (length - mc.font.width(text1)) / 2, -8 - mc.font.lineHeight / 2, 0xFFFFFFFF, true);
 
                 String text = "§a" + ToolList.getInstance().numberToEZString(bossBar.getHealth()) + "§c❤";
