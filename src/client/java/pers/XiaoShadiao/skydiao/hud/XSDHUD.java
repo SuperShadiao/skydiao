@@ -32,8 +32,16 @@ public abstract class XSDHUD implements HudElement {
     public static final GenshinImpactHeatCold genshinImpactHeatCold = new GenshinImpactHeatCold();
     public static final MusicLyricDisplay musicLyricDisplay = new MusicLyricDisplay();
     public static final DungeonReviveItemCD dungeonReviveItemCD = new DungeonReviveItemCD();
+    public static final DungeonMapHUD dungeonMapHUD = new DungeonMapHUD();
+    public static final DungeonHUD.ScoreHUD dungeonScoreHUD = new DungeonHUD.ScoreHUD();
+    public static final DungeonHUD.CryptsHUD dungeonCryptsHUD = new DungeonHUD.CryptsHUD();
+    public static final DungeonHUD.DeathsHUD dungeonDeathsHUD = new DungeonHUD.DeathsHUD();
+    public static final DungeonHUD.SecretsHUD dungeonSecretsHUD = new DungeonHUD.SecretsHUD();
     public static final PinglessMiningHUD pinglessMiningHUD = new PinglessMiningHUD();
     public static final DynamicSpotHUD dynamicSpotHUD = new DynamicSpotHUD();
+    public static final DeployableHUD deployableHUD = new DeployableHUD();
+    public static final StatusBarsHUD statusBarsHUD = new StatusBarsHUD();
+    public static final QuiverHUD quiverHUD = new QuiverHUD();
 
     public static final List<XSDHUD> huds = Util.make(new ArrayList<>(), arr -> Register.execRegister(XSDHUD.class, XSDHUD.class, arr::add));
 

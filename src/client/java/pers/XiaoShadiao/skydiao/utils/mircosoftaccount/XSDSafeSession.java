@@ -18,7 +18,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
-import sun.misc.Unsafe;
+import pers.XiaoShadiao.skydiao.utils.UnsafeUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.constant.Constable;
@@ -35,41 +35,30 @@ import java.util.stream.Stream;
 
 public class XSDSafeSession extends User {
 
-    private static String fakeToken;
-
-    static {
-        // fakeToken = new FakeString();
-        FakeString fakeString = new FakeString();
-
-        try {
-            Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
-            unsafeField.setAccessible(true);
-            Unsafe unsafe = (Unsafe) unsafeField.get(null);
-
-            Field field = XSDSafeSession.class.getDeclaredField("fakeToken");
-            long staticFieldOffset = unsafe.staticFieldOffset(field);
-            unsafe.putObject(XSDSafeSession.class, staticFieldOffset, fakeString);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private static final Object2IntMap<String> stackPrintCount = new Object2IntOpenHashMap<>();
-
-    private static final List<UUID> requestedBypassList = List.of(
-            // UUID.fromString("3f448a12-a2b3-46ef-9a46-ca145b2c9550")
-    );
 
     private static final Logger log = LogManager.getLogger();
 
     public XSDSafeSession(String name, UUID uuid, String accessToken) {
         super(name, uuid, encodeString(accessToken), ToolList.mc.getUser().getXuid(), ToolList.mc.getUser().getClientId());
         if(!toString().equals(super.toString())) throw new AssertionError("!?强强?!");
+
+        try {
+            UnsafeUtils.applyValueToField(User.class.getDeclaredField("accessToken"), this, new FakeString(encodeString(accessToken), ""));
+        } catch (Throwable e) {
+            throw new AssertionError();
+        }
     }
 
     public XSDSafeSession(User parent) {
         super(parent.getName(), parent.getProfileId(), encodeString(parent.getAccessToken()), parent.getXuid(), parent.getClientId());
         if(!toString().equals(super.toString())) throw new AssertionError("!?强强?!");
+
+        try {
+            UnsafeUtils.applyValueToField(User.class.getDeclaredField("accessToken"), this, new FakeString(encodeString(parent.getAccessToken()), ""));
+        } catch (Throwable e) {
+            throw new AssertionError();
+        }
     }
 
     private Object[] checkStack() {
@@ -88,11 +77,6 @@ public class XSDSafeSession extends User {
             return new Object[] {false, stack, null}; // 艾斯比 mod。
         }
 
-        if (requestedBypassList.contains(getProfileId())) {
-            flag = true;
-            log.info("有人尝试获取token, 但根据你的请求, 小沙雕不再保护你的token, 一切后果由你自己承担");
-        }
-
         if (!flag) {
             new Throwable().printStackTrace();
         }
@@ -108,28 +92,32 @@ public class XSDSafeSession extends User {
 
         if (allow) {
             printGetterStack("getAccessToken", stack);
-            return ToolList.getInstance().decodeString(super.getAccessToken());
+            if(UnsafeUtils.bypass(super.getAccessToken()) instanceof FakeString fs) return decodeString(fs.getCallingTarget());
+            // return ToolList.getInstance().decodeString(accessToken);
         }
 
-        throwException("getAccessToken", stack);
-        return fakeToken;
+        // throwException("getAccessToken", stack);
+        return FakeString.genFakeString("getAccessToken", stack);
     }
 
     @Override
     public @NotNull String getSessionId() {
         Object[] objects = checkStack();
         if(objects[2] == Minecraft.class) {
-            String tk = ToolList.getInstance().decodeString(super.getAccessToken());
-            char[] charArray = tk.toCharArray();
-            try {
-                Arrays.fill(charArray, 2, charArray.length - 2, '*');
-            } catch (Exception e) {
-                Arrays.fill(charArray, '*');
+            String tk;
+            if(UnsafeUtils.bypass(super.getAccessToken()) instanceof FakeString fs) {
+                tk = decodeString(fs.getCallingTarget());
+                char[] charArray = tk.toCharArray();
+                try {
+                    Arrays.fill(charArray, 2, charArray.length - 2, '*');
+                } catch (Exception e) {
+                    Arrays.fill(charArray, '*');
+                }
+                tk = new String(charArray);
+                String s = "token:" + tk + ":" + UndashedUuid.toString(this.getProfileId());
+                log.warn("已移除Minecraft类在Debug日志下打印的AccessToken");
+                return s;
             }
-            tk = new String(charArray);
-            String s = "token:" + tk + ":" + UndashedUuid.toString(this.getProfileId());
-            log.warn("已移除Minecraft类在Debug日志下打印的AccessToken");
-            return s;
         }
         boolean allow = (boolean) objects[0];
         String stack = (String) objects[1];
@@ -139,12 +127,15 @@ public class XSDSafeSession extends User {
             //		return "token:" + this.accessToken + ":" + UndashedUuid.toString(this.uuid);
             //	}
             printGetterStack("getSessionId", stack);
-            return "token:" + ToolList.getInstance().decodeString(super.getAccessToken()) + ":" + UndashedUuid.toString(this.getProfileId());
+
+            if(UnsafeUtils.bypass(super.getAccessToken()) instanceof FakeString fs) {
+                return "token:" + decodeString(fs.getCallingTarget()) + ":" + UndashedUuid.toString(this.getProfileId());
+            }
         }
 
 
-        throwException("getSessionId", stack);
-        return fakeToken;
+        // throwException("getSessionId", stack);
+        return FakeString.genFakeString("getSessionId", stack);
     }
 
     public boolean equals(Object session) {
@@ -154,7 +145,7 @@ public class XSDSafeSession extends User {
         return false;
     }
 
-    private void printGetterStack(String str, String stack) {
+    private static void printGetterStack(String str, String stack) {
         log.warn("椎栈" + stack + "在刚才调用了" + str + "()");
         if(stackPrintCount.computeInt(stack, (_, value) -> (value == null ? 0 : value) + 1) < 4) {
             ToolList.printChatMessage(Component.literal("§a[小沙雕] §e椎栈" + stack + "在刚才通过" + str + "()获取了你的Token"));
@@ -163,7 +154,7 @@ public class XSDSafeSession extends User {
         }
     }
 
-    private void throwException(String str, String stack) {
+    private static void throwException(String str, String stack) {
         if(stackPrintCount.computeInt(stack, (_, value) -> (value == null ? 0 : value) + 1) < 4) {
             ToolList.printChatMessage(Component.literal("§a[小沙雕] §c未经授权的椎栈" + stack + "尝试通过" + str + "()获取你的Token, 已进行拦截"));
             ToolList.printChatMessage(Component.literal("§a[小沙雕] §c可能来自于Mod: §6" + getSuspiciousInfo(stack)));
@@ -282,10 +273,12 @@ public class XSDSafeSession extends User {
     }
 
     public void joinServer(String serverId) throws AuthenticationException {
-        ToolList.mc.services().sessionService().joinServer(getProfileId(), ToolList.getInstance().decodeString(super.getAccessToken()), serverId);
+        if(UnsafeUtils.bypass(super.getAccessToken()) instanceof FakeString fs) {
+            ToolList.mc.services().sessionService().joinServer(getProfileId(), ToolList.getInstance().decodeString(fs.getCallingTarget()), serverId);
+        }
     }
 
-    public String getSuspiciousInfo(String stack) {
+    private static String getSuspiciousInfo(String stack) {
         List<EntrypointContainer<?>> list = new ArrayList<>();
         list.addAll(FabricLoaderImpl.INSTANCE.getEntrypointContainers("main", ModInitializer.class));
         list.addAll(FabricLoaderImpl.INSTANCE.getEntrypointContainers("client", ClientModInitializer.class));
@@ -305,6 +298,40 @@ public class XSDSafeSession extends User {
     }
 
     public static class FakeString implements java.io.Serializable, Comparable<String>, CharSequence, Constable {
+
+        private final String callingTarget;
+        private final String callerStack;
+
+        private FakeString(String callingTarget, String callerStack) {
+            this.callingTarget = callingTarget;
+            this.callerStack = callerStack;
+        }
+
+        interface StringGetter {
+            String get();
+        }
+
+        public static String genFakeString(String callingTarget, String callerStack) {
+            // return new FakeString(callingTarget, callerStack);
+            FakeString ret = new FakeString(callingTarget, callerStack);
+            // future.complete(ret);
+            StringGetter container = new StringGetter() {
+                public String obj;
+
+                @Override
+                public String get() {
+                    return obj;
+                }
+            };
+
+            try {
+                Field field = container.getClass().getDeclaredField("obj");
+                UnsafeUtils.applyValueToField(field, container, ret);
+                return container.get();
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        }
 
         @Override
         public int length() {
@@ -504,11 +531,11 @@ public class XSDSafeSession extends User {
         }
 
         public static String join(CharSequence delimiter, CharSequence... elements) {
-            throw genException();
+            throw genException(null);
         }
 
         public static String join(CharSequence delimiter, Iterable<? extends CharSequence> elements) {
-            throw genException();
+            throw genException(null);
         }
 
         public String toLowerCase(Locale locale) {
@@ -587,11 +614,11 @@ public class XSDSafeSession extends User {
         }
 
         public static String format(String format, Object... args) {
-            throw genException();
+            throw genException(null);
         }
 
         public static String format(Locale l, String format, Object... args) {
-            throw genException();
+            throw genException(null);
         }
 
         public String formatted(Object... args) {
@@ -599,47 +626,47 @@ public class XSDSafeSession extends User {
         }
 
         public static String valueOf(Object obj) {
-            throw genException();
+            throw genException(null);
         }
 
         public static String valueOf(char[] data) {
-            throw genException();
+            throw genException(null);
         }
 
         public static String valueOf(char[] data, int offset, int count) {
-            throw genException();
+            throw genException(null);
         }
 
         public static String copyValueOf(char[] data, int offset, int count) {
-            throw genException();
+            throw genException(null);
         }
 
         public static String copyValueOf(char[] data) {
-            throw genException();
+            throw genException(null);
         }
 
         public static String valueOf(boolean b) {
-            throw genException();
+            throw genException(null);
         }
 
         public static String valueOf(char c) {
-            throw genException();
+            throw genException(null);
         }
 
         public static String valueOf(int i) {
-            throw genException();
+            throw genException(null);
         }
 
         public static String valueOf(long l) {
-            throw genException();
+            throw genException(null);
         }
 
         public static String valueOf(float f) {
-            throw genException();
+            throw genException(null);
         }
 
         public static String valueOf(double d) {
-            throw genException();
+            throw genException(null);
         }
 
         public String intern() {
@@ -659,7 +686,20 @@ public class XSDSafeSession extends User {
             throw genException();
         }
 
-        private static UnsupportedOperationException genException() {
+        public String getCallingTarget() {
+            return callingTarget;
+        }
+
+        public String getCallerStack() {
+            return callerStack;
+        }
+
+        private UnsupportedOperationException genException() {
+            return genException(this);
+        }
+
+        private static UnsupportedOperationException genException(FakeString this$) {
+            if(this$ != null) throwException(this$.callingTarget, this$.callerStack);
             if(!Minecraft.getInstance().isSameThread()) {
                 log.fatal("调用者来自非主线程, 已尝试强制冻结该线程");
                 while(true) {

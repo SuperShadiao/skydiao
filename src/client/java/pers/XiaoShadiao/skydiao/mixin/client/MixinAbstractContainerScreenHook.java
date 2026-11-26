@@ -4,6 +4,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.inventory.Slot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -20,7 +21,12 @@ public class MixinAbstractContainerScreenHook extends Screen {
     @Inject(method = "extractContents", at = @At("TAIL"))
     public void /*renderContents*/extractContents(GuiGraphicsExtractor guiGraphics, int i, int j, float f, CallbackInfo ci) {
         // AbstractListener.inventoryItemFilter.postRender(this, guiGraphics, i, j, f);
-        CustomFabricEvents.ON_SLOT_RENDER.invoker().renderSlots(this, guiGraphics, i, j, f);
+        CustomFabricEvents.ON_SLOT_RENDER.invoker().render(this, guiGraphics, i, j, f);
+    }
+
+    @Inject(method = "extractSlot", at = @At("HEAD"))
+    public void /*render*/render(GuiGraphicsExtractor graphics, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
+        CustomFabricEvents.ON_RENDER_ITEM.invoker().renderSlots(graphics, slot.getItem(), slot.x, slot.y);
     }
 
 }

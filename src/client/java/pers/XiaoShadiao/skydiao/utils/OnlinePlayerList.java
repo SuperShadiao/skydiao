@@ -64,13 +64,17 @@ public class OnlinePlayerList {
     }
 
     public static void addPlayer(String name, String uuid, String clientVersion) {
-        players.add(new OnlinePlayer(name, uuid, clientVersion.startsWith("hhskb ")));
-        playerNames.add(name);
-        playerUUIDs.add(uuid);
+        if(clientVersion.startsWith("hhskb ") || clientVersion.startsWith("hh ")) {
+            players.add(new OnlinePlayer(name, uuid, clientVersion.startsWith("hhskb ")));
+            playerNames.add(name);
+            playerUUIDs.add(uuid);
+        }
     }
 
     public static void clearPlayers() {
         players.clear();
+        playerNames.clear();
+        playerUUIDs.clear();
     }
 
 }

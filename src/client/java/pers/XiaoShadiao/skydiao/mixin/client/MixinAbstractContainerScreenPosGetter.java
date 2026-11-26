@@ -11,5 +11,9 @@ public interface MixinAbstractContainerScreenPosGetter {
     public int getLeftPos();
     @Accessor("topPos")
     public int getTopPos();
+    @Accessor("imageWidth")
+    public int getImageWidth();
+    @Accessor("imageHeight")
+    public int getImageHeight();
 
 }

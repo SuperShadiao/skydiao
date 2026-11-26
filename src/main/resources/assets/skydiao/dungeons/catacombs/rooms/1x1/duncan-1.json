@@ -1,0 +1,15 @@
+{
+  "id": "duncan-1",
+  "shape": "1x1",
+  "blockCount": 22503,
+  "secrets": [
+    {
+      "secretName": "1 - Item",
+      "category": "item",
+      "x": 12,
+      "y": 89,
+      "z": 7
+    }
+  ],
+  "name": "Duncan"
+}

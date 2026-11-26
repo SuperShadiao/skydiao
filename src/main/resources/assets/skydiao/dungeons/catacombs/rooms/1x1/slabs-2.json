@@ -1,0 +1,22 @@
+{
+  "id": "slabs-2",
+  "shape": "1x1",
+  "blockCount": 19124,
+  "secrets": [
+    {
+      "secretName": "1 - Chest (click both sides)",
+      "category": "chest",
+      "x": 22,
+      "y": 85,
+      "z": 3
+    },
+    {
+      "secretName": "2 - Chest (click both sides)",
+      "category": "chest",
+      "x": 23,
+      "y": 85,
+      "z": 3
+    }
+  ],
+  "name": "Slabs"
+}

@@ -18,6 +18,7 @@ import pers.XiaoShadiao.skydiao.config.option.*;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.bilibili.BLiveListener;
 import pers.XiaoShadiao.skydiao.screen.HudConfigScreen;
+import pers.XiaoShadiao.skydiao.screen.QuickNavConfigScreen;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
@@ -100,6 +101,9 @@ public class ConfigManager {
     public static final BooleanConfigOption autoFishAutoMove = new BooleanConfigOption("autofishautomove", false).flagAsMacroFeature();
     public static final BooleanConfigOption autoFishAutoRotation = new BooleanConfigOption("autofishautorotation", true).flagAsMacroFeature();
     public static final TimeDelayOption autofishrethrowhookdelay = new TimeDelayOption("autofishrethrowhookdelay", 0).flagAsMacroFeature();
+    public static final BooleanConfigOption autoFishAutoExchangeAirMode = new BooleanConfigOption("autofishautoexchangeairmode", false).flagAsMacroFeature();
+    public static final BooleanConfigOption autoFishAutoDiving = new BooleanConfigOption("autofishautodiving", false).flagAsMacroFeature();
+    public static final DoubleConfigOption autoFishAutoExchangeAirThreshold = new DoubleConfigOption("autofishautoexchangeairthreshold", 0.25).flagAsMacroFeature();
     public static final BooleanConfigOption pfAllowBreak = new BooleanConfigOption("pathfinderallowbreak", false);
     public static final BooleanConfigOption pfAllowPlace = new BooleanConfigOption("pathfinderallowplace", false);
     public static final BooleanConfigOption pfStopWhenTP = new BooleanConfigOption("pathfinderstopwhentp", false);
@@ -118,6 +122,7 @@ public class ConfigManager {
     public static final BooleanConfigOption enableircjointip = new BooleanConfigOption("enableircjointip", true);
     public static final BooleanConfigOption enableircafktip = new BooleanConfigOption("enableircafktip", true);
     public static final BooleanConfigOption enableircmacrochecktip = new BooleanConfigOption("enableircmacrochecktip", true);
+    public static final BooleanConfigOption enableircheadicon = new BooleanConfigOption("enableircheadicon", true);
     public static final SelectConfigOption fireOverlay = new SelectConfigOption("fireoverlay", 1, List.of("config.fireoverlay.options.normal", "config.fireoverlay.options.lower", "config.fireoverlay.options.remove"));
     public static final BooleanConfigOption skydiaocustomcape = new BooleanConfigOption("skydiaocustomcape", false);
     public static final BooleanConfigOption skyblockriftautodanceroom = new BooleanConfigOption("skyblockriftautodanceroom", false);
@@ -173,6 +178,7 @@ public class ConfigManager {
     public static final BooleanConfigOption crystalHollowScanBear3 = new BooleanConfigOption("crystalhollows.scan.bear3", true);
     public static final BooleanConfigOption crystalHollowHelperDebug = new BooleanConfigOption("crystalhollowhelperdebug", false);
     public static final BooleanConfigOption crystalHollowDupServerTipper = new BooleanConfigOption("crystalhollowdupservertipper", true);
+    public static final BooleanConfigOption crystalHollowMetalDetector = new BooleanConfigOption("crystalhollowmetaldetector", true);
     public static final StringConfigOption mineshaftShareAnnounce = new StringConfigOption("mineshaftshareannounce", "");
     public static final BooleanConfigOption skyblockautobloodfiend = new BooleanConfigOption("skyblockautobloodfiend", false).flagAsMacroFeature();
     public static final IntConfigOption skyblockautobloodfiendlowhealth = new IntConfigOption("skyblockautobloodfiendlowhealth", 5).flagAsMacroFeature();
@@ -200,6 +206,19 @@ public class ConfigManager {
     public static final BooleanConfigOption safariRenderTargetESP = new BooleanConfigOption("safaritargetrenderepesp", true);
     public static final BooleanConfigOption floorDroppingRender = new BooleanConfigOption("floordroppingrender", true);
     public static final BooleanConfigOption dungeonReviveItemCDRender = new BooleanConfigOption("dungeonreviveitemcdrender", true);
+    public static final BooleanConfigOption dungeonMapHudRender = new BooleanConfigOption("dungeonmaphudrender", true);
+    public static final BooleanConfigOption dungeonMapHudShowName = new BooleanConfigOption("dungeonmaphudshowname", true);
+    public static final BooleanConfigOption dungeonMapXray = new BooleanConfigOption("dungeonmapxray", false);
+    public static final BooleanConfigOption dungeonScoreHud = new BooleanConfigOption("dungeonscorehud", true);
+    public static final BooleanConfigOption dungeonCryptsHud = new BooleanConfigOption("dungeoncryptshud", true);
+    public static final BooleanConfigOption dungeonDeathsHud = new BooleanConfigOption("dungeondeathshud", true);
+    public static final BooleanConfigOption dungeonSecretsHud = new BooleanConfigOption("dungeonsecretshud", true);
+    public static final BooleanConfigOption dungeonDoorESP = new BooleanConfigOption("dungeondooresp", true);
+    public static final BooleanConfigOption dungeonLeapMenu = new BooleanConfigOption("dungeonleapmenu", true);
+    public static final IntConfigOption dungeonLeapMenuButtonSize = new IntConfigOption("dungeonleapmenubuttonsize", 50);
+    public static final StringConfigOption dungeonLeapSlotPriority = new StringConfigOption("dungeonleapslotpriority", "");
+    public static final BooleanConfigOption dungeonTipIfCleared = new BooleanConfigOption("dungeontipifcleared", false);
+    public static final BooleanConfigOption dungeonTipIfAllSecretFound = new BooleanConfigOption("dungeontipifallsecretfound", false);
     public static final BooleanConfigOption isleVolcanoFinder =  new BooleanConfigOption("islevolcanofinder", true);
     public static final BooleanConfigOption isleVolcanoFinderCataOnlyMode = new BooleanConfigOption("islevolcanofindercataonlymode", true);
     public static final BooleanConfigOption isleDupServerTip = new BooleanConfigOption("isledupservertip", true);
@@ -265,6 +284,54 @@ public class ConfigManager {
     public static final BooleanConfigOption dungeonKeyNotification = new BooleanConfigOption("dungeonkeynotification", true);
     public static final BooleanConfigOption riftAutoDigMushroom = new BooleanConfigOption("riftautodigmushroom", false);
     public static final BooleanConfigOption fullBright = new BooleanConfigOption("fullbright", true);
+    public static final DoubleConfigOption handOffsetX = new DoubleConfigOption("handoffsetx", 0d);
+    public static final DoubleConfigOption handOffsetY = new DoubleConfigOption("handoffsety", 0d);
+    public static final DoubleConfigOption handOffsetZ = new DoubleConfigOption("handoffsetz", 0d);
+    public static final DoubleConfigOption handSwingPointOffsetX = new DoubleConfigOption("handswingpointoffsetx", 0d);
+    public static final DoubleConfigOption handSwingPointOffsetY = new DoubleConfigOption("handswingpointoffsety", 0d);
+    public static final DoubleConfigOption handSwingPointOffsetZ = new DoubleConfigOption("handswingpointoffsetz", 0d);
+    public static final DoubleConfigOption handSwingSpeedMultiplier = new DoubleConfigOption("handswingspeedmultiplier", 1d);
+    public static final BooleanConfigOption crystalHollowWaypoint = new BooleanConfigOption("crystalhollowwaypoint", true);
+    public static final BooleanConfigOption itemRarityRender = new BooleanConfigOption("itemrarityrender", true);
+    public static final BooleanConfigOption itemPriceTooltip = new BooleanConfigOption("itempricetooltip", true);
+    public static final BooleanConfigOption itemMuseumDonateStateTooltip = new BooleanConfigOption("itemmuseumdonatestatetooltip", true);
+    public static final BooleanConfigOption deployableHUD = new BooleanConfigOption("deployablehud", true);
+    public static final BooleanConfigOption statusBars = new BooleanConfigOption("statusbars", false);
+    public static final BooleanConfigOption quickNav = new BooleanConfigOption("quicknav", true);
+    public static final BooleanConfigOption statusBarsShowHealthMax = new BooleanConfigOption("statusbarsshowhealthmax", true);
+    public static final BooleanConfigOption statusBarsShowManaMax = new BooleanConfigOption("statusbarsshowmanamax", true);
+    private static final List<String> STATUS_BAR_ICON_OPTIONS = List.of(
+            "config.statusbaricon.options.off",
+            "config.statusbaricon.options.left",
+            "config.statusbaricon.options.right");
+    public static final SelectConfigOption statusBarHealthIcon = new SelectConfigOption("statusbarhealthicon", 1, STATUS_BAR_ICON_OPTIONS);
+    public static final SelectConfigOption statusBarManaIcon = new SelectConfigOption("statusbarmanaicon", 2, STATUS_BAR_ICON_OPTIONS);
+    public static final SelectConfigOption statusBarDefenseIcon = new SelectConfigOption("statusbardefenseicon", 1, STATUS_BAR_ICON_OPTIONS);
+    public static final SelectConfigOption statusBarExperienceIcon = new SelectConfigOption("statusbarexperienceicon", 1, STATUS_BAR_ICON_OPTIONS);
+    public static final SelectConfigOption statusBarSpeedIcon = new SelectConfigOption("statusbarspeedicon", 1, STATUS_BAR_ICON_OPTIONS);
+    public static final SelectConfigOption statusBarAirIcon = new SelectConfigOption("statusbarairicon", 1, STATUS_BAR_ICON_OPTIONS);
+    public static final SelectConfigOption statusBarVitalityIcon = new SelectConfigOption("statusbarvitalityicon", 1, STATUS_BAR_ICON_OPTIONS);
+    public static final BooleanConfigOption quiverHUD = new BooleanConfigOption("quiverhud", true);
+    public static final BooleanConfigOption quiverHUDShowIcon = new BooleanConfigOption("quiverhudshowicon", true);
+    private static final List<String> QUIVER_WHEN_OPTIONS = List.of(
+            "config.quiverhudwhen.options.always",
+            "config.quiverhudwhen.options.bowinventory",
+            "config.quiverhudwhen.options.bowhand");
+    public static final SelectConfigOption quiverHUDWhen = new SelectConfigOption("quiverhudwhen", 2, QUIVER_WHEN_OPTIONS);
+    public static final BooleanConfigOption deployableExpiredTitle = new BooleanConfigOption("deployableexpiredtitle", true);
+    public static final BooleanConfigOption miningAbilitiesAvaliableTitle = new BooleanConfigOption("miningabilitiesavaliabletitle", true);
+    public static final BooleanConfigOption enchantTableSuperPairHelper = new BooleanConfigOption("enchanttablesuperpairhelper", true);
+    public static final BooleanConfigOption enchantedBookPreview = new BooleanConfigOption("enchantedbookpreview", true);
+    public static final BooleanConfigOption noHurtcam = new BooleanConfigOption("nohurtcam", false);
+    public static final BooleanConfigOption slayerBossESP = new BooleanConfigOption("slayerbossesp", true);
+    public static final BooleanConfigOption blockOverlay = new BooleanConfigOption("blockoverlay", false);
+    public static final ColorConfigOption blockOverlayColor = new ColorConfigOption("blockoverlaycolor", 0xFFFFFFFF);
+    public static final BooleanConfigOption blockOverlayRainbowMode = new BooleanConfigOption("blockoverlayrainbowmode", false);
+    public static final DoubleConfigOption blockOverlayRainbowModeSpeed = new DoubleConfigOption("blockoverlayrainbowmodespeed", 1d);
+    public static final BooleanConfigOption blockOverlayAllowInAdvantureMode = new BooleanConfigOption("blockoverlayallowinadvanturemode", false);
+    public static final DoubleConfigOption blockOverlayAlpha = new DoubleConfigOption("blockoverlayalpha", 0.33);
+    public static final ColorConfigOption etherwarpCanWarpPreviewColor = new ColorConfigOption("etherwarpcanwarppreviewcolor", 0x00FF00);
+    public static final ColorConfigOption etherwarpCannotWarpPreviewColor = new ColorConfigOption("etherwarpcannotwarppreviewcolor", 0xFF0000);
 
     // public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
@@ -297,6 +364,9 @@ public class ConfigManager {
     public static final StringConfigOption dungeonUseRagnarock = new StringConfigOption("dungeonuseragnarock", "叫！！！(+[strength]\uE00D)");
     public static final StringConfigOption dungeonUseRagnarockCancelled = new StringConfigOption("dungeonuseragnarockcancelled", "大狗叫不出来了。");
     public static final StringConfigOption dungeonUseRagnarockRecieveDamage = new StringConfigOption("dungeonuseragnarockrecievedamage", "大狗受到伤害没叫出来。");
+    public static final StringConfigOption dungeonScore270Msg = new StringConfigOption("dungeonscore270msg", "270 Score");
+    public static final StringConfigOption dungeonScore300Msg = new StringConfigOption("dungeonscore300msg", "300 Score");
+    public static final StringConfigOption dungeonLeapMsg = new StringConfigOption("dungeonleapmsg", "Leaped to [player]!");
 
     public static final StringConfigOption hudOffsetAndScale = new StringConfigOption("hudoffsetandscale", "{}");
 
@@ -313,6 +383,15 @@ public class ConfigManager {
             dungeonf7msgbotmelody3,
             dungeonf7msgbotmelody4
     };
+    public static final DoubleConfigOption[] handOptions = {
+            handOffsetX,
+            handOffsetY,
+            handOffsetZ,
+            handSwingPointOffsetX,
+            handSwingPointOffsetY,
+            handSwingPointOffsetZ,
+            handSwingSpeedMultiplier
+    };
 
     public static final BooleanConfigOption macroReplay = new BooleanConfigOption("macroreplay", true);
     public static final BooleanConfigOption macroReplaySelfCleaning = new BooleanConfigOption("macroreplayselfcleaning", true);
@@ -324,6 +403,7 @@ public class ConfigManager {
     public static final SelectConfigOption musicplayermode = new SelectConfigOption("musicplayermode", 0, List.of("顺序播放", "有序随机", "无序随机", "while(true)"));
     public static final IntConfigOption musiclastmusic = new IntConfigOption("musiclastmusic", 0);
     public static final IntConfigOption xsdmusicvolume = new IntConfigOption("xsdmusicvolume", 100);
+    public static final BooleanConfigOption enablemusicplayersoundeffect = new BooleanConfigOption("enablemusicplayersoundeffect", false);
 
     public static final BooleanConfigOption autoHypeTrain = new BooleanConfigOption("autolobbytrain", true);
     public static final BooleanConfigOption autoHypeTrainManbaOut = new BooleanConfigOption("autolobbytrainplaysoundaftercrash", true);
@@ -338,6 +418,8 @@ public class ConfigManager {
     public static final ActionConfigOption openFsKeyBind = new ActionConfigOption("openfskeybind", openControl);
     public static final ActionConfigOption openClearStashCommand = new ActionConfigOption("openclearstashcommand", openChat.apply("/skydiao fastclearminingstash"));
     public static final ActionConfigOption openHud = new ActionConfigOption("openhud", () -> ToolList.mc.setScreenAndShow(new HudConfigScreen(ToolList.mc.gui.screen())));
+    public static final ActionConfigOption openQuickNavConfig = new ActionConfigOption("openquicknavconfig",
+            () -> ToolList.mc.setScreenAndShow(new QuickNavConfigScreen(ToolList.mc.gui.screen())));
     public static final ActionConfigOption openfastcommandmenukeybinds = new ActionConfigOption("openfastcommandmenukeybinds", openControl);
 
     public static final BooleanConfigOption iAutoObsidian = new BooleanConfigOption("iautoobsidian", false) {
@@ -365,24 +447,44 @@ public class ConfigManager {
     public static final IntConfigOption obsidianCycleTicks = new IntConfigOption("obsidiancycleticks", 9).flagAsMacroFeature();
 
     public static final List<Map.Entry<String, List<ConfigOption<?>>>> categories = List.of(
-            Map.entry("basic", List.of(language, enablexsdccommandtip, enableircjointip, enableircafktip, enableircmacrochecktip, cooltitle, customTitleText, autoHypeTrain, autoHypeTrainManbaOut)),
-            Map.entry("工具类", List.of(inventoryFilter, itemStarCountRender, itemStarCountRenderColor1, itemStarCountRenderColor2, openfastcommandmenukeybinds, chatbutton, skydiaocustomcape, blivelistener, blivelistenercode, blivemodetab, blivemodeentityname, blivemodechat, blivemodescoreboard, blivemodehideserverid, bliveboardcastdankumu, keepSprint, autoReconnect, afkInOtherPlace, freecamFlySpeed, openFreelookAndFreecamAction, preventShortbowDrawing, highSpeedDownload, openAutoClickAction, openAllAutoClickKeybindAction, openClearStashCommand)),
+            Map.entry("basic", List.of(language, enablexsdccommandtip, cooltitle, customTitleText)),
+            Map.entry("IRC设置", List.of(enableircjointip, enableircafktip, enableircmacrochecktip, enableircheadicon)),
+            Map.entry("工具类", List.of(inventoryFilter, itemStarCountRender,
+
+                    itemStarCountRenderColor1, itemStarCountRenderColor2,
+                    openfastcommandmenukeybinds, chatbutton, skydiaocustomcape,
+                    blivelistener, blivelistenercode, blivemodetab, blivemodeentityname,
+                    blivemodechat, blivemodescoreboard, blivemodehideserverid, bliveboardcastdankumu,
+                    keepSprint, autoReconnect, afkInOtherPlace,
+                    freecamFlySpeed, openFreelookAndFreecamAction,
+                    preventShortbowDrawing, deployableHUD, deployableExpiredTitle,
+                    highSpeedDownload, openAutoClickAction,
+                    openAllAutoClickKeybindAction, openClearStashCommand,
+                    enchantTableSuperPairHelper, enchantedBookPreview,
+                    etherwarpCanWarpPreviewColor, etherwarpCannotWarpPreviewColor
+            )),
             Map.entry("寻路系统", List.of(pfAllowBreak, pfAllowPlace, pfStopWhenTP, pfTimeout, pathfinderallowbreakwhengetslowmining, pfXRay)),
-            Map.entry("自动类", List.of(macroReplay, macroReplaySelfCleaning, autoEnchantTableGame, autoHarp, autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming, skyblockriftautodanceroom, autoCarnivalAutoRestart, carnivalAutoFruitDigger, carnivalAutoShootZombie, carnivalAutoShootZombieOffset, skyblockautobloodfiend, skyblockautobloodfiendlowhealth, iAutoObsidian, iAutoObsidianWR, obsidianPositionHelper, autoObsidianPositionsFile, drillSlot, lanternSlot, obsidianPlayerCheckRange, obsidianPlayerCheck, obsidianTheEndCheck, obsidianCycleTicks, autoPickupPhoneRing, autoPlayBeachBall, autoPlayBeachBallAutoStopAt40, autoEvaluateFossils, autoEvaluateFossilsAutoRestart)),
+            Map.entry("自动类", List.of(macroReplay, macroReplaySelfCleaning, autoEnchantTableGame, autoHarp,
+                    autoFish, autoFishAutoJump, autoFishAutoMove, autoFishAutoRotation, lotusAtollAutofishKeep, autofishrethrowhookdelay, autofishDelayRetraction, autoFishAutoExchangeAirMode, autoFishAutoExchangeAirThreshold, autoFishAutoDiving,
+                    autoDojo, autoDojoControlPredictDist, autoDojoMasteryShootTiming,
+                    skyblockriftautodanceroom, autoCarnivalAutoRestart, carnivalAutoFruitDigger, carnivalAutoShootZombie, carnivalAutoShootZombieOffset,
+                    skyblockautobloodfiend, skyblockautobloodfiendlowhealth,
+                    iAutoObsidian, iAutoObsidianWR, obsidianPositionHelper, autoObsidianPositionsFile, drillSlot, lanternSlot, obsidianPlayerCheckRange, obsidianPlayerCheck, obsidianTheEndCheck, obsidianCycleTicks,
+                    autoPickupPhoneRing, autoPlayBeachBall, autoPlayBeachBallAutoStopAt40, autoEvaluateFossils, autoEvaluateFossilsAutoRestart)),
             Map.entry("mining", List.of(mineshaftHelper, mineshaftSharing, mineshaftShareCorpseInChat, mineshaftShareAnnounce,
                     skyblockSafeIsland, mineshaftEnterLoadout, mineshaftExitLoadout,
                     crystalHollowHelper, crystalHollowScanBlue, crystalHollowScanPurple,
                     crystalHollowScanYellow, crystalHollowScanOrange, crystalHollowScanGreen,
                     crystalHollowScanGoblinKing, crystalHollowScanDragonLair, crystalHollowScanWormFishSpot,
                     crystalHollowScanCorleone, crystalHollowScanFairyGrotto, crystalHollowScanBear3,
-                    crystalHollowHelperDebug, crystalHollowDupServerTipper, crystalHollowHelperDisableThreadLimit,
+                    crystalHollowHelperDebug, crystalHollowDupServerTipper, crystalHollowHelperDisableThreadLimit, crystalHollowWaypoint, crystalHollowMetalDetector,
                     genshinImpactHeatColdRender, miningCommissionEntityESP, autoEvaluateFossils,
-                    autoEvaluateFossilsAutoRestart, pinglessMining)),
+                    autoEvaluateFossilsAutoRestart, pinglessMining, miningAbilitiesAvaliableTitle)),
             Map.entry("combat", List.of(
                     slayerTogether,
                     isleVolcanoFinder, isleVolcanoFinderCataOnlyMode, isleDupServerTip,
                     endIslandDragonESPListener, endermanSlayerBeaconESP, endermanSlayerEyeESP,
-                    blazeSlayerFirePillarESP, blazeSlayerShieldColorESP
+                    blazeSlayerFirePillarESP, blazeSlayerShieldColorESP, slayerBossESP
             )),
             Map.entry("foraging", List.of(galateashulker, treeProgress, autoReel, autoReelAutoAim, torrhusCanyonHelper, safariBoardcastHotspot, safariBoardcastTradeNPC, safariRenderTargetESP, floorDroppingRender)),
             Map.entry("farming", List.of(openFsCommandAction, openFsKeyBind, hubratesp, gardenPestESP, autoSprayonator, autoChangeLo, halfAutoKillPests, gardenTrapPrompt, gardenBonusPrompt, fsGardenMoonFlowerMode, fsGardenMoonFlowerModeKeepNightFarming, fsTPToPest)),
@@ -404,6 +506,9 @@ public class ConfigManager {
                     dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7InactiveTerminalRender,
                     f7TerminalESPTracer, f7ArrowAlignSolver, f7ArrowAlignSolverBlockWrongClicks,
                     f7SimonSaysSolver, f7SimonSaysSolverBlockWrongClicks, dungeonReviveItemCDRender,
+                    dungeonMapHudRender, dungeonMapHudShowName, dungeonMapXray,
+                    dungeonTipIfCleared, dungeonTipIfAllSecretFound, dungeonScoreHud, dungeonCryptsHud,
+                    dungeonDeathsHud, dungeonSecretsHud, dungeonDoorESP, dungeonLeapMenu, dungeonLeapMenuButtonSize, dungeonLeapSlotPriority,
                     f7DrawWitherDragonESP, f7DrawStormFireballTarget, f7DrawWitherDragonLightning, f7AutoSwapEnderDragonInWitherKing,
 
                     dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3,
@@ -414,11 +519,29 @@ public class ConfigManager {
                     dungeonf7msgbotssleap, dungeonMissingPlayer, dungeonCryptsEnough,
                     dungeonf7Stage3EnterArea2, dungeonf7Stage3EnterArea3, dungeonf7Stage3EnterArea4,
                     dungeonUseRagnarock3s, dungeonUseRagnarock2s, dungeonUseRagnarock1s,
-                    dungeonUseRagnarock, dungeonUseRagnarockCancelled, dungeonUseRagnarockRecieveDamage
+                    dungeonUseRagnarock, dungeonUseRagnarockCancelled, dungeonUseRagnarockRecieveDamage,
+                    dungeonScore270Msg, dungeonScore300Msg, dungeonLeapMsg
             )),
             Map.entry("rift", List.of(rifttimegunhelper, riftAutoDigMushroom)),
-            Map.entry("界面类", List.of(openHud, bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, bossDrawESP, customBossESPTracer, starrailNotification, starrailNotificationSound, dyingtip, noblind, fullBright, nosuffoverlay, fireOverlay, lyricColor1, lyricColor2, dynamicSpot, dynamicSpotReplaceTabList)),
-            Map.entry("ravengard", List.of(ravengardHelper, ravengardQueueMessage))
+            Map.entry("界面类", List.of(openHud, bossbar, bossbarShowHealth, bossbarAddTargetEntity, bossbarDisplayLimit, bossDrawESP, customBossESPTracer,
+
+                    starrailNotification, starrailNotificationSound,
+                    dyingtip, noblind, fullBright, nosuffoverlay,
+                    fireOverlay, lyricColor1, lyricColor2,
+                    dynamicSpot, dynamicSpotReplaceTabList,
+                    handOffsetX, handOffsetY, handOffsetZ,
+                    handSwingPointOffsetX, handSwingPointOffsetY, handSwingPointOffsetZ,
+                    handSwingSpeedMultiplier,
+                    itemRarityRender, itemPriceTooltip, itemMuseumDonateStateTooltip, noHurtcam,
+                    quickNav, openQuickNavConfig,
+                    statusBars, statusBarsShowHealthMax, statusBarsShowManaMax,
+                    statusBarHealthIcon, statusBarManaIcon, statusBarDefenseIcon,
+                    statusBarExperienceIcon, statusBarSpeedIcon, statusBarAirIcon, statusBarVitalityIcon,
+                    quiverHUD, quiverHUDShowIcon, quiverHUDWhen,
+                    blockOverlay, blockOverlayColor, blockOverlayRainbowMode, blockOverlayRainbowModeSpeed, blockOverlayAllowInAdvantureMode, blockOverlayAlpha
+            )),
+            Map.entry("ravengard", List.of(ravengardHelper, ravengardQueueMessage)),
+            Map.entry("杂项", List.of(autoHypeTrain, autoHypeTrainManbaOut))
     );
 
 
@@ -440,12 +563,12 @@ public class ConfigManager {
                 continue;
             }
             Object value = option.getValue();
-            if (value instanceof Boolean value2) {
-                jo.addProperty(option.getName(), value2);
-            } else if (value instanceof Integer value2) {
-                jo.addProperty(option.getName(), value2);
-            } else if (value instanceof String value2) {
-                jo.addProperty(option.getName(), value2);
+            switch (value) {
+                case Boolean value2 -> jo.addProperty(option.getName(), value2);
+                case Integer value2 -> jo.addProperty(option.getName(), value2);
+                case String value2 -> jo.addProperty(option.getName(), value2);
+                case Double value2 -> jo.addProperty(option.getName(), value2);
+                default -> throw new IllegalArgumentException("Unknown config option type " + value.getClass() + " in option " + option.getName());
             }
         }
         try {

@@ -11,6 +11,7 @@ import net.minecraft.world.entity.LivingEntity;
 import pers.XiaoShadiao.skydiao.eventbuslistener.E2AMappingListener;
 import pers.XiaoShadiao.skydiao.hud.CustomBossbar;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
+import pers.XiaoShadiao.skydiao.screen.LeapOverlayScreen;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.Objects;
@@ -40,7 +41,7 @@ public class DungeonF1BossbarListener extends AbstractDungeonBossbar {
 
     private void onChat(Component component, boolean b) {
         String message = ToolList.getInstance().deleteColorCode(component.getString());
-        if(message.contains("[BOSS] Bonzo: Oh I'm dead!")) {
+        if(message.contains("[BOSS] Bonzo: Oh I'm dead!") || message.equals("[BOSS] Bonzo: Hoho, looks like you killed me!")) {
             stage2EnterFlag = true;
         }
     }
@@ -62,9 +63,16 @@ public class DungeonF1BossbarListener extends AbstractDungeonBossbar {
             }
         }
         if(f1BossTarget != null) {
-            if(stage2EnterFlag && currentStage == 1 && getHealth() / getMaxHealth() > 0.9) {
+            if(stage2EnterFlag && currentStage == 1 && getHealth() / getMaxHealth() > 0.5) {
                 stage2EnterFlag = false;
                 currentStage = 2;
+            }
+
+            if(ToolList.getInstance().isDevEnvironment()) {
+                if(mc.gui.screen() instanceof LeapOverlayScreen leapOverlayScreen) {
+                    leapOverlayScreen.setRecommendLeapPlayer1("HyperShadiao");
+                    leapOverlayScreen.setRecommendLeapPlayer2("HyperShadiao");
+                }
             }
 
             if(!ToolList.getInstance().isEntityOnWorld(f1BossTarget)) {

@@ -35,6 +35,7 @@ import java.util.function.Function;
 public class XSDIRCConfig implements IIRCConfig {
 
     public static final XSDIRCConfig INSTANCE = new XSDIRCConfig();
+    public static final ChatClientManager IRC = new ChatClientManager(INSTANCE);
 
     @Override
     public String getClientNameAndVersion() {
@@ -66,8 +67,8 @@ public class XSDIRCConfig implements IIRCConfig {
     }
 
     @Override
-    public Runnable getOnClose() {
-        return OnlinePlayerList::clearPlayers;
+    public Consumer<Throwable> getOnClose() {
+        return _ -> OnlinePlayerList.clearPlayers();
     }
 
     @Override
@@ -78,6 +79,11 @@ public class XSDIRCConfig implements IIRCConfig {
     @Override
     public boolean enableSpecialLog() {
         return ToolList.getInstance().isXiaoShadiao();
+    }
+
+    @Override
+    public boolean showHeadIcon() {
+        return ConfigManager.enableircheadicon.getValue();
     }
 
     @Override
@@ -120,12 +126,12 @@ public class XSDIRCConfig implements IIRCConfig {
         return packet -> {
             switch(packet.packetType) {
                 case "join":
-                    if(!packet.getRank(false).contains("[离线]")) OnlinePlayerList.addPlayer(packet.sender, packet.senderUUID, packet.message);
+                    if(!packet.isOffline()) OnlinePlayerList.addPlayer(packet.sender, packet.senderUUID, packet.message);
                     break;
                 case "leave":
                     OnlinePlayerList.removePlayerByUUID(packet.senderUUID);
                     break;
-                case "getplayers":
+                case "get_players":
                     OnlinePlayerList.readFromPacket(packet);
                     break;
                 default:
@@ -163,7 +169,7 @@ public class XSDIRCConfig implements IIRCConfig {
             case "sharemusic":
                 MusicInfo musicInfo = MusicListManager.jsonToMI(JsonParser.parseString(packet.message).getAsJsonObject());
                 int shareId = MusicListManager.storeTempSharingMusic(musicInfo);
-                MutableComponent component = Component.literal("§a[XSDChat] " + packet.getRank(true) + "§d" + packet.sender + " §a分享了音乐 §6" + musicInfo.name + " - " + musicInfo.singer);
+                MutableComponent component = Component.literal("§a[XSDChat] ").append(packet.getDisplayPlayerName(true, "§d")).append(" §a分享了音乐 §6" + musicInfo.name + " - " + musicInfo.singer);
                 MutableComponent component2 = Component.literal("§a[XSDChat] §e点击这里§a可以收听!");
 
                 Style style1 = Style.EMPTY
@@ -180,7 +186,7 @@ public class XSDIRCConfig implements IIRCConfig {
                     packet2.packetType = "find_party_check_callbackinfo";
                     packet2.message = clone.toJson().toString();
                     packet2.initSender();
-                    ChatClientManager.trySendOrWarning(packet2, true, this);
+                    IRC.trySendOrWarning(packet2, true);
                 }
                 break;
             case "find_party_check_callbackinfo":
@@ -198,7 +204,7 @@ public class XSDIRCConfig implements IIRCConfig {
                     packet2.packetType = "find_party_please_join";
                     packet2.message = packet.sender;
                     packet2.initSender();
-                    ChatClientManager.trySendOrWarning(packet2, true, this);
+                    IRC.trySendOrWarning(packet2, true);
                     PartyFinderManager.selfPartyData.players.add(packet.sender);
                     try { Thread.sleep(2000); } catch (InterruptedException e) {}
                     ToolList.getInstance().updatePartyInfo();

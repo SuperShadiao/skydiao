@@ -62,7 +62,6 @@ import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.irc.XSDIRCConfig;
-import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
 import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatPacket;
 import pers.XiaoShadiao.skydiao.keybinds.KeyBindsManager;
 import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
@@ -82,6 +81,7 @@ import pers.XiaoShadiao.skydiao.utils.renderutils.CustomRenderPipeline;
 import pers.XiaoShadiao.skydiao.utils.renderutils.Gif;
 import pers.XiaoShadiao.skydiao.utils.renderutils.ImageTexture;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
+import pers.XiaoShadiao.skydiao.utils.tab.TabReader;
 
 import java.io.File;
 import java.io.IOException;
@@ -119,6 +119,7 @@ public class BasicListener extends AbstractListener {
     @Override
     public void registerListeners() {
         ClientTickEvents.START_CLIENT_TICK.register(this::onStartClientTick);
+        ClientTickEvents.END_CLIENT_TICK.register(this::onEndClientTick);
         ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register(this::onWorldChange);
         CustomFabricEvents.HYPIXEL_PACKET_EVENT.register(this::onHypixelPacket);
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
@@ -139,6 +140,11 @@ public class BasicListener extends AbstractListener {
             }
         });
         LevelRenderEvents.COLLECT_SUBMITS.register(this::onCollectSubmits);
+    }
+
+    private void onEndClientTick(Minecraft mc) {
+        ToolList.getInstance().updateScoreboardCaches();
+        TabReader.refreshTab();
     }
 
     private void onCollectSubmits(LevelRenderContext context) {
@@ -193,7 +199,8 @@ public class BasicListener extends AbstractListener {
                         }
 
                         File temp = File.createTempFile("pack1", ".zip");
-                        File target = new File(mc.getResourcePackDirectory().toFile(), "hypixel_resoucepack.zip");
+                        String fileName = ToolList.getInstance().fetchScoreboardLinesNoColor().stream().anyMatch(line -> line.contains("alpha.hypixel.net")) ? "alpha_hypixel_resoucepack.zip" : "hypixel_resoucepack.zip";
+                        File target = new File(mc.getResourcePackDirectory().toFile(), fileName);
                         ToolList.printChatMessage(Component.literal("§a[小沙雕] §eHypixel官材: " + packet2.url()));
                         if(disableHashCheck || !target.isFile() || !hashFunction.hashBytes(FileUtils.readFileToByteArray(target)).equals(hashCode)) {
                             XSDHUD.bigTitle.updateTitleMsg("§e正在获取Hypixel官材...如果长时间未完成, 请检查网络", 120000);
@@ -222,7 +229,7 @@ public class BasicListener extends AbstractListener {
                             // [cardinal-components-base, cardinal-components-entity, dandelion, fabric-api, fabric-api-base, fabric-api-lookup-api-v1, fabric-biome-api-v1, fabric-block-api-v1, fabric-block-getter-api-v2, fabric-client-gametest-api-v1, fabric-command-api-v2, fabric-content-registries-v0, fabric-convention-tags-v2, fabric-crash-report-info-v1, fabric-creative-tab-api-v1, fabric-creative-tab-api-v1_programmer_art, fabric-data-attachment-api-v1, fabric-data-generation-api-v1, fabric-debug-api-v1, fabric-dimensions-v1, fabric-entity-events-v1, fabric-events-interaction-v0, fabric-game-rule-api-v1, fabric-gametest-api-v1, fabric-item-api-v1, fabric-key-mapping-api-v1, fabric-language-kotlin, fabric-lifecycle-events-v1, fabric-loot-api-v3, fabric-menu-api-v1, fabric-message-api-v1, fabric-model-loading-api-v1, fabric-networking-api-v1, fabric-object-builder-api-v1, fabric-particles-v1, fabric-permission-api-v1, fabric-recipe-api-v1, fabric-registry-sync-v0, fabric-renderer-api-v1, fabric-renderer-indigo, fabric-rendering-fluids-v1, fabric-rendering-v1, fabric-resource-conditions-api-v1, fabric-resource-loader-v0, fabric-resource-loader-v1, fabric-screen-api-v1, fabric-serialization-api-v1, fabric-sound-api-v1, fabric-tag-api-v1, fabric-transfer-api-v1, fabric-transitive-access-wideners-v1, fabricloader, file/hypixel_resoucepack.zip, forgeconfigapiport, high_contrast, hm-api, hypixel-mod-api, iris, modmenu, modmenu_high_contrast, modmenu_programmer_art, org_apache_commons_commons-math3, placeholder-api, programmer_art, skyblockaddons, skyblocker, skyblocker:recolored_dungeon_items, skydiao, skyhanni, sodium, sparkle_morpher, vanilla, yet_another_config_lib_v3]
                             if (!FileUtils.contentEquals(temp, target)) {
                                 boolean executedRemove = false;
-                                if(mc.getResourcePackRepository().removePack("file/hypixel_resoucepack.zip")) {
+                                if(mc.getResourcePackRepository().removePack("file/" + fileName)) {
                                     CompletableFuture<CompletableFuture<Void>> future = new CompletableFuture<>();
                                     mc.execute(() -> future.complete(mc.reloadResourcePacks()));
                                     future.get().get();
@@ -230,7 +237,7 @@ public class BasicListener extends AbstractListener {
                                 }
                                 Files.move(temp.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
                                 if(executedRemove) {
-                                    mc.getResourcePackRepository().addPack("file/hypixel_resoucepack.zip");
+                                    mc.getResourcePackRepository().addPack("file/" + fileName);
                                     CompletableFuture<CompletableFuture<Void>> future = new CompletableFuture<>();
                                     mc.execute(() -> future.complete(mc.reloadResourcePacks()));
                                     future.get().get();
@@ -499,7 +506,7 @@ public class BasicListener extends AbstractListener {
             cp.packetType = "hyp_party";
             cp.message = jo.toString();
             cp.initSender();
-            ChatClientManager.trySendOrWarning(cp, XSDIRCConfig.INSTANCE);
+            XSDIRCConfig.IRC.trySendOrWarning(cp);
             PartyManager.updatePartyMembers(partyInfoPacket.isInParty() ? new ArrayList<>(partyInfoPacket.getMemberMap().values()) : List.of());
         }
     }
@@ -507,7 +514,7 @@ public class BasicListener extends AbstractListener {
     private long lastNotifyPublicPartyTime;
 
     private void onWorldChange(Minecraft mc, ClientLevel clientLevel) {
-        ChatClientManager.refreshIfNotAvaliable(XSDIRCConfig.INSTANCE);
+        XSDIRCConfig.IRC.refreshIfNotAvaliable();
         reloadCustomCape();
         InputSimulator.unpressAllKey();
         ServerIdSpoofer.generateServerIds();
@@ -530,6 +537,7 @@ public class BasicListener extends AbstractListener {
                 }
             }, 80);
         }
+        TabReader.clearCache();
     }
 
     private int afkHoldTick;
@@ -578,7 +586,7 @@ public class BasicListener extends AbstractListener {
             if(afkHoldTick++ > 20) {
                 if (isAFK) {
                     isAFK = false;
-                    ChatClientManager.trySendAFK(false, false);
+                    XSDIRCConfig.IRC.trySendAFK(false, false);
                 }
                 lastOperationTime = System.currentTimeMillis();
             }
@@ -587,7 +595,7 @@ public class BasicListener extends AbstractListener {
         }
         if(System.currentTimeMillis() - lastOperationTime > 120000 && !isAFK) {
             isAFK = true;
-            ChatClientManager.trySendAFK(true, false);
+            XSDIRCConfig.IRC.trySendAFK(true, false);
         }
 
         if(tickCounter % 40 == 0) {

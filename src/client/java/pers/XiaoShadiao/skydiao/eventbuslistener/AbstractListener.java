@@ -6,7 +6,15 @@ import org.apache.logging.log4j.Logger;
 import pers.XiaoShadiao.skydiao.appendage.eventbuslistener.EditingPListListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.bilibili.BLiveReqMusicListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.bossbar.dungeon.*;
+import pers.XiaoShadiao.skydiao.eventbuslistener.dungeon.*;
+import pers.XiaoShadiao.skydiao.eventbuslistener.fishing.FishingBigMobRenderListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.fishing.FishingHotSpotListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.fishing.LotusAtollHelper;
+import pers.XiaoShadiao.skydiao.eventbuslistener.foraging.AutoReelListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.mining.*;
+import pers.XiaoShadiao.skydiao.eventbuslistener.quicknav.QuickNavListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.foraging.*;
 import pers.XiaoShadiao.skydiao.utils.Register;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
@@ -14,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class AbstractListener extends Thread {
+public abstract class  AbstractListener extends Thread {
 
     public static final Minecraft mc = ToolList.mc;
     public static List<AbstractListener> listeners = new ArrayList<>();
@@ -38,6 +46,8 @@ public abstract class AbstractListener extends Thread {
     public static final MineshaftHelperListener mineshaftHelperListener = new MineshaftHelperListener();
     public static final RiftAutoDanceRoomListener riftAutoDanceRoomListener = new RiftAutoDanceRoomListener();
     public static final TooltipScrollController tooltipScrollController = new TooltipScrollController();
+    public static final ItemPriceTooltipListener itemPriceTooltipListener = new ItemPriceTooltipListener();
+    public static final MuseumTooltipListener museumTooltipListener = new MuseumTooltipListener();
     public static final RiftTimeGunRightClickHolderListener riftTimeGunRightClickHolderListener = new RiftTimeGunRightClickHolderListener();
     public static final ResurrectionItemListener resurrectionItemListener = new ResurrectionItemListener();
     public static final SlayerTogetherListener slayerTogetherListener = new SlayerTogetherListener();
@@ -50,6 +60,12 @@ public abstract class AbstractListener extends Thread {
     public static final WorldRenderCrashFix worldRenderCrashFix = new WorldRenderCrashFix();
     public static final GhostEntityFixer ghostEntityFixer = new GhostEntityFixer();
     public static final DungeonMiscMessageListener dungeonMiscMessageListener = new DungeonMiscMessageListener();
+    public static final DungeonMapScanListener dungeonMapScanListener = new DungeonMapScanListener();
+    public static final DungeonSecretWaypointListener dungeonSecretWaypointListener = new DungeonSecretWaypointListener();
+    public static final DungeonPuzzleSolverListener dungeonPuzzleSolverListener = new DungeonPuzzleSolverListener();
+    public static final DungeonScoreListener dungeonScoreListener = new DungeonScoreListener();
+    public static final DungeonDoorESPListener dungeonDoorESPListener = new DungeonDoorESPListener();
+    public static final DungeonLeapMenuListener dungeonLeapMenuListener = new DungeonLeapMenuListener();
     public static final LotusAtollHelper lotusAtollHelper = new LotusAtollHelper();
     public static final FishingBigMobRenderListener fishingBigMobRenderListener = new FishingBigMobRenderListener();
     public static final BliveModeChatHandler bliveModeChatHandler = new BliveModeChatHandler();
@@ -57,6 +73,7 @@ public abstract class AbstractListener extends Thread {
     public static final DungeonTrashTPSListener dungeonTrashTPSListener = new DungeonTrashTPSListener();
     public static final BlacklistRenderer blacklistRenderer = new BlacklistRenderer();
     public static final CrystalHollowHelperListener crystalHollowHelperListener = new CrystalHollowHelperListener();
+    public static final CrystalHollowMetalDetectorListener crystalHollowMetalDetectorListener = new CrystalHollowMetalDetectorListener();
     public static final DungeonTTTFailListener dungeonTTTFailListener = new DungeonTTTFailListener();
     public static final XiaoShadiaoCommandListener xiaoShadiaoCommandListenerListener = new XiaoShadiaoCommandListener();
     public static final AutoLoadoutListener autoLoadoutListener = new AutoLoadoutListener();
@@ -96,6 +113,21 @@ public abstract class AbstractListener extends Thread {
     public static final BlazeSlayerFirePillarRender blazeSlayerFirePillarRender = new BlazeSlayerFirePillarRender();
     public static final EndermanSlayerBeaconRender endermanSlayerBeaconRender = new EndermanSlayerBeaconRender();
     public static final RiftAutoDigMushroom riftAutoDigMushroom = new RiftAutoDigMushroom();
+    public static final ForagingSweepToDynamicSpotListener foragingSweepToDynamicSpotListener = new ForagingSweepToDynamicSpotListener();
+    public static final WaypointListener waypointListener = new WaypointListener();
+    public static final ItemRarityRenderListener itemRarityRenderListener = new ItemRarityRenderListener();
+    public static final MiningAbilitiesReadyListener miningAbilitiesReadyListener = new MiningAbilitiesReadyListener();
+    public static final ItemStarCount itemStarCount = new ItemStarCount();
+    public static final EnchantedBookPreview enchantedBookPreview = new EnchantedBookPreview();
+    public static final SlayerBossESPListener slayerBossESPListener = new SlayerBossESPListener();
+    public static final BlockOverlayListener blockOverlayListener = new BlockOverlayListener();
+    public static final QuickNavListener quickNavListener = new QuickNavListener();
+    public static final EtherwarpPreviewerListener etherwarpPreviewerListener = new EtherwarpPreviewerListener();
+    public static final AutoCombineEnchantbookListener autoCombineEnchantbookListener = new AutoCombineEnchantbookListener();
+    public static final SyncScreenListener syncScreenListener = new SyncScreenListener();
+    public static final AutoUseItemListener autoUseItemListener = new AutoUseItemListener();
+    public static final AutoUseFireVeilWandListener autoUseFireVeilWandListener = new AutoUseFireVeilWandListener();
+    public static final NPCTrackerListener npcTrackerListener = new NPCTrackerListener();
 
     public static final DungeonF1BossbarListener dungeonF1Bossbar = new DungeonF1BossbarListener();
     public static final DungeonF2BossbarListener dungeonF2Bossbar = new DungeonF2BossbarListener();

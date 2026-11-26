@@ -1,16 +1,12 @@
 package pers.XiaoShadiao.skydiao.utils;
 
-import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
-import com.mojang.renderpearl.api.textures.GpuTexture;
 import net.minecraft.util.ARGB;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
 
 public class PicUtils {
@@ -62,40 +58,29 @@ public class PicUtils {
         return baos.toByteArray();
     }
 
-    public static BufferedImage cloneMappedViewToBufferedImage(RenderTarget target, GpuBufferSlice.MappedView mappedView) {
-        int width = target.width;
-        int height = target.height;
-        GpuTexture sourceTexture = target.getColorTexture();
-
-        if (sourceTexture == null) throw new IllegalStateException("Tried to capture screenshot of an incomplete framebuffer");
-
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB_PRE);
-
-        ByteBuffer data = cloneByteBuffer(mappedView.data()).join();
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int argb = data.getInt((x + y * width) * sourceTexture.getFormat().blockSize());
-                image.setRGB(x, height - y - 1, (ARGB.blue(argb) << 16) | (ARGB.green(argb) << 8) | (ARGB.red(argb)) | 0xFF000000);
-            }
-        }
-        return image;
+    /**
+     * 把 {@link ScreenshotUtils.CapturedFrame} 还原成 BufferedImage.
+     */
+    public static BufferedImage heapBufferToBufferedImage(ScreenshotUtils.CapturedFrame frame) {
+        return heapBufferToBufferedImage(frame.data(), frame.width(), frame.height(), frame.blockSize());
     }
 
-    public static CompletableFuture<ByteBuffer> cloneByteBuffer(ByteBuffer buffer) {
-        CompletableFuture<ByteBuffer> future = new CompletableFuture<>();
-        ToolList.mc.execute(() -> {
-            ByteBuffer heapDst = ByteBuffer.allocate(buffer.remaining());
-            try {
-                heapDst.order(buffer.order());
-                heapDst.put(buffer);
-                heapDst.position(0);
-            } catch (Exception e) {
-                ToolList.getInstance().log.catching(e);
-            } finally {
-                future.complete(heapDst);
+    /**
+     * 把帧的堆内存数据还原成 BufferedImage, 纯 Java 堆操作, 可在任意线程调用.
+     */
+    public static BufferedImage heapBufferToBufferedImage(ByteBuffer data, int width, int height, int blockSize) {
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB_PRE);
+        int[] pixels = new int[width * height];
+        for (int y = 0; y < height; y++) {
+            int srcRow = y * width;
+            int dstRow = (height - y - 1) * width;
+            for (int x = 0; x < width; x++) {
+                int argb = data.getInt((srcRow + x) * blockSize);
+                pixels[dstRow + x] = (ARGB.blue(argb) << 16) | (ARGB.green(argb) << 8) | (ARGB.red(argb)) | 0xFF000000;
             }
-        });
-        return future;
+        }
+        image.setRGB(0, 0, width, height, pixels, 0, width);
+        return image;
     }
 
 }

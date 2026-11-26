@@ -21,6 +21,7 @@ import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
@@ -497,6 +498,39 @@ public class RenderUtils {
         double z2 = z + width / 2.0;
 
         renderESP(worldRender, x1, y1, z1, x2, y2, z2, r, g, b, a, fillBox);
+    }
+
+    /**
+     * 只渲染 waypoint 的文字标签：始终面向相机、屏幕上的大小固定（不随距离缩小），
+     * 不受光照影响，并且可以穿墙看到。方块高亮请用 {@link #renderESP} 单独画。
+     *
+     * @param textSize 文字相对默认大小的倍数，1 表示默认
+     */
+
+    public static void renderWaypoint(LevelRenderContext context, Vec3 pos, Component label, float textSize) {
+        renderWaypoint(context, pos, label, textSize, 0);
+    }
+    public static void renderWaypoint(LevelRenderContext context, Vec3 pos, Component label, float textSize, float yOffset) {
+        Vec3 camera = context.levelState().cameraRenderState.pos;
+        double dx = pos.x - camera.x;
+        double dy = pos.y - camera.y;
+        double dz = pos.z - camera.z;
+        double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        if (distance < 0.01) distance = 0.01;
+
+        FormattedCharSequence text = label.getVisualOrderText();
+        float halfWidth = ToolList.mc.font.width(text) / 2f;
+        // 0.025 是原版 name tag 在 10 格左右的比例；乘上距离让屏幕上的像素大小保持不变
+        float scale = (float) distance * 0.0025f * textSize;
+
+        PoseStack poseStack = context.poseStack();
+        poseStack.pushPose();
+        poseStack.translate(dx, dy, dz);
+        poseStack.rotate(context.levelState().cameraRenderState.orientation);
+        poseStack.scale(scale, -scale, scale);
+        context.submitNodeCollector().submitText(poseStack, -halfWidth, yOffset, text, true,
+                Font.DisplayMode.SEE_THROUGH, LightCoordsUtil.FULL_BRIGHT, 0xFFFFFFFF, 0x40000000, 0);
+        poseStack.popPose();
     }
 
     public static void renderWorldLine(WorldRender worldRender, double x1, double y1, double z1, double x2, double y2, double z2, float r1, float g1, float b1, float a1, float r2, float g2, float b2, float a2) {

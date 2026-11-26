@@ -437,7 +437,6 @@ public class AccountSelectScreen extends Screen {
     @Override
     public void onClose() {
         ToolList.mc.gui.setScreen(lastScreen);
-        removed();
     }
 
     @Override

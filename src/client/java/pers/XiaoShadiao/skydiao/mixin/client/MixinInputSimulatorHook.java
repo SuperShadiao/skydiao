@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.booleans.BooleanBooleanPair;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,20 +37,13 @@ public class MixinInputSimulatorHook {
 
     @WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;tick()V"))
     public void tickGui(Gui instance, Operation<Void> original) {
-        hookedLeftClickResult = false;
-        consumedHookedRightClick = false;
         consumedHookedLeftClick = false;
+        consumedHookedRightClick = false;
 
         shouldConsumeClicks = ToolList.mc.player != null && !ToolList.mc.player.isUsingItem();
         original.call(instance);
         if(ToolList.mc.player != null && ToolList.mc.level != null && ToolList.mc.gameMode != null) {
-            if(instance.screen() != null) {
-                InputSimulator.updateTick();
-            } else {
-                InputSimulator.updateCurrentItemSlotIndex();
-            }
-
-            InputSimulator.updateInventoryState();
+            InputSimulator.updateTick(instance.screen() != null);
         }
     }
 
@@ -62,14 +56,14 @@ public class MixinInputSimulatorHook {
     public boolean onConsumeClick(KeyMapping instance, Operation<Boolean> original) {
         if(instance == ToolList.mc.options.keyAttack) {
             if(shouldConsumeClicks) {
+                // 先消费并执行模拟点击，再让原版点击走 original（避免同一 tick 里模拟点击被丢或重复）
                 BooleanBooleanPair pair = InputSimulator.consumeSingleLeftClick();
                 if (pair.rightBoolean()) {
-                    hookedLeftClickResult |= pair.leftBoolean();
+                    hookedLeftClickResult = pair.leftBoolean();
                     consumedHookedLeftClick = true;
                     return true;
-                } else {
-                    consumedHookedLeftClick = false;
                 }
+                consumedHookedLeftClick = false;
             } else {
                 InputSimulator.consumeDoNothing();
             }
@@ -113,6 +107,7 @@ public class MixinInputSimulatorHook {
         if(!bl && missTime > 1000) {
             InputSimulator.continueAttack(click);
             executed = click;
+            if (executed) missTime = 0;
         }
         if(!executed) {
             original.call(instance, click);
@@ -128,16 +123,9 @@ public class MixinInputSimulatorHook {
             this.rightClickDelay = InputSimulator.rightClickDelay;
         }
         if(instance == ToolList.mc.options.keyUse) {
-            return original.call(instance) || (InputSimulator.isMouseRightHolding && !InputSimulator.hasRemainRightClick() && !InputSimulator.isInventoryOpen());
+            return original.call(instance) || (InputSimulator.isMouseRightHolding && !InputSimulator.isInventoryOpen());
         }
         return original.call(instance);
-    }
-
-    @Inject(method = "handleKeybinds", at = @At("RETURN"))
-    public void decreaseTicks(CallbackInfo ci) {
-        if(ToolList.mc.gui.screen() == null) {
-            InputSimulator.decreaseTicks();
-        }
     }
 
     @Inject(method = "startUseItem", at = @At("RETURN"))
@@ -145,5 +133,9 @@ public class MixinInputSimulatorHook {
         InputSimulator.rightClickDelay = this.rightClickDelay;
     }
 
+    @WrapOperation(method = "pauseGame", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;stopDestroyBlock()V"))
+    public void cancelIfSimulatorRunning(MultiPlayerGameMode instance, Operation<Void> original) {
+        if(!InputSimulator.leftClickFlagMinecraft) original.call(instance);
+    }
 
 }

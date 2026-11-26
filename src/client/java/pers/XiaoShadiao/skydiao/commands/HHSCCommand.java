@@ -37,7 +37,7 @@ import pers.XiaoShadiao.skydiao.hud.CustomBossbar;
 import pers.XiaoShadiao.skydiao.hud.GenshinImpactHeatCold;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
-import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
+import pers.XiaoShadiao.skydiao.irc.XSDIRCConfig;
 import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatPacket;
 import pers.XiaoShadiao.skydiao.screen.FastCommandMenuScreen;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
@@ -105,7 +105,7 @@ public class HHSCCommand extends SkydiaoCommand {
                 packet.initSender();
                 packet.packetType = "macro_check";
                 packet.message = "test msg";
-                ChatClientManager.trySend(packet, false);
+                XSDIRCConfig.IRC.trySend(packet, false);
                 return 0;
             }));
             devcommand.then(getArgConstantInstance("fetchskulldata").executes(context -> {
@@ -190,6 +190,7 @@ public class HHSCCommand extends SkydiaoCommand {
                 });
                 return 0;
             }));
+            devcommand.then(getArgConstantInstance("reconnectIRC").executes(context -> owo(XSDIRCConfig.IRC::closeClient)));
         } else {
             devcommand.executes((context) -> owo(() -> context.getSource().sendFeedback(Component.literal("§a[小沙雕] §c当前不是Dev环境..."))));
         }
@@ -214,8 +215,28 @@ public class HHSCCommand extends SkydiaoCommand {
                         .executes(this::executePrintTargetEntities)
                         .then(getArgInstance("entityid", IntegerArgumentType.integer()).executes(this::executeDumpEntityNBT)),
                 getArgConstantInstance("dumpallentitynbt").executes(this::executeDumpAllEntityNBT),
+                getArgConstantInstance("dumpfishhook").executes(this::executeDumpFishhook),
                 devcommand
         );
+    }
+
+    private int executeDumpFishhook(CommandContext<FabricClientCommandSource> context) {
+        if(mc.player.fishing != null) {
+            context.getSource().sendFeedback(Component.literal("§a[小沙雕] §e当前鱼钩信息:"));
+            context.getSource().sendFeedback(Component.literal("§a[小沙雕] §e坐标: " + mc.player.fishing.position()));
+            context.getSource().sendFeedback(Component.literal("§a[小沙雕] §e动量: " + mc.player.fishing.getDeltaMovement()));
+            Entity hookedIn = mc.player.fishing.getHookedIn();
+            context.getSource().sendFeedback(Component.literal("§a[小沙雕] §e勾住了: " + hookedIn));
+            LivingEntity livingEntity = hookedIn != null ? hookedIn.asLivingEntity() : null;
+            if(livingEntity != null) {
+                context.getSource().sendFeedback(Component.literal("§a[小沙雕] §e勾住的实体生命值: " + livingEntity.getHealth() + "/" + livingEntity.getMaxHealth()));
+                E2AMappingListener.MobInfo mobInfo = AbstractListener.e2AMappingListener.getMobInfo(livingEntity);
+                if(mobInfo != null) {
+                    context.getSource().sendFeedback(Component.literal("§a[小沙雕] §e勾住的实体对应盔甲架: " + mobInfo.armorStand.getName()));
+                }
+            }
+        }
+        return 0;
     }
 
     private int executeDumpEntityNBT(CommandContext<FabricClientCommandSource> context) {

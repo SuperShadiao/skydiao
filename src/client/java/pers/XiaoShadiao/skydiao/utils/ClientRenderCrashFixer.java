@@ -2,8 +2,10 @@ package pers.XiaoShadiao.skydiao.utils;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.renderpearl.api.commands.CommandEncoder;
 import com.mojang.renderpearl.api.device.GpuSurface;
 import com.mojang.renderpearl.api.textures.GpuTextureView;
+import com.mojang.renderpearl.frontend.FrontendCommandEncoder;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -11,6 +13,7 @@ import net.minecraft.client.gui.render.GuiItemAtlas;
 import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinFeatureRenderDispatcherAccessor;
+import pers.XiaoShadiao.skydiao.mixin.client.MixinFrontendCommandEncoderAccessor;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinGameRendererAccessor;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinGuiItemAtlasAccessor;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinGuiRendererAccessor;
@@ -29,7 +32,8 @@ public class ClientRenderCrashFixer {
     private static void fixModelViewStack() {
         try {
             RenderSystem.getModelViewStack().clear();
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
+            ToolList.getInstance().log.catching(e);
         }
     }
 
@@ -40,7 +44,11 @@ public class ClientRenderCrashFixer {
         fixModelViewStack();
         if (wrc != null) {
             if(wrc.poseStack() != null) {
-                while(!wrc.poseStack().isEmpty()) wrc.poseStack().popPose();
+                try {
+                    while(!wrc.poseStack().isEmpty()) wrc.poseStack().popPose();
+                } catch (Throwable e) {
+                    ToolList.getInstance().log.catching(e);
+                }
             }
         }
         if (gg != null) {
@@ -53,8 +61,7 @@ public class ClientRenderCrashFixer {
             }
         }
         fixFeatureFrame();
-        fixGuiRenderer();
-        fixGuiItemAtlas();
+        fixGuiState();
         fixRenderBuffers();
         fixWindowSurface();
     }
@@ -65,8 +72,13 @@ public class ClientRenderCrashFixer {
      * 之后每一帧都会在 prepare() 的 appendDraw 处抛出 "Cannot append draw after upload"，
      * 于是永远走不到 Minecraft.runTick 末尾的上屏逻辑，画面就冻结在最后一帧。
      * 这里手工补做一次帧尾收尾，让下一帧从干净的渲染状态开始。
+     *
+     * GuiItemAtlas 里的 poseStack 同样是跨帧复用的单个实例：drawToSlot() 在 :106 pushPose、
+     * :127 popPose，中间抛异常就让栈里多一层 translate(槽位中心) + scale(16,-16,16)，
+     * 下一帧再叠加一次，箱子/背包里的物品图标就会位置、大小、朝向全错；
+     * 同时 :111 开的 scissor 也因 :126 被跳过而残留。这里一并收尾。
      */
-    private static void fixGuiRenderer() {
+    private static void fixGuiState() {
         try {
             Minecraft mc = Minecraft.getInstance();
             if (mc == null || mc.gameRenderer == null) return;
@@ -79,26 +91,8 @@ public class ClientRenderCrashFixer {
             accessor.skydiao$getDraws().clear();
             accessor.skydiao$getRenderState().reset();
             accessor.skydiao$setFirstDrawIndexAfterBlur(Integer.MAX_VALUE);
-        } catch (Throwable ignored) {
-        }
-    }
 
-    /**
-     * GuiItemAtlas 里的 poseStack 是跨帧复用的单个实例：drawToSlot() 在 :106 pushPose、
-     * :127 popPose，中间（item.submit / prepareFrame / renderAllFeatures）抛异常就让栈里多一层
-     * translate(槽位中心) + scale(16,-16,16)。下一帧再叠加同样的变换，所有 GUI 物品（箱子/背包里的
-     * 物品图标）就会被二次变换，表现为位置/大小/朝向错误。
-     * 同时 drawToSlot 在 :111 开的 scissor 也因 :126 被跳过而残留，这里一并关闭。
-     */
-    private static void fixGuiItemAtlas() {
-        try {
-            Minecraft mc = Minecraft.getInstance();
-            if (mc == null || mc.gameRenderer == null) return;
-
-            GuiRenderer guiRenderer = ((MixinGameRendererAccessor) (Object) mc.gameRenderer).skydiao$getGuiRenderer();
-            if (guiRenderer == null) return;
-
-            GuiItemAtlas atlas = ((MixinGuiRendererAccessor) (Object) guiRenderer).skydiao$getItemAtlas();
+            GuiItemAtlas atlas = accessor.skydiao$getItemAtlas();
             if (atlas == null) return;
 
             PoseStack poseStack = ((MixinGuiItemAtlasAccessor) (Object) atlas).skydiao$getPoseStack();
@@ -106,7 +100,8 @@ public class ClientRenderCrashFixer {
                 poseStack.popPose();
             }
             RenderSystem.disableScissorForRenderTypeDraws();
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
+            ToolList.getInstance().log.catching(e);
         }
     }
 
@@ -127,7 +122,10 @@ public class ClientRenderCrashFixer {
 
             // close() 在未使用时（context 为 null）会抛 NullPointerException("Frame not in use")，属于正常情况
             ((MixinFeatureRenderDispatcherAccessor) (Object) dispatcher).skydiao$getPreparedFrame().close();
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
+            if (!(e instanceof NullPointerException) || !"Frame not in use".equals(e.getMessage())) {
+                ToolList.getInstance().log.catching(e);
+            }
         }
     }
 
@@ -142,7 +140,8 @@ public class ClientRenderCrashFixer {
             Minecraft mc = Minecraft.getInstance();
             if (mc == null || mc.gameRenderer == null) return;
             mc.gameRenderer.renderBuffers().endFrame();
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
+            ToolList.getInstance().log.catching(e);
         }
     }
 
@@ -152,8 +151,9 @@ public class ClientRenderCrashFixer {
      * 所以只要异常发生在 acquireNextTexture()（1321）和 present()（1418）之间，这一帧就永远不会 present，
      * 之后每一帧 renderFrame 都直接整段跳过：不渲染、不出画、也不再抛异常 → FPS 0、画面冻结但游戏继续 tick。
      * present() 又要求先 blit，所以这里补一次 blit + present 把表面解锁，让后续帧恢复正常。
+     * 除了异常路径外，MixinMinecraft 在 renderFrame 入口发现表面仍处于 acquired 时也会调用本方法。
      */
-    private static void fixWindowSurface() {
+    public static void fixWindowSurface() {
         try {
             Minecraft mc = Minecraft.getInstance();
             if (mc == null || mc.gameRenderer == null) return;
@@ -163,8 +163,10 @@ public class ClientRenderCrashFixer {
 
             GpuTextureView colorTexture = mc.gameRenderer.mainRenderTarget().getColorTextureView();
             if (colorTexture != null) {
+                CommandEncoder encoder = RenderSystem.getDevice().createCommandEncoder();
+                fixStuckRenderPass(encoder);
                 try {
-                    surface.blitFromTexture(RenderSystem.getDevice().createCommandEncoder(), colorTexture);
+                    surface.blitFromTexture(encoder, colorTexture);
                 } catch (Throwable e) {
                     ToolList.getInstance().log.catching(e);
                 }
@@ -172,7 +174,7 @@ public class ClientRenderCrashFixer {
                 // 但 VulkanCommandEncoder 是先提交命令再 rotate 销毁队列，blit 已经进队列了，
                 // 所以这里必须继续 present，否则表面会一直锁在 acquired 状态
                 try {
-                    RenderSystem.getDevice().createCommandEncoder().submit();
+                    encoder.submit();
                 } catch (Throwable e) {
                     ToolList.getInstance().log.catching(e);
                 }
@@ -181,5 +183,26 @@ public class ClientRenderCrashFixer {
         } catch (Throwable e) {
             ToolList.getInstance().log.catching(e);
         }
+    }
+
+    /**
+     * FrontendCommandEncoder 是全局单例（FrontendGpuDevice.createCommandEncoder 返回同一个实例），
+     * 一旦某个 render pass 没走完 close()（例如 close 时 debug group 未平衡抛错，onFinish 被跳过），
+     * isInRenderPass 就会永久为 true，之后所有 blitFromTexture 都会抛
+     * "Close the existing render pass before presenting with a command encoder"。
+     * 这里强制把这个卡住的 pass 结束掉，后续帧才能恢复渲染。
+     */
+    private static void fixStuckRenderPass(CommandEncoder encoder) {
+        if (!(encoder instanceof FrontendCommandEncoder frontendEncoder)) return;
+
+        MixinFrontendCommandEncoderAccessor accessor = (MixinFrontendCommandEncoderAccessor) (Object) frontendEncoder;
+        if (!accessor.skydiao$isInRenderPass()) return;
+
+        try {
+            accessor.skydiao$submitRenderPass();
+        } catch (Throwable e) {
+            ToolList.getInstance().log.catching(e);
+        }
+        accessor.skydiao$setInRenderPass(false);
     }
 }

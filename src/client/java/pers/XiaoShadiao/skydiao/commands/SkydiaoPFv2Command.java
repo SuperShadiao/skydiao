@@ -50,11 +50,11 @@ public class SkydiaoPFv2Command extends BaseCommand {
     }
 
     private int handlePause(CommandContext<FabricClientCommandSource> context, boolean flag) {
-//        if(flag) {
-//            MacroManagerListener.pathFinderExecutor.pausePF();
-//        } else {
-//            MacroManagerListener.pathFinderExecutor.resumePF();
-//        }
+        if(flag) {
+            MacroManagerListener.pathFinderV2Executor.pauseExecution();
+        } else {
+            MacroManagerListener.pathFinderV2Executor.resumeExecution();
+        }
         return 0;
     }
 

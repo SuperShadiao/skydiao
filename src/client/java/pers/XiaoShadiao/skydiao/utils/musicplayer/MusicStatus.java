@@ -97,8 +97,14 @@ public class MusicStatus extends PlaybackListener {
     }
 
     public void setVolumeCtrl(int a) {
+        float db = a == 0 ? -80.0F : (float)((double)a * 0.2 - 35.0);
+        if (player.getCurrentAD() instanceof OpenAlAudioDevice openAl) {
+            // OpenAL 后端没有 JavaSound 的 MASTER_GAIN 控制器, 直接改 source 的增益
+            openAl.setGainDb(db);
+            return;
+        }
         FloatControl fc = getVolumeCtrl();
-        fc.setValue(a == 0 ? -80.0F : (float)((double)a * 0.2 - 35.0));
+        fc.setValue(db);
     }
     
 }

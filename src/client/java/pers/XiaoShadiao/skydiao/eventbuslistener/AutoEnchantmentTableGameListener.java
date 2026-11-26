@@ -1,11 +1,18 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.network.PacketListener;
+import net.minecraft.network.PacketProcessor;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.ChestMenu;
@@ -16,6 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
+import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.*;
@@ -33,6 +41,24 @@ public class AutoEnchantmentTableGameListener extends AbstractListener {
     private int lastAdded = 0;
     private final HashMap<Integer,Integer> ultrasequencerOrder = new HashMap<>();
 
+    private final Int2ObjectMap<ItemStackPack> knownItems = new Int2ObjectOpenHashMap<>();
+    private final Int2ObjectMap<ItemStackPack> knownButHiddenItems = new Int2ObjectOpenHashMap<>();
+
+    public record ItemStackPack(ItemStack itemStack) {
+
+        public int hashCode() {
+            return itemStack.getItem().hashCode() ^ itemStack.getHoverName().getString().hashCode();
+        }
+
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null || getClass() != obj.getClass()) return false;
+            ItemStackPack that = (ItemStackPack) obj;
+            return itemStack.getItem().equals(that.itemStack.getItem()) && itemStack.getHoverName().getString().equals(that.itemStack.getHoverName().getString());
+        }
+
+    }
+
     private String chronomatronOrderFirstName = "";
 
     private Runnable delayedTask = null;
@@ -43,6 +69,7 @@ public class AutoEnchantmentTableGameListener extends AbstractListener {
         chronomatronOrder.clear();
         lastAdded = 0;
         ultrasequencerOrder.clear();
+        knownItems.clear();
         if (!ConfigManager.autoEnchantTableGame.getValue() || !(screen instanceof ContainerScreen containerScreen)) return;
         ChestMenu menu = containerScreen.getMenu();
         Container container = menu.getContainer();
@@ -185,6 +212,66 @@ public class AutoEnchantmentTableGameListener extends AbstractListener {
     public void registerListeners() {
         ScreenEvents.AFTER_INIT.register(this::onGuiOpen);
         ClientTickEvents.START_CLIENT_TICK.register(this::onClientTick);
+        CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
+        CustomFabricEvents.ON_RENDER_ITEM.register(this::onRenderItem);
+    }
+
+    private void onRenderItem(GuiGraphicsExtractor guiGraphicsExtractor, ItemStack itemStack, int x, int y) {
+
+        int count = 0;
+        for (ItemStackPack value : knownButHiddenItems.values()) {
+            if(value.equals(new ItemStackPack(itemStack))) count++;
+        }
+        if(count > 0) guiGraphicsExtractor.fill(x, y, x + 16, y + 16, count > 1 ? 0xFF00FF00 : 0xFFFF0000);
+
+    }
+
+    private boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
+        if(ConfigManager.enchantTableSuperPairHelper.getValue()) {
+            if(packet instanceof ClientboundContainerSetSlotPacket packet1) {
+                if (currentExperiment == ExperimentType.SUPERPAIRS) {
+                    if (mc.gui.screen() instanceof ContainerScreen containerScreen) {
+                        ChestMenu menu = containerScreen.getMenu();
+                        if (packet1.getContainerId() == menu.containerId) {
+                            if(packet1.getItem().is(Items.STAINED_GLASS.cyan())) {
+                                if(knownItems.containsKey(packet1.getSlot())) {
+                                    menu.setItem(packet1.getSlot(), packet1.getStateId(), knownItems.get(packet1.getSlot()).itemStack);
+                                    knownButHiddenItems.put(packet1.getSlot(), knownItems.get(packet1.getSlot()));
+                                    return true;
+                                }
+                            } else {
+                                knownItems.put(packet1.getSlot(), new ItemStackPack(packet1.getItem()));
+                                knownButHiddenItems.remove(packet1.getSlot());
+                            }
+                        }
+                    }
+                }
+            } else if(packet instanceof ClientboundContainerSetContentPacket(
+                    int containerId, int stateId, List<ItemStack> items1, ItemStack carriedItem
+            )) {
+                if (currentExperiment == ExperimentType.SUPERPAIRS) {
+                    if (mc.gui.screen() instanceof ContainerScreen containerScreen) {
+                        ChestMenu menu = containerScreen.getMenu();
+                        if (containerId == menu.containerId) {
+                            List<ItemStack> items = new ArrayList<>(items1);
+                            for (int i = 0; i < items.size(); i++) {
+                                if(items.get(i).is(Items.STAINED_GLASS.cyan())) {
+                                    if(knownItems.containsKey(i)) {
+                                        items.set(i, knownItems.get(i).itemStack);
+                                        knownButHiddenItems.put(i, knownItems.get(i));
+                                    }
+                                } else {
+                                    knownButHiddenItems.remove(i);
+                                }
+                            }
+                            menu.initializeContents(stateId, items, carriedItem);
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private int tickPassed;

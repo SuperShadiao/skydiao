@@ -71,7 +71,7 @@ public class XSDCShowCommand extends BaseRootRunnableCommand {
             packet.packetType = "showitem";
             packet.message = jsonElement.toString();
             packet.initSender();
-            ChatClientManager.trySendOrWarning(packet, XSDIRCConfig.INSTANCE);
+            XSDIRCConfig.IRC.trySendOrWarning(packet, true);
         }
     }
 

@@ -6,7 +6,6 @@ import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
 import pers.XiaoShadiao.skydiao.irc.XSDIRCConfig;
-import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
 import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatPacket;
 
 import java.util.List;
@@ -30,7 +29,7 @@ public class HHChallengeMCCommand extends BaseCommand {
         packet.packetType = "challenge_mc";
         packet.message = String.valueOf(LongArgumentType.getLong(context, "qq"));
         packet.initSender();
-        ChatClientManager.trySendOrWarning(packet, XSDIRCConfig.INSTANCE);
+        XSDIRCConfig.IRC.trySendOrWarning(packet, true);
 
         context.getSource().sendFeedback(Component.literal("§a[小沙雕] 已尝试进行验证, 请再次尝试加入群聊"));
 

@@ -3,7 +3,6 @@ package pers.XiaoShadiao.skydiao.utils;
 import net.hypixel.data.type.ServerType;
 import net.hypixel.modapi.packet.impl.clientbound.event.ClientboundLocationPacket;
 import pers.XiaoShadiao.skydiao.irc.XSDIRCConfig;
-import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
 import pers.XiaoShadiao.skydiao.ircinner.api.v1.IIRCConfig;
 
 import java.util.HashMap;
@@ -97,7 +96,7 @@ public class StatusManager extends Thread implements IIRCConfig.IHypixelOnlineIn
             map.put("lobbyName", lobbyName);
             ToolList.getInstance().log.info("已加载玩家在线信息: " + map);
 
-            if(hasStatus && online) ChatClientManager.sendHypixelOnlineInfo(this, XSDIRCConfig.INSTANCE);
+            if(hasStatus && online) XSDIRCConfig.IRC.sendHypixelOnlineInfo(this);
         }
 
     }

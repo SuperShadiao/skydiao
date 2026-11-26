@@ -6,7 +6,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
-import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
+import pers.XiaoShadiao.skydiao.irc.XSDIRCConfig;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ public class XSDChatCommand extends BaseRootRunnableCommand {
 
     @Override
     public int executeCommand(CommandContext<FabricClientCommandSource> context) {
-        ChatClientManager.trySendMessage(StringArgumentType.getString(context, "chat"), true);
+        XSDIRCConfig.IRC.trySendMessage(StringArgumentType.getString(context, "chat"), true);
         return 1;
     }
 

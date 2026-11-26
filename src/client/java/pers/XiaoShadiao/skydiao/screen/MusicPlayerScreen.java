@@ -79,6 +79,10 @@ public class MusicPlayerScreen extends Screen {
             b.setMessage(Component.literal(ConfigManager.musicplayermode.getCurrentDisplayString()));
             PlayerThread.clearQueue();
         }).size(70, 20).build());
+        top.addChild(Button.builder(Component.literal("启用神秘音效: " + (ConfigManager.enablemusicplayersoundeffect.getValue() ? "§a开" : "§c关")), b -> {
+            ConfigManager.enablemusicplayersoundeffect.setValue(!ConfigManager.enablemusicplayersoundeffect.getValue());
+            b.setMessage(Component.literal("启用神秘音效: " + (ConfigManager.enablemusicplayersoundeffect.getValue() ? "§a开" : "§c关")));
+        }).size(110, 20).build());
         bottom.addChild(Button.builder(Component.literal("返回"), b -> onClose()).size(50, 20).build());
         bottom.addChild(Button.builder(Component.literal("下载音乐"), b -> MusicListManager.ensureMusicFolderVaildAndRun(() -> minecraft.gui.setScreen(new MusicSearchScreen(this)), () -> minecraft.gui.setScreen(this))).size(70, 20).build());
         bottom.addChild(

@@ -98,7 +98,7 @@ public class SlayerTogetherListener extends AbstractListener {
         packet.message = jo.toString();
         packet.packetType = "slayer_together";
         packet.initSender();
-        ChatClientManager.trySendOrWarning(packet, XSDIRCConfig.INSTANCE);
+        XSDIRCConfig.IRC.trySendOrWarning(packet);
     }
 
     public void onSlayerTogetherPacket(ChatPacket packet) {

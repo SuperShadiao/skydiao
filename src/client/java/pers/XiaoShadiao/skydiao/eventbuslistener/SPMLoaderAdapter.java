@@ -27,7 +27,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
-import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
+import pers.XiaoShadiao.skydiao.irc.XSDIRCConfig;
 import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatPacket;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
@@ -202,7 +202,7 @@ public class SPMLoaderAdapter extends AbstractListener implements ICustomSkinMod
     }
 
     private static void trySendToIRC(ChatPacket packet) {
-        ChatClientManager.trySend(packet, false);
+        XSDIRCConfig.IRC.trySend(packet, false);
     }
 
     private void loadModel(byte[] data, String id) {

@@ -127,7 +127,11 @@ public class MinecraftLogin {
             conn.setRequestProperty("Content-Type", "application/json");
         });
         JsonObject jsonObject = new JsonParser().parse(response).getAsJsonObject();
-        return jsonObject.get("access_token").getAsString();
+        try {
+            return jsonObject.get("access_token").getAsString();
+        } catch (Throwable e) {
+            throw new RuntimeException("Can't parse response: " + response, e);
+        }
     }
 
     private MinecraftSessionContainer checkMinecraftProfile(String accessToken) throws Exception {

@@ -19,7 +19,9 @@ public class RandomTips {
             "可以使用/skydiao ban/wipe整蛊的好伙伴...",
             "可以使用/skydiao editfastcommand来编辑快速命令菜单, 可以在快捷键设置中打开该快捷菜单并使用其快速输入指令 (例如快速切复活头等)",
             "可以使用/skydiaomusic来在客户端内听音乐!",
-            "可以使用/skydiaofp打开Party Finder菜单来查找或开放你的地牢/钓鱼等队伍, 也可以使用快捷键(设置)快速打开Party Finder菜单!"
+            "可以使用/skydiaofp打开Party Finder菜单来查找或开放你的地牢/钓鱼等队伍, 也可以使用快捷键(设置)快速打开Party Finder菜单!",
+            "可以使用/skydiao waypoint创建自己的Waypoint, 还可以分享给别人使用哦!",
+            "可以使用/skydiao autocombineenchantedbook清理你那些打地牢拿的一堆附魔书!"
     };
 
     public static String getRandomTip() {

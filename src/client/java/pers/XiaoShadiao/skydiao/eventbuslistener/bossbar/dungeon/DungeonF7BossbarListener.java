@@ -165,11 +165,15 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         }
         if (tempDisableRealHealthDetect) return 0;
         if(f7BossRealHealth != null) {
+            // System.out.println("f7BossRealHealth: " + f7BossRealHealth.getHealth() + " / " + f7BossRealHealth.getMaxHealth());
+//            if(f7Boss != null) {
+//                System.out.println("f7Boss: " + f7Boss.getProgress());
+//            }
             double scale = f7BossRealHealth.getHealth() / f7BossRealHealth.getMaxHealth();
-            double v = getMaxHealth() * scale;
-            double w = v < 2 ? 0 : v;
-            if(w <= 0) tempDisableRealHealthDetect = true;
-            return w;
+            // System.out.println("scale: " + scale);
+            double v = scale < 0.008 ? 0 : getMaxHealth() * scale;
+            if(v <= 0) tempDisableRealHealthDetect = true;
+            return v;
         } else if(f7Boss != null) {
             double scale = f7Boss.getProgress();
             return getMaxHealth() * (scale < 0.02 ? 0 : scale);

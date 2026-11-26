@@ -143,7 +143,7 @@ public class BetterAFKPlaceListener extends AbstractListener {
     }
 
     private String pickupDefaultId() {
-        return "Meshenyo";
+        return "5i_XiaoShadiao";
     }
 
     public void setXiaoShadiaoNeedMoreSocialXP(boolean xiaoshadiaoWantMoreSocialXP) {

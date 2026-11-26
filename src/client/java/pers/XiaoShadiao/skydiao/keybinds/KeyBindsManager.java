@@ -28,6 +28,9 @@ public class KeyBindsManager {
     public static final KeyMapping openConfigMenu = new KeyMapping("key.openConfigMenu", InputConstants.Type.KEYBOARD, 0, skydiaoCategory);
     public static final KeyMapping openPartyFinderMenu = new KeyMapping("key.openPartyFinderMenu", InputConstants.Type.KEYBOARD, 0, skydiaoCategory);
 
+    public static final KeyMapping toggleAutoUseFireVeilWand = new KeyMapping("key.category.skydiao.toggleAutoUseFireVeilWand", InputConstants.Type.KEYBOARD, 0, skydiaoCategory);
+    public static final KeyMapping useFireVeilWandItem = new KeyMapping("key.category.skydiao.useFireVeilWandItem", InputConstants.Type.KEYBOARD, 0, skydiaoCategory);
+
     public static void registerKeyBinds() {
         Register.execRegister(KeyBindsManager.class, KeyMapping.class, KeyMappingHelper::registerKeyMapping);
     }

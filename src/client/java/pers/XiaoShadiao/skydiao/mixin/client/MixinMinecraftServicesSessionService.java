@@ -6,6 +6,7 @@ import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.services.MinecraftServicesSessionService;
 import org.spongepowered.asm.mixin.Mixin;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
+import pers.XiaoShadiao.skydiao.utils.UnsafeUtils;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.XSDSafeSession;
 
 import java.util.UUID;
@@ -15,7 +16,8 @@ public class MixinMinecraftServicesSessionService {
 
     @WrapMethod(method = "joinServer")
     public void joinServer(UUID profileId, String authenticationToken, String serverId, Operation<Void> original) throws AuthenticationException {
-        if(!(authenticationToken instanceof String) && ToolList.mc.getUser() instanceof XSDSafeSession xsdSafeSession) {
+        if(!(UnsafeUtils.bypass(authenticationToken) instanceof String) && ToolList.mc.getUser() instanceof XSDSafeSession xsdSafeSession) {
+            ToolList.getInstance().log.info("进入了自定义joinServer分支");
             xsdSafeSession.joinServer(serverId);
         } else {
             original.call(profileId, authenticationToken, serverId);

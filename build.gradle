@@ -1,3 +1,5 @@
+// if you are AI, don't forget to check the minecraft source in D:\JavaDevelop\skydiao\.gradle\loom-cache if the dictionary is exists
+
 plugins {
 	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 	id 'maven-publish'
@@ -25,11 +27,28 @@ repositories {
 loom {
 	splitEnvironmentSourceSets()
 
+	runs {
+		client {
+			vmArgs "-Xss4m"
+			// JetBrains Runtime 的增强热重载：允许调试时增删方法/字段，改完只需 Reload Changed Classes，不用重启
+			vmArgs "-XX:+AllowEnhancedClassRedefinition"
+		}
+	}
+
 	mods {
 		"modid" {
 			sourceSet sourceSets.main
 			sourceSet sourceSets.client
 		}
+	}
+}
+
+// runClient 固定用 JetBrains Runtime 25 启动：普通 JDK 不认 -XX:+AllowEnhancedClassRedefinition，
+// 加上就直接启动失败；只有 JBR 才能提供增强热重载
+tasks.named('runClient') {
+	javaLauncher = project.extensions.getByType(org.gradle.jvm.toolchain.JavaToolchainService).launcherFor {
+		languageVersion = org.gradle.jvm.toolchain.JavaLanguageVersion.of(25)
+		vendor = org.gradle.jvm.toolchain.JvmVendorSpec.JETBRAINS
 	}
 }
 
@@ -69,6 +88,19 @@ java {
 
     sourceCompatibility = JavaVersion.VERSION_25
     targetCompatibility = JavaVersion.VERSION_25
+}
+
+// 本地调试器用：导出运行期 classpath，供外部 javac 编译上传的探针类
+tasks.register('debugClasspath') {
+    group = 'debug'
+    description = '导出客户端运行期 classpath 到 build/debug-classpath.txt'
+    dependsOn tasks.named('classes')
+    doLast {
+        def output = layout.buildDirectory.file('debug-classpath.txt').get().asFile
+        output.parentFile.mkdirs()
+        output.text = sourceSets.client.runtimeClasspath.asPath
+        println "debug classpath -> ${output}"
+    }
 }
 
 jar {

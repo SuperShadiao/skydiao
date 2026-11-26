@@ -1,7 +1,11 @@
 package pers.XiaoShadiao.skydiao.utils;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.fabricmc.loader.api.FabricLoader;
 import net.hypixel.modapi.HypixelModAPI;
 import net.hypixel.modapi.packet.impl.serverbound.ServerboundPartyInfoPacket;
@@ -11,6 +15,8 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.numbers.NumberFormat;
@@ -50,6 +56,7 @@ import pers.XiaoShadiao.skydiao.SkyDiaoModClient;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.mixin.client.MixinEntityCloneableAccessor;
 import pers.XiaoShadiao.skydiao.utils.blivesensitiveword.ComponentHelper;
+import pers.XiaoShadiao.skydiao.utils.itemprice.AttributeShardRegistry;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -67,6 +74,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ToolList {
@@ -375,8 +383,13 @@ public class ToolList {
         return getMD5(s, true);
     }
 
+    private final Pattern STRIP_FORMATTING_PATTERN = Pattern.compile("§.");
+
     public String deleteColorCode(String string) {
-        return string.replaceAll("§.", "");
+        // return ChatFormatting.stripFormatting(string);
+        if (string == null) return null;
+        if (string.indexOf('§') < 0) return string;
+        return STRIP_FORMATTING_PATTERN.matcher(string).replaceAll("");
     }
 
     public String getMidOfText(String target, String left, String right) {
@@ -617,6 +630,101 @@ public class ToolList {
 
     public String tryGetSkyblockItemId(ItemStack itemStack) {
         return itemStack.getComponents().getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getStringOr("id", "");
+    }
+
+    public Object2IntMap<String> tryGetSkyblockItemEnchantments(ItemStack itemStack) {
+        CompoundTag compoundTag = itemStack.getComponents().getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        CompoundTag enchantments = compoundTag.getCompoundOrEmpty("enchantments");
+        Object2IntMap<String> map = new Object2IntLinkedOpenHashMap<>();
+        for (Map.Entry<String, Tag> entry : enchantments.entrySet()) {
+            map.put(entry.getKey(), entry.getValue().asInt().get());
+        }
+        return map;
+    }
+
+    /**
+     * 获取物品在价格 API（Bazaar / Lowest BIN）中使用的 id。
+     * 规则对齐 Skyblocker 的 ItemUtils#getSkyblockApiId 与价格后端的 normalize 规则：
+     * 宠物按 1 级、附魔书按附魔等级、药水按等级/强化/延长/喷溅、符文按等级等细分。
+     *
+     * @param itemStack 物品
+     * @return API id；不是 Skyblock 物品时返回空字符串
+     */
+    public String tryGetSkyblockItemApiId(ItemStack itemStack) {
+        if (itemStack == null || itemStack.isEmpty()) return "";
+
+        CompoundTag customData = itemStack.getComponents()
+                .getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY)
+                .copyTag();
+        String id = customData.getStringOr("id", "");
+        if (id.isEmpty()) return "";
+
+        if (customData.contains("is_shiny")) return "SHINY_" + id;
+
+        return switch (id) {
+            case "ENCHANTED_BOOK" -> {
+                CompoundTag enchantments = customData.getCompoundOrEmpty("enchantments");
+                String enchantment = enchantments.keySet().stream().findFirst().orElse("");
+                if (enchantment.isEmpty()) yield id;
+                yield "ENCHANTMENT_" + enchantment.toUpperCase(Locale.ENGLISH) + "_" + enchantments.getIntOr(enchantment, 0);
+            }
+            case "PET" -> {
+                String petInfoJson = customData.getStringOr("petInfo", "");
+                if (petInfoJson.isEmpty()) yield id;
+                try {
+                    JsonObject petInfo = JsonParser.parseString(petInfoJson).getAsJsonObject();
+                    String type = petInfo.get("type").getAsString().toUpperCase(Locale.ENGLISH);
+                    String tier = petInfo.get("tier").getAsString().toUpperCase(Locale.ENGLISH);
+                    yield "LVL_1_" + tier + "_" + type;
+                } catch (Exception ignored) {
+                    yield id;
+                }
+            }
+            case "POTION" -> {
+                String potion = customData.getStringOr("potion", "");
+                int level = customData.getIntOr("potion_level", 0);
+                if (potion.isEmpty() || level <= 0) yield id;
+                String enhanced = customData.getBooleanOr("enhanced", false) ? "_ENHANCED" : "";
+                String extended = customData.getBooleanOr("extended", false) ? "_EXTENDED" : "";
+                String splash = customData.getBooleanOr("splash", false) ? "_SPLASH" : "";
+                yield (potion + "_POTION_" + level + enhanced + extended + splash).toUpperCase(Locale.ENGLISH);
+            }
+            case "RUNE", "UNIQUE_RUNE" -> {
+                CompoundTag runes = customData.getCompoundOrEmpty("runes");
+                String rune = runes.keySet().stream().findFirst().orElse("");
+                if (rune.isEmpty()) yield id;
+                yield rune.toUpperCase(Locale.ENGLISH) + "_RUNE_" + runes.getIntOr(rune, 0);
+            }
+            case "ATTRIBUTE_SHARD" -> {
+                CompoundTag attributes = customData.getCompoundOrEmpty("attributes");
+                String attributeKey = attributes.keySet().stream().findFirst().orElse("");
+                String bazaarName = AttributeShardRegistry.getBazaarName(attributeKey);
+                yield bazaarName != null ? bazaarName : id;
+            }
+            case "NEW_YEAR_CAKE" -> {
+                int year = customData.getIntOr("new_years_cake", 0);
+                yield year > 0 ? id + "_" + year : id;
+            }
+            case "PARTY_HAT_CRAB", "BALLOON_HAT_2024", "BALLOON_HAT_2025", "CAKE_HAT_2026" -> {
+                String color = customData.getStringOr("party_hat_color", "").toUpperCase(Locale.ENGLISH);
+                yield color.isEmpty() ? id : id + "_" + color;
+            }
+            case "PARTY_HAT_CRAB_ANIMATED" -> {
+                String color = customData.getStringOr("party_hat_color", "").toUpperCase(Locale.ENGLISH);
+                yield color.isEmpty() ? id : "PARTY_HAT_CRAB_" + color + "_ANIMATED";
+            }
+            case "PARTY_HAT_SLOTH" -> {
+                String emoji = customData.getStringOr("party_hat_emoji", "").toUpperCase(Locale.ENGLISH);
+                yield emoji.isEmpty() ? id : id + "_" + emoji;
+            }
+            case "MIDAS_SWORD" -> customData.getIntOr("winning_bid", 0) >= 50_000_000 ? id + "_50M" : id;
+            case "MIDAS_STAFF" -> customData.getIntOr("winning_bid", 0) >= 100_000_000 ? id + "_100M" : id;
+            case "FACTION_RABBIT" -> {
+                String rabbit = customData.getStringOr("faction_rabbit_id", "").toUpperCase(Locale.ENGLISH);
+                yield rabbit.isEmpty() ? id : id + "_" + rabbit;
+            }
+            default -> id.replace(':', '-');
+        };
     }
 
     public String tryGetSkyblockItemUUID(ItemStack itemStack) {
@@ -882,7 +990,23 @@ public class ToolList {
         return objective != null ? objective : scoreboard.getDisplayObjective(DisplaySlot.SIDEBAR);
     }
 
+    public void updateScoreboardCaches() {
+        scoreboardTitleCache = getScoreboardTitle0();
+        scoreboardTitleNoColorCache = getScoreboardTitleNoColor0();
+        scoreboardLinesCache = getScoreboardLines0();
+        scoreboardLinesCacheNoColor = getScoreboardLinesNoColor0();
+    }
+
+    private Component scoreboardTitleCache = Component.empty();
+    private String scoreboardTitleNoColorCache = "";
+    private List<Component> scoreboardLinesCache = List.of();
+    private List<String> scoreboardLinesCacheNoColor = List.of();
+
     public Component getScoreboardTitle() {
+        return scoreboardTitleCache;
+    }
+
+    private Component getScoreboardTitle0() {
         if (mc.level == null || mc.player == null) return Component.empty();
         Objective objective2 = getScoreboardObjective();
         if (objective2 != null) {
@@ -892,24 +1016,23 @@ public class ToolList {
     }
 
     public String getScoreboardTitleNoColor() {
+        return scoreboardTitleNoColorCache;
+    }
+
+    private String getScoreboardTitleNoColor0() {
         return deleteColorCode(getScoreboardTitle().getString());
     }
 
     public List<Component> fetchScoreboardLines() {
+        return scoreboardLinesCache;
+    }
+
+    private List<Component> getScoreboardLines0() {
         if (mc.level == null) return List.of();
         Scoreboard scoreboard = mc.level.getScoreboard();
         Objective objective2 = getScoreboardObjective();
         if (objective2 != null) {
             List<Component> lines = new ArrayList<>();
-//            Collection<PlayerScoreEntry> entries = scoreboard.listPlayerScores(objective2);
-//            for (PlayerScoreEntry entry : entries) {
-//                PlayerTeam playerTeam2 = scoreboard.getPlayersTeam(entry.owner());
-//                Component componentx2 = entry.ownerName();
-//                Component component2 = PlayerTeam.formatNameForTeam(playerTeam2, componentx2);
-//                NumberFormat numberFormat = objective2.numberFormatOrDefault(StyledFormat.SIDEBAR_DEFAULT);
-//                Component component3 = entry.formatValue(numberFormat);
-//                lines.add(Component.empty().append(componentx2).append(component2).append(component3));
-//            }
             NumberFormat numberFormat = objective2.numberFormatOrDefault(StyledFormat.SIDEBAR_DEFAULT);
             scoreboard.listPlayerScores(objective2)
                     .stream()
@@ -930,6 +1053,10 @@ public class ToolList {
     }
 
     public List<String> fetchScoreboardLinesNoColor() {
+        return scoreboardLinesCacheNoColor;
+    }
+
+    private List<String> getScoreboardLinesNoColor0() {
         return fetchScoreboardLines().stream().map(Component::getString).map(this::deleteColorCode).collect(Collectors.toList());
     }
 

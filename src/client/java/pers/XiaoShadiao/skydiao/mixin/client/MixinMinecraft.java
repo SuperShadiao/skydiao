@@ -6,6 +6,8 @@ import com.mojang.authlib.minecraft.UserApiService;
 import com.mojang.authlib.services.FriendsService;
 import com.mojang.authlib.services.MinecraftServicesDiscoveryService;
 import com.mojang.authlib.services.ProfileResult;
+import com.mojang.blaze3d.platform.SDLEventHandler;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import com.mojang.renderpearl.api.device.GpuOutOfMemoryException;
 import net.minecraft.CrashReport;
@@ -34,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
-import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
+import pers.XiaoShadiao.skydiao.irc.XSDIRCConfig;
 import pers.XiaoShadiao.skydiao.screen.MinecraftCrashedScreen;
 import pers.XiaoShadiao.skydiao.utils.ClientRenderCrashFixer;
 import pers.XiaoShadiao.skydiao.utils.MCThreadDumper;
@@ -98,6 +100,9 @@ public class MixinMinecraft {
     @Shadow
     @Mutable
     private RemoteFriendListUpdateHandler remoteFriendListUpdateHandler;
+    @Final
+    @Shadow
+    private SDLEventHandler sdlEventHandler;
 
     // =========== SHADOW END =============
 
@@ -122,7 +127,7 @@ public class MixinMinecraft {
         Minecraft mc = (Minecraft) (Object) this;
         XSDSafeSession user = user0 instanceof XSDSafeSession xs ? xs : new XSDSafeSession(user0);
         if (!user.equals(this.user)) {
-            ChatClientManager.closeClient();
+            XSDIRCConfig.IRC.closeClient();
         }
         MixinRealmStatusReset.setFuture(null);
         MixinRealmsClientReseter.setRealmsClientInstance(null);
@@ -153,6 +158,12 @@ public class MixinMinecraft {
         }
     }
 
+    @WrapOperation(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;pollEvents(Lcom/mojang/blaze3d/platform/SDLEventHandler;)V"), method = "run")
+    public void redirectToRun(SDLEventHandler eventHandler, Operation<Void> original) {
+        // original.call(instance);
+        // MixinMinecraft L178
+    }
+
     @WrapOperation(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;runTick(Z)V"), method = "run")
     public void run(Minecraft instance, boolean bl, Operation<Void> original) {
         try {
@@ -164,6 +175,7 @@ public class MixinMinecraft {
                 }
                 dumperThread.flagAlive();
             }
+            RenderSystem.pollEvents(sdlEventHandler);
             original.call(instance, bl);
             if(exceptionCounter > 0) exceptionCounter--;
         } catch (ReportedException var11) {
@@ -217,6 +229,26 @@ public class MixinMinecraft {
                 LOGGER.error(LogUtils.FATAL_MARKER, "趁琴团长不在, 我帮你把客户端修好吧, 别告可莉状, 求求了qwq");
             }
         }
+    }
+
+    @Unique
+    private long skydiao$lastSurfaceRecovery;
+
+    /**
+     * renderFrame 整个函数体包在 if (!windowSurface.isAcquired()) 里，一旦上一帧没能 present，
+     * 之后每帧都会整段跳过：不渲染、不出画、也不再抛异常，于是上面的 catch 永远不会再触发 fix()，
+     * 画面就永久冻结（FPS 停在旧值）而 tick 照常运行。
+     * 这里在每帧入口检测"表面仍处于 acquired"这一冻结特征，主动补做一次收尾与 present 解锁。
+     */
+    @Inject(method = "renderFrame", at = @At("HEAD"))
+    private void skydiao$recoverStuckSurface(boolean advanceGameTime, CallbackInfo ci) {
+        Minecraft mc = (Minecraft) (Object) this;
+        if (mc.windowSurface() == null || !mc.windowSurface().isAcquired()) return;
+
+        long now = Util.getMillis();
+        if (now - this.skydiao$lastSurfaceRecovery < 1000L) return;
+        this.skydiao$lastSurfaceRecovery = now;
+        ClientRenderCrashFixer.fixWindowSurface();
     }
 
     @WrapOperation(method = "updateTitle", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;createTitle()Ljava/lang/String;"))

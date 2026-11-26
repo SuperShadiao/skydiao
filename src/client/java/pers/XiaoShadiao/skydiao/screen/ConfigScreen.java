@@ -19,6 +19,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.InteractionHand;
 import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.config.option.*;
@@ -31,6 +32,7 @@ import pers.XiaoShadiao.skydiao.utils.screen.XSDSliderButton;
 import java.awt.*;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.DoubleConsumer;
@@ -49,6 +51,8 @@ public class ConfigScreen extends Screen {
     private final Screen lastScreen;
 
     private Tab[] tabs;
+
+    private int previewHandAnimationCD;
 
     private Runnable delayedSearchHandler;
 
@@ -87,6 +91,7 @@ public class ConfigScreen extends Screen {
 
     @Override
     public void tick() {
+        previewHandAnimationCD++;
         if(delayedSearchHandler != null) {
             delayedSearchHandler.run();
             delayedSearchHandler = null;
@@ -341,7 +346,7 @@ public class ConfigScreen extends Screen {
                 return 305;
             }
 
-            public static class ConfigEntry extends AbstractConfigEntry {
+            public class ConfigEntry extends AbstractConfigEntry {
                 protected final ConfigOption<?> option;
                 protected final AbstractWidget widget;
                 protected final Button resetConfigButton;
@@ -471,6 +476,12 @@ public class ConfigScreen extends Screen {
                         String temp = option.getI18nValue();
                         if(!editBox.getValue().equals(temp) && !editBox.isFocused()) editBox.setValue(temp);
                     }
+
+                    if(isFocused() && previewHandAnimationCD % 30 == 0 && Arrays.asList(ConfigManager.handOptions).contains(option)) {
+                        if(minecraft.player != null) {
+                            minecraft.player.swing(InteractionHand.MAIN_HAND, minecraft.player.getMainHandItem().getAttackAnimation(), false);
+                        }
+                    }
                 }
 
                 @Override
@@ -479,7 +490,7 @@ public class ConfigScreen extends Screen {
                 }
             }
 
-            public static class ColorConfigEntry extends ConfigEntry {
+            public class ColorConfigEntry extends ConfigEntry {
                 private final XSDSliderButton r;
                 private final XSDSliderButton g;
                 private final XSDSliderButton b;

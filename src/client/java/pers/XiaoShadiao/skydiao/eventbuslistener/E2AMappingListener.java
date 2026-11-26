@@ -45,6 +45,7 @@ public class E2AMappingListener extends AbstractListener {
             // 获取所有盔甲架实体
             java.util.List<ArmorStand> armorStands = new java.util.ArrayList<>();
             java.util.List<ArmorStand> armorStandsForBoss = new java.util.ArrayList<>();
+            java.util.List<ArmorStand> armorStandsForBossType = new java.util.ArrayList<>();
             for (Entity entity : mc.level.entitiesForRendering()) {
                 if (entity instanceof ArmorStand armorStand) {
                     // 跳过已被绑定的盔甲架
@@ -52,7 +53,13 @@ public class E2AMappingListener extends AbstractListener {
                         continue;
                     }
                     String name = armorStand.getName().getString();
-                    if (name.contains("by:") || !name.contains(" ") || name.contains("BOSS")) continue;
+                    if (name.contains("by:") || !name.contains(" ")) {
+                        continue;
+                    }
+                    if (name.contains("BOSS")) {
+                        armorStandsForBossType.add(armorStand);
+                        continue;
+                    }
                     Matcher matcher = timeMatcher.matcher(name);
                     if (matcher.find()) {
                         armorStandsForBoss.add(armorStand);
@@ -123,6 +130,20 @@ public class E2AMappingListener extends AbstractListener {
                     if (closestArmorStandForBoss != null) {
                         info.armorStandForBoss = closestArmorStandForBoss;
                     }
+
+                    currentDistance = Integer.MAX_VALUE;
+                    ArmorStand closestArmorStandForBossType = null;
+                    for (ArmorStand armorStand : armorStandsForBossType) {
+                        double distance = getXZDistance(entity, armorStand);
+                        if (distance <= minDistance && armorStand.getY() + 1 >= entity.getY() &&
+                                (closestArmorStandForBossType == null || distance < currentDistance)) {
+                            currentDistance = distance;
+                            closestArmorStandForBossType = armorStand;
+                        }
+                    }
+                    if (closestArmorStandForBossType != null) {
+                        info.armorStandForBossType = closestArmorStandForBossType;
+                    }
                 }
 
             }
@@ -182,9 +203,16 @@ public class E2AMappingListener extends AbstractListener {
                 mobInfo.maxHealth = Math.max(key.getMaxHealth(), Math.max(mobInfo.health, mobInfo.maxHealth));
                 mobInfo.theEntity = key;
 
-                if(mobInfo.armorStand != null && mobInfo.armorStandForBoss != null) {
-                    if(getXZDistance(key, mobInfo.armorStandForBoss) >= 1) {
-                        mobInfo.armorStandForBoss = null;
+                if(mobInfo.armorStand != null) {
+                    if(mobInfo.armorStandForBoss != null) {
+                        if(getXZDistance(key, mobInfo.armorStandForBoss) >= 1) {
+                            mobInfo.armorStandForBoss = null;
+                        }
+                    }
+                    if(mobInfo.armorStandForBossType != null) {
+                        if(getXZDistance(key, mobInfo.armorStandForBossType) >= 1) {
+                            mobInfo.armorStandForBossType = null;
+                        }
                     }
                 }
             });
@@ -223,6 +251,7 @@ public class E2AMappingListener extends AbstractListener {
         public int maxHit;
         public boolean isBoss;
         public ArmorStand armorStandForBoss;
+        public ArmorStand armorStandForBossType;
         public boolean hasHittingAttr;
 
         public String toString() {
