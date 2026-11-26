@@ -92,6 +92,7 @@ public class ConfigManager {
     public static final IntConfigOption bossbarDisplayLimit = new IntConfigOption("bossbardisplaylimit", 3);
     public static final BooleanConfigOption noblind = new BooleanConfigOption("removeblindnessrender", false);
     public static final BooleanConfigOption nosuffoverlay = new BooleanConfigOption("nosuffoverlay", false);
+    public static final BooleanConfigOption chocolateFactoryShortcut = new BooleanConfigOption("chocolatefactoryshortcut", false);
     public static final BooleanConfigOption inventoryFilter = new BooleanConfigOption("skyblockinventoryitemfilter", false);
     public static final BooleanConfigOption dyingtip = new BooleanConfigOption("dyingtip", false);
     public static final StringConfigOption inventoryFilterRegex = new StringConfigOption("inventoryfilterregex", "");
@@ -449,7 +450,7 @@ public class ConfigManager {
     public static final List<Map.Entry<String, List<ConfigOption<?>>>> categories = List.of(
             Map.entry("basic", List.of(language, enablexsdccommandtip, cooltitle, customTitleText)),
             Map.entry("IRC设置", List.of(enableircjointip, enableircafktip, enableircmacrochecktip, enableircheadicon)),
-            Map.entry("工具类", List.of(inventoryFilter, itemStarCountRender,
+            Map.entry("工具类", List.of(inventoryFilter, chocolateFactoryShortcut, itemStarCountRender,
 
                     itemStarCountRenderColor1, itemStarCountRenderColor2,
                     openfastcommandmenukeybinds, chatbutton, skydiaocustomcape,

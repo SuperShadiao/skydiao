@@ -672,6 +672,10 @@
       "configname": "§eSkyblock地牢陷阱显示",
       "description": "§e在Skyblock地牢中显示发射器陷阱"
     },
+    "chocolatefactoryshortcut": {
+      "configname": "§e巧克力工厂快捷入口",
+      "description": "§e在 SkyBlock 菜单第二排第八格显示巧克力工厂入口，点击直接打开工厂"
+    },
     "skyblockinventoryitemfilter": {
       "configname": "§e物品栏筛选",
       "description": "§e在容器 (包括背包) 页面添加物品搜索高亮功能"
