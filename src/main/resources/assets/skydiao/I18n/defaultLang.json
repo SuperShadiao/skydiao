@@ -1654,6 +1654,14 @@
       "configname": "§eDeployable物品过期提示",
       "description": "§eDeployable物品过期时弹出大标题"
     },
+    "miningtabhud": {
+      "configname": "§e矿洞保底进度 HUD",
+      "description": "§e显示矿洞保底进度条。请用 /tab 启用 Pity，可在 HUD 编辑器调整位置和大小"
+    },
+    "pickaxeabilityhud": {
+      "configname": "§e镐子技能倒计时 HUD",
+      "description": "§e显示镐子技能剩余时间，并定期用 Tab 校准。请用 /tab 启用 Pickaxe Ability"
+    },
     "miningabilitiesavaliabletitle": {
       "configname": "§e挖矿技能就绪大标题",
       "description": "§e挖矿技能CD准备好时弹出大标题"
