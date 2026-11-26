@@ -16,6 +16,7 @@ import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
+import pers.XiaoShadiao.skydiao.utils.DeployableType;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
@@ -43,6 +44,8 @@ public class GenshinImpactHeatCold extends XSDHUD {
     private int timewarn;
     private int timewarnrender;
     private float animation,animation2;
+
+    private float deployableAnimation;
 
     private SimpleSoundInstance keepingWarningSound;
 
@@ -85,6 +88,24 @@ public class GenshinImpactHeatCold extends XSDHUD {
         // if(animation < 100) animation += 1;
         
         if(animation > 70) {
+
+            int seconds = deployableHUD.getRemainSecondsByType(DeployableType.LANTERN);
+            if(deployableAnimation < seconds) {
+                deployableAnimation += 6.5f * tickCounter.getGameTimeDeltaTicks();
+                if(deployableAnimation > seconds) deployableAnimation = seconds;
+            } else if(deployableAnimation > seconds) {
+                deployableAnimation -= 6.5f * tickCounter.getGameTimeDeltaTicks();
+                if(deployableAnimation < seconds) deployableAnimation = seconds;
+            }
+            if(deployableAnimation < 0) deployableAnimation = 0;
+
+            if(deployableAnimation > 0) {
+                // new Color(255, 142, 142)
+                context.enableScissor(guiPosX - 43, guiPosY - 52 + 50, (int) (guiPosX - 43 + 87 * (deployableAnimation / 300f)), guiPosY - 52 + 50 + 5);
+                RenderUtils.drawWithCustomGlow(context, guiPosX - 42.5f, guiPosY - 52 + 50, 86, 5, false, false, 3, 0f, 255 / 255f, 142 / 255f, 142 / 255f, (-(70f - animation) / 30f));
+                context.disableScissor();
+            }
+
             for(int I = -4;I <= 164;I++) {
                 if(I < -3 || I > 162)
                     context.fill(guiPosX - 40 + I / 2, guiPosY - 50 + 50, guiPosX - 39 + I / 2, guiPosY - 49 + 50, getColorBarGround(currentColor, (int) (255f * (-(70f - animation) / 30f))).getRGB());
@@ -113,6 +134,7 @@ public class GenshinImpactHeatCold extends XSDHUD {
 
             }
         }
+
         // RenderUtils.renderPendingBlurredRoundedSurface(context.guiRenderState);
 
         pose.popMatrix();

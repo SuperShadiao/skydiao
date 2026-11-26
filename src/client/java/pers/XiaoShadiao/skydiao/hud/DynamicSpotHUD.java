@@ -182,7 +182,8 @@ public final class DynamicSpotHUD extends XSDHUD {
 
         replaceIdleParts.removeIf(entry -> entry.shouldRemove.shouldRemove());
         parts.replaceAll(part -> {
-            for (ReplaceIdlePart replaceIdlePart : replaceIdleParts) {
+            for (int i = replaceIdleParts.size() - 1; i >= 0; i--) {
+                ReplaceIdlePart replaceIdlePart = replaceIdleParts.get(i);
                 if (part != null && Objects.equals(replaceIdlePart.targetIdHolder, part.idHolder)) {
                     part = replaceIdlePart.part.getIdlePart(replaceIdlePart.targetIdHolder);
                     if(part == null) return null;
@@ -232,6 +233,10 @@ public final class DynamicSpotHUD extends XSDHUD {
     public static void replaceIdlePart(Identifier targetIdHolder, IdlePart part, long durationMs) {
         long startTime = System.currentTimeMillis();
         replaceIdleParts.add(new ReplaceIdlePart(targetIdHolder, (_) -> part, () -> System.currentTimeMillis() - startTime > durationMs));
+    }
+
+    public static void removeReplaceIdlePart(Identifier targetIdHolder) {
+        replaceIdleParts.removeIf(entry -> Objects.equals(entry.targetIdHolder, targetIdHolder));
     }
 
     public interface IdlePartSupplier extends Supplier<IdlePart> {
@@ -304,6 +309,7 @@ public final class DynamicSpotHUD extends XSDHUD {
         }
         tabProgress = 0F;
         TAB_ANIMATION.reset();
+        replaceIdleParts.clear();
     }
 
     public static void showSuccess(String title, String detail, long durationMs) {

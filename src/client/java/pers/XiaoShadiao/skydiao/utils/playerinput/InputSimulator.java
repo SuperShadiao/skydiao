@@ -69,21 +69,32 @@ public class InputSimulator {
             release.run();
         }
     }
+    
+    private static long lastUseSingleLeftClick;
+    private static long lastUseSingleRightClick;
 
     public static void singleLeftClick() {
+        if(System.currentTimeMillis() - lastUseSingleLeftClick < 50) return;
+        lastUseSingleLeftClick = System.currentTimeMillis();
         leftClickThread.interrupt();
     }
 
     public static void singleRightClick() {
+        if(System.currentTimeMillis() - lastUseSingleRightClick < 50) return;
+        lastUseSingleRightClick = System.currentTimeMillis();
         rightClickThread.interrupt();
     }
 
     public static void pressLeftClick() {
         if(CustomFabricEvents.ON_SIMULATOR_CLICK.invoker().onSimulatorClick(CustomFabricEvents.ClickType.LEFT)) return;
 
-        if(isInventoryOpen()) return;
+        if(isInventoryOpen()) return; 
 
+        // 外部代码（寻路/宏）每 tick 调 pressLeftClick 表示"按住"，
+        // 连点线程内部的 press/release 只表示一次点击，不能影响按住语义
+        if (!isClickerThread()) externalLeftHold = true;
         if (!isMouseLeftHolding) leftClickCounter++;
+        leftClickPressedSinceTick = true;
         isMouseLeftHolding = true;
     }
 
@@ -102,67 +113,110 @@ public class InputSimulator {
 
     public static void releaseLeftClick() {
         isMouseLeftHolding = false;
+        leftReleasedSinceTick = true;
+        if (!isClickerThread()) externalLeftHold = false;
     }
 
     public static void releaseRightClick() {
         isMouseRightHolding = false;
     }
 
-    public static void updateTick() {
+    public static void updateTick(boolean consumeClicks) {
         updateInventoryState();
         if(preTick()) {
-            midTick();
+            midTick(consumeClicks);
             postTick();
         }
     }
-
-    private static int lastBreakDelay;
 
     private static boolean preTick() {
         if (rightClickDelay > 0) {
             rightClickDelay--;
         }
-        int currentDestroyDelay = ((MixinMultiPlayerGameModeDestroyBlockDelayAccessor) mc.gameMode).getDestroyDelay();
-        if(lastBreakDelay == 0 && currentDestroyDelay == 5) {
-            ((MixinMultiPlayerGameModeDestroyBlockDelayAccessor) mc.gameMode).setDestroyDelay(6);
-        }
-        lastBreakDelay = currentDestroyDelay;
+
         if (mc.gui.overlay() != null || isInventoryOpen()) {
             missTime = 999999999;
             isMouseLeftHolding = isMouseRightHolding = false;
+            externalLeftHold = false;
             leftClickCounter = rightClickCounter = 0;
+            if(mc.gameMode.isDestroying()) {
+                mc.gameMode.stopDestroyBlock();
+            }
+            if(mc.player.isUsingItem()) {
+                mc.gameMode.releaseUsingItem(mc.player);
+            }
             return false;
         }
         return true;
     }
 
-    public static void decreaseTicks() {
-        if (rightClickDelay > 0) {
-            rightClickDelay--;
-        }
-        postTick();
-    }
-
     public static boolean leftClickFlagMinecraft;
 
-    private static void midTick() {
+    /** 待处理点击被阻塞（挖掘中/挖掘冷却）超过该 tick 数就丢弃 */
+    private static final int MAX_PENDING_LEFT_CLICK_TICKS = 2;
+    /** 当前待处理点击已经连续阻塞的 tick 数 */
+    private static int pendingLeftClickTicks;
+    /** 自上次 tick 以来是否有过新的模拟左键按下（用于区分"刚点了一下"和"早就停下"） */
+    private static boolean leftClickPressedSinceTick;
+    /** 自上次 tick 以来是否松开过左键（连点模式每次松开都算一次点击，不能当成按住） */
+    private static boolean leftReleasedSinceTick;
+    /** 本 tick 是否处于"真正按住"（由 midTick 计算，handleKeybinds 在 midTick 之后仍要用） */
+    private static boolean leftHoldForTick;
+    /** 外部代码（寻路/宏）通过 pressLeftClick/releaseLeftClick 表达的"按住"意图 */
+    private static boolean externalLeftHold;
+
+    private static boolean isClickerThread() {
+        return Thread.currentThread() == leftClickThread;
+    }
+
+    private static void midTick(boolean consumeClicks) {
         boolean bl3 = false;
         updateCurrentItemSlotIndex();
-        if (mc.player.isUsingItem()) {
-            consumeDoNothing();
-        } else {
-            bl3 = consumeLeftClick().leftBoolean();
-
-            consumeRightClick();
+        // 连点模式（只有连点线程在 press/release）每次松开都意味着"这一下已经点完了"：此时不能当成按住，
+        // 否则 midTick 会在松开后仍然 continueAttack(true)，方块进度一直累积不重置，
+        // 连点就退化成长按慢速挖方块（原版连点点方块时进度会被 stopDestroyBlock 重置）。
+        // 但外部每 tick pressLeftClick 的"按住"不受连点线程的 release 影响（寻路系统的用法）
+        leftHoldForTick = externalLeftHold || (isMouseLeftHolding && !leftReleasedSinceTick);
+        leftReleasedSinceTick = false;
+        // 没有任何左键按住（物理/模拟），且自上次 tick 以来也没有新的点击时，
+        // 丢弃所有累积的待处理点击，避免"手已经停下却还在补点"
+        if (!isMouseLeftHolding && !mc.options.keyAttack.isDown() && !leftClickPressedSinceTick) {
+            leftClickCounter = 0;
+            pendingLeftClickTicks = 0;
         }
+        leftClickPressedSinceTick = false;
+        if(consumeClicks) {
+            if (mc.player.isUsingItem()) {
+                consumeDoNothing();
+            } else {
+                bl3 = consumeLeftClick().leftBoolean();
 
-        if(mc.gui.screen() != null) {
-            if (isMouseRightHolding && rightClickDelay == 0 && !mc.player.isUsingItem()) {
-                startUseItem();
+                consumeRightClick();
+            }
+
+            if (mc.gui.screen() != null) {
+                if (isMouseRightHolding && rightClickDelay == 0 && !mc.player.isUsingItem()) {
+                    startUseItem();
+                }
             }
         }
-        leftClickFlagMinecraft = !isInventoryOpen() && !bl3 && isMouseLeftHolding;
-        if(mc.gui.screen() != null) continueAttack(leftClickFlagMinecraft);
+        leftClickFlagMinecraft = !isInventoryOpen() && !bl3 && leftHoldForTick;
+        // 注意：不要为了"重新起手"在这里补一个点击边沿（leftClickCounter = 1）。
+        // 点击边沿会走 startAttack -> startDestroyBlock，同一 tick 的 continueDestroyBlock
+        // 还会再累加一次挖掘进度，使每块都少 1 tick，触发 GrimAC FastBreak diff=50ms。
+        // 破坏结束后的重新起手交给 continueAttack：残留目标会被清掉，
+        // continueDestroyBlock 走 else 分支重新发 START（该 tick 不累加进度，与原版一致）。
+        // 另外，点击在"挖掘中 / 挖掘冷却"期间无法消费，若一直留着会在解除阻塞后每 tick 倾泻一个：
+        // 表现为 20 CPS 连点，以及每次都在 destroyDelay == 1 时重发 START_DESTROY_BLOCK
+        //（比原版早 1 tick，触发 GrimAC FastBreak）。持续按住时由 leftClickFlagMinecraft
+        // 走 continueAttack 挖掘，不需要这个点击边沿，所以阻塞超时就丢弃
+        if (leftClickCounter <= 0 || hasPendingLeftClick()) {
+            pendingLeftClickTicks = 0;
+        } else if (++pendingLeftClickTicks > MAX_PENDING_LEFT_CLICK_TICKS) {
+            leftClickCounter = 0;
+            pendingLeftClickTicks = 0;
+        }
+        if(consumeClicks && mc.gui.screen() != null) continueAttack(leftClickFlagMinecraft);
     }
 
     public static void consumeDoNothing() {
@@ -184,12 +238,51 @@ public class InputSimulator {
         return clicked;
     }
 
+    /** 不可能命中的坐标，用来丢弃 destroyBlockPos 的残留值（不能置 null，见 continueAttack） */
+    private static final BlockPos NO_DESTROY_TARGET = new BlockPos(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
+
+    /** 是否处于"破坏已结束，但 destroyBlockPos 仍停留在同一坐标"的残留状态 */
+    private static boolean isStaleDestroyTarget(BlockPos pos) {
+        return !mc.gameMode.isDestroying()
+                && pos.equals(((MixinMultiPlayerGameModeDestroyBlockDelayAccessor) mc.gameMode).getDestroyBlockPos());
+    }
+
+    /** 当前状态下是否允许发起一次左键攻击（与原有守卫保持一致） */
+    private static boolean canStartAttackNow() {
+        if (mc.gameMode.isDestroying()) {
+            return false;
+        }
+        if (((MixinMultiPlayerGameModeDestroyBlockDelayAccessor) mc.gameMode).getDestroyDelay() <= 1) {
+            return true;
+        }
+        return !(mc.hitResult instanceof BlockHitResult result) || result.getType() != HitResult.Type.BLOCK;
+    }
+
+    /** 是否处于"真正按住不放"（连点模式每次都会松开，不算按住） */
+    private static boolean isContinuousLeftHold() {
+        return leftHoldForTick;
+    }
+
+    /** 是否存在可执行的待处理左键点击（按住挖掘期间不消费，避免点击被静默丢弃） */
+    public static boolean hasPendingLeftClick() {
+        return leftClickCounter > 0 && (!isContinuousLeftHold() || canStartAttackNow());
+    }
+
+    /** 执行一次待处理的左键点击，返回值等价于 Minecraft.startAttack 的返回值 */
+    public static BooleanBooleanPair consumeSingleLeftClick() {
+        if (!hasPendingLeftClick()) {
+            return BooleanBooleanPair.of(false, false);
+        }
+        leftClickCounter--;
+        return BooleanBooleanPair.of(startAttack(), true);
+    }
+
     public static BooleanBooleanPair consumeLeftClick() {
         boolean bl3 = false;
         boolean clicked = false;
-        while (leftClickCounter > 0) {
+        while (hasPendingLeftClick()) {
             leftClickCounter--;
-            if(!mc.gameMode.isDestroying() && (((MixinMultiPlayerGameModeDestroyBlockDelayAccessor) mc.gameMode).getDestroyDelay() <= 1 || !(mc.hitResult instanceof BlockHitResult result) || result.getType() != HitResult.Type.BLOCK)) bl3 |= startAttack();
+            bl3 |= startAttack();
             clicked = true;
         }
         return BooleanBooleanPair.of(bl3, clicked);
@@ -202,16 +295,6 @@ public class InputSimulator {
             return true;
         }
         return false;
-    }
-
-    public static BooleanBooleanPair consumeSingleLeftClick() {
-        if (leftClickCounter > 0) {
-            leftClickCounter--;
-            if(!mc.gameMode.isDestroying() && (((MixinMultiPlayerGameModeDestroyBlockDelayAccessor) mc.gameMode).getDestroyDelay() <= 1 || !(mc.hitResult instanceof BlockHitResult result) || result.getType() != HitResult.Type.BLOCK)) {
-                return BooleanBooleanPair.of(startAttack(), true);
-            }
-        }
-        return BooleanBooleanPair.of(false, false);
     }
 
     private static void postTick() {
@@ -234,6 +317,14 @@ public class InputSimulator {
                     BlockPos pos = blockHit.getBlockPos();
                     if (!mc.level.getBlockState(pos).isAir()) {
                         Direction direction = blockHit.getDirection();
+                        // 破坏已结束/被中断但 destroyBlockPos 仍残留为同一坐标时，
+                        // continueDestroyBlock 只会走 sameDestroyTarget 分支累加本地进度
+                        //（不发 START_DESTROY_BLOCK、服务端无粒子）。把残留目标改成不可能命中的坐标，
+                        // 让它走 else 分支重新 startDestroyBlock。
+                        // 不能置 null：stopDestroyBlock 会用它调 level.getBlockState（26.3 源码 L220）
+                        if (isStaleDestroyTarget(pos)) {
+                            ((MixinMultiPlayerGameModeDestroyBlockDelayAccessor) mc.gameMode).setDestroyBlockPos(NO_DESTROY_TARGET);
+                        }
                         if (mc.gameMode.continueDestroyBlock(pos, direction)) {
                             mc.player.swing(InteractionHand.MAIN_HAND, swingAnimation, false);
                             mc.player.connection.send(ServerboundPunchPacket.INSTANCE);
@@ -391,7 +482,7 @@ public class InputSimulator {
         return isInventoryOpen;
     }
 
-    public static void updateInventoryState() {
+    private static void updateInventoryState() {
         if (mc.gui.screen() instanceof AbstractContainerScreen || mc.gui.screen() instanceof BookEditScreen || mc.gui.screen() instanceof BookSignScreen || mc.gui.screen() instanceof BookViewScreen) {
             isInventoryOpen = true;
         } else if(mc.gui.screen() == null) {
@@ -577,6 +668,7 @@ public class InputSimulator {
         sprint = false;
         isMouseLeftHolding = false;
         isMouseRightHolding = false;
+        externalLeftHold = false;
     }
 
     public static List<Direction> tryNoViewChangeControlMoveTo(BlockPos pos, double requireDist) {

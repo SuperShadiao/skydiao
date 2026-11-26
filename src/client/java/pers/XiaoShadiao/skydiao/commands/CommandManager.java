@@ -43,6 +43,8 @@ public interface CommandManager {
     public static final HHFindPartyCommand HH_FIND_PARTY_COMMAND = new HHFindPartyCommand();
     public static final HHFPCommand HH_FP_COMMAND = new HHFPCommand();
     public static final SkydiaoFPCommand SKYDIAO_FP_COMMAND = new SkydiaoFPCommand();
+    public static final HHStopAfterThisCarnivalCommand HH_STOP_AFTER_THIS_CARNIVAL_COMMAND = new HHStopAfterThisCarnivalCommand();
+    public static final SkydiaoStopAfterThisCarnivalCommand SKYDIAO_STOP_AFTER_THIS_CARNIVAL_COMMAND = new SkydiaoStopAfterThisCarnivalCommand();
 
     public static void registerCommands() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {

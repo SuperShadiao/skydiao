@@ -5,6 +5,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.numbers.StyledFormat;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.ScoreHolder;
@@ -13,13 +14,18 @@ import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pers.XiaoShadiao.skydiao.hud.DynamicSpotHUD;
+import pers.XiaoShadiao.skydiao.utils.OnlinePlayerList;
+import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** Keeps vanilla TabList content and morphs it inside the DynamicSpot shell. */
 @Mixin(PlayerTabOverlay.class)
@@ -78,6 +84,26 @@ public abstract class DynamicSpotPlayerTabOverlay {
         if (!skydiao$tabTransformActive) graphics.fill(x1, y1, x2, y2, color);
     }
 
+    @Unique
+    private static final Pattern PLAYERNAME_PATTERN = Pattern.compile("\\w+");
+
+    @Unique
+    private boolean testIsSkydiaoUser(FormattedText str) {
+        boolean isSkydiaoUser = false;
+
+        String line = ToolList.getInstance().deleteColorCode(str.getString());
+        Matcher matcher = PLAYERNAME_PATTERN.matcher(line);
+        while(matcher.find()) {
+            String player = matcher.group();
+            if(OnlinePlayerList.isPlayerNameOnline(player)) {
+                isSkydiaoUser = true;
+                break;
+            }
+        }
+        return isSkydiaoUser;
+    }
+
+    @Unique
     private TabBounds measureTab(int screenWidth, Scoreboard scoreboard, Objective objective) {
         // Use the same sorted, capped player list as vanilla when measuring the shell.
         List<PlayerInfo> players = getPlayerInfos();
@@ -102,7 +128,8 @@ public abstract class DynamicSpotPlayerTabOverlay {
             }
         }
         for (PlayerInfo player : players) {
-            nameWidth = Math.max(nameWidth, minecraft.font.width(getNameForDisplay(player)));
+            Component nameForDisplay = getNameForDisplay(player);
+            nameWidth = Math.max(nameWidth, minecraft.font.width(nameForDisplay) + (testIsSkydiaoUser(nameForDisplay) ? 10 : 0));
         }
 
         boolean showFaces = minecraft.isLocalServer() || minecraft.getConnection() != null

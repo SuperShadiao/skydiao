@@ -666,7 +666,7 @@
     },
     "language": {
       "configname": "§e语言",
-      "description": "§e设置你的的语言"
+      "description": "§e设置你的的语言 (想要为你的语言做出贡献吗? 访问https://xiaoshadiao.club/hhmt了解更多)"
     },
     "skyblockdungeontraprender": {
       "configname": "§eSkyblock地牢陷阱显示",
@@ -901,6 +901,10 @@
       "configname": "§e水晶矿洞助手",
       "description": "§e在水晶矿洞帮你搜索各种特殊结构"
     },
+    "crystalhollowmetaldetector": {
+      "configname": "§e金属探测器助手",
+      "description": "§e在Mines of Divan使用金属探测器时, 根据距离提示计算宝藏位置并渲染路径点"
+    },
     "crystalhollows": {
       "scan": {
         "blue": {
@@ -1024,6 +1028,58 @@
     "dungeonkeyrender": {
       "configname": "§eDungeon Key标记",
       "description": "§e渲染Dungeon Key的位置"
+    },
+    "dungeonmaphudrender": {
+      "configname": "§e地牢地图HUD",
+      "description": "§e在屏幕上渲染地牢地图，显示房间名、秘密进度和勾叉"
+    },
+    "dungeonmaphudshowname": {
+      "configname": "§e地牢地图显示房间名",
+      "description": "§e开启时在房间上写房间名，关闭时只在房间左上角画勾叉"
+    },
+    "dungeonmapxray": {
+      "configname": "§e地牢地图透视扫描",
+      "description": "§e地牢开始后扫描所有已加载区块，把还没探索到的房间也标到地图上（压暗显示）"
+    },
+    "dungeontipifcleared": {
+      "configname": "§e当前房间清理完毕提示",
+      "description": "§e当前所在房间从灰色变成白色（清完但秘密没找全）时, 用星铁通知提示一次"
+    },
+    "dungeontipifallsecretfound": {
+      "configname": "§e当前房间秘密找齐提示",
+      "description": "§e当前所在房间的秘密被全部找到（变成绿勾）时, 用星铁通知提示一次"
+    },
+    "dungeonscorehud": {
+      "configname": "§e地牢分数HUD",
+      "description": "§e显示当前地牢的估算分数和评级（000 (S)）"
+    },
+    "dungeondooresp": {
+      "configname": "§e凋零门/血房门ESP",
+      "description": "§e标记下一道凋零门或血房门；有钥匙绿色，没钥匙红色"
+    },
+    "dungeoncryptshud": {
+      "configname": "§e地牢Crypts HUD",
+      "description": "§e显示 Crypts: X/5"
+    },
+    "dungeondeathshud": {
+      "configname": "§e地牢死亡数HUD",
+      "description": "§e显示 Death: X"
+    },
+    "dungeonsecretshud": {
+      "configname": "§e地牢秘密数HUD",
+      "description": "§e显示当前房间的秘密进度 Secret: X/X"
+    },
+    "dungeonleapmenu": {
+      "configname": "§eSpirit Leap 菜单",
+      "description": "§e把地牢里的 Spirit Leap 箱子界面替换成玩家头像菜单"
+    },
+    "dungeonleapmenubuttonsize": {
+      "configname": "§eSpirit Leap 菜单按钮大小",
+      "description": "§e玩家按钮的高度（像素，36~80），宽和头像按比例缩放；默认 50"
+    },
+    "dungeonleapslotpriority": {
+      "configname": "§eSpirit Leap 槽位优先级",
+      "description": "§e四个槽位用分号分隔, 槽位内规则用逗号分隔, 可填职业(Healer/Mage/Berserk/Archer/Tank)或玩家名. 例如 Healer,HyperShadiao,Berserk;Archer;Mage,Tank; 条件都不满足的空槽位最后按默认顺序补剩余玩家"
     },
     "openfscommandaction": {
       "configname": "§e农业脚本指令设置",
@@ -1458,6 +1514,206 @@
       "configname": "§e永久夜视",
       "description": "§e远离菲林斯 (bushi"
     },
+    "enableircheadicon": {
+      "configname": "§e启用IRC玩家头像",
+      "description": "§e在IRC聊天信息中添加玩家的皮肤头像"
+    },
+    "autofishautoexchangeairmode": {
+      "configname": "§e自动钓鱼自动换气模式",
+      "description": "§e如果处于水下钓鱼, 当氧气值即将耗尽时, 自动按住跳跃直到浮出水面为止"
+    },
+    "autofishautodiving": {
+      "configname": "§e自动钓鱼自动下潜",
+      "description": "§e此选项决定自动换气后是否自动按住Shift下潜"
+    },
+    "autofishautoexchangeairthreshold": {
+      "configname": "§e自动钓鱼自动换气阈值",
+      "description": "§e自动换气模式只会尝试在氧气值低于阈值时触发, 其中1代表满氧气值, 0代表氧气值耗尽"
+    },
+    "handoffsetx": {
+      "configname": "§e手部偏移X轴",
+      "description": "§e调整第一人称手的X偏移位置"
+    },
+    "handoffsety": {
+      "configname": "§e手部偏移Y轴",
+      "description": "§e调整第一人称手的Y偏移位置"
+    },
+    "handoffsetz": {
+      "configname": "§e手部偏移Z轴",
+      "description": "§e调整第一人称手的Z偏移位置"
+    },
+    "handswingpointoffsetx": {
+      "configname": "§e手部摆动点偏移X轴",
+      "description": "§e调整第一人称手的摆动点X偏移位置"
+    },
+    "handswingpointoffsety": {
+      "configname": "§e手部摆动点偏移Y轴",
+      "description": "§e调整第一人称手的摆动点Y偏移位置"
+    },
+    "handswingpointoffsetz": {
+      "configname": "§e手部摆动点偏移Z轴",
+      "description": "§e调整第一人称手的摆动点Z偏移位置"
+    },
+    "handswingspeedmultiplier": {
+      "configname": "§e手部摆动速度倍率",
+      "description": "§e调整第一人称手的摆动速度倍率, 数值越高摆动速度越快, 数值越低摆动速度越慢, 限制只能大于0, 否则会出现Bug"
+    },
+    "crystalhollowwaypoint": {
+      "configname": "§e水晶矿洞Waypoint",
+      "description": "§e显示水晶矿洞的各种特殊结构的Waypoint"
+    },
+    "itemrarityrender": {
+      "configname": "§e物品稀有度渲染",
+      "description": "§e在物品的背景处按照稀有度渲染颜色"
+    },
+    "itempricetooltip": {
+      "configname": "§e物品价格提示",
+      "description": "§e在物品的Tooltip显示当前Bazaar最低价格, Auction House最低价格"
+    },
+    "itemmuseumdonatestatetooltip": {
+      "configname": "§e物品博物馆捐赠状态提示",
+      "description": "§e在物品的Tooltip显示该物品是否捐赠到博物馆过"
+    },
+    "statusbars": {
+      "configname": "§e血量/蓝量状态条",
+      "description": "§e在快捷栏上方显示自绘的血量、蓝量与防御条"
+    },
+    "quicknav": {
+      "configname": "§e快捷导航选项卡",
+      "description": "§e在打开背包/菜单时，在界面上方和下方显示类似创造模式的快捷跳转选项卡"
+    },
+    "openquicknavconfig": {
+      "configname": "§e配置快捷导航",
+      "description": "§e点击编辑快捷导航按钮、图标、指令与双击设置"
+    },
+    "statusbarsshowhealthmax": {
+      "configname": "§e血量最大值显示",
+      "description": "§e在血量文字中显示为 当前值/最大值"
+    },
+    "statusbarsshowmanamax": {
+      "configname": "§e蓝量最大值显示",
+      "description": "§e在蓝量文字中显示为 当前值/最大值"
+    },
+    "statusbaricon": {
+      "options": {
+        "off": "关闭",
+        "left": "左侧",
+        "right": "右侧"
+      }
+    },
+    "statusbarhealthicon": {
+      "configname": "§e血量条图标位置",
+      "description": "§e设置血量条图标的显示位置"
+    },
+    "statusbarmanaicon": {
+      "configname": "§e蓝量条图标位置",
+      "description": "§e设置蓝量条图标的显示位置"
+    },
+    "statusbardefenseicon": {
+      "configname": "§e防御条图标位置",
+      "description": "§e设置防御条图标的显示位置"
+    },
+    "statusbarexperienceicon": {
+      "configname": "§e经验条图标位置",
+      "description": "§e设置经验条图标的显示位置"
+    },
+    "statusbarspeedicon": {
+      "configname": "§e速度条图标位置",
+      "description": "§e设置速度条图标的显示位置"
+    },
+    "statusbarairicon": {
+      "configname": "§e氧气条图标位置",
+      "description": "§e设置氧气条图标的显示位置"
+    },
+    "statusbarvitalityicon": {
+      "configname": "§eVitality条图标位置",
+      "description": "§e设置Vitality条图标的显示位置"
+    },
+    "quiverhud": {
+      "configname": "§e箭矢数量HUD",
+      "description": "§e显示当前选择的箭矢类型和数量"
+    },
+    "quiverhudshowicon": {
+      "configname": "§e箭矢HUD图标",
+      "description": "§e在箭矢数量前显示箭矢图标"
+    },
+    "quiverhudwhen": {
+      "configname": "§e箭矢HUD显示时机",
+      "description": "§e设置什么时候显示箭矢HUD",
+      "options": {
+        "always": "始终",
+        "bowinventory": "背包内有弓",
+        "bowhand": "手持弓"
+      }
+    },
+    "deployablehud": {
+      "configname": "§eDeployable物品倒计时HUD",
+      "description": "§e附近有Deployable物品时在HUD上显示其倒计时"
+    },
+    "deployableexpiredtitle": {
+      "configname": "§eDeployable物品过期提示",
+      "description": "§eDeployable物品过期时弹出大标题"
+    },
+    "miningabilitiesavaliabletitle": {
+      "configname": "§e挖矿技能就绪大标题",
+      "description": "§e挖矿技能CD准备好时弹出大标题"
+    },
+    "dungeonscore270msg": {
+      "configname": "§e地牢270分提示",
+      "description": "§e地牢270分时发送消息并弹出提示"
+    },
+    "dungeonscore300msg": {
+      "configname": "§e地牢300分提示",
+      "description": "§e地牢300分时发送消息并弹出提示"
+    },
+    "dungeonleapmsg": {
+      "configname": "§e地牢Leap消息",
+      "description": "§e在地牢使用Spirit Leap后发送消息, 使用[player]替代玩家名"
+    },
+    "enchanttablesuperpairhelper": {
+      "configname": "§e附魔桌配对助手",
+      "description": "§e游玩附魔桌配对游戏时, 阻止已翻开的元素被重新隐藏"
+    },
+    "enchantedbookpreview": {
+      "configname": "§e附魔书预览",
+      "description": "§e在附魔书物品的右下角显示附魔首字母简称"
+    },
+    "slayerbossesp": {
+      "configname": "§eSlayer Boss ESP",
+      "description": "§e高亮显示Slayer Boss的ESP"
+    },
+    "blockoverlay": {
+      "configname": "§e方块描边",
+      "description": "§e取消渲染原版的瞄准描边, 改用带颜色的描边"
+    },
+    "blockoverlaycolor": {
+      "configname": "§e方块描边颜色",
+      "description": "§e设置方块描边的颜色"
+    },
+    "blockoverlayrainbowmode": {
+      "configname": "§e方块描边彩虹模式",
+      "description": "§e设置方块描边是否使用彩虹模式, 开启后描边颜色将不断变色"
+    },
+    "blockoverlayrainbowmodespeed": {
+      "configname": "§e方块描边彩虹模式变色速度",
+      "description": "§e设置方块描边彩虹模式变色速度的速度, 数值越高变色越快"
+    },
+    "blockoverlayallowinadvanturemode": {
+      "configname": "§e方块描边是否在冒险模式下显示",
+      "description": "§e设置方块描边是否在冒险模式下显示, 开启后在冒险模式下也会显示方块描边"
+    },
+    "blockoverlayalpha": {
+      "configname": "§e方块描边填充透明度",
+      "description": "§e设置方块描边的填充透明度, 取值范围为0.0~1.0, 数值越低填充越透明, 数值越高填充越不透明"
+    },
+    "etherwarpcanwarppreviewcolor": {
+      "configname": "§eEtherwarp可以传送预览颜色",
+      "description": "§e设置手持AOTV潜行时, 瞄准的位置可以Etherwarp传送的预览的颜色"
+    },
+    "etherwarpcannotwarppreviewcolor": {
+      "configname": "§eEtherwarp不能传送预览颜色",
+      "description": "§e设置手持AOTV潜行时, 瞄准的位置不能Etherwarp传送的预览的颜色"
+    },
 
     "about1": "§e小沙雕的QQ: 3381949033",
     "about2": "§e小沙雕の狗窝: https://xiaoshadiao.club/qqg",
@@ -1493,7 +1749,9 @@
         "leftautoclicker": "切换左键连点",
         "rightautoclicker": "切换右键连点",
         "togglefarmingscript": "开关农业脚本",
-        "toggleSprint": "切换强制疾跑"
+        "toggleSprint": "切换强制疾跑",
+        "toggleAutoUseFireVeilWand": "切换自动使用Fire Veil Wand",
+        "useFireVeilWandItem": "快速使用Fire Veil Wand物品"
       }
     }
   },
@@ -1680,6 +1938,67 @@
     },
     "customtitle": {
       "timepassed": "时间已流逝: %s"
+    },
+    "partyfinder_description": {
+      "type": {
+        "Dungeon": "创建一个地牢队伍",
+        "Fishing": "创建一个钓鱼队伍",
+        "Diana": "创建一个主大厅挖宝队伍",
+        "Safari": "创建一个Safari队伍",
+        "Kuudra": "创建一个Kuudra队伍",
+        "Rift": "创建一个Rift队伍",
+        "Ravenguard": "创建一个Ravenguard队伍",
+        "Unknown": "队伍类型无法被解析, 可能你的Mod版本过于陈旧, 若你确认你当前是最新版本, 请反馈给小沙雕"
+      },
+      "subtype": {
+        "Entrance": "标记此队伍为游玩地牢Entrance层的队伍",
+        "F1": "标记此队伍为游玩地牢Floor 1的队伍",
+        "F2": "标记此队伍为游玩地牢Floor 2的队伍",
+        "F3": "标记此队伍为游玩地牢Floor 3的队伍",
+        "F4": "标记此队伍为游玩地牢Floor 4的队伍",
+        "F5": "标记此队伍为游玩地牢Floor 5的队伍",
+        "F6": "标记此队伍为游玩地牢Floor 6的队伍",
+        "F7": "标记此队伍为游玩地牢Floor 7的队伍",
+        "M1": "标记此队伍为游玩地牢Master Mode Floor 1的队伍",
+        "M2": "标记此队伍为游玩地牢Master Mode Floor 2的队伍",
+        "M3": "标记此队伍为游玩地牢Master Mode Floor 3的队伍",
+        "M4": "标记此队伍为游玩地牢Master Mode Floor 4的队伍",
+        "M5": "标记此队伍为游玩地牢Master Mode Floor 5的队伍",
+        "M6": "标记此队伍为游玩地牢Master Mode Floor 6的队伍",
+        "M7": "标记此队伍为游玩地牢Master Mode Floor 7的队伍",
+        "M7R/ADG": "标记此队伍需要遵守M7R (M7 Rules) 或ADG (Advanced Dungeon Guide), 通常用于速通, 因此该队伍可能需要较高的要求",
+        "Chill": "标记此队伍为休闲类队伍, 队伍游玩起来没有速通那么紧张的氛围",
+
+        "Bayou": "标记该队伍在Bayou钓鱼",
+        "Lotus": "标记该队伍在Lotus (莲花岛) 钓鱼",
+        "Spooky": "标记该队伍为万圣节钓鱼队伍, 专门用于万圣节钓鱼",
+        "Barn": "标记该队伍在主大厅的农业岛钓鱼 (从Hub直接传送到农业岛屿, 而不是用Teleport Pad)",
+        "Galatea": "标记该队伍在Galatea钓鱼, 适用于海皇趴",
+        "Canyon": "标记该队伍在Canyon钓鱼",
+        "Crismon Isle": "标记该队伍在Crismon Isle钓鱼",
+        "Jerry's Workshop": "标记该队伍在Jerry's Workshop钓鱼",
+        "Crystal Hollow": "标记该队伍在Crystal Hollow钓鱼, 适用于组队钓虫",
+
+        "Legendary Pet": "标记该挖宝队伍普遍使用Legendary品质的Griffin宠物",
+        "Mythic Pet": "标记该挖宝队伍普遍使用Mythic品质的Griffin宠物",
+
+        "Unique Clear": "标记该队伍在游玩Safari时, 每种生物只抓一遍, 适用于快速升级Hunting等级",
+        "Full Clear": "标记该队伍游玩Safari时, 将会捕捉所有生物, 适用于快速刷取收集",
+
+        "Need Carry": "意味着队长需要帮忙Rift, 无法独立完成某些东西",
+        "Leech": "表示要一起击杀水蛭",
+        "Slime": "表示要一起击杀史莱姆",
+        "Vampire Slayer": "表示要一起殴打吸血鬼",
+        "Burger Contest": "表示需要一起做喂食汉堡的任务",
+        "Snake": "表示要一起挖蛇",
+
+        "Basic (T1)": "标记该队伍为游玩Kuudra Basic Tier的队伍",
+        "Hot (T2)": "标记该队伍为游玩Kuudra Hot Tier的队伍",
+        "Burning (T3)": "标记该队伍为游玩Kuudra Burning Tier的队伍",
+        "Fiery (T4)": "标记该队伍为游玩Kuudra Fiery Tier的队伍",
+        "Infernal (T5)": "标记该队伍为游玩Kuudra Infernal Tier的队伍",
+        "Daily": "标记该队伍目的是做每日任务, 例如Isle击杀Boss, 包含每日击杀Kuudra的任务"
+      }
     }
   },
   "xsdchat": {
@@ -1701,6 +2020,31 @@
         "inputtipsearch": "搜索物品",
         "inputtipregex": "可用正则表达式",
         "title": "预设设置"
+      },
+      "partyfinder": {
+        "title_findparty": "寻找队伍",
+        "title_createparty": "设置队伍信息",
+        "searchboxhint": "搜索队长名, 队伍标签, 类型, 备注...",
+        "buttonback": "返回",
+        "buttoncreateparty": "创建自己的队伍",
+        "buttonrefresh": "刷新",
+        "partytype": "队伍类型",
+        "partysubtype": "队伍子类型",
+        "partyjoin": "加入",
+        "partymembers": "队伍成员",
+        "partydescription": "队伍备注",
+        "partydescriptionhint": "输入队伍备注...",
+        "buttonopenparty": "开放队伍",
+        "buttoncloseparty": "关闭队伍",
+        "maxplayerhint1_1": "当前队伍类型推荐最大人数为%s人",
+        "maxplayerhint1_2": "或以上",
+        "maxplayerhint2": "但你当前队伍最大人数为%s人, 是否仍要开放队伍?",
+        "maxplayer": "队伍最大人数",
+
+        "tip1": "§e如果你没有收到队伍邀请, 可能是因为对方不是组队队长或者你的权限设置限制了邀请, 请使用/settings调整组队权限!",
+
+        "warning1": "§6为了维护Partyfinder良好的氛围, 任意成员不得在队伍内起冲突, 争执, 压力等",
+        "warning2": "§6如果发生上述情况, 请告诉小沙雕, 小沙雕会根据提供的消息判断双方对错做出处罚"
       }
     },
     "feature": {

@@ -27,6 +27,12 @@
     ],
     "preLaunch": [
       "pers.XiaoShadiao.skydiao.SkyDiaoPreLaunch"
+    ],
+    "rei_client": [
+      "pers.XiaoShadiao.skydiao.compat.rei.SkydiaoReiPlugin"
+    ],
+    "rei_common": [
+      "pers.XiaoShadiao.skydiao.compat.rei.SkydiaoReiCommonPlugin"
     ]
   },
   "mixins": [

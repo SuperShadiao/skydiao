@@ -32,6 +32,8 @@ import java.util.regex.Pattern;
 
 public class PinglessMiningHUD extends XSDHUD {
 
+    private static final Pattern DIGITS = Pattern.compile("\\d+");
+
     private BlockPos lastAimingPos = BlockPos.ZERO;
     private float breakTotalTick = 0;
     private boolean increaseBreakTotalTick;
@@ -140,7 +142,7 @@ public class PinglessMiningHUD extends XSDHUD {
         }
 
         TabReader.findLineWith("Mining Speed:").ifPresentOrElse(line -> {
-            Matcher matcher = Pattern.compile("\\d+").matcher(ToolList.getInstance().deleteColorCode(line));
+            Matcher matcher = DIGITS.matcher(ToolList.getInstance().deleteColorCode(line));
             if (matcher.find()) {
                 miningSpeed = Integer.parseInt(matcher.group());
                 cantReadMiningSpeedTick = 0;

@@ -3,6 +3,7 @@ package pers.XiaoShadiao.skydiao.screen.partyfinder;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
@@ -46,27 +47,35 @@ public class SetupPartyScreen extends Screen {
 
     private EditBox partyMaxPlayer;
 
+    private final Screen parentScreen;
+
     public SetupPartyScreen() {
-        super(Component.literal("设置队伍信息"));
+        this(null);
+    }
+
+    public SetupPartyScreen(Screen parentScreen) {
+        super(Component.translatable("skydiao.gui.partyfinder.title_createparty"));
+        this.parentScreen = parentScreen;
     }
 
     @Override
     protected void init() {
+        layout.setFooterHeight(55);
         layout.addTitleHeader(title, font);
 
         LinearLayout contents = LinearLayout.vertical().spacing(7);
-        contents.addChild(typeSelector = new TypeSelector(Component.literal("队伍类型")));
-        contents.addChild(subTypeSelector = new SubTypeSelector(Component.literal("队伍子类型")));
+        contents.addChild(typeSelector = new TypeSelector(Component.translatable("skydiao.gui.partyfinder.partytype")));
+        contents.addChild(subTypeSelector = new SubTypeSelector(Component.translatable("skydiao.gui.partyfinder.partysubtype")));
 
         LinearLayout descriptionEdit = descriptionEditArea = contents.addChild(LinearLayout.vertical().spacing(5));
         descriptionEdit.defaultCellSetting().alignHorizontallyCenter();
         // descriptionEdit.spacing(5);
-        descriptionEdit.addChild(new StringWidget(Component.literal("队伍备注"), font));
+        descriptionEdit.addChild(new StringWidget(Component.translatable("skydiao.gui.partyfinder.partydescription"), font));
         descriptionEditBox = descriptionEdit.addChild(
                 new MultiLineEditBox.Builder()
                         .setShowDecorations(true)
                         .setTextShadow(true)
-                        .setPlaceholder(Component.literal("输入队伍备注..."))
+                        .setPlaceholder(Component.translatable("skydiao.gui.partyfinder.partydescriptionhint"))
                         .build(font, width - BORDER * 2, 20, Component.literal("队伍备注"))
         );
         descriptionEditBox.setValueListener(description -> PartyFinderManager.selfPartyData.description = description);
@@ -76,7 +85,7 @@ public class SetupPartyScreen extends Screen {
         layout.addToContents(contents);
 
         openPartyButton = Button.builder(
-                Component.literal("开放队伍"),
+                Component.translatable("skydiao.gui.partyfinder.buttonopenparty"),
                 onPress -> {
                     Runnable runnable = () -> {
                         openPartyButton.active = false;
@@ -100,13 +109,17 @@ public class SetupPartyScreen extends Screen {
                                     }
                                     minecraft.setScreenAndShow(this);
                                 },
-                                Component.literal("当前队伍类型推荐最大人数为" + PartyFinderManager.selfPartyData.partyType.recommendMaxPlayers + (PartyFinderManager.selfPartyData.partyType.recommendMoreMaxPlayers ? "人或以上" : "人")), Component.literal("但你当前队伍最大人数为" + PartyFinderManager.selfPartyData.maxPlayers + "人, 是否仍要开放队伍?")
+                                Component.translatable(
+                                        "skydiao.gui.partyfinder.maxplayerhint1_1",
+                                        PartyFinderManager.selfPartyData.partyType.recommendMaxPlayers
+                                ).append(PartyFinderManager.selfPartyData.partyType.recommendMoreMaxPlayers ? Component.literal(" ").append(Component.translatable("skydiao.gui.partyfinder.maxplayerhint1_2")) : Component.empty()),
+                                Component.translatable("skydiao.gui.partyfinder.maxplayerhint2", PartyFinderManager.selfPartyData.maxPlayers)
                         ));
                     }
                 }
         ).size(100, 20).build();
         closePartyButton = Button.builder(
-                Component.literal("关闭队伍"),
+                Component.translatable("skydiao.gui.partyfinder.buttoncloseparty"),
                 onPress -> {
                     PartyFinderManager.isPublic = false;
                     openPartyButton.active = true;
@@ -117,10 +130,13 @@ public class SetupPartyScreen extends Screen {
         openPartyButton.active = !PartyFinderManager.isPublic;
         closePartyButton.active = PartyFinderManager.isPublic;
 
-        LinearLayout footer = LinearLayout.horizontal().spacing(7);
-
-        footer.addChild(partyMaxPlayer = new EditBox(font, 35, 20, Component.literal("队伍最大人数")));
-        partyMaxPlayer.setTooltip(Tooltip.create(Component.literal("队伍最大人数")));
+        LinearLayout linearLayout1 = this.layout.addToFooter(LinearLayout.vertical().spacing(2));
+        linearLayout1.defaultCellSetting().alignHorizontallyCenter();
+        linearLayout1.addChild(new StringWidget(Component.translatable("skydiao.gui.partyfinder.warning1"), this.font));
+        linearLayout1.addChild(new StringWidget(Component.translatable("skydiao.gui.partyfinder.warning2"), this.font));
+        LinearLayout linearLayout2 = linearLayout1.addChild(LinearLayout.horizontal().spacing(7));
+        linearLayout2.addChild(partyMaxPlayer = new EditBox(font, 35, 20, Component.literal("队伍最大人数")));
+        partyMaxPlayer.setTooltip(Tooltip.create(Component.translatable("skydiao.gui.partyfinder.maxplayer")));
         partyMaxPlayer.setResponder(stringx -> {
             try {
                 int i = Integer.parseInt(stringx);
@@ -136,12 +152,9 @@ public class SetupPartyScreen extends Screen {
         });
         partyMaxPlayer.setValue(String.valueOf(PartyFinderManager.selfPartyData.maxPlayers));
 
-        footer.addChild(closePartyButton);
-        footer.addChild(openPartyButton);
-        footer.addChild(Button.builder(Component.literal("返回"), this::onClose).size(50, 20).build());
-
-
-        layout.addToFooter(footer);
+        linearLayout2.addChild(closePartyButton);
+        linearLayout2.addChild(openPartyButton);
+        linearLayout2.addChild(Button.builder(Component.translatable("skydiao.gui.partyfinder.buttonback"), this::onClose).size(50, 20).build());
 
         layout.visitWidgets(this::addRenderableWidget);
 
@@ -150,6 +163,11 @@ public class SetupPartyScreen extends Screen {
 
     private void onClose(Button button) {
         onClose();
+    }
+
+    @Override
+    public void onClose() {
+        minecraft.setScreenAndShow(parentScreen);
     }
 
     @Override
@@ -165,19 +183,23 @@ public class SetupPartyScreen extends Screen {
         }
         layout.arrangeElements();
         if(descriptionEditArea != null) {
-            FrameLayout.centerInRectangle(descriptionEditArea, 0, descriptionEditArea.getY() - 15, width, height - descriptionEditArea.getY() - 44 + 10);
+            FrameLayout.centerInRectangle(descriptionEditArea, 0, descriptionEditArea.getY() - 15, width, height - descriptionEditArea.getY() - layout.getFooterHeight());
             if(descriptionEditBox != null) {
                 descriptionEditBox.setWidth(width - BORDER * 2);
-                descriptionEditBox.setHeight(height - descriptionEditArea.getY() - 44);
+                descriptionEditBox.setHeight(height - descriptionEditArea.getY() - layout.getFooterHeight() - 11);
             }
         }
     }
 
-    public abstract class Selector<T> extends AbstractWidget {
+    public abstract class Selector<T> extends AbstractWidget implements ContainerEventHandler {
 
         private List<Button> buttons;
 
         private List<List<Button>> buttonLines;
+
+        private @Nullable GuiEventListener focused;
+
+        private boolean dragging;
 
         public Selector(Component message, T[] options) {
             super(0, 0, 0, 0, message);
@@ -188,14 +210,55 @@ public class SetupPartyScreen extends Screen {
         }
 
         @Override
+        public List<Button> children() {
+            return buttons;
+        }
+
+        @Override
+        public @Nullable GuiEventListener getFocused() {
+            return focused;
+        }
+
+        @Override
+        public void setFocused(@Nullable GuiEventListener focused) {
+            if (this.focused != focused) {
+                if (this.focused != null) {
+                    this.focused.setFocused(false);
+                }
+                if (focused != null) {
+                    focused.setFocused(true);
+                }
+                this.focused = focused;
+            }
+        }
+
+        @Override
+        public boolean isFocused() {
+            return ContainerEventHandler.super.isFocused();
+        }
+
+        @Override
+        public void setFocused(boolean focused) {
+            ContainerEventHandler.super.setFocused(focused);
+        }
+
+        @Override
+        public boolean isDragging() {
+            return dragging;
+        }
+
+        @Override
+        public void setDragging(boolean dragging) {
+            this.dragging = dragging;
+        }
+
+        @Override
         public @Nullable ComponentPath nextFocusPath(FocusNavigationEvent navigationEvent) {
-            int nextIndex = buttons.indexOf(getFocused()) + 1;
-            if(nextIndex == 0 && !this.isFocused()) return null;
-            if(nextIndex >= buttons.size()) return super.nextFocusPath(navigationEvent);
-            return ComponentPath.leaf(buttons.get(nextIndex));
+            return ContainerEventHandler.super.nextFocusPath(navigationEvent);
         }
 
         public void updateButtons(T[] options) {
+            setFocused(null);
             buttons = getButtons(options);
             setButtonPos();
             repositionElements();
@@ -253,69 +316,42 @@ public class SetupPartyScreen extends Screen {
 
         @Override
         public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-            boolean flag = false;
-            for (Button button : buttons) {
-                flag |= button.mouseClicked(event, doubleClick);
-            }
-            return super.mouseClicked(event, doubleClick) || flag;
+            return ContainerEventHandler.super.mouseClicked(event, doubleClick);
         }
 
         @Override
         public boolean mouseReleased(MouseButtonEvent event) {
-            boolean flag = false;
-            for (Button button : buttons) {
-                flag |= button.mouseReleased(event);
-            }
-            return super.mouseReleased(event) || flag;
+            return ContainerEventHandler.super.mouseReleased(event);
         }
 
         @Override
-        public void mouseMoved(double x, double y) {
-            for (Button button : buttons) {
-                button.mouseMoved(x, y);
-            }
-            super.mouseMoved(x, y);
+        public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
+            return ContainerEventHandler.super.mouseDragged(event, dx, dy);
         }
 
         @Override
         public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {
-            boolean flag = false;
-            for (Button button : buttons) {
-                flag |= button.mouseScrolled(x, y, scrollX, scrollY);
-            }
-            return super.mouseScrolled(x, y, scrollX, scrollY) || flag;
+            return ContainerEventHandler.super.mouseScrolled(x, y, scrollX, scrollY);
         }
 
         @Override
         public boolean keyPressed(KeyEvent event) {
-            boolean flag = false;
-            for (Button button : buttons) {
-                flag |= button.keyPressed(event);
-            }
-            return super.keyPressed(event) || flag;
+            return ContainerEventHandler.super.keyPressed(event);
         }
 
         @Override
         public boolean keyReleased(KeyEvent event) {
-            boolean flag = false;
-            for (Button button : buttons) {
-                flag |= button.keyReleased(event);
-            }
-            return super.keyReleased(event) || flag;
+            return ContainerEventHandler.super.keyReleased(event);
         }
 
         @Override
         public boolean charTyped(CharacterEvent event) {
-            boolean flag = false;
-            for (Button button : buttons) {
-                flag |= button.charTyped(event);
-            }
-            return super.charTyped(event) || flag;
+            return ContainerEventHandler.super.charTyped(event);
         }
 
         @Override
         public @Nullable ComponentPath getCurrentFocusPath() {
-            return super.getCurrentFocusPath();
+            return ContainerEventHandler.super.getCurrentFocusPath();
         }
     }
 
@@ -329,6 +365,7 @@ public class SetupPartyScreen extends Screen {
         protected List<Button> getButtons(PartyFinderData.Type[] types) {
             ArrayList<Button> buttons = new ArrayList<>();
             for (PartyFinderData.Type type : types) {
+                if(type == PartyFinderData.Type.UNKNOWN) continue;
 //                buttons.add(Button.builder(
 //                        Component.literal((PartyFinderManager.selfPartyData.partyType == type ? "§a" : "") + type.displayName),
 //                        onPress -> {
@@ -347,6 +384,9 @@ public class SetupPartyScreen extends Screen {
                     }
                     subTypeSelector.updateButtons(type.subTypes.toArray(new PartyFinderData.SubType[0]));
                 }, Supplier::get) {
+                    {
+                        setTooltip(Tooltip.create(Component.literal(type.getI18nDescription())));
+                    }
 
                     @Override
                     public @NotNull Component getMessage() {
@@ -388,6 +428,9 @@ public class SetupPartyScreen extends Screen {
                         PartyFinderManager.selfPartyData.partySubTypes.add(type);
                     }
                 }, Supplier::get) {
+                    {
+                        setTooltip(Tooltip.create(Component.literal(type.getI18nDescription())));
+                    }
 
                     @Override
                     public @NotNull Component getMessage() {

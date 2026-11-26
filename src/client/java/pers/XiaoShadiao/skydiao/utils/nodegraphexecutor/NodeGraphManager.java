@@ -20,10 +20,17 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 /**
@@ -172,6 +179,7 @@ public final class NodeGraphManager {
         String fileName = safeFileName(name);
         Files.createDirectories(dir);
         Path file = dir.resolve(fileName);
+        markSelfWrite(file);
         try (Writer writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
             PRETTY.toJson(root, writer);
         }
@@ -189,6 +197,7 @@ public final class NodeGraphManager {
         String fileName = safeFileName(name);
         graphs.remove(stripExt(fileName));
         Path file = graphsFolder.toPath().resolve(fileName);
+        markSelfWrite(file);
         try {
             return Files.deleteIfExists(file);
         } catch (IOException e) {
@@ -286,6 +295,155 @@ public final class NodeGraphManager {
         }
     }
 
+    // ---------- 目录监听 ----------
+
+    /** 自己写盘（saveGraph/removeGraph）后多久内忽略该文件的事件，避免重复热载 */
+    private static final long SELF_WRITE_IGNORE_MS = 1500L;
+    /** 收到文件事件后等待多久，把同一次保存产生的连续事件合并处理 */
+    private static final long EVENT_DEBOUNCE_MS = 200L;
+
+    /** 自身写过的文件 -> 时间戳 */
+    private final Map<Path, Long> selfWrites = new ConcurrentHashMap<>();
+    private volatile WatchService watchService;
+
+    /**
+     * 开始监听 {@link #graphsFolder}：外部新增 / 修改 / 删除 {@code .json} 时自动热载对应节点图。
+     * 重复调用无副作用。
+     */
+    public synchronized void startWatching() {
+        if (watchService != null) {
+            return;
+        }
+        try {
+            graphsFolder.mkdirs();
+            WatchService service = FileSystems.getDefault().newWatchService();
+            register(service);
+            watchService = service;
+            Thread thread = new Thread(() -> watchLoop(service), "XSD NodeGraph Watcher");
+            thread.setDaemon(true);
+            thread.start();
+            logger.info("已监听节点图目录：" + graphsFolder);
+        } catch (IOException e) {
+            logger.warn("监听节点图目录失败：" + graphsFolder, e);
+        }
+    }
+
+    private static void register(WatchService service) throws IOException {
+        graphsFolder.toPath().register(service,
+                StandardWatchEventKinds.ENTRY_CREATE,
+                StandardWatchEventKinds.ENTRY_MODIFY,
+                StandardWatchEventKinds.ENTRY_DELETE);
+    }
+
+    private void watchLoop(WatchService service) {
+        while (true) {
+            WatchKey key;
+            try {
+                key = service.take();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            } catch (ClosedWatchServiceException e) {
+                return;
+            }
+
+            Set<String> names = new LinkedHashSet<>();
+            collectJsonNames(key, names);
+            // 编辑器一次保存往往连发多个 MODIFY，先等一小会儿再统一取一次
+            try {
+                Thread.sleep(EVENT_DEBOUNCE_MS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+            collectJsonNames(key, names);
+            WatchKey extra;
+            while ((extra = service.poll()) != null) {
+                collectJsonNames(extra, names);
+            }
+
+            if (!key.reset()) {
+                // 目录被删除或不可访问：重建并重新注册
+                logger.warn("节点图目录不可用，尝试重新监听：" + graphsFolder);
+                if (!reRegister(service)) {
+                    return;
+                }
+                continue;
+            }
+
+            for (String fileName : names) {
+                try {
+                    syncFromDisk(fileName);
+                } catch (Exception e) {
+                    logger.warn("自动重载节点图失败：" + fileName, e);
+                }
+            }
+        }
+    }
+
+    /** 目录失效后持续尝试重建并重新注册，直到成功或线程被中断 */
+    private static boolean reRegister(WatchService service) {
+        while (!Thread.currentThread().isInterrupted()) {
+            try {
+                graphsFolder.mkdirs();
+                register(service);
+                DEFAULT_LOG.info("已重新监听节点图目录：" + graphsFolder);
+                return true;
+            } catch (IOException e) {
+                try {
+                    Thread.sleep(1000L);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static void collectJsonNames(WatchKey key, Set<String> out) {
+        for (WatchEvent<?> event : key.pollEvents()) {
+            if (!(event.context() instanceof Path path)) {
+                continue;
+            }
+            String fileName = path.getFileName().toString();
+            if (fileName.startsWith(".") || !fileName.toLowerCase(Locale.ROOT).endsWith(".json")) {
+                continue;
+            }
+            out.add(fileName);
+        }
+    }
+
+    /** 按磁盘现状同步单个节点图：文件存在则热载，不存在则从内存卸载 */
+    private synchronized void syncFromDisk(String fileName) {
+        Path file = graphsFolder.toPath().resolve(fileName).toAbsolutePath().normalize();
+        String name = stripExt(fileName);
+
+        Long selfWrite = selfWrites.remove(file);
+        if (selfWrite != null && System.currentTimeMillis() - selfWrite < SELF_WRITE_IGNORE_MS) {
+            return; // 自己刚写过，内存里已是最新
+        }
+
+        if (!Files.isRegularFile(file)) {
+            if (graphs.remove(name) != null) {
+                logger.info("节点图文件已被删除，自动卸载：" + fileName);
+            }
+            return;
+        }
+        try {
+            loadFile(file);
+            logger.info("检测到节点图变化，已自动重载：" + fileName);
+        } catch (Exception e) {
+            logger.warn("自动重载节点图失败，已跳过：" + fileName, e);
+        }
+    }
+
+    private void markSelfWrite(Path file) {
+        long now = System.currentTimeMillis();
+        selfWrites.values().removeIf(t -> now - t > SELF_WRITE_IGNORE_MS * 4);
+        selfWrites.put(file.toAbsolutePath().normalize(), now);
+    }
+
     // ---------- 工具 ----------
 
     private static String nameOf(JsonObject root, String def) {
@@ -317,6 +475,7 @@ public final class NodeGraphManager {
     public void init() throws IOException {
         if(!inited) inited = true; else return;
         loadFolder();
+        startWatching();
         FileUtils.copyInputStreamToFile(
                 Objects.requireNonNull(NodeGraphManager.class.getClassLoader().getResourceAsStream("skydiao_extensions.json")),
                 defaultExtensionFile

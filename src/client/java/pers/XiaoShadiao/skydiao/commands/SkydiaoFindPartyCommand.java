@@ -6,7 +6,6 @@ import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
 import pers.XiaoShadiao.skydiao.irc.XSDIRCConfig;
-import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
 import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatPacket;
 import pers.XiaoShadiao.skydiao.screen.partyfinder.PartyListScreen;
 import pers.XiaoShadiao.skydiao.screen.partyfinder.SetupPartyScreen;
@@ -39,13 +38,13 @@ public class SkydiaoFindPartyCommand extends BaseRootRunnableCommand {
                         packet.message = PartyFinderManager.selfPartyData.toJson().toString();
                         packet.packetType = "find_party_broadcast";
                         packet.initSender();
-                        ChatClientManager.trySendOrWarning(packet, XSDIRCConfig.INSTANCE);
+                        XSDIRCConfig.IRC.trySendOrWarning(packet, true);
                     }
                     return 0;
                 }),
                 getArgConstantInstance("join").then(getArgInstance("playerName", StringArgumentType.string()).executes(context -> {
                     String playerName = context.getArgument("playerName", String.class);
-                    PartyFinderManager.joinPlayerNameParty(playerName);
+                    mc.schedule(() -> mc.setScreenAndShow(new PartyListScreen(playerName)));
                     return 0;
                 }))
         );

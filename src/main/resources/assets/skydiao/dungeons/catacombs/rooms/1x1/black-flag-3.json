@@ -1,0 +1,43 @@
+{
+  "id": "black-flag-3",
+  "shape": "1x1",
+  "blockCount": 33114,
+  "secrets": [
+    {
+      "secretName": "1 - Entrance",
+      "category": "entrance",
+      "x": 24,
+      "y": 81,
+      "z": 3
+    },
+    {
+      "secretName": "1 - Chest",
+      "category": "chest",
+      "x": 27,
+      "y": 80,
+      "z": 3
+    },
+    {
+      "secretName": "2 - Entrance",
+      "category": "entrance",
+      "x": 19,
+      "y": 80,
+      "z": 25
+    },
+    {
+      "secretName": "2 - Chest",
+      "category": "chest",
+      "x": 28,
+      "y": 80,
+      "z": 25
+    },
+    {
+      "secretName": "3 - Item",
+      "category": "item",
+      "x": 22,
+      "y": 59,
+      "z": 27
+    }
+  ],
+  "name": "Black Flag"
+}

@@ -18,13 +18,16 @@ import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.irc.XSDIRCConfig;
-import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
 import pers.XiaoShadiao.skydiao.keybinds.KeyBindsManager;
 import pers.XiaoShadiao.skydiao.screen.mircosoftaccount.AccountSelectScreen;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.autoupdater.AutoUpdater;
 import pers.XiaoShadiao.skydiao.utils.autoupdater.ExecuteOfflineThread;
+import pers.XiaoShadiao.skydiao.utils.devdebugger.LocalhostHttpDebugger;
 import pers.XiaoShadiao.skydiao.utils.i18n.CrowdinI18nManager;
+import pers.XiaoShadiao.skydiao.utils.itemprice.NetworthDataManager;
+import pers.XiaoShadiao.skydiao.utils.itemprice.PriceDataManager;
+import pers.XiaoShadiao.skydiao.utils.museum.MuseumDataManager;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.MinecraftLogin;
 import pers.XiaoShadiao.skydiao.utils.mircosoftaccount.XSDSafeSession;
 import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.NodeGraphManager;
@@ -74,9 +77,15 @@ public class SkyDiaoModClient implements ClientModInitializer {
         MinecraftLogin.replaceSession(currentInstance);
         AccountSelectScreen.load();
         AbstractListener.initListeners();
-        ChatClientManager.refreshIfNotAvaliable(XSDIRCConfig.INSTANCE);
+        XSDIRCConfig.IRC.refreshIfNotAvaliable();
         XSDHUD.init();
+        PriceDataManager.init();
+        MuseumDataManager.init();
+        NetworthDataManager.init();
         CustomSounds.initialize();
+        if (FabricLoader.getInstance().isModLoaded("roughlyenoughitems")) {
+            pers.XiaoShadiao.skydiao.compat.rei.SkydiaoReiPlugin.bootstrap();
+        }
 
         ClientboundPacketHandler handler = p -> {
             ToolList.getInstance().log.info(p.getIdentifier());
@@ -110,6 +119,7 @@ public class SkyDiaoModClient implements ClientModInitializer {
         } catch (IOException e) {
 
         }
+        LocalhostHttpDebugger.startDebugger();
 
     }
 }

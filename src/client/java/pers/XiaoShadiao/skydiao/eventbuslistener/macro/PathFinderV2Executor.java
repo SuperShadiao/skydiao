@@ -160,7 +160,6 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
                 logger.catching(e);
                 return;
             }
-
             path.addAll(pathNodes.getPath());
             pathBlockPos.addAll(pathNodes.getPath().stream().map(PathNode::pos).toList());
 
@@ -188,15 +187,35 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
                         List<PathNode> pathNodes1 = path.subList(0, index + 1);
                         pathNodes1.clear();
                         pathBlockPos.subList(0, index + 1).clear();
-                        if(!path.isEmpty()) System.out.println("Current Node: " + path.getFirst());
+                        if (!path.isEmpty()) System.out.println("Current Node: " + path.getFirst());
                         flagPathfinderAlive();
                         prepareParkourJump = System.currentTimeMillis();
                         break;
                     }
                 }
 
-                double aimSpeed = 0.8;
-                BlockPos aimOffset = BlockPos.ZERO;
+                if (isPaused) {
+                    flagPathfinderAlive();
+                }
+
+                if (path.size() == 1 && path.getFirst().type() == PathNodeType.FLY && !rePathInfoQueue.isEmpty()) {
+                    break;
+                }
+
+                if (!path.isEmpty() && path.size() < 30 && rePathInfoQueue.isEmpty()) {
+                    PathNode lastNode = path.getLast();
+                    if (!lastNode.pos().equals(pathfinder.getEndPos())) {
+                        rePath(lastNode.pos(), pathfinder.getEndPos(), false);
+                    }
+                }
+                if (isPathfinderStuck()) {
+                    rePath(mc.player.blockPosition(), pathfinder.getEndPos(), true);
+                }
+
+                if (!isPaused) {
+
+                    double aimSpeed = 0.8;
+                    BlockPos aimOffset = BlockPos.ZERO;
 
 //                List<PathNode> pendingPreAimNodes = new ArrayList<>();
 //                int expandCount = 0;
@@ -208,139 +227,129 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
 //                    preAimNode = temp;
 //                    expandCount++;
 //                }
-                PathNode finalAimNode = aimNode;
-                PathNode preAimNode = path.subList(0, Math.min(path.size(), canUseAOTE ? 50 : 5))
-                        .stream()
-                        .filter(temp -> temp.type() == PathNodeType.FLY || temp.type() == PathNodeType.MOVE || temp.type() == PathNodeType.UP || temp.type() == PathNodeType.DOWN)
-                        .filter(temp -> canBeSee(temp) && !BlockHelper.areaHasCollision(finalAimNode.pos(), temp.pos().above(canUseAOTE ? 1 : 2)))
-                        .max(Comparator.comparingInt(path::indexOf)).orElse(aimNode);
+                    PathNode finalAimNode = aimNode;
+                    PathNode preAimNode = path.subList(0, Math.min(path.size(), canUseAOTE ? 50 : 5))
+                            .stream()
+                            .filter(temp -> temp.type() == PathNodeType.FLY || temp.type() == PathNodeType.MOVE || temp.type() == PathNodeType.UP || temp.type() == PathNodeType.DOWN)
+                            .filter(temp -> canBeSee(temp) && !BlockHelper.areaHasCollision(finalAimNode.pos(), temp.pos().above(canUseAOTE ? 1 : 2)))
+                            .max(Comparator.comparingInt(path::indexOf)).orElse(aimNode);
 
 
-                if (!path.isEmpty() && path.size() < 30 && rePathInfoQueue.isEmpty()) {
-                    PathNode lastNode = path.getLast();
-                    if(!lastNode.pos().equals(pathfinder.getEndPos())) {
-                        rePath(lastNode.pos(), pathfinder.getEndPos(), false);
-                    }
-                }
-                if(isPathfinderStuck()) {
-                    rePath(mc.player.blockPosition(), pathfinder.getEndPos(), true);
-                }
+                    InputSimulator.releaseAllKey();
+                    boolean useSprint = true;
+                    boolean enableAiming = true;
 
-                InputSimulator.releaseAllKey();
-                boolean useSprint = true;
-                boolean enableAiming = true;
-
-                if(node.type() == PathNodeType.FLY) {
-                    if (!canDoFly() && !canUseAOTE) {
-                        rePath(mc.player.blockPosition(), pathfinder.getEndPos(), true);
-                    } else if(canUseAOTE) {
-                        aimSpeed = 1.2;
-                        switchToAOTE();
-                        aimNode = preAimNode;
-                        PathNode nextNode = getNextNode(preAimNode);
-                        boolean useEWarpFlag = false;
-                        if(mc.player.getY() < nextNode.pos().getY()) {
-                            double currentHorDist = mc.player.position().horizontal().distanceTo(Vec3.atCenterOf(nextNode.pos()).horizontal());
-                            int tpYOff = (int) (Math.sqrt(teleportDist * teleportDist - currentHorDist * currentHorDist));
-                            int i;
-                            for (i = 1; i < tpYOff; i++) {
-                                if(!canBeSee(aimNode.pos().above(i)) || BlockHelper.hasCollision(aimNode.pos().above(i))) {
-                                    i--;
-                                    break;
+                    if (node.type() == PathNodeType.FLY) {
+                        if (!canDoFly() && !canUseAOTE) {
+                            rePath(mc.player.blockPosition(), pathfinder.getEndPos(), true);
+                        } else if (canUseAOTE) {
+                            aimSpeed = 1.2;
+                            switchToAOTE();
+                            aimNode = preAimNode;
+                            PathNode nextNode = getNextNode(preAimNode);
+                            boolean useEWarpFlag = false;
+                            if (mc.player.getY() < nextNode.pos().getY()) {
+                                double currentHorDist = mc.player.position().horizontal().distanceTo(Vec3.atCenterOf(nextNode.pos()).horizontal());
+                                int tpYOff = (int) (Math.sqrt(teleportDist * teleportDist - currentHorDist * currentHorDist));
+                                int i;
+                                for (i = 1; i < tpYOff; i++) {
+                                    if (!canBeSee(aimNode.pos().above(i)) || BlockHelper.hasCollision(aimNode.pos().above(i))) {
+                                        i--;
+                                        break;
+                                    }
+                                }
+                                tpYOff = i;
+                                aimOffset = new BlockPos(0, tpYOff, 0);
+                            } else if (Math.abs(mc.player.getY() - nextNode.pos().getY()) < 0.1) {
+                                aimOffset = new BlockPos(0, -1, 0);
+                            }
+                            if (canUseEWarp && Stream.of(nextNode, preAimNode).anyMatch(temp -> temp.type() != PathNodeType.FLY && BlockHelper.hasCollision(temp.pos().below()) && canBeSee(temp.pos().below()))) {
+                                aimSpeed = 2.5;
+                                aimOffset = new BlockPos(0, -1, 0);
+                                aimNode = nextNode;
+                                InputSimulator.setShift(true);
+                                useEWarpFlag = true;
+                            }
+                            if (isWaitingAOTVSync()) {
+                                if (lastAimResult != null) {
+                                    float absYaw = Math.abs(lastAimResult.yaw() - InputSimulator.getPlayerYaw()) % 360;
+                                    float absPitch = Math.abs(lastAimResult.pitch() - InputSimulator.getPlayerPitch());
+                                    if (Math.min(absYaw, Math.abs(absYaw - 360)) < (useEWarpFlag ? 5 : 20) && absPitch < (useEWarpFlag ? 4 : 16)) {
+                                        InputSimulator.singleRightClick();
+                                        waitAOTESync = System.currentTimeMillis();
+                                    }
                                 }
                             }
-                            tpYOff = i;
-                            aimOffset = new BlockPos(0, tpYOff, 0);
-                        } else if(Math.abs(mc.player.getY() - nextNode.pos().getY()) < 0.1) {
-                            aimOffset = new BlockPos(0, -1, 0);
-                        }
-                        if(canUseEWarp && Stream.of(nextNode, preAimNode).anyMatch(temp -> temp.type() != PathNodeType.FLY && BlockHelper.hasCollision(temp.pos().below()) && canBeSee(temp.pos().below()))) {
-                            aimSpeed = 2.5;
-                            aimOffset = new BlockPos(0, -1, 0);
-                            aimNode = nextNode;
-                            InputSimulator.setShift(true);
-                            useEWarpFlag = true;
-                        }
-                        if(isWaitingAOTVSync()) {
-                            if(lastAimResult != null) {
-                                float absYaw = Math.abs(lastAimResult.yaw() - InputSimulator.getPlayerYaw()) % 360;
-                                float absPitch = Math.abs(lastAimResult.pitch() - InputSimulator.getPlayerPitch());
-                                if (Math.min(absYaw, Math.abs(absYaw - 360)) < (useEWarpFlag ? 5 : 20) && absPitch < (useEWarpFlag ? 4 : 16)) {
-                                    InputSimulator.singleRightClick();
-                                    waitAOTESync = System.currentTimeMillis();
-                                }
-                            }
-                        }
-                    } else if (canDoFly()) {
-                        // InputSimulator.setForward(node.pos().getCenter().horizontal().distanceTo(mc.player.position().horizontal()) > getFlyPassDist());
-                        InputSimulator.tryNoViewChangeControlMoveTo(node.pos(), 1);
-                        aimNode = preAimNode;
+                        } else if (canDoFly()) {
+                            // InputSimulator.setForward(node.pos().getCenter().horizontal().distanceTo(mc.player.position().horizontal()) > getFlyPassDist());
+                            InputSimulator.tryNoViewChangeControlMoveTo(node.pos(), 1);
+                            aimNode = preAimNode;
 
-                        if(node.pos().getY() - (BlockHelper.hasCollision(node.pos().below()) ? 0 : 0.5) > mc.player.getY()) {
-                            InputSimulator.setJump(true);
-                        } else if(node.pos().getY() + 2 < mc.player.getY() + mc.player.getBbHeight()) {
-                            InputSimulator.setShift(true);
-                        }
-                    } else {
-                        InputSimulator.setJump(tickCounter % 5 == 0);
-                    }
-                } else if(node.type().isJumpMove()) {
-                    if(node.type() == PathNodeType.JUMP1 || node.type() == PathNodeType.JUMP2) {
-                        useSprint = false;
-                    }
-
-                    if(System.currentTimeMillis() - prepareParkourJump > 100) {
-                        if(System.currentTimeMillis() - prepareParkourJump > 800) {
-                            InputSimulator.tryNoViewChangeControlMoveTo(node.pos(), 0.5);
-                            boolean farAwayParkourGoal = mc.player.position().horizontal().distanceTo(Vec3.atBottomCenterOf(node.pos()).horizontal()) > 1;
-                            if (!BlockHelper.hasCollision(mc.player.blockPosition().below()) && farAwayParkourGoal) {
+                            if (node.pos().getY() - (mc.player.horizontalCollision || BlockHelper.hasCollision(node.pos().below()) ? 0 : 0.5) > mc.player.getY()) {
                                 InputSimulator.setJump(true);
-                            }
-                            if (!farAwayParkourGoal) {
-                                enableAiming = false;
+                            } else if (node.pos().getY() + 2 < mc.player.getY() + mc.player.getBbHeight()) {
+                                InputSimulator.setShift(true);
                             }
                         } else {
-                            if (InputSimulator.tryNoViewChangeControlMoveTo(getPrevNode(node).pos(), isSameDirection(getPrevNode(node).pos(), node.pos(), getNextBlockPos(node.pos())) ? 0.6 : 0.05).isEmpty()) {
-                                prepareParkourJump = 0;
+                            InputSimulator.setJump(tickCounter % 5 == 0);
+                        }
+                    } else if (node.type().isJumpMove()) {
+                        if (node.type() == PathNodeType.JUMP1 || node.type() == PathNodeType.JUMP2) {
+                            useSprint = false;
+                        }
+
+                        if (System.currentTimeMillis() - prepareParkourJump > 100) {
+                            if (System.currentTimeMillis() - prepareParkourJump > 800) {
+                                InputSimulator.tryNoViewChangeControlMoveTo(node.pos(), 0.5);
+                                boolean farAwayParkourGoal = mc.player.position().horizontal().distanceTo(Vec3.atBottomCenterOf(node.pos()).horizontal()) > 1;
+                                if (!BlockHelper.hasCollision(mc.player.blockPosition().below()) && farAwayParkourGoal) {
+                                    InputSimulator.setJump(true);
+                                }
+                                if (!farAwayParkourGoal) {
+                                    enableAiming = false;
+                                }
+                            } else {
+                                if (InputSimulator.tryNoViewChangeControlMoveTo(getPrevNode(node).pos(), isSameDirection(getPrevNode(node).pos(), node.pos(), getNextBlockPos(node.pos())) ? 0.6 : 0.05).isEmpty()) {
+                                    prepareParkourJump = 0;
+                                } else {
+                                    InputSimulator.setShift(true);
+                                }
+                            }
+                        }
+                    } else if (node.type().isMove() || node.type() == PathNodeType.UP) {
+                        // InputSimulator.setForward(true);
+                        InputSimulator.tryNoViewChangeControlMoveTo(node.pos(), 0.3);
+                        aimNode = preAimNode;
+
+                        if (node.pos().getY() - 0.5 > mc.player.getY()) {
+                            InputSimulator.setJump(true);
+                        } else if (canDoFly()) {
+                            if (node.pos().getY() > mc.player.getY()) {
+                                InputSimulator.setJump(true);
                             } else {
                                 InputSimulator.setShift(true);
                             }
                         }
-                    }
-                } else if(node.type().isMove() || node.type() == PathNodeType.UP) {
-                    // InputSimulator.setForward(true);
-                    InputSimulator.tryNoViewChangeControlMoveTo(node.pos(), 0.3);
-                    aimNode = preAimNode;
-
-                    if(node.pos().getY() - 0.5 > mc.player.getY()) {
-                        InputSimulator.setJump(true);
-                    } else if(canDoFly()) {
-                        if(node.pos().getY() > mc.player.getY()) {
-                            InputSimulator.setJump(true);
-                        } else {
-                            InputSimulator.setShift(true);
+                    } else if (node.type() == PathNodeType.DOWN) {
+                        if (canDoFly()) {
+                            if (node.pos().getY() > mc.player.getY()) {
+                                InputSimulator.setJump(true);
+                            } else {
+                                InputSimulator.setShift(true);
+                            }
                         }
+                        // InputSimulator.setForward(mc.player.position().horizontal().distanceTo(node.pos().getCenter().horizontal()) > 0.5);
+                        InputSimulator.tryNoViewChangeControlMoveTo(node.pos(), 0.3);
+                        aimNode = preAimNode;
                     }
-                } else if(node.type() == PathNodeType.DOWN) {
-                    if(canDoFly()) {
-                        if(node.pos().getY() > mc.player.getY()) {
-                            InputSimulator.setJump(true);
-                        } else {
-                            InputSimulator.setShift(true);
-                        }
+
+                    InputSimulator.setSprint(useSprint);
+                    if (enableAiming) {
+                        lastAimResult = AimHelper.getYawPitchByVec3(Vec3.atBottomCenterOf(aimNode.pos().above().offset(aimOffset)));
+                        lastAimResult.updateToAimHelper(new AimHelper(aimSpeed));
+                        preAimToRender = aimNode;
                     }
-                    // InputSimulator.setForward(mc.player.position().horizontal().distanceTo(node.pos().getCenter().horizontal()) > 0.5);
-                    InputSimulator.tryNoViewChangeControlMoveTo(node.pos(), 0.3);
-                    aimNode = preAimNode;
                 }
-
-                InputSimulator.setSprint(useSprint);
-                if(enableAiming) {
-                    lastAimResult = AimHelper.getYawPitchByVec3(Vec3.atBottomCenterOf(aimNode.pos().above().offset(aimOffset)));
-                    lastAimResult.updateToAimHelper(new AimHelper(aimSpeed));
-                    preAimToRender = aimNode;
-                }
-
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
@@ -349,7 +358,9 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
             }
         }
 
+        boolean oldPauseState = isPaused;
         stopExecution(false);
+        isPaused = oldPauseState;
 
     }
 
@@ -482,7 +493,7 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
 
 
         if(pathfinder.isActuallyAllowBreak()) {
-            passed &= (!BlockHelper.hasCollision(goal) && !BlockHelper.hasCollision(goal.above())) || !PathFinder.isBreakable(goal) || !PathFinder.isBreakable(goal.above());
+            passed &= (!BlockHelper.hasCollision(current.pos()) && !BlockHelper.hasCollision(current.pos().above())) || !PathFinder.isBreakable(current.pos()) || !PathFinder.isBreakable(current.pos().above());
         }
 
         if(pathfinder.isActuallyAllowPlace()) {
@@ -638,6 +649,15 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
 
             interrupt();
         }, null);
+    }
+
+    public void pauseExecution() {
+        isPaused = true;
+    }
+
+    public void resumeExecution() {
+        flagPathfinderAlive();
+        isPaused = false;
     }
 
     private void updateAOTEEWarpState() {

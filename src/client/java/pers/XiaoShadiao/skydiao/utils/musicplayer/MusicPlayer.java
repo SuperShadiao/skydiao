@@ -2,7 +2,9 @@ package pers.XiaoShadiao.skydiao.utils.musicplayer;
 
 import javazoom.jl.decoder.*;
 import javazoom.jl.player.AudioDevice;
+import javazoom.jl.player.AudioDeviceFactory;
 import javazoom.jl.player.FactoryRegistry;
+import javazoom.jl.player.JavaSoundAudioDeviceFactory;
 import javazoom.jl.player.advanced.AdvancedPlayer;
 import javazoom.jl.player.advanced.PlaybackEvent;
 import javazoom.jl.player.advanced.PlaybackListener;
@@ -31,6 +33,34 @@ public class MusicPlayer extends AdvancedPlayer {
     
     private Long musicLength;
     private static final InputStream useless = new ByteArrayInputStream(new byte[] {});
+
+    static {
+        // 优先使用原有的 JavaSound 播放器; 创建失败(例如 Android 运行时缺少 libjsound)时自动回退到 OpenAL
+        FactoryRegistry registry = FactoryRegistry.systemRegistry();
+        registry.removeFactoryType(JavaSoundAudioDeviceFactory.class);
+        registry.addFactory(new FallbackAudioDeviceFactory());
+    }
+
+    private static final class FallbackAudioDeviceFactory extends AudioDeviceFactory {
+
+        private final JavaSoundAudioDeviceFactory javaSound = new JavaSoundAudioDeviceFactory();
+
+        // private boolean alreadyPrintError;
+
+        @Override
+        public AudioDevice createAudioDevice() throws JavaLayerException {
+//            try {
+//                // if(true) throw new JavaLayerException("test");
+//                return javaSound.createAudioDevice();
+//            } catch (JavaLayerException e) {
+//                if(!alreadyPrintError) {
+//                    ToolList.getInstance().log.warn("JavaSound 播放器创建失败, 回退到 OpenAL", e);
+//                    alreadyPrintError = true;
+//                }
+                return new OpenAlAudioDevice();
+            // }
+        }
+    }
     
     public MusicPlayer(InputStream stream) throws JavaLayerException, IOException {
         this(stream, (AudioDevice)null);

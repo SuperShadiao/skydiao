@@ -1,0 +1,15 @@
+{
+  "id": "admin-0",
+  "shape": "1x1",
+  "blockCount": 24459,
+  "secrets": [
+    {
+      "secretName": "Fairy Soul behind Crypt",
+      "category": "fairysoul",
+      "x": 15,
+      "y": 95,
+      "z": 29
+    }
+  ],
+  "name": "Admin"
+}

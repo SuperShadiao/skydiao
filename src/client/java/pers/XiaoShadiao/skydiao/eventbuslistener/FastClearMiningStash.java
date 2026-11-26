@@ -2,9 +2,6 @@ package pers.XiaoShadiao.skydiao.eventbuslistener;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
@@ -23,7 +20,6 @@ import java.util.Map;
 
 public class FastClearMiningStash extends AbstractListener {
 
-    private PageSwitchCallback pageSwitchCallback;
     private ToolList.ThreadedTask<?> task;
 
     @Override
@@ -33,21 +29,13 @@ public class FastClearMiningStash extends AbstractListener {
 
     @Override
     public void registerListeners() {
-        ScreenEvents.AFTER_INIT.register(this::afterScreenInit);
-    }
 
-    private void afterScreenInit(Minecraft minecraft, Screen screen, int i, int i1) {
-        if(pageSwitchCallback != null) {
-            pageSwitchCallback.setScreen(screen);
-            pageSwitchCallback = null;
-        }
     }
-
 
     private List<String> getStashItemIdsAndPickup(List<String> blackListIds, List<String> nonBlackListIds) throws InterruptedException {
         ToolList.printChatMessage(Component.literal("§a[小沙雕] §e如果任务陷入死循环, 请在viewstash页面拼手速手动关闭页面即可停止"));
         ToolList.sendChatMessage("/viewstash material");
-        PageSwitchCallback pageSwitchCallback = this.pageSwitchCallback = new PageSwitchCallback();
+        PageSwitchCallback pageSwitchCallback = syncScreenListener.createScreenListener();
         if (!(pageSwitchCallback.getScreen(1500) instanceof ContainerScreen containerScreen)) return List.of();
         ChestMenu menu0 = containerScreen.getMenu();
         Container container0 = menu0.getContainer();
@@ -90,7 +78,7 @@ public class FastClearMiningStash extends AbstractListener {
             String enchantedItemId = handleId(id);
             ToolList.sendChatMessage("/viewrecipe " + enchantedItemId);
 
-            PageSwitchCallback pageSwitchCallback = this.pageSwitchCallback = new PageSwitchCallback();
+            PageSwitchCallback pageSwitchCallback = syncScreenListener.createScreenListener();
             if (!(pageSwitchCallback.getScreen(1500) instanceof ContainerScreen containerScreen)) {
                 blackListIds.add(id);
                 continue;

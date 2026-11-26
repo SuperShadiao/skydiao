@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
@@ -39,7 +38,6 @@ import pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.op.OperationSendC
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.keybinds.KeyBindsManager;
-import pers.XiaoShadiao.skydiao.utils.PageSwitchCallback;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
@@ -139,7 +137,6 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register(this::onUnload);
         LevelRenderEvents.END_MAIN.register(this::onLastRender);
         CustomFabricEvents.MOUSE_BUTTON_EVENT.register(this::onMouseButton);
-        ScreenEvents.AFTER_INIT.register(this::onScreenAfterInit);
         CustomFabricEvents.CLIENT_PACKET_EVENT.register(this::onPacket);
     }
 
@@ -458,9 +455,8 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
 
     private void executeDayNightSwitch(SleepActions sleepActions, boolean night) {
         sleepActions.addAction(ctx -> {
-                    this.pageSwitchCallback = new PageSwitchCallback();
                     ToolList.sendChatMessage("/desk");
-                    ctx.put("screen", this.pageSwitchCallback.getScreen());
+                    ctx.put("screen", syncScreenListener.createScreenListener().getScreen());
                 }, 600)
                 .addAction(ctx -> {
                     Screen screen = (Screen) ctx.get("screen");
@@ -470,8 +466,7 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                     if (!(container instanceof SimpleContainer)) return;
                     if (mc.gameMode != null && mc.player != null) {
                         mc.execute(() -> mc.gameMode.handleContainerInput(menu.containerId, 50, 0, ContainerInput.PICKUP, mc.player));
-                        this.pageSwitchCallback = new PageSwitchCallback();
-                        ctx.put("screen", this.pageSwitchCallback.getScreen());
+                        ctx.put("screen", syncScreenListener.createScreenListener().getScreen());
                     }
                 }, 600)
                 .addAction(ctx -> {
@@ -538,10 +533,10 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
                 .addAction(ctx -> {
                     ctx.put("lastSelectedSlot", mc.player.getInventory().getSelectedSlot());
                     InputSimulator.switchItem(spray);
-                }, 300, true)
+                }, 300)
                 .addAction(InputSimulator::pressRightClick, 100)
                 .addAction(InputSimulator::unpressAllKey, 300)
-                .addAction(ctx -> InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")), 300, true)
+                .addAction(ctx -> InputSimulator.switchItem((int) ctx.get("lastSelectedSlot")), 300)
                 .addAction(this::startCurrentActions, 5000)
                 .run();
     }
@@ -847,15 +842,6 @@ public class EasyFarmingScriptListener extends AbstractListener implements IMacr
         nodeExecMaxDelay = delay;
         ToolList.printChatMessage(Component.literal("§a[小沙雕] §e已设置节点执行全局最大延迟为" + delay + "ms!"));
         save();
-    }
-
-    private PageSwitchCallback pageSwitchCallback = new PageSwitchCallback();
-
-    private void onScreenAfterInit(Minecraft minecraft, Screen screen, int i, int i1) {
-        if(pageSwitchCallback != null) {
-            pageSwitchCallback.setScreen(screen);
-            pageSwitchCallback = null;
-        }
     }
 
 }

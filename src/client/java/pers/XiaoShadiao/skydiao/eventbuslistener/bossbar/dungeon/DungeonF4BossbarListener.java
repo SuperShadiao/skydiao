@@ -77,7 +77,8 @@ public class DungeonF4BossbarListener extends AbstractDungeonBossbar {
 
         for (Entity entity : mc.level.entitiesForRendering()) {
             if(entity instanceof ArmorStand) {
-                if(ToolList.getInstance().deleteColorCode(entity.getName().getString()).contains("Spirit Bow")) {
+                var customName = entity.getCustomName();
+                if(customName != null && ToolList.getInstance().deleteColorCode(customName.getString()).contains("Spirit Bow")) {
                     RenderUtils.renderESP(wr, entity, 1, 0, 1, 1, false);
                     RenderUtils.renderTrace(wr, entity, 1, 0, 1, 1);
                 }
@@ -120,15 +121,17 @@ public class DungeonF4BossbarListener extends AbstractDungeonBossbar {
         int y = 77;
 
         List<BlockPos> pos = new ArrayList<>();
-        for (BlockPos blockPos : BlockPos.betweenClosed(mapBoundX2, y, mapBoundZ2, mapBoundX1, y, mapBoundZ1)) {
-            Block block = mc.level.getBlockState(blockPos).getBlock();
-            if(
-                    mc.level.getBlockState(blockPos.east()).getBlock() != Blocks.AIR &&
-                    mc.level.getBlockState(blockPos.west()).getBlock() != Blocks.AIR &&
-                    mc.level.getBlockState(blockPos.north()).getBlock() != Blocks.AIR &&
-                    mc.level.getBlockState(blockPos.south()).getBlock() != Blocks.AIR
-            ) continue;
-            if(block == Blocks.SEA_LANTERN) pos.add(blockPos.immutable());
+        if(bossEntity != null) {
+            for (BlockPos blockPos : BlockPos.betweenClosed(new BlockPos(mapBoundX2, y, mapBoundZ2), new BlockPos(mapBoundX1, y, mapBoundZ1))) {
+                Block block = mc.level.getBlockState(blockPos).getBlock();
+                if(
+                        mc.level.getBlockState(blockPos.east()).getBlock() != Blocks.AIR &&
+                                mc.level.getBlockState(blockPos.west()).getBlock() != Blocks.AIR &&
+                                mc.level.getBlockState(blockPos.north()).getBlock() != Blocks.AIR &&
+                                mc.level.getBlockState(blockPos.south()).getBlock() != Blocks.AIR
+                ) continue;
+                if(block == Blocks.SEA_LANTERN) pos.add(blockPos.immutable());
+            }
         }
         if(pos.isEmpty()) {
             bearCharging = 0;

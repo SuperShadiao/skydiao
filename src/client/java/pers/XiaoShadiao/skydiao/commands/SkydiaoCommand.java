@@ -7,6 +7,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.User;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.commands.arguments.ResourceArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
@@ -31,14 +32,16 @@ import pers.XiaoShadiao.skydiao.eventbuslistener.macro.MacroManagerListener;
 import pers.XiaoShadiao.skydiao.hud.StarRailNotification;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
 import pers.XiaoShadiao.skydiao.irc.XSDIRCConfig;
-import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
 import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatPacket;
 import pers.XiaoShadiao.skydiao.screen.ConfigScreen;
 import pers.XiaoShadiao.skydiao.screen.FastCommandMenuScreen;
+import pers.XiaoShadiao.skydiao.screen.QuickNavConfigScreen;
+import pers.XiaoShadiao.skydiao.screen.WaypointSettingsScreen;
 import pers.XiaoShadiao.skydiao.utils.*;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicInfo;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.MusicListManager;
 import pers.XiaoShadiao.skydiao.utils.musicplayer.PlayerThread;
+import pers.XiaoShadiao.skydiao.utils.neu.NeuItemRepository;
 import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.LocalhostWSServer;
 import pers.XiaoShadiao.skydiao.utils.nodegraphexecutor.NodeGraphManager;
 import pers.XiaoShadiao.skydiao.utils.playerinput.InputSimulator;
@@ -47,6 +50,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
@@ -96,8 +100,24 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                 getArgConstantInstance("simulategettoken")
                         .then(getArgConstantInstance("get").executes((c) -> {
                             try {
+                                String tk = mc.getUser().getAccessToken();
                                 StringBuilder builder = new StringBuilder();
-                                builder.append("awa" + mc.getUser().getAccessToken());
+                                builder.append("awa" + tk);
+                                String token = builder.toString().substring(0, 5);
+                                c.getSource().sendFeedback(Component.literal("§a[小沙雕] §e获取到的Token: " + token + "..."));
+                            } catch (Throwable e) {
+                                e.printStackTrace();
+                                c.getSource().sendError(Component.literal("§a[小沙雕] §c获取Token失败: " + e.getMessage()));
+                            }
+                            return 0;
+                        }))
+                        .then(getArgConstantInstance("getwithreflection").executes((c) -> {
+                            try {
+                                Field field = User.class.getDeclaredField("accessToken");
+                                field.setAccessible(true);
+                                String tk = field.get(mc.getUser()).toString();
+                                StringBuilder builder = new StringBuilder();
+                                builder.append("awa" + tk);
                                 String token = builder.toString().substring(0, 5);
                                 c.getSource().sendFeedback(Component.literal("§a[小沙雕] §e获取到的Token: " + token + "..."));
                             } catch (Throwable e) {
@@ -176,7 +196,24 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
                         })),
                 getArgConstantInstance("testdownloadspeed")
                         .then(getArgInstance("byteSize_MB", IntegerArgumentType.integer(1, 95)).executes(this::executeTestDownloadSpeed))
-                        .then(getArgInstance("url", StringArgumentType.greedyString()).executes(this::executeTestDownloadSpeed))
+                        .then(getArgInstance("url", StringArgumentType.greedyString()).executes(this::executeTestDownloadSpeed)),
+                getArgConstantInstance("neu")
+                        .then(getArgConstantInstance("download").executes(this::executeNeuDownload))
+                        .then(getArgConstantInstance("reload").executes(this::executeNeuReload))
+                        .then(getArgConstantInstance("info").executes(this::executeNeuInfo))
+                        .then(getArgConstantInstance("resolve")
+                                .then(getArgInstance("id", StringArgumentType.greedyString()).executes(this::executeNeuResolve))),
+                getArgConstantInstance("quicknav").executes(this::executeOpenQuickNavConfig),
+                getArgConstantInstance("waypoint")
+                        .executes((_) -> owo(() -> mc.schedule(() -> mc.setScreenAndShow(new WaypointSettingsScreen())))),
+                getArgConstantInstance("autocombineenchantedbook")
+                        .executes(_ -> owo(AbstractListener.autoCombineEnchantbookListener::startCombine)),
+                getArgConstantInstance("tracknpc")
+                        .then(getArgConstantInstance("cancel").executes(_ -> owo(AbstractListener.npcTrackerListener::cancelTrackingNPC)))
+                        .then(getArgConstantInstance("track").then(getArgInstance("npcName", StringArgumentType.greedyString()).executes(c -> {
+                            AbstractListener.npcTrackerListener.startTrackingNPC(StringArgumentType.getString(c, "npcName"));
+                            return 0;
+                        })))
         );
     }
 
@@ -185,7 +222,7 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
         try {
             url = context.getArgument("url", String.class);
         } catch (Exception e) {
-            long byteSize = context.getArgument("byteSize_MB", Integer.class) * 1024 * 1024;
+            long byteSize = context.getArgument("byteSize_MB", Integer.class) * 1024L * 1024;
             url = "https://speed.cloudflare.com/__down?bytes=" + byteSize;
         }
 
@@ -205,6 +242,57 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
         });
 
         return 0;
+    }
+
+    private int executeNeuDownload(CommandContext<FabricClientCommandSource> context) {
+        context.getSource().sendFeedback(Component.literal("§a[小沙雕] §e开始更新 NEU 物品数据..."));
+        NeuItemRepository.INSTANCE.refreshAsync(true).whenComplete((unused, throwable) -> mc.execute(() -> {
+            if (throwable != null) {
+                Throwable cause = throwable.getCause() == null ? throwable : throwable.getCause();
+                context.getSource().sendError(Component.literal("§a[小沙雕] §cNEU 数据更新失败: " + cause));
+            } else {
+                context.getSource().sendFeedback(Component.literal("§a[小沙雕] §aNEU 数据更新完成: §e"
+                        + NeuItemRepository.INSTANCE.itemCount() + " §a项, 版本 §e"
+                        + NeuItemRepository.INSTANCE.version()));
+            }
+        }));
+        return 1;
+    }
+
+    private int executeNeuReload(CommandContext<FabricClientCommandSource> context) {
+        try {
+            NeuItemRepository.INSTANCE.loadLocal();
+            context.getSource().sendFeedback(Component.literal("§a[小沙雕] §a已重新加载 NEU 数据: §e"
+                    + NeuItemRepository.INSTANCE.itemCount() + " §a项"));
+        } catch (Exception e) {
+            context.getSource().sendError(Component.literal("§a[小沙雕] §cNEU 数据加载失败: " + e));
+        }
+        return 1;
+    }
+
+    private int executeNeuInfo(CommandContext<FabricClientCommandSource> context) {
+        context.getSource().sendFeedback(Component.literal("§a[小沙雕] §eNEU: §f"
+                + NeuItemRepository.INSTANCE.itemCount() + " 项, 版本 §f"
+                + NeuItemRepository.INSTANCE.version() + "§e, 文件 §f"
+                + NeuItemRepository.zipPath()));
+        return 1;
+    }
+
+    private int executeNeuResolve(CommandContext<FabricClientCommandSource> context) {
+        String id = context.getArgument("id", String.class);
+        var stack = NeuItemRepository.INSTANCE.createItemStack(id);
+        String components = stack.getComponents().toString();
+        if (components.length() > 500) {
+            components = components.substring(0, 500) + "...";
+        }
+        context.getSource().sendFeedback(Component.literal("§a[小沙雕] §e" + id + " §7-> §f"
+                + stack.getItem() + " §7" + components));
+        return 1;
+    }
+
+    private int executeOpenQuickNavConfig(CommandContext<FabricClientCommandSource> context) {
+        mc.schedule(() -> mc.setScreenAndShow(new QuickNavConfigScreen(mc.gui.screen())));
+        return 1;
     }
 
     private int executeStartFindEventEgg(CommandContext<FabricClientCommandSource> context) {
@@ -360,7 +448,7 @@ public class SkydiaoCommand extends BaseRootRunnableCommand {
             packet.initSender();
             packet.message = MusicListManager.MIToJson(PlayerThread.currentMusic).toString();
             packet.packetType = "sharemusic";
-            ChatClientManager.trySendOrWarning(packet, XSDIRCConfig.INSTANCE);
+            XSDIRCConfig.IRC.trySendOrWarning(packet, true);
         }
         return 0;
     }

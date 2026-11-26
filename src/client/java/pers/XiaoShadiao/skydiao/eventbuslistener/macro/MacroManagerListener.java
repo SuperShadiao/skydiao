@@ -1,7 +1,6 @@
 package pers.XiaoShadiao.skydiao.eventbuslistener.macro;
 
 import com.madgag.gif.fmsware.AnimatedGifEncoder;
-import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import com.mojang.text2speech.Narrator;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
@@ -24,11 +23,13 @@ import pers.XiaoShadiao.skydiao.appendage.eventbuslistener.macro.mining.Obsidian
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.customsounds.CustomSounds;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.macro.carnival.CarnivalFruitDigger;
+import pers.XiaoShadiao.skydiao.eventbuslistener.macro.carnival.CarnivalZombieShoot;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.farming.EasyFarmingScriptListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.macro.slayer.vs.AutoBloodfiendListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.hud.XSDHUD;
-import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
+import pers.XiaoShadiao.skydiao.irc.XSDIRCConfig;
 import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatPacket;
 import pers.XiaoShadiao.skydiao.utils.*;
 
@@ -183,12 +184,12 @@ public class MacroManagerListener extends AbstractListener {
         }
 
         alertSpamTicker = Math.clamp(alertSpamTicker + 200, 0, 2000);
-        if(ChatClientManager.serverAvailable() && alertSpamTicker < 1000) {
+        if(XSDIRCConfig.IRC.serverAvailable() && alertSpamTicker < 1000) {
             ChatPacket p = new ChatPacket();
             p.initSender();
             p.packetType = "macro_check";
             p.message = "Alert! Macro check! (Info: ActiveMacros: " + activeMacros.stream().map(IMacro::getMacroName).toList() + " " + message + ")";
-            ChatClientManager.trySend(p, false);
+            XSDIRCConfig.IRC.trySend(p, false);
         }
     }
 
@@ -230,7 +231,7 @@ public class MacroManagerListener extends AbstractListener {
                 if (ConfigManager.macroReplaySelfCleaning.getValue()) {
                     currentRecordInstance = new File(recordDir, String.valueOf(recordInstanceCycle));
                     recordInstanceCycle++;
-                    if(recordInstanceCycle > 4) {
+                    if(recordInstanceCycle > 19) {
                         recordInstanceCycle = 0;
                     }
                     try {
@@ -281,35 +282,29 @@ public class MacroManagerListener extends AbstractListener {
 
         if(isRecording || recordMoreFrame > 0) {
             if(frameTasks.remainingCapacity() > 1) {
-                ScreenshotUtils.takeScreenshot2(mc.gameRenderer.mainRenderTarget(), (image0, close) -> {
+                ScreenshotUtils.captureFramebuffer(mc.gameRenderer.mainRenderTarget(), frame -> {
                     int delay = Math.clamp(System.currentTimeMillis() - lastFrameTime, 1, 750);
                     if (frameTasks.offer(() -> {
-                        try(GpuBufferSlice.MappedView image = image0) {
-                            BufferedImage bi = PicUtils.cloneMappedViewToBufferedImage(mc.gameRenderer.mainRenderTarget(), image);
+                        BufferedImage bi = frame.toBufferedImage();
 
-                            gifEncoder.setDelay(delay);
-                            gifEncoder.addFrame(bi);
+                        gifEncoder.setDelay(delay);
+                        gifEncoder.addFrame(bi);
 
-                            recordCycleDelay += delay;
-                            if (recordCycleDelay >= 10000) {
-                                recordCycleDelay = 0;
-                                recordIndex++;
-                                gifEncoder.finish();
-                                try {
-                                    gifEncoder.start(new FileOutputStream(new File(currentRecordInstance, recordIndex + ".gif")));
-                                } catch (FileNotFoundException e) {
-                                }
-                                gifEncoder.setDelay(100);
-
-                                new File(currentRecordInstance, (recordIndex - 5) + ".gif").delete();
+                        recordCycleDelay += delay;
+                        if (recordCycleDelay >= 10000) {
+                            recordCycleDelay = 0;
+                            recordIndex++;
+                            gifEncoder.finish();
+                            try {
+                                gifEncoder.start(new FileOutputStream(new File(currentRecordInstance, recordIndex + ".gif")));
+                            } catch (FileNotFoundException e) {
                             }
-                        } finally {
-                            close.run();
+                            gifEncoder.setDelay(100);
+
+                            new File(currentRecordInstance, (recordIndex - 5) + ".gif").delete();
                         }
                     })) {
                         lastFrameTime = System.currentTimeMillis();
-                    } else {
-                        close.run();
                     }
                 });
             }

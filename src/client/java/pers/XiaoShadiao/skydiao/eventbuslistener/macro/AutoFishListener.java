@@ -27,7 +27,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
-import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractFishingListener;
+import pers.XiaoShadiao.skydiao.eventbuslistener.fishing.AbstractFishingListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.eventbuslistener.E2AMappingListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
@@ -53,6 +53,7 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
     private final AntiAFKThread antiAFKMove = new AntiAFKThread(AntiAFKThread.MOVE);
     private final AntiAFKThread antiAFKJump = new AntiAFKThread(AntiAFKThread.JUMP);
     private final AntiAFKThread antiAFKRotation = new AntiAFKThread(AntiAFKThread.ROTATION);
+    private final AntiAFKThread antiAFKExchangeAirMode = new AntiAFKThread(AntiAFKThread.EXCHANGE_AIR);
     private final LotusAtollJumpKeeper lotusAtollJumpKeeper = new LotusAtollJumpKeeper();
 
     private int catchFishCount;
@@ -66,7 +67,9 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
         public static final int
                 JUMP = 0,
                 MOVE = 1,
-                ROTATION = 2;
+                ROTATION = 2,
+                EXCHANGE_AIR = 3
+                        ;
 
         private final int type;
         private boolean flag;
@@ -90,11 +93,11 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
                     }
                     ToolList.getInstance().log.info("AntiAFK called");
                     try {
-                        Thread.sleep(4000 + ToolList.getInstance().random.nextInt(3500) + ToolList.getInstance().random.nextInt(500));
+                        Thread.sleep((4000 + ToolList.getInstance().random.nextInt(3500) + ToolList.getInstance().random.nextInt(500)) / (type == EXCHANGE_AIR ? 6 : 1));
                     } catch (InterruptedException e) {
                     }
 
-                    if (isHoldingFishRod() && !InputSimulator.isInventoryOpen()) {
+                    if (shouldContinueRun()) {
                         if (type == MOVE) {
                             Consumer<Boolean> key = (flag = !flag) ? InputSimulator::setLeft : InputSimulator::setRight;
 
@@ -104,14 +107,14 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
                                 Thread.sleep(500);
                             } catch (InterruptedException e) {
                             }
-                            if (isHoldingFishRod() && !InputSimulator.isInventoryOpen()) key.accept(true);
+                            if (shouldContinueRun()) key.accept(true);
 
                             try {
                                 Thread.sleep(1500);
                             } catch (InterruptedException e) {
                             }
 
-                            if (isHoldingFishRod() && !InputSimulator.isInventoryOpen()) key.accept(false);
+                            if (shouldContinueRun()) key.accept(false);
 
                             try {
                                 Thread.sleep(1000);
@@ -124,7 +127,7 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
                             } catch (InterruptedException e) {
                             }
 
-                            if (isHoldingFishRod() && !InputSimulator.isInventoryOpen())
+                            if (shouldContinueRun())
                                 InputSimulator.setJump(true);
 
                             try {
@@ -145,10 +148,10 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
 
                             float afterChangePitch = tempP + 1.3453f * ToolList.getInstance().random.nextInt(3) * (ToolList.getInstance().random.nextBoolean() ? 1 : -1);
                             float afterChangeYaw = tempY + 1.3453f * ToolList.getInstance().random.nextInt(3) * (ToolList.getInstance().random.nextBoolean() ? 1 : -1);
-                            if (isHoldingFishRod() && !InputSimulator.isInventoryOpen()) {
+                            if (shouldContinueRun()) {
                                 InputSimulator.setPlayerPitch(afterChangePitch);
                             }
-                            if (isHoldingFishRod() && !InputSimulator.isInventoryOpen()) {
+                            if (shouldContinueRun()) {
                                 InputSimulator.setPlayerYaw(afterChangeYaw);
                             }
 
@@ -161,11 +164,30 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
                                 return;
                             }
 
-                            if (isHoldingFishRod() && !InputSimulator.isInventoryOpen())
+                            if (shouldContinueRun())
                                 InputSimulator.setPlayerPitch(tempP);
-                            if (isHoldingFishRod() && !InputSimulator.isInventoryOpen())
+                            if (shouldContinueRun())
                                 InputSimulator.setPlayerYaw(tempY);
 
+                        } else if(type == EXCHANGE_AIR) {
+                            while (shouldContinueRun() && mc.player.isUnderWater()) {
+                                InputSimulator.setJump(true);
+                                try {
+                                    Thread.sleep(100);
+                                } catch (InterruptedException e) {
+                                }
+                            }
+                            InputSimulator.setJump(false);
+                            if(shouldContinueRun() && ConfigManager.autoFishAutoDiving.getValue()) {
+                                while (shouldContinueRun() && !mc.player.onGround()) {
+                                    InputSimulator.setShift(true);
+                                    try {
+                                        Thread.sleep(100);
+                                    } catch (InterruptedException e) {
+                                    }
+                                }
+                                InputSimulator.setShift(false);
+                            }
                         }
                     }
                 } catch (Exception e) {
@@ -173,6 +195,10 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
                 }
 
             }
+        }
+
+        private boolean shouldContinueRun() {
+            return isHoldingFishRod() && !InputSimulator.isInventoryOpen();
         }
     }
 
@@ -254,6 +280,13 @@ public class AutoFishListener extends AbstractFishingListener implements IMacro 
         }
         if(catchFishCount++ % (2 + ToolList.getInstance().random.nextInt(2)) == 0) {
             if(ConfigManager.autoFishAutoRotation.getValue()) antiAFKRotation.interrupt();
+        }
+        if(mc.player.onGround() &&
+                ConfigManager.autoFishAutoExchangeAirMode.getValue() &&
+                mc.player.isUnderWater() &&
+                1d * mc.player.getAirSupply() / mc.player.getMaxAirSupply() < ConfigManager.autoFishAutoExchangeAirThreshold.getValue()
+        ) {
+            antiAFKExchangeAirMode.interrupt();
         }
 
         fishTriggeredCount++;

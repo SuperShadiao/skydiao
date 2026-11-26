@@ -21,7 +21,7 @@ public class OVOOA2 extends MusicPlatform {
     private List<MusicInfo> search(String song) throws Exception {
         String name = URLEncoder.encode(song, StandardCharsets.UTF_8);
         String result;
-        try (InputStream is = fetchMusic("https://oiapi.net/API/Music_163?name=" + name + "&n=1&key=oiapi-27e1b651-bc89-5a56-b840-1a738fb3baf8")) {
+        try (InputStream is = fetchMusic("https://oiapi.net/api/Music_163?name=" + name + "&n=1&key=oiapi-27e1b651-bc89-5a56-b840-1a738fb3baf8")) {
             result = new String(is.readAllBytes(), StandardCharsets.UTF_8);
         }
         System.out.println(result);
@@ -56,7 +56,7 @@ public class OVOOA2 extends MusicPlatform {
     private List<MusicInfo> regenByID(String id0) throws Exception {
         String id = URLEncoder.encode(id0, StandardCharsets.UTF_8);
         String result;
-        try (InputStream is = fetchMusic("https://oiapi.net/API/Music_163?id=" + id + "&n=1&key=oiapi-27e1b651-bc89-5a56-b840-1a738fb3baf8")) {
+        try (InputStream is = fetchMusic("https://oiapi.net/api/Music_163?id=" + id + "&n=1&key=oiapi-27e1b651-bc89-5a56-b840-1a738fb3baf8")) {
             result = new String(is.readAllBytes(), StandardCharsets.UTF_8);
         }
         System.out.println(result);

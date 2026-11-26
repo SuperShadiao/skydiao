@@ -1,0 +1,15 @@
+{
+  "id": "zodd-1",
+  "shape": "1x1",
+  "blockCount": 30433,
+  "secrets": [
+    {
+      "secretName": "1 - Chest",
+      "category": "chest",
+      "x": 7,
+      "y": 70,
+      "z": 3
+    }
+  ],
+  "name": "Zodd"
+}

@@ -1,0 +1,22 @@
+{
+  "id": "multicolored-1",
+  "shape": "1x1",
+  "blockCount": 30400,
+  "secrets": [
+    {
+      "secretName": "1 - Superboom",
+      "category": "superboom",
+      "x": 26,
+      "y": 70,
+      "z": 11
+    },
+    {
+      "secretName": "1 - Chest",
+      "category": "chest",
+      "x": 25,
+      "y": 70,
+      "z": 4
+    }
+  ],
+  "name": "Multicolored"
+}

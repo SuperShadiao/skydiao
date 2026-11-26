@@ -48,9 +48,9 @@ public class AutoClickerListener extends AbstractListener {
     }
 
     private boolean onMouseClick(long windows, CustomFabricEvents.ClickType clickType, int state) {
-        if(mc.gui.screen() == null) {
+        if(mc.gui.screen() == null || state == 0) {
             boolean flag = false;
-            if (isRightAutoClickingEnabled()) {
+            if (isRightAutoClickingEnabled() || isRightAutoClicking) {
                 if (clickType == CustomFabricEvents.ClickType.RIGHT) {
                     isRightAutoClicking = state == 1;
                     if(isRightAutoClicking) {
@@ -60,7 +60,7 @@ public class AutoClickerListener extends AbstractListener {
                     }
                 }
             }
-            if (isLeftAutoClickingEnabled()) {
+            if (isLeftAutoClickingEnabled() || isLeftAutoClicking) {
                 if (clickType == CustomFabricEvents.ClickType.LEFT) {
                     isLeftAutoClicking = state == 1;
                     if(isLeftAutoClicking) {
@@ -95,7 +95,6 @@ public class AutoClickerListener extends AbstractListener {
             }
         } else {
             rightClickDelay = 0;
-            isRightAutoClicking = false;
         }
         if(isLeftAutoClickingEnabled()) {
             if(isLeftAutoClicking) {
@@ -108,7 +107,6 @@ public class AutoClickerListener extends AbstractListener {
             }
         } else {
             leftClickDelay = 0;
-            isLeftAutoClicking = false;
         }
     }
 

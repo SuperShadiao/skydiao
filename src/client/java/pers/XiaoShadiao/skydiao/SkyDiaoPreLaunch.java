@@ -17,8 +17,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.security.MessageDigest;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.zip.ZipInputStream;
 
@@ -35,7 +36,7 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
             new Lib(false, "jlayer-1.0.1.jar", "https://xiaoshadiao.club/3rd_lib/jlayer-1.0.1.jar", "601db87031f231fbf7a61f9d8384dde6"),
             new Lib(false, "Java-WebSocket-1.5.6.jar", "https://xiaoshadiao.club/3rd_lib/Java-WebSocket-1.5.6.jar", "0c663cf078f779f5d03fa4d02e1647e3"),
             new Lib(false, "blivemode.jar", "https://xiaoshadiao.club/3rd_lib/blivemode.jar", "3f40b7f8d8c4a14da4bc4171ec3b300f"),
-            new Lib(true, "skydiao_irc.jar", "https://xiaoshadiao.club/skydiao_closed-source_irc_file/skydiao-irc-1.jar", "c04291ce0143fe2ad4cb299caa10b234")
+            new Lib(true, "skydiao_irc.jar", "https://xiaoshadiao.club/skydiao_closed-source_irc_file/skydiao-irc-2.jar", "57c339b9f0f6c26828eb59bf7ba749ee")
     );
 
     static {
@@ -82,11 +83,12 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
             return CompletableFuture.supplyAsync(() -> {
                 int tries = 0;
                 Throwable lastError = null;
-                while(tries++ < 3) {
+                while(tries++ < 5) {
                     try {
                         log.info("Downloading lib " + name + " from " + url + " to " + getPrepareFile().getAbsolutePath());
                         log.info("If this is take too long, please try to download it and put it in the folder manually");
                         // FileUtils.copyURLToFile(new URL(url), getPrepareFile());
+                        // if(true) throw new IOException("test");
                         MultiThreadDownloader.DownloadInfo download = MultiThreadDownloader.download(url, getPrepareFile(), md5);
                         new Thread(() -> {
                             while(!download.isDone()) {
@@ -98,7 +100,7 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
                         }, "Lib Download Process").start();
                         download.waitOrThrowThrowableIfFailed();
                         verifyOrThrow(getPrepareFile());
-                        break;
+                        return null;
                     } catch (Throwable e) {
                         log.error("Failed to download lib " + name);
                         log.catching(e);
@@ -227,10 +229,10 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
     }
 
     private void moveOldLibToNewLib() {
-        List<CompletableFuture<Throwable>> downloadFutures = new ArrayList<>();
+        Map<Lib, CompletableFuture<Throwable>> downloadFutures = new HashMap<>();
         for (Lib lib : libs) {
             if(lib.isPrepareExist()) {
-                downloadFutures.add(CompletableFuture.completedFuture(null).thenCompose(o -> {
+                downloadFutures.put(lib, CompletableFuture.completedFuture(null).thenCompose(o -> {
                     Throwable error = null;
                     try {
                         moveFile(lib);
@@ -251,15 +253,28 @@ public class SkyDiaoPreLaunch implements PreLaunchEntrypoint {
                     }
                     return CompletableFuture.completedFuture(a);
                 });
-                downloadFutures.add(download);
+                downloadFutures.put(lib, download);
             }
         }
         try {
-            for (CompletableFuture<Throwable> downloadFuture : downloadFutures) {
-                Throwable throwable = downloadFuture.get();
-                if (throwable != null) {
-                    throw new RuntimeException("初次使用SkyDiao，lib库文件下载失败，小沙雕感到非常生气。请检查网络状态并尝试重启游戏！", throwable);
+//            for (Map.Entry<Lib, CompletableFuture<Throwable>> downloadFuture : downloadFutures.entrySet()) {
+//                Throwable throwable = downloadFuture.getValue().get();
+//                if (throwable != null) {
+//                    throw new RuntimeException("初次使用SkyDiao，lib库文件下载失败，小沙雕感到非常生气。请检查网络状态并尝试重启游戏！", throwable);
+//                }
+//            }
+            downloadFutures.values().removeIf(future -> future.join() == null);
+            if(!downloadFutures.isEmpty()) {
+                Throwable e = downloadFutures.values().iterator().next().get();
+                StringBuilder result = new StringBuilder("以下Lib文件下载失败:");
+                for (Lib lib : downloadFutures.keySet()) {
+                    result.append("\n")
+                            .append(lib.url)
+                            .append(" 下载到 ")
+                            .append(lib.loadFile.getAbsolutePath());
                 }
+                result.append("\n你可以选择重启客户端尝试，或者手动打开链接下载lib文件补全到对应目录。");
+                throw new RuntimeException(result.toString(), e);
             }
         } catch (Throwable e) {
             RuntimeException runtimeException = new RuntimeException("初次使用SkyDiao，lib库文件下载失败，小沙雕感到非常生气。请检查网络状态并尝试重启游戏！", e);

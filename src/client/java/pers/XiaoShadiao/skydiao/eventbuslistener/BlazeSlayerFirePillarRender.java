@@ -117,6 +117,7 @@ public class BlazeSlayerFirePillarRender extends AbstractListener {
                         if (BlazeShield.fromItem(mc.player.getMainHandItem()) == shield) {
                             RenderUtils.renderESP(wrFill, entity, shield.color.getRed() / 255.0f, shield.color.getGreen() / 255.0f, shield.color.getBlue() / 255.0f, 1, true);
                         }
+                        slayerBossESPListener.addIgnoreEntity(entity);
                     }
                 }
             });

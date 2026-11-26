@@ -9,7 +9,9 @@ import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public final class CustomFabricEvents {
 
@@ -148,14 +150,43 @@ public final class CustomFabricEvents {
         public boolean onIngameClick(ClickType type);
     }
 
-    public static final Event<@NotNull SlotRender> ON_SLOT_RENDER = EventFactory.createArrayBacked(SlotRender.class, callbacks -> (screen, guiGraphics, mouseX, mouseY, tickDelta) -> {
-        for (SlotRender callback : callbacks) {
-            callback.renderSlots(screen, guiGraphics, mouseX, mouseY, tickDelta);
+    public static final Event<@NotNull ScreenRender> ON_SLOT_RENDER = EventFactory.createArrayBacked(ScreenRender.class, callbacks -> (screen, guiGraphics, mouseX, mouseY, tickDelta) -> {
+        for (ScreenRender callback : callbacks) {
+            callback.render(screen, guiGraphics, mouseX, mouseY, tickDelta);
         }
     });
 
-    public interface SlotRender {
-        public void renderSlots(Screen screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float tickDelta);
+    public static final Event<@NotNull ScreenRender> AFTER_BACKGROUND_RENDER = EventFactory.createArrayBacked(ScreenRender.class, callbacks -> (screen, guiGraphics, mouseX, mouseY, tickDelta) -> {
+        for (ScreenRender callback : callbacks) {
+            callback.render(screen, guiGraphics, mouseX, mouseY, tickDelta);
+        }
+    });
+
+    public interface ScreenRender {
+        public void render(Screen screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float tickDelta);
+    }
+
+    public static final Event<@NotNull OnRenderItem> ON_RENDER_ITEM = EventFactory.createArrayBacked(OnRenderItem.class, callbacks -> (guiGraphics, item, mouseX, mouseY) -> {
+        for (OnRenderItem callback : callbacks) {
+            callback.renderSlots(guiGraphics, item, mouseX, mouseY);
+        }
+    });
+
+    public interface OnRenderItem {
+        public void renderSlots(GuiGraphicsExtractor graphics, ItemStack itemStack, int x, int y);
+    }
+
+    public static final Event<@NotNull OnRenderItemCountOverride> RENDER_ITEM_COUNT_OVERRIDE = EventFactory.createArrayBacked(OnRenderItemCountOverride.class, callbacks -> (item, text) -> {
+        String result = text;
+        for (OnRenderItemCountOverride callback : callbacks) {
+            String result1 = callback.overrideItemCount(item, result);
+            if(result1 != null) result = result1;
+        }
+        return result;
+    });
+
+    public interface OnRenderItemCountOverride {
+        public String overrideItemCount(ItemStack itemStack, @Nullable String text);
     }
 
     public static final Event<@NotNull ScreenReplacer> REPLACE_SCREEN = EventFactory.createArrayBacked(ScreenReplacer.class, (callbacks) -> (beforeScreen) -> {

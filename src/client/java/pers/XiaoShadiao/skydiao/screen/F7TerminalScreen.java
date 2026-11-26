@@ -19,7 +19,7 @@ import net.minecraft.world.item.Items;
 import org.apache.commons.lang3.function.ToBooleanBiFunction;
 import org.jetbrains.annotations.NotNull;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
-import pers.XiaoShadiao.skydiao.eventbuslistener.F7AutoTerminal;
+import pers.XiaoShadiao.skydiao.eventbuslistener.dungeon.F7AutoTerminal;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;

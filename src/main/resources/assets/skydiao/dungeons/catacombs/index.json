@@ -1,0 +1,875 @@
+{
+  "version": 1,
+  "source": "converted",
+  "blockIds": {
+    "1": "minecraft:andesite",
+    "2": "minecraft:bedrock",
+    "3": "minecraft:black_terracotta",
+    "4": "minecraft:chiseled_stone_bricks",
+    "5": "minecraft:clay",
+    "6": "minecraft:coarse_dirt",
+    "7": "minecraft:cobblestone",
+    "8": "minecraft:cyan_terracotta",
+    "9": "minecraft:diorite",
+    "10": "minecraft:dirt",
+    "11": "minecraft:double_stone_slab",
+    "12": "minecraft:grass_block",
+    "13": "minecraft:gray_terracotta",
+    "14": "minecraft:gray_wool",
+    "15": "minecraft:mossy_cobblestone",
+    "16": "minecraft:mossy_stone_bricks",
+    "17": "minecraft:oak_leaves",
+    "18": "minecraft:polished_andesite",
+    "19": "minecraft:polished_diorite",
+    "20": "minecraft:stone",
+    "21": "minecraft:stone_bricks"
+  },
+  "shapes": {
+    "1x1": [
+      {
+        "id": "admin-0",
+        "name": "Admin",
+        "blocks": 24459,
+        "secrets": 1
+      },
+      {
+        "id": "andesite-2",
+        "name": "Andesite",
+        "blocks": 30418,
+        "secrets": 3
+      },
+      {
+        "id": "arrow-trap-1",
+        "name": "Arrow Trap",
+        "blocks": 30537,
+        "secrets": 3
+      },
+      {
+        "id": "banners-1",
+        "name": "Banners",
+        "blocks": 29747,
+        "secrets": 2
+      },
+      {
+        "id": "basement-1",
+        "name": "Basement",
+        "blocks": 30302,
+        "secrets": 2
+      },
+      {
+        "id": "beams-2",
+        "name": "Beams",
+        "blocks": 18228,
+        "secrets": 4
+      },
+      {
+        "id": "big-red-flag-2",
+        "name": "Big Red Flag",
+        "blocks": 25904,
+        "secrets": 4
+      },
+      {
+        "id": "black-flag-3",
+        "name": "Black Flag",
+        "blocks": 33114,
+        "secrets": 5
+      },
+      {
+        "id": "blue-skulls-1",
+        "name": "Blue Skulls",
+        "blocks": 26238,
+        "secrets": 3
+      },
+      {
+        "id": "cage-1",
+        "name": "Cage",
+        "blocks": 28914,
+        "secrets": 3
+      },
+      {
+        "id": "cages-2",
+        "name": "Cages",
+        "blocks": 37953,
+        "secrets": 3
+      },
+      {
+        "id": "carpets-1",
+        "name": "Carpets",
+        "blocks": 27318,
+        "secrets": 1
+      },
+      {
+        "id": "cell-1",
+        "name": "Cell",
+        "blocks": 29167,
+        "secrets": 3
+      },
+      {
+        "id": "chains-2",
+        "name": "Chains",
+        "blocks": 23414,
+        "secrets": 5
+      },
+      {
+        "id": "cobble-wall-pillar-2",
+        "name": "Cobble Wall Pillar",
+        "blocks": 43153,
+        "secrets": 4
+      },
+      {
+        "id": "crypts-1",
+        "name": "Crypts",
+        "blocks": 30672,
+        "secrets": 3
+      },
+      {
+        "id": "dip-2",
+        "name": "Dip",
+        "blocks": 24005,
+        "secrets": 4
+      },
+      {
+        "id": "dome-2",
+        "name": "Dome",
+        "blocks": 33190,
+        "secrets": 6
+      },
+      {
+        "id": "double-diamond-3",
+        "name": "Double Diamond",
+        "blocks": 27912,
+        "secrets": 7
+      },
+      {
+        "id": "double-stair-3",
+        "name": "Double Stair",
+        "blocks": 30706,
+        "secrets": 5
+      },
+      {
+        "id": "drop-2",
+        "name": "Drop",
+        "blocks": 31038,
+        "secrets": 4
+      },
+      {
+        "id": "dueces-3",
+        "name": "Dueces",
+        "blocks": 40931,
+        "secrets": 6
+      },
+      {
+        "id": "duncan-1",
+        "name": "Duncan",
+        "blocks": 22503,
+        "secrets": 1
+      },
+      {
+        "id": "end-2",
+        "name": "End",
+        "blocks": 26559,
+        "secrets": 5
+      },
+      {
+        "id": "four-banner-1",
+        "name": "Four Banner",
+        "blocks": 27570,
+        "secrets": 1
+      },
+      {
+        "id": "golden-oasis-1",
+        "name": "Golden Oasis",
+        "blocks": 36399,
+        "secrets": 6
+      },
+      {
+        "id": "granite-2",
+        "name": "Granite",
+        "blocks": 33527,
+        "secrets": 3
+      },
+      {
+        "id": "hall-0",
+        "name": "Hall",
+        "blocks": 30310,
+        "secrets": 0
+      },
+      {
+        "id": "hanging-vines-1",
+        "name": "Hanging Vines",
+        "blocks": 23298,
+        "secrets": 2
+      },
+      {
+        "id": "jumping-skulls-1",
+        "name": "Jumping Skulls",
+        "blocks": 36088,
+        "secrets": 1
+      },
+      {
+        "id": "knight-3",
+        "name": "Knight",
+        "blocks": 27628,
+        "secrets": 4
+      },
+      {
+        "id": "lava-pool-3",
+        "name": "Lava Pool",
+        "blocks": 26996,
+        "secrets": 5
+      },
+      {
+        "id": "lava-skull-3",
+        "name": "Lava Skull",
+        "blocks": 21502,
+        "secrets": 7
+      },
+      {
+        "id": "lava-skulls-3",
+        "name": "Lava Tomb",
+        "blocks": 25255,
+        "secrets": 6
+      },
+      {
+        "id": "leaves-1",
+        "name": "Leaves",
+        "blocks": 23935,
+        "secrets": 4
+      },
+      {
+        "id": "locked-away-1",
+        "name": "Locked Away",
+        "blocks": 23601,
+        "secrets": 3
+      },
+      {
+        "id": "logs-4",
+        "name": "Logs",
+        "blocks": 20417,
+        "secrets": 7
+      },
+      {
+        "id": "long-hall-3",
+        "name": "Long Hall",
+        "blocks": 32999,
+        "secrets": 7
+      },
+      {
+        "id": "lots-of-floors-3",
+        "name": "Lots of Floors",
+        "blocks": 32135,
+        "secrets": 8
+      },
+      {
+        "id": "mini-rail-track-3",
+        "name": "Mini Rail Track",
+        "blocks": 22728,
+        "secrets": 6
+      },
+      {
+        "id": "mirror-1",
+        "name": "Mirror",
+        "blocks": 33092,
+        "secrets": 2
+      },
+      {
+        "id": "multicolored-1",
+        "name": "Multicolored",
+        "blocks": 30400,
+        "secrets": 2
+      },
+      {
+        "id": "mural-1",
+        "name": "Mural",
+        "blocks": 19723,
+        "secrets": 2
+      },
+      {
+        "id": "mushroom-1",
+        "name": "Mushroom",
+        "blocks": 27801,
+        "secrets": 2
+      },
+      {
+        "id": "overgrown-3",
+        "name": "Overgrown",
+        "blocks": 19843,
+        "secrets": 8
+      },
+      {
+        "id": "overgrown-chains-2",
+        "name": "Overgrown Chains",
+        "blocks": 16531,
+        "secrets": 4
+      },
+      {
+        "id": "painting-2",
+        "name": "Painting",
+        "blocks": 27767,
+        "secrets": 4
+      },
+      {
+        "id": "perch-2",
+        "name": "Perch",
+        "blocks": 36481,
+        "secrets": 2
+      },
+      {
+        "id": "pillars-1",
+        "name": "Pillars",
+        "blocks": 21143,
+        "secrets": 3
+      },
+      {
+        "id": "prison-cell-1",
+        "name": "Prison Cell",
+        "blocks": 30643,
+        "secrets": 2
+      },
+      {
+        "id": "quad-lava-2",
+        "name": "Quad Lava",
+        "blocks": 28863,
+        "secrets": 3
+      },
+      {
+        "id": "raccoon-4",
+        "name": "Raccoon",
+        "blocks": 20434,
+        "secrets": 8
+      },
+      {
+        "id": "red-green-3",
+        "name": "Red Green",
+        "blocks": 30425,
+        "secrets": 6
+      },
+      {
+        "id": "redstone-key-3",
+        "name": "Redstone Key",
+        "blocks": 37307,
+        "secrets": 8
+      },
+      {
+        "id": "redstone-skull-3",
+        "name": "Redstone Skull",
+        "blocks": 30298,
+        "secrets": 9
+      },
+      {
+        "id": "sanctuary-1",
+        "name": "Sanctuary",
+        "blocks": 25766,
+        "secrets": 3
+      },
+      {
+        "id": "sand-dragon-1",
+        "name": "Sand Dragon",
+        "blocks": 19411,
+        "secrets": 2
+      },
+      {
+        "id": "sarcophagus-3",
+        "name": "Sarcophagus",
+        "blocks": 41099,
+        "secrets": 6
+      },
+      {
+        "id": "scaffolding-2",
+        "name": "Scaffolding",
+        "blocks": 19710,
+        "secrets": 2
+      },
+      {
+        "id": "silvers-sword-1",
+        "name": "Silvers Sword",
+        "blocks": 26787,
+        "secrets": 3
+      },
+      {
+        "id": "slabs-2",
+        "name": "Slabs",
+        "blocks": 19124,
+        "secrets": 2
+      },
+      {
+        "id": "sloth-1",
+        "name": "Sloth",
+        "blocks": 29945,
+        "secrets": 3
+      },
+      {
+        "id": "small-stairs-2",
+        "name": "Small Stairs",
+        "blocks": 23181,
+        "secrets": 4
+      },
+      {
+        "id": "spikes-3",
+        "name": "Spikes",
+        "blocks": 28481,
+        "secrets": 6
+      },
+      {
+        "id": "steps-1",
+        "name": "Steps",
+        "blocks": 29724,
+        "secrets": 2
+      },
+      {
+        "id": "stone-window-2",
+        "name": "Stone Window",
+        "blocks": 27692,
+        "secrets": 5
+      },
+      {
+        "id": "temple-3",
+        "name": "Temple",
+        "blocks": 32006,
+        "secrets": 6
+      },
+      {
+        "id": "tombstone-2",
+        "name": "Tombstone",
+        "blocks": 25932,
+        "secrets": 4
+      },
+      {
+        "id": "tomioka-0",
+        "name": "Tomioka",
+        "blocks": 25373,
+        "secrets": 2
+      },
+      {
+        "id": "trinity-4",
+        "name": "Trinity",
+        "blocks": 23914,
+        "secrets": 9
+      },
+      {
+        "id": "water-2",
+        "name": "Water",
+        "blocks": 31926,
+        "secrets": 4
+      },
+      {
+        "id": "waterfall-2",
+        "name": "Mini Waterfall",
+        "blocks": 25979,
+        "secrets": 3
+      },
+      {
+        "id": "zodd-1",
+        "name": "Zodd",
+        "blocks": 30433,
+        "secrets": 1
+      }
+    ],
+    "1x2": [
+      {
+        "id": "archway-3",
+        "name": "Archway",
+        "blocks": 57639,
+        "secrets": 6
+      },
+      {
+        "id": "balcony-4",
+        "name": "Balcony",
+        "blocks": 93734,
+        "secrets": 10
+      },
+      {
+        "id": "bridges-6",
+        "name": "Bridges",
+        "blocks": 88001,
+        "secrets": 10
+      },
+      {
+        "id": "crypt-5",
+        "name": "Crypt",
+        "blocks": 57003,
+        "secrets": 11
+      },
+      {
+        "id": "doors-5",
+        "name": "Doors",
+        "blocks": 58749,
+        "secrets": 15
+      },
+      {
+        "id": "gold-1",
+        "name": "Gold",
+        "blocks": 55299,
+        "secrets": 3
+      },
+      {
+        "id": "grand-library-4",
+        "name": "Grand Library",
+        "blocks": 55802,
+        "secrets": 11
+      },
+      {
+        "id": "grass-ruin-3",
+        "name": "Grass Ruin",
+        "blocks": 79753,
+        "secrets": 11
+      },
+      {
+        "id": "mage-4",
+        "name": "Mage",
+        "blocks": 78269,
+        "secrets": 10
+      },
+      {
+        "id": "pedestal-5",
+        "name": "Pedestal",
+        "blocks": 42992,
+        "secrets": 9
+      },
+      {
+        "id": "pressure-plates-6",
+        "name": "Pressure Plates",
+        "blocks": 71530,
+        "secrets": 16
+      },
+      {
+        "id": "purple-flags-5",
+        "name": "Purple Flags",
+        "blocks": 80726,
+        "secrets": 9
+      },
+      {
+        "id": "redstone-warrior-3",
+        "name": "Redstone Warrior",
+        "blocks": 71065,
+        "secrets": 9
+      },
+      {
+        "id": "skull-2",
+        "name": "Skull",
+        "blocks": 45010,
+        "secrets": 3
+      }
+    ],
+    "1x3": [
+      {
+        "id": "catwalk-6",
+        "name": "Catwalk",
+        "blocks": 96309,
+        "secrets": 11
+      },
+      {
+        "id": "deathmite-6",
+        "name": "Deathmite",
+        "blocks": 80883,
+        "secrets": 13
+      },
+      {
+        "id": "diagonal-4",
+        "name": "Diagonal",
+        "blocks": 108788,
+        "secrets": 10
+      },
+      {
+        "id": "gravel-6",
+        "name": "Gravel",
+        "blocks": 91758,
+        "secrets": 11
+      },
+      {
+        "id": "red-blue-4",
+        "name": "Red Blue",
+        "blocks": 45318,
+        "secrets": 9
+      },
+      {
+        "id": "slime-5",
+        "name": "Slime",
+        "blocks": 122071,
+        "secrets": 9
+      },
+      {
+        "id": "wizard-4",
+        "name": "Wizard",
+        "blocks": 83976,
+        "secrets": 8
+      }
+    ],
+    "1x4": [
+      {
+        "id": "hallway-3",
+        "name": "Hallway",
+        "blocks": 96184,
+        "secrets": 8
+      },
+      {
+        "id": "mossy-4",
+        "name": "Mossy",
+        "blocks": 75875,
+        "secrets": 9
+      },
+      {
+        "id": "pit-5",
+        "name": "Pit",
+        "blocks": 101840,
+        "secrets": 7
+      },
+      {
+        "id": "quartz-knight-7",
+        "name": "Quartz Knight",
+        "blocks": 164839,
+        "secrets": 11
+      },
+      {
+        "id": "sewer-7",
+        "name": "Sewer",
+        "blocks": 179357,
+        "secrets": 18
+      },
+      {
+        "id": "waterfall-8",
+        "name": "Waterfall",
+        "blocks": 151532,
+        "secrets": 14
+      }
+    ],
+    "2x2": [
+      {
+        "id": "atlas-6",
+        "name": "Atlas",
+        "blocks": 149130,
+        "secrets": 14
+      },
+      {
+        "id": "buttons-5",
+        "name": "Buttons",
+        "blocks": 136033,
+        "secrets": 15
+      },
+      {
+        "id": "cathedral-8",
+        "name": "Cathedral",
+        "blocks": 111528,
+        "secrets": 11
+      },
+      {
+        "id": "flags-7",
+        "name": "Flags",
+        "blocks": 153092,
+        "secrets": 11
+      },
+      {
+        "id": "mithril-cave-10",
+        "name": "Mines",
+        "blocks": 224191,
+        "secrets": 24
+      },
+      {
+        "id": "museum-5",
+        "name": "Museum",
+        "blocks": 155121,
+        "secrets": 12
+      },
+      {
+        "id": "rail-track-9",
+        "name": "Rail Track",
+        "blocks": 165294,
+        "secrets": 16
+      },
+      {
+        "id": "stairs-4",
+        "name": "Stairs",
+        "blocks": 82227,
+        "secrets": 7
+      },
+      {
+        "id": "super-tall-6",
+        "name": "Super Tall",
+        "blocks": 267635,
+        "secrets": 17
+      }
+    ],
+    "l-shape": [
+      {
+        "id": "altar-6",
+        "name": "Altar",
+        "blocks": 130506,
+        "secrets": 10
+      },
+      {
+        "id": "chambers-5",
+        "name": "Chambers",
+        "blocks": 91737,
+        "secrets": 15
+      },
+      {
+        "id": "dino-dig-site-4",
+        "name": "Dino Dig Site",
+        "blocks": 115185,
+        "secrets": 8
+      },
+      {
+        "id": "draw-bridge-6",
+        "name": "Draw Bridge",
+        "blocks": 73371,
+        "secrets": 12
+      },
+      {
+        "id": "lava-ravine-6",
+        "name": "Lava Ravine",
+        "blocks": 148396,
+        "secrets": 13
+      },
+      {
+        "id": "layers-8",
+        "name": "Layers",
+        "blocks": 78277,
+        "secrets": 16
+      },
+      {
+        "id": "market-5",
+        "name": "Market",
+        "blocks": 87081,
+        "secrets": 13
+      },
+      {
+        "id": "melon-7",
+        "name": "Melon",
+        "blocks": 64261,
+        "secrets": 15
+      },
+      {
+        "id": "spider-9",
+        "name": "Spider",
+        "blocks": 157147,
+        "secrets": 17
+      },
+      {
+        "id": "well-7",
+        "name": "Well",
+        "blocks": 136209,
+        "secrets": 13
+      },
+      {
+        "id": "withermancers-4",
+        "name": "Withermancers",
+        "blocks": 111967,
+        "secrets": 10
+      }
+    ],
+    "miniboss": [
+      {
+        "id": "arches-0",
+        "name": "Arches",
+        "blocks": 22047,
+        "secrets": 0
+      },
+      {
+        "id": "corridor-0",
+        "name": "Corridor",
+        "blocks": 17582,
+        "secrets": 0
+      },
+      {
+        "id": "dragon-skull-0",
+        "name": "Dragon Skull",
+        "blocks": 23415,
+        "secrets": 0
+      },
+      {
+        "id": "midas-0",
+        "name": "Midas",
+        "blocks": 18464,
+        "secrets": 0
+      },
+      {
+        "id": "ritual-0",
+        "name": "Ritual",
+        "blocks": 23890,
+        "secrets": 0
+      }
+    ],
+    "puzzle": [
+      {
+        "id": "blaze-room-1-high",
+        "name": "*Higher* or Lower",
+        "blocks": 47044,
+        "secrets": 2
+      },
+      {
+        "id": "blaze-room-1-low",
+        "name": "Higher or *Lower*",
+        "blocks": 47021,
+        "secrets": 2
+      },
+      {
+        "id": "boxes-room",
+        "name": "Boulder",
+        "blocks": 26756,
+        "secrets": 0
+      },
+      {
+        "id": "creeper-room",
+        "name": "Creeper Beams",
+        "blocks": 35595,
+        "secrets": 0
+      },
+      {
+        "id": "ice-path",
+        "name": "Ice Fill",
+        "blocks": 28618,
+        "secrets": 0
+      },
+      {
+        "id": "ice-silverfish-room",
+        "name": "Ice Path",
+        "blocks": 32902,
+        "secrets": 0
+      },
+      {
+        "id": "teleport-pad-room",
+        "name": "Teleport Maze",
+        "blocks": 30037,
+        "secrets": 0
+      },
+      {
+        "id": "three-chests",
+        "name": "Three Weirdos",
+        "blocks": 32970,
+        "secrets": 0
+      },
+      {
+        "id": "tic-tac-toe-1",
+        "name": "Tic Tac Toe",
+        "blocks": 31432,
+        "secrets": 3
+      },
+      {
+        "id": "trivia-room",
+        "name": "Quiz",
+        "blocks": 34729,
+        "secrets": 0
+      },
+      {
+        "id": "water-puzzle",
+        "name": "Water Board",
+        "blocks": 34529,
+        "secrets": 0
+      }
+    ],
+    "trap": [
+      {
+        "id": "trap-hard-4",
+        "name": "Old Trap",
+        "blocks": 25268,
+        "secrets": 7
+      },
+      {
+        "id": "trap-very-hard-3",
+        "name": "New Trap",
+        "blocks": 27248,
+        "secrets": 5
+      }
+    ]
+  }
+}

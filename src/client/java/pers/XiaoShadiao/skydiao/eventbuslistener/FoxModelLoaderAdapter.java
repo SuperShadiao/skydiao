@@ -36,7 +36,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
 import org.apache.commons.lang3.StringUtils;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
-import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatClientManager;
+import pers.XiaoShadiao.skydiao.irc.XSDIRCConfig;
 import pers.XiaoShadiao.skydiao.ircinner.api.v1.ChatPacket;
 import pers.XiaoShadiao.skydiao.utils.StatusManager;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
@@ -252,7 +252,7 @@ public class FoxModelLoaderAdapter extends AbstractListener implements ICustomSk
     }
 
     private static void trySendToIRC(ChatPacket packet) {
-        ChatClientManager.trySend(packet, false);
+        XSDIRCConfig.IRC.trySend(packet, false);
     }
 
     private void loadModel(byte[] data, String id) {
