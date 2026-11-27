@@ -41,12 +41,15 @@ public class ContainerStoragePreviewScreen
         extends AbstractContainerScreen<AbstractContainerMenu>
         implements IContainerScreenHelper {
 
-    private static final Identifier SLOT_SPRITE =
-            Identifier.withDefaultNamespace("container/slot");
+    /** 使用模组自带槽位贴图，避免材质包把 minecraft:container/slot 改成透明后槽位消失。 */
+    private static final Identifier SLOT_TEXTURE =
+            Identifier.fromNamespaceAndPath("skydiao", "textures/gui/storage_slot.png");
     private static final Identifier SLOT_HIGHLIGHT_FRONT =
             Identifier.withDefaultNamespace("container/slot_highlight_front");
     private static final int CARD_WIDTH = 168;
-    private static final int CARD_GAP = 10; 
+    /** 除玩家背包外，卡片右侧额外多画 1px。 */
+    private static final int CARD_RIGHT_EXTRA = 2;
+    private static final int CARD_GAP = 10;
     private static final int SIDE_PADDING = 10;
     private static final int CONTENT_TOP = 30;
     private static final int TITLE_HEIGHT = 14;
@@ -259,24 +262,25 @@ public class ContainerStoragePreviewScreen
     private void drawCard(GuiGraphicsExtractor graphics, Card card,
                           int y, int mouseX, int mouseY) {
         int x = card.x;
+        int right = x + CARD_WIDTH + CARD_RIGHT_EXTRA;
         boolean active = card.page.equals(activePage);
         boolean cached = card.rows > 0;
         boolean dimmed = !active;
-        boolean hovered = !active && mouseX >= x && mouseX < x + CARD_WIDTH
+        boolean hovered = !active && mouseX >= x && mouseX < right
                 && mouseY >= y && mouseY < y + card.height;
 
         int background = active ? 0xEE1F2A1F : (cached ? 0xEE1B1B1B : 0xEE351515);
         if (hovered) {
             background = cached ? 0xEE2A2A2A : 0xEE4A1C1C;
         }
-        graphics.fill(x, y, x + CARD_WIDTH, y + card.height, background);
+        graphics.fill(x, y, right, y + card.height, background);
 
         int border = active || hovered ? 0xFFFFD54F
                 : (cached ? 0xFF4A4A4A : 0xFF8A3030);
-        graphics.fill(x, y, x + CARD_WIDTH, y + 1, border);
-        graphics.fill(x, y + card.height - 1, x + CARD_WIDTH, y + card.height, border);
+        graphics.fill(x, y, right, y + 1, border);
+        graphics.fill(x, y + card.height - 1, right, y + card.height, border);
         graphics.fill(x, y, x + 1, y + card.height, border);
-        graphics.fill(x + CARD_WIDTH - 1, y, x + CARD_WIDTH, y + card.height, border);
+        graphics.fill(right - 1, y, right, y + card.height, border);
 
         int titleColor = card.page.kind() == ContainerPage.Kind.ENDER_CHEST
                 ? 0xFF7FDBFF : 0xFFFFC66D;
@@ -317,8 +321,7 @@ public class ContainerStoragePreviewScreen
             int[] lineCol = getLineColByIndex(i);
             int slotX = x + 4 + lineCol[1] * SLOT_SIZE;
             int currentY = slotY + lineCol[0] * SLOT_SIZE;
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_SPRITE,
-                    slotX, currentY, SLOT_SIZE, SLOT_SIZE);
+            drawSlot(graphics, slotX, currentY);
 
             ItemStack stack;
             if (active) {
@@ -351,7 +354,7 @@ public class ContainerStoragePreviewScreen
                     mouseX, mouseY);
         }
         if (dimmed) {
-            graphics.fill(x, y, x + CARD_WIDTH, y + card.height, INACTIVE_OVERLAY);
+            graphics.fill(x, y, right, y + card.height, INACTIVE_OVERLAY);
         }
     }
 
@@ -370,27 +373,28 @@ public class ContainerStoragePreviewScreen
 
     /** 常驻在玩家背包左侧的 Storage 入口卡片：固定 4 行（去掉菜单第 1、3 行）。 */
     private void drawEntryCard(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+        int right = entryCardX + CARD_WIDTH + CARD_RIGHT_EXTRA;
         boolean live = entryMenuActive();
-        boolean hovered = mouseX >= entryCardX && mouseX < entryCardX + CARD_WIDTH
+        boolean hovered = mouseX >= entryCardX && mouseX < right
                 && mouseY >= entryCardY && mouseY < entryCardY + ENTRY_CARD_HEIGHT;
 
         graphics.fill(entryCardX, entryCardY,
-                entryCardX + CARD_WIDTH, entryCardY + ENTRY_CARD_HEIGHT, 0xEE1B1B1B);
+                right, entryCardY + ENTRY_CARD_HEIGHT, 0xEE1B1B1B);
         int border = hovered && !live ? 0xFFFFD54F : 0xFF4A4A4A;
         graphics.fill(entryCardX, entryCardY,
-                entryCardX + CARD_WIDTH, entryCardY + 1, border);
+                right, entryCardY + 1, border);
         graphics.fill(entryCardX, entryCardY + ENTRY_CARD_HEIGHT - 1,
-                entryCardX + CARD_WIDTH, entryCardY + ENTRY_CARD_HEIGHT, border);
+                right, entryCardY + ENTRY_CARD_HEIGHT, border);
         graphics.fill(entryCardX, entryCardY,
                 entryCardX + 1, entryCardY + ENTRY_CARD_HEIGHT, border);
-        graphics.fill(entryCardX + CARD_WIDTH - 1, entryCardY,
-                entryCardX + CARD_WIDTH, entryCardY + ENTRY_CARD_HEIGHT, border);
+        graphics.fill(right - 1, entryCardY,
+                right, entryCardY + ENTRY_CARD_HEIGHT, border);
         graphics.text(font, "入口容器", entryCardX + 5, entryCardY + 4, 0xFFFFD54F);
 
         if (!live) {
             // 未选中时保持 4x9 尺寸，不显示空槽位和物品，只显示入口文字。
             graphics.fill(entryCardX, entryCardY,
-                    entryCardX + CARD_WIDTH, entryCardY + ENTRY_CARD_HEIGHT, INACTIVE_OVERLAY);
+                    right, entryCardY + ENTRY_CARD_HEIGHT, INACTIVE_OVERLAY);
             graphics.centeredText(font, Component.literal("点击打开"),
                     entryCardX + CARD_WIDTH / 2,
                     entryCardY + (TITLE_HEIGHT + ENTRY_ROWS * SLOT_SIZE) / 2 - 4,
@@ -400,8 +404,7 @@ public class ContainerStoragePreviewScreen
 
         for (int i = 0; i < ENTRY_ROWS * 9; i++) {
             int[] pos = entrySlotPosition(i);
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_SPRITE,
-                    pos[0], pos[1], SLOT_SIZE, SLOT_SIZE);
+            drawSlot(graphics, pos[0], pos[1]);
 
             int source = entrySourceIndex(i);
             if (source >= realMenu.slots.size()) {
@@ -429,6 +432,11 @@ public class ContainerStoragePreviewScreen
         };
     }
 
+    private static void drawSlot(GuiGraphicsExtractor graphics, int x, int y) {
+        graphics.blit(RenderPipelines.GUI_TEXTURED, SLOT_TEXTURE,
+                x, y, 0, 0, SLOT_SIZE, SLOT_SIZE, SLOT_SIZE, SLOT_SIZE);
+    }
+
     private void drawPlayerPanel(GuiGraphicsExtractor graphics) {
         graphics.fill(playerPanelX, playerPanelY,
                 playerPanelX + PLAYER_PANEL_WIDTH, playerPanelY + PLAYER_PANEL_HEIGHT, 0xEE1B1B1B);
@@ -446,8 +454,7 @@ public class ContainerStoragePreviewScreen
                 ? minecraft.player.getInventory().getNonEquipmentItems() : null;
         for (int i = 0; i < 36; i++) {
             int[] pos = playerSlotPosition(i);
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_SPRITE,
-                    pos[0], pos[1], SLOT_SIZE, SLOT_SIZE);
+            drawSlot(graphics, pos[0], pos[1]);
 
             ItemStack stack;
             if (realMenu != null) {
@@ -564,7 +571,7 @@ public class ContainerStoragePreviewScreen
                 && click.y() >= CONTENT_TOP && click.y() < contentBottom) {
             for (Card card : cards) {
                 int cardY = card.y - (int) scroll;
-                if (click.x() >= card.x && click.x() < card.x + CARD_WIDTH
+                if (click.x() >= card.x && click.x() < card.x + CARD_WIDTH + CARD_RIGHT_EXTRA
                         && click.y() >= cardY && click.y() < cardY + card.height) {
                     if (!card.page.equals(activePage)) {
                         openPage(card.page);
@@ -618,7 +625,7 @@ public class ContainerStoragePreviewScreen
     }
 
     private boolean isInsideEntryCard(double mouseX, double mouseY) {
-        return mouseX >= entryCardX && mouseX < entryCardX + CARD_WIDTH
+        return mouseX >= entryCardX && mouseX < entryCardX + CARD_WIDTH + CARD_RIGHT_EXTRA
                 && mouseY >= entryCardY && mouseY < entryCardY + ENTRY_CARD_HEIGHT;
     }
 
