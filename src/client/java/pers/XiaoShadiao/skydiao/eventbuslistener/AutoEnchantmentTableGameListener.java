@@ -220,7 +220,7 @@ public class AutoEnchantmentTableGameListener extends AbstractListener {
 
         int count = 0;
         for (ItemStackPack value : knownButHiddenItems.values()) {
-            if(value.equals(new ItemStackPack(itemStack))) count++;
+            if(Objects.equals(value, new ItemStackPack(itemStack))) count++;
         }
         if(count > 0) guiGraphicsExtractor.fill(x, y, x + 16, y + 16, count > 1 ? 0xFF00FF00 : 0xFFFF0000);
 

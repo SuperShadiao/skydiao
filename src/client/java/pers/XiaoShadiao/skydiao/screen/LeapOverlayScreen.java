@@ -17,6 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.ResolvableProfile;
+import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
@@ -97,7 +98,7 @@ public class LeapOverlayScreen extends AbstractContainerScreen<ChestMenu> {
     private UUID hoveredMapPlayer;
 
     public LeapOverlayScreen(ChestMenu menu, Component title) {
-        super(menu, ToolList.mc.player.getInventory(), title);
+        super(menu, ToolList.mc.player.getInventory(), title, 450, 500);
         this.menu = menu;
         Integer configured = ConfigManager.dungeonLeapMenuButtonSize.getValue();
         int height = configured == null ? DEFAULT_BUTTON_HEIGHT : configured;
@@ -310,7 +311,7 @@ public class LeapOverlayScreen extends AbstractContainerScreen<ChestMenu> {
 
     @Override
     public void extractRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
-        super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
+        // super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 
         Entry buttonHovered = entryAt(mouseX, mouseY);
         if (mapVisible) {
@@ -452,6 +453,11 @@ public class LeapOverlayScreen extends AbstractContainerScreen<ChestMenu> {
             // 地图被隐藏/恢复（例如进入 Boss 房）时重新排版
             layout();
         }
+    }
+
+    @Override
+    public void extractBackground(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        extractTransparentBackground(graphics);
     }
 
     @Override

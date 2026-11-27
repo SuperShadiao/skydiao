@@ -485,7 +485,7 @@ public class F7TerminalScreen extends AbstractContainerScreen<@NotNull ChestMenu
         if(background == 1) {
             extractBlurredBackground(graphics);
         } else if(background == 0) {
-            extractMenuBackground(graphics);
+            extractTransparentBackground(graphics);
         }
 
         // graphics.fill(width / 2 - (4 * buttonSize + buttonSpacing * 2), getTopY(), width / 2 + (4 * buttonSize + buttonSpacing * 2), getBottumY(), 0xFF000000);

@@ -11,6 +11,7 @@ import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
@@ -37,7 +38,7 @@ import java.util.regex.Pattern;
 /**
  * 地牢地图扫描：从快捷栏的地图物品解出入口、房间尺寸、玩家所在格、当前房间模板和勾叉状态。
  *
- * <p>每 {@value #TICK_INTERVAL} tick 跑一次。房间识别只在玩家换了物理格时执行（失败则每
+ * <p>每 {@value #MAX_SCAN_INTERVAL} tick 跑一次。房间识别只在玩家换了物理格时执行（失败则每
  * {@value #RETRY_INTERVAL} tick 重试一次），识别结果按物理格缓存，所以同一个房间只会算一次。
  *
  * <p>结果通过 {@link #getCurrent()} 暴露给 HUD 使用。
@@ -369,6 +370,17 @@ public class DungeonMapScanListener extends AbstractListener {
                     // 刚踏进新房间时动作栏还是上一个房间的秘密数，先别记到新格子上
                     if (key != lastPlayerCell || tick < secretPauseUntil) return false;
                     secrets.put(key, new int[]{Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2))});
+                }
+            }
+        } else if(packet instanceof ClientboundContainerSetSlotPacket packet1) {
+            if (map == null && packet1.getContainerId() == 0 && packet1.getSlot() == 44) {
+                ItemStack itemStack = packet1.getItem();
+                MapId id = itemStack.get(DataComponents.MAP_ID);
+                if (id != null) {
+                    MapItemSavedData data = MapItem.getSavedData(id, mc.level);
+                    if (data != null) {
+                        map = data;
+                    }
                 }
             }
         }

@@ -787,6 +787,11 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                     "[BOSS] Wither King: Your skills have faded humans.").contains(message)) {
                 addStarRailNotification("未在对应出生点击杀凋零龙, 未能对凋零王造成伤害!", StarRailNotification.Type.warning);
             }
+            if (Set.of(
+                    "[BOSS] Wither King: Foolish! That statue has already crumbled!"
+            ).contains(message)) {
+                addStarRailNotification("此凋零龙的灵魂已经消散, 无法再次对凋零王造成伤害...", StarRailNotification.Type.warning);
+            }
         }
         if(message.contains(">") && message.contains("[SkyDiao]") && message.contains("(SS Leap)")) {
             stage3LeapTip = true;

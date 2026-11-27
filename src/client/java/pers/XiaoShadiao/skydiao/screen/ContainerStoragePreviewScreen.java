@@ -54,6 +54,8 @@ public class ContainerStoragePreviewScreen
     private static final int CONTENT_TOP = 30;
     private static final int TITLE_HEIGHT = 14;
     private static final int SLOT_SIZE = 18;
+    /** 槽位判定相对渲染位置的偏移修正，让高亮和点击区域与物品对齐。 */
+    private static final int SLOT_HIT_OFFSET = 1;
     private static final int MISSING_HEIGHT = 58;
     private static final int PLAYER_PANEL_WIDTH = SLOT_SIZE * 9 + 8;
     private static final int PLAYER_PANEL_HEIGHT = SLOT_SIZE * 4 + 8;
@@ -341,8 +343,10 @@ public class ContainerStoragePreviewScreen
             }
             graphics.itemDecorations(font, stack, slotX + 1, currentY + 1);
 
-            if (!active && mouseX >= slotX && mouseX < slotX + 16
-                    && mouseY >= currentY && mouseY < currentY + 16) {
+            if (!active && mouseX >= slotX + SLOT_HIT_OFFSET
+                    && mouseX < slotX + SLOT_HIT_OFFSET + 16
+                    && mouseY >= currentY + SLOT_HIT_OFFSET
+                    && mouseY < currentY + SLOT_HIT_OFFSET + 16) {
                 overItem = true;
                 graphics.setTooltipForNextFrame(font, stack, mouseX, mouseY);
             }
@@ -501,9 +505,11 @@ public class ContainerStoragePreviewScreen
                 if (!isSlotVisible(slotY)) {
                     continue;
                 }
-                if (mouseX >= slotX && mouseX < slotX + 16
-                        && mouseY >= slotY && mouseY < slotY + 16) {
-                    return new HoveredSlot(realMenu.slots.get(9 + i), slotX, slotY);
+                int hitX = slotX + SLOT_HIT_OFFSET;
+                int hitY = slotY + SLOT_HIT_OFFSET;
+                if (mouseX >= hitX && mouseX < hitX + 16
+                        && mouseY >= hitY && mouseY < hitY + 16) {
+                    return new HoveredSlot(realMenu.slots.get(9 + i), hitX, hitY);
                 }
             }
         }
@@ -514,17 +520,21 @@ public class ContainerStoragePreviewScreen
                     break;
                 }
                 int[] pos = entrySlotPosition(i);
-                if (mouseX >= pos[0] && mouseX < pos[0] + 16
-                        && mouseY >= pos[1] && mouseY < pos[1] + 16) {
-                    return new HoveredSlot(realMenu.slots.get(source), pos[0], pos[1]);
+                int hitX = pos[0] + SLOT_HIT_OFFSET;
+                int hitY = pos[1] + SLOT_HIT_OFFSET;
+                if (mouseX >= hitX && mouseX < hitX + 16
+                        && mouseY >= hitY && mouseY < hitY + 16) {
+                    return new HoveredSlot(realMenu.slots.get(source), hitX, hitY);
                 }
             }
         }
         for (Map.Entry<Integer, Slot> entry : playerSlots.entrySet()) {
             int[] pos = playerSlotPosition(entry.getKey());
-            if (mouseX >= pos[0] && mouseX < pos[0] + 16
-                    && mouseY >= pos[1] && mouseY < pos[1] + 16) {
-                return new HoveredSlot(entry.getValue(), pos[0], pos[1]);
+            int hitX = pos[0] + SLOT_HIT_OFFSET;
+            int hitY = pos[1] + SLOT_HIT_OFFSET;
+            if (mouseX >= hitX && mouseX < hitX + 16
+                    && mouseY >= hitY && mouseY < hitY + 16) {
+                return new HoveredSlot(entry.getValue(), hitX, hitY);
             }
         }
         return null;
