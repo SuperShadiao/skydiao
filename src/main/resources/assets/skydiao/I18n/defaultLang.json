@@ -1287,6 +1287,10 @@
       "configname": "§eM7凋零龙ESP",
       "description": "§e根据凋零龙位置及其血量选择性渲染ESP"
     },
+    "f7witherdragonspawnwaypoint": {
+      "configname": "§eM7凋零龙生成倒计时",
+      "description": "§e在凋零龙生成点上方显示生成倒计时Waypoint"
+    },
     "f7drawstormfireballtarget": {
       "configname": "§eF7渲染Storm火球落点",
       "description": "§e标记出Storm火球的飞行路径和其落地点"
@@ -1739,6 +1743,10 @@
     "etherwarpcannotwarppreviewcolor": {
       "configname": "§eEtherwarp不能传送预览颜色",
       "description": "§e设置手持AOTV潜行时, 瞄准的位置不能Etherwarp传送的预览的颜色"
+    },
+    "f7maxorcrystalesp": {
+      "configname": "§eMaxor Crystal ESP",
+      "description": "§e高亮显示Maxor阶段的水晶"
     },
 
     "about1": "§e小沙雕的QQ: 3381949033",

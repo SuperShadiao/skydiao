@@ -54,6 +54,7 @@
     "MixinHttpUtilDownload",
     "MixinIngameClick",
     "MixinInputSimulatorHook",
+    "MixinKeyMappingFix",
     "MixinLevelRenderer",
     "MixinLevelRendererAccessor",
     "MixinMinecraftServicesSessionService",

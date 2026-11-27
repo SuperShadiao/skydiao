@@ -60,7 +60,8 @@ public class StatusBarsHUD extends XSDHUD {
         HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR,
                 Identifier.fromNamespaceAndPath("skydiao", "status_bars"), this);
 
-        // 用自绘条替代原版血条、饥饿条、氧气条和经验条；关闭功能或不在 Skyblock 时保持原样
+        // 用自绘条替代原版护甲条、血条、饥饿条、氧气条和经验条；关闭功能或不在 Skyblock 时保持原样
+        hideWhenEnabled(VanillaHudElements.ARMOR_BAR);
         hideWhenEnabled(VanillaHudElements.HEALTH_BAR);
         hideWhenEnabled(VanillaHudElements.FOOD_BAR);
         hideWhenEnabled(VanillaHudElements.AIR_BAR);

@@ -13,12 +13,14 @@ import net.minecraft.client.gui.Hud;
 import net.minecraft.client.gui.components.LerpingBossEvent;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketProcessor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
@@ -27,6 +29,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -103,25 +106,42 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
 
     private record WitherDragonData(int entityId, ColorType colorType) {
         private enum ColorType {
-            GREEN(new BlockPos(26, 6, 94), new BlockPos(32, 23, 94), Color.GREEN, "Apex Dragon"),
-            RED(new BlockPos(26, 6, 59), new BlockPos(32, 22, 59), Color.RED, "Power Dragon"),
-            ORANGE(new BlockPos(86, 6, 56), new BlockPos(80, 23, 56), Color.ORANGE, "Flame Dragon"),
-            BLUE(new BlockPos(85, 6, 94), new BlockPos(79, 23, 94), Color.BLUE, "Ice Dragon"),
-            PURPLE(new BlockPos(56, 8, 126), new BlockPos(56, 22, 120), Color.MAGENTA, "Soul Dragon"),
+            GREEN(new BlockPos(26, 6, 94), new BlockPos(32, 23, 94), Color.GREEN, "Apex Dragon", "绿色", "§a"),
+            RED(new BlockPos(26, 6, 59), new BlockPos(32, 22, 59), Color.RED, "Power Dragon", "红色", "§c"),
+            ORANGE(new BlockPos(86, 6, 56), new BlockPos(80, 23, 56), Color.ORANGE, "Flame Dragon", "橙色", "§6"),
+            BLUE(new BlockPos(85, 6, 94), new BlockPos(79, 23, 94), Color.BLUE, "Ice Dragon", "蓝色", "§b"),
+            PURPLE(new BlockPos(56, 8, 126), new BlockPos(56, 22, 120), Color.MAGENTA, "Soul Dragon", "紫色", "§5"),
             ;
             private final BlockPos spawnPos;
             private final BlockPos deathDetection;
             private final Color color;
             private final String name;
-            ColorType(BlockPos pos, BlockPos deathDetection, Color color, String name) {
+            private final String chineseName;
+            private final String colorCode;
+            ColorType(BlockPos pos, BlockPos deathDetection, Color color, String name, String chineseName, String colorCode) {
                 this.spawnPos = pos;
                 this.deathDetection = deathDetection;
                 this.color = color;
                 this.name = name;
+                this.chineseName = chineseName;
+                this.colorCode = colorCode;
             }
 
             private double horizontalSpawnDistanceSqrToEntity(Entity entity) {
                 return entity.position().horizontal().distanceToSqr(spawnPos.getX() + 0.5, 0, spawnPos.getZ() + 0.5);
+            }
+
+            private Vec3 spawnCountdownPos() {
+                return new Vec3(spawnPos.getX() + 0.5, 15, spawnPos.getZ() + 0.5);
+            }
+
+            private String englishColorName() {
+                String n = name();
+                return n.charAt(0) + n.substring(1).toLowerCase(Locale.ROOT);
+            }
+
+            private boolean matchesSpawnParticle(double x, double z) {
+                return Math.abs(x - spawnPos.getX()) <= 3 && Math.abs(z - spawnPos.getZ()) <= 3;
             }
 
             private boolean isDragonInSpawnArea(EnderDragon dragon) {
@@ -146,6 +166,9 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         }
     }
     private final List<WitherDragonData> witherDragons = new ArrayList<>();
+    /** 凋零龙生成点 -> 预计生成时的 tick(检测到生成粒子后 100 tick, 即 5 秒) */
+    private final Map<WitherDragonData.ColorType, Long> dragonSpawnCountdown = new EnumMap<>(WitherDragonData.ColorType.class);
+    private long dragonTimerTick;
 
     @Override
     public int getStage() {
@@ -393,6 +416,8 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
             tempDisableRealHealthDetect = false;
             stage5DragonCount = 0;
             witherDragons.clear();
+            dragonSpawnCountdown.clear();
+            dragonTimerTick = 0;
         });
         LevelRenderEvents.END_MAIN.register(this::onLastRender);
         CustomFabricEvents.ON_INGAME_CLICK.register(this::onIngameClick);
@@ -448,6 +473,16 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         }
         if(ToolList.getInstance().isDevEnvironment()) {
             if(f7BossRealHealth != null) RenderUtils.renderTrace(wrThrough1, f7BossRealHealth, 1, 1, 1, 1);
+        }
+        if(currentStage == 1 && ConfigManager.f7MaxorCrystalESP.getValue()) {
+            for (Entity entity : mc.level.entitiesForRendering()) {
+                if (!(entity instanceof EndCrystal endCrystal)) continue;
+                if(endCrystal.getY() <= 227) continue;
+
+                RenderUtils.renderTrace(wr1, endCrystal, 0.4f, 0.11f, 1f, 1f);
+                RenderUtils.renderESP(wr2, endCrystal, 0.4f, 0.11f, 1f, 1f, true);
+                RenderUtils.renderESP(wr1, endCrystal, 0.4f, 0.11f, 1f, 1f, false);
+            }
         }
         if(currentStage == 2 && ConfigManager.f7DrawStormFireballTarget.getValue()) {
             for (Entity entity : mc.level.entitiesForRendering()) {
@@ -549,6 +584,15 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
                 i++;
             }
         }
+        if(ConfigManager.f7WitherDragonSpawnWaypoint.getValue() && !dragonSpawnCountdown.isEmpty()) {
+            for (Map.Entry<WitherDragonData.ColorType, Long> entry : dragonSpawnCountdown.entrySet()) {
+                long remainTick = entry.getValue() - dragonTimerTick;
+                if(remainTick <= 0) continue;
+                String timerColor = remainTick <= 20 ? "§c" : remainTick <= 60 ? "§e" : "§a";
+                Component label = Component.literal(entry.getKey().colorCode + entry.getKey().englishColorName() + " " + timerColor + String.format("%.1fs", remainTick / 20f));
+                RenderUtils.renderWaypoint(context, entry.getKey().spawnCountdownPos(), label, 1.414f);
+            }
+        }
         wr2.finishDraw();
         wr1.finishDraw();
         stage4PlatformHasBlock = flag;
@@ -558,6 +602,9 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         if(mc.player == null || mc.level == null || /*isInMasterDungeonFloor() || */(!passWatcherFlag && !isInCorrectDungeon())) return;
 
         masterFloorFlag |= isInMasterDungeonFloor();
+
+        dragonTimerTick++;
+        dragonSpawnCountdown.entrySet().removeIf(entry -> entry.getValue() <= dragonTimerTick);
 
         MixinBossbarEventGetter bossbarEventGetter = (MixinBossbarEventGetter) mc.gui.hud.getBossOverlay();
         boolean[] flag = new boolean[] {false};
@@ -737,6 +784,8 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         isDoingSimonSays = false;
         targetsimonSaysButton.clear();
         ssCursor = 0;
+        dragonSpawnCountdown.clear();
+        dragonTimerTick = 0;
     }
 
     private boolean stage1LaserFlag = false;
@@ -812,6 +861,9 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
     private boolean onPacket(Packet<?> packet, PacketListener packetListener, PacketProcessor packetProcessor) {
         if(mc.level == null || !StatusManager.get().isInDungeon()) {
             return false;
+        }
+        if(packet instanceof ClientboundLevelParticlesPacket particlesPacket && isDragonSpawnParticle(particlesPacket)) {
+            delayTickExecutor.delayExec(() -> onDragonSpawnParticle(particlesPacket), 0);
         }
         if(packet instanceof ClientboundAddEntityPacket addEntityPacket) {
             if (addEntityPacket.getType() == EntityTypes.ENDER_DRAGON) {
@@ -938,6 +990,35 @@ public class DungeonF7BossbarListener extends AbstractDungeonBossbar {
         }
 
         return false;
+    }
+
+    /**
+     * 复刻 Odin 的凋零龙生成检测: 龙生成前 5 秒服务端会在生成点上方发送固定参数的 FLAME 粒子
+     * (count = 20, y = 19, 分布 2x3x2, 速度为 0, 坐标为整数)。
+     */
+    private static boolean isDragonSpawnParticle(ClientboundLevelParticlesPacket packet) {
+        return packet.count() == 20
+                && packet.y() == 19.0
+                && packet.particle().getType() == ParticleTypes.FLAME
+                && packet.xDist() == 2f
+                && packet.yDist() == 3f
+                && packet.zDist() == 2f
+                && packet.xMaxSpeed() == 0f
+                && packet.yMaxSpeed() == 0f
+                && packet.zMaxSpeed() == 0f
+                && packet.x() % 1 == 0.0
+                && packet.z() % 1 == 0.0;
+    }
+
+    private void onDragonSpawnParticle(ClientboundLevelParticlesPacket packet) {
+        if(currentStage < 4) return;
+        for (WitherDragonData.ColorType colorType : WitherDragonData.ColorType.values()) {
+            if(!colorType.matchesSpawnParticle(packet.x(), packet.z())) continue;
+            if(dragonSpawnCountdown.containsKey(colorType) || colorType.existOnScoreboard()) return;
+            dragonSpawnCountdown.put(colorType, dragonTimerTick + 100);
+            addStarRailNotification(colorType.colorCode + colorType.chineseName + "凋零龙§f即将生成!", StarRailNotification.Type.warning);
+            return;
+        }
     }
 
     private int getBossIndex(String bossName) {

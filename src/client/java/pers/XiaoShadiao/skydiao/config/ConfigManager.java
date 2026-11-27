@@ -242,6 +242,7 @@ public class ConfigManager {
     public static final BooleanConfigOption autoCarnivalAutoRestart = new BooleanConfigOption("autocarnivalautorestart", false).flagAsMacroFeature();
     public static final BooleanConfigOption bossDrawESP = new BooleanConfigOption("bossdrawesp", true);
     public static final BooleanConfigOption f7DrawWitherDragonESP = new BooleanConfigOption("f7drawwitherdragonesp", true);
+    public static final BooleanConfigOption f7WitherDragonSpawnWaypoint = new BooleanConfigOption("f7witherdragonspawnwaypoint", true);
     public static final BooleanConfigOption f7DrawStormFireballTarget = new BooleanConfigOption("f7drawstormfireballtarget", true);
     public static final BooleanConfigOption f7DrawWitherDragonLightning = new BooleanConfigOption("f7drawwitherkinglightning", true);
     public static final BooleanConfigOption treeProgress = new BooleanConfigOption("treeprogress", true).addDependFeature(bossbar);
@@ -340,6 +341,7 @@ public class ConfigManager {
     public static final DoubleConfigOption blockOverlayAlpha = new DoubleConfigOption("blockoverlayalpha", 0.33);
     public static final ColorConfigOption etherwarpCanWarpPreviewColor = new ColorConfigOption("etherwarpcanwarppreviewcolor", 0x00FF00);
     public static final ColorConfigOption etherwarpCannotWarpPreviewColor = new ColorConfigOption("etherwarpcannotwarppreviewcolor", 0xFF0000);
+    public static final BooleanConfigOption f7MaxorCrystalESP = new BooleanConfigOption("f7maxorcrystalesp", true);
 
     // public static final BooleanConfigOption dungeonf7msgbot = new BooleanConfigOption("dungeonf7msgbot", true);
     public static final StringConfigOption dungeonf7msgbotsimonsaysstart = new StringConfigOption("dungeonf7msgbotsimonsaysstart", "Simon Says开始咯!");
@@ -517,7 +519,7 @@ public class ConfigManager {
                     dungeonMapHudRender, dungeonMapHudBackgroundAlpha, dungeonMapHudShowName, dungeonMapXray,
                     dungeonTipIfCleared, dungeonTipIfAllSecretFound, dungeonScoreHud, dungeonCryptsHud,
                     dungeonDeathsHud, dungeonSecretsHud, dungeonSecretWaypoint, dungeonDoorESP, dungeonLeapMenu, dungeonLeapMenuButtonSize, dungeonLeapSlotPriority,
-                    f7DrawWitherDragonESP, f7DrawStormFireballTarget, f7DrawWitherDragonLightning, f7AutoSwapEnderDragonInWitherKing,
+                    f7DrawWitherDragonESP, f7WitherDragonSpawnWaypoint, f7MaxorCrystalESP, f7DrawStormFireballTarget, f7DrawWitherDragonLightning, f7AutoSwapEnderDragonInWitherKing,
 
                     dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3,
                     dungeonf7msgbotsimonsays4, dungeonf7msgbotmelodystart, dungeonf7msgbotmelody1,

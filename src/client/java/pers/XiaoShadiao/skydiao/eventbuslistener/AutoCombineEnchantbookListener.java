@@ -125,7 +125,7 @@ public class AutoCombineEnchantbookListener extends AbstractListener {
                 mc.execute(() -> mc.gameMode.handleContainerInput(finalMenu.containerId, click2.index, 0, ContainerInput.QUICK_MOVE, mc.player));
                 ItemStack product;
                 while((product = menu.slots.get(13).getItem()).is(Items.BARRIER)) {
-                    if(mc.gui.screen() != screen) break;
+                    if(!(mc.gui.screen() instanceof ContainerScreen)) break;
                     if(ToolList.getInstance().deleteColorCode(product.getHoverName().getString()).equals("Error!")) {
                         blacklistEnchantments.add(readyToCombine.getKey());
                         mc.execute(screen::onClose);
@@ -140,6 +140,7 @@ public class AutoCombineEnchantbookListener extends AbstractListener {
                         continue a;
                     }
                 }
+                // logger.info("Flag Item: " + product + ", Hover Name: " + ToolList.getInstance().deleteColorCode(product.getHoverName().getString()));
 
                 tryUsePickupStash = true;
                 Thread.sleep(500);
