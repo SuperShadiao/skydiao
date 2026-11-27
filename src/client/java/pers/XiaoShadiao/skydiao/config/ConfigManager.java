@@ -320,6 +320,8 @@ public class ConfigManager {
             "config.quiverhudwhen.options.bowhand");
     public static final SelectConfigOption quiverHUDWhen = new SelectConfigOption("quiverhudwhen", 2, QUIVER_WHEN_OPTIONS);
     public static final BooleanConfigOption deployableExpiredTitle = new BooleanConfigOption("deployableexpiredtitle", true);
+    public static final BooleanConfigOption pickaxeAbilityHUD = new BooleanConfigOption("pickaxeabilityhud", false);
+    public static final BooleanConfigOption miningTabHUD = new BooleanConfigOption("miningtabhud", false);
     public static final BooleanConfigOption miningAbilitiesAvaliableTitle = new BooleanConfigOption("miningabilitiesavaliabletitle", true);
     public static final BooleanConfigOption enchantTableSuperPairHelper = new BooleanConfigOption("enchanttablesuperpairhelper", true);
     public static final BooleanConfigOption enchantedBookPreview = new BooleanConfigOption("enchantedbookpreview", true);
@@ -480,7 +482,7 @@ public class ConfigManager {
                     crystalHollowScanCorleone, crystalHollowScanFairyGrotto, crystalHollowScanBear3,
                     crystalHollowHelperDebug, crystalHollowDupServerTipper, crystalHollowHelperDisableThreadLimit, crystalHollowWaypoint, crystalHollowMetalDetector,
                     genshinImpactHeatColdRender, miningCommissionEntityESP, autoEvaluateFossils,
-                    autoEvaluateFossilsAutoRestart, pinglessMining, miningAbilitiesAvaliableTitle)),
+                    autoEvaluateFossilsAutoRestart, pinglessMining, miningAbilitiesAvaliableTitle, miningTabHUD, pickaxeAbilityHUD)),
             Map.entry("combat", List.of(
                     slayerTogether,
                     isleVolcanoFinder, isleVolcanoFinderCataOnlyMode, isleDupServerTip,

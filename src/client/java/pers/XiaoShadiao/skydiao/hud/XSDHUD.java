@@ -37,6 +37,8 @@ public abstract class XSDHUD implements HudElement {
     public static final DungeonHUD.CryptsHUD dungeonCryptsHUD = new DungeonHUD.CryptsHUD();
     public static final DungeonHUD.DeathsHUD dungeonDeathsHUD = new DungeonHUD.DeathsHUD();
     public static final DungeonHUD.SecretsHUD dungeonSecretsHUD = new DungeonHUD.SecretsHUD();
+    public static final MiningTabHUD miningTabHUD = new MiningTabHUD();
+    public static final PickaxeAbilityHUD pickaxeAbilityHUD = new PickaxeAbilityHUD();
     public static final PinglessMiningHUD pinglessMiningHUD = new PinglessMiningHUD();
     public static final DynamicSpotHUD dynamicSpotHUD = new DynamicSpotHUD();
     public static final DeployableHUD deployableHUD = new DeployableHUD();

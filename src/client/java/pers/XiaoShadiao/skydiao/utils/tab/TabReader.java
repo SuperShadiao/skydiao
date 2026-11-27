@@ -6,10 +6,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.GameType;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -17,6 +19,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 public class TabReader {
+
+    private static final Comparator<PlayerInfo> TAB_ORDER = Comparator
+            .comparingInt(PlayerInfo::getTabListOrder).reversed()
+            .thenComparing(info -> info.getGameMode() == GameType.SPECTATOR)
+            .thenComparing(info -> info.getTeam() == null ? "" : info.getTeam().getName())
+            .thenComparing(info -> info.getProfile().name(), String.CASE_INSENSITIVE_ORDER);
 
     private static List<String> tabLines = new ArrayList<>();
     private static List<String> tabNoColorLines = new ArrayList<>();
@@ -39,6 +47,18 @@ public class TabReader {
                 .map(String::trim)
                 .toList();
         tabNoColorLines = tabLines.stream().map(ToolList.getInstance()::deleteColorCode).toList();
+    }
+
+    // 保留 Tab 的行顺序和缩进，用于读取多行组件。
+    public static List<String> getOrderedNoColorLines() {
+        ClientPacketListener connection = Minecraft.getInstance().getConnection();
+        if (connection == null) return List.of();
+
+        return connection.getListedOnlinePlayers().stream()
+                .sorted(TAB_ORDER)
+                .map(PlayerInfo::getTabListDisplayName)
+                .map(component -> component == null ? "" : ToolList.getInstance().deleteColorCode(component.getString()))
+                .toList();
     }
 
     // 获取整行文本列表
