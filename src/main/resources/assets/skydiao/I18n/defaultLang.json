@@ -1033,6 +1033,10 @@
       "configname": "§e地牢地图HUD",
       "description": "§e在屏幕上渲染地牢地图，显示房间名、秘密进度和勾叉"
     },
+    "dungeonmaphudbackgroundalpha": {
+      "configname": "§e地牢地图HUD背景透明度",
+      "description": "§e地图黑色背景的透明度, 0 为完全透明, 1 为完全不透明, 默认 0.5"
+    },
     "dungeonmaphudshowname": {
       "configname": "§e地牢地图显示房间名",
       "description": "§e开启时在房间上写房间名，关闭时只在房间左上角画勾叉"

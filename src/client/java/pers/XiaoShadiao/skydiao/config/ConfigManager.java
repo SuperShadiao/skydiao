@@ -209,6 +209,7 @@ public class ConfigManager {
     public static final BooleanConfigOption floorDroppingRender = new BooleanConfigOption("floordroppingrender", true);
     public static final BooleanConfigOption dungeonReviveItemCDRender = new BooleanConfigOption("dungeonreviveitemcdrender", true);
     public static final BooleanConfigOption dungeonMapHudRender = new BooleanConfigOption("dungeonmaphudrender", true);
+    public static final DoubleConfigOption dungeonMapHudBackgroundAlpha = new DoubleConfigOption("dungeonmaphudbackgroundalpha", 0.5);
     public static final BooleanConfigOption dungeonMapHudShowName = new BooleanConfigOption("dungeonmaphudshowname", true);
     public static final BooleanConfigOption dungeonMapXray = new BooleanConfigOption("dungeonmapxray", false);
     public static final BooleanConfigOption dungeonScoreHud = new BooleanConfigOption("dungeonscorehud", true);
@@ -513,7 +514,7 @@ public class ConfigManager {
                     dungeonAutoCloseChest, dungeonPuzzleHelper, dungeonf7InactiveTerminalRender,
                     f7TerminalESPTracer, f7ArrowAlignSolver, f7ArrowAlignSolverBlockWrongClicks,
                     f7SimonSaysSolver, f7SimonSaysSolverBlockWrongClicks, dungeonReviveItemCDRender,
-                    dungeonMapHudRender, dungeonMapHudShowName, dungeonMapXray,
+                    dungeonMapHudRender, dungeonMapHudBackgroundAlpha, dungeonMapHudShowName, dungeonMapXray,
                     dungeonTipIfCleared, dungeonTipIfAllSecretFound, dungeonScoreHud, dungeonCryptsHud,
                     dungeonDeathsHud, dungeonSecretsHud, dungeonSecretWaypoint, dungeonDoorESP, dungeonLeapMenu, dungeonLeapMenuButtonSize, dungeonLeapSlotPriority,
                     f7DrawWitherDragonESP, f7DrawStormFireballTarget, f7DrawWitherDragonLightning, f7AutoSwapEnderDragonInWitherKing,

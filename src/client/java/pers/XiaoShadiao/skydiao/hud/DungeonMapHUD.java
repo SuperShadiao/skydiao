@@ -46,7 +46,13 @@ public class DungeonMapHUD extends XSDHUD {
     private static final float TEXT_SCALE = 0.5f;
     /** 允许房间名横向溢出格子的比例，和 Skyblocker 的 MAX_WIDTH_SCALAR 思路一致。 */
     private static final float LABEL_WIDTH_SCALAR = 1.6f;
-    private static final int COLOR_SURFACE = 0x80000000;
+    /** 地图底色是黑色，透明度由配置控制（0~1）。 */
+    private static int surfaceColor() {
+        double alpha = ConfigManager.dungeonMapHudBackgroundAlpha.getValue();
+        int a = (int) Math.round(Math.max(0, Math.min(1, alpha)) * 255);
+        return a << 24;
+    }
+
     private static final int COLOR_BORDER = 0xFF9A9A9A;
     private static final int COLOR_UNKNOWN_TEXT = 0xFFAAAAAA;
     /** 房间之间普通门的连接色。 */
@@ -155,7 +161,7 @@ public class DungeonMapHUD extends XSDHUD {
         DungeonMapUtils.MapGrid grid = DungeonMapUtils.roomGrid(snapshot.mapEntrance(), size);
 
         // 地图尺寸固定，不随已识别的房间数量变化
-        context.fill(-3, -3, MAP_SIZE + 3, MAP_SIZE + 3, COLOR_SURFACE);
+        context.fill(-3, -3, MAP_SIZE + 3, MAP_SIZE + 3, surfaceColor());
         context.fill(-3, -3, MAP_SIZE + 3, -2, COLOR_BORDER);
         context.fill(-3, MAP_SIZE + 2, MAP_SIZE + 3, MAP_SIZE + 3, COLOR_BORDER);
         context.fill(-3, -3, -2, MAP_SIZE + 3, COLOR_BORDER);
