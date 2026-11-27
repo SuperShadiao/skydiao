@@ -23,6 +23,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.ResolvableProfile;
 import org.apache.logging.log4j.LogManager;
@@ -46,17 +47,21 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -75,6 +80,8 @@ public final class NeuItemRepository {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Gson COMPACT_GSON = new Gson();
     private static final String USER_AGENT = "skydiao-neu-repository/1.0";
+    private static final Pattern OVERLAY_DYED_COLOR =
+            Pattern.compile("\"?minecraft:dyed_color\"?\\s*:\\s*(-?\\d+)");
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor(runnable -> {
         Thread thread = new Thread(runnable, "Skydiao-NEU");
@@ -86,6 +93,10 @@ public final class NeuItemRepository {
     private volatile List<Recipe> recipes = List.of();
     private volatile Map<String, List<Recipe>> recipesByOutput = Map.of();
     private volatile Map<String, List<Recipe>> recipesByInput = Map.of();
+    private volatile List<MobDropRecipe> mobDropRecipes = List.of();
+    private volatile Map<String, List<MobDropRecipe>> mobDropsByMob = Map.of();
+    private volatile Map<String, List<MobDropRecipe>> mobDropsByDrop = Map.of();
+    private volatile Map<String, Integer> overlayColors = Map.of();
     private volatile Map<String, List<String>> parents = Map.of();
     private volatile Map<String, Map<String, PetNum>> petNumbers = Map.of();
     private volatile List<Shard> shards = List.of();
@@ -204,6 +215,10 @@ public final class NeuItemRepository {
             recipes = List.of();
             recipesByOutput = Map.of();
             recipesByInput = Map.of();
+            mobDropRecipes = List.of();
+            mobDropsByMob = Map.of();
+            mobDropsByDrop = Map.of();
+            overlayColors = Map.of();
             parents = Map.of();
             petNumbers = Map.of();
             shards = List.of();
@@ -232,6 +247,7 @@ public final class NeuItemRepository {
             items = Map.copyOf(loaded);
 
             loadRecipes(zipFile);
+            loadOverlayColors(zipFile);
             loadParents(zipFile);
             loadPetNumbers(zipFile);
             loadShards(zipFile);
@@ -242,8 +258,9 @@ public final class NeuItemRepository {
             }
         }
 
-        log.info("NEU 数据已加载: {} 物品, {} 配方, {} 折叠组, {} 宠物, {} 碎片",
-                items.size(), recipes.size(), parents.size(), petNumbers.size(), shards.size());
+        log.info("NEU 数据已加载: {} 物品, {} 配方, {} 怪物掉落, {} 覆盖层颜色, {} 折叠组, {} 宠物, {} 碎片",
+                items.size(), recipes.size(), mobDropRecipes.size(), overlayColors.size(),
+                parents.size(), petNumbers.size(), shards.size());
         notifyLoadListeners();
     }
 
@@ -264,6 +281,9 @@ public final class NeuItemRepository {
             recipes = List.of();
             recipesByOutput = Map.of();
             recipesByInput = Map.of();
+            mobDropRecipes = List.of();
+            mobDropsByMob = Map.of();
+            mobDropsByDrop = Map.of();
             return;
         }
 
@@ -285,15 +305,114 @@ public final class NeuItemRepository {
             if (!output.isEmpty()) {
                 byOutput.computeIfAbsent(output, key -> new ArrayList<>()).add(recipe);
             }
+            Set<String> seenInputs = new HashSet<>();
             for (String token : recipe.inputTokens()) {
                 String input = baseId(token);
-                if (!input.isEmpty()) {
+                if (!input.isEmpty() && seenInputs.add(input)) {
                     byInput.computeIfAbsent(input, key -> new ArrayList<>()).add(recipe);
                 }
             }
         }
         recipesByOutput = Map.copyOf(byOutput);
         recipesByInput = Map.copyOf(byInput);
+
+        List<MobDropRecipe> loadedMobDrops = new ArrayList<>();
+        Map<String, List<MobDropRecipe>> byMob = new HashMap<>();
+        Map<String, List<MobDropRecipe>> byDrop = new HashMap<>();
+        for (Recipe recipe : recipes) {
+            if (!"drops".equals(recipe.type())) {
+                continue;
+            }
+            MobDropRecipe mobDrop = MobDropRecipe.from(recipe);
+            loadedMobDrops.add(mobDrop);
+            addUnique(byMob, baseId(mobDrop.sourceItem()), mobDrop);
+            addUnique(byMob, baseId(mobDrop.mob()), mobDrop);
+            Set<String> seenDrops = new HashSet<>();
+            for (MobDrop drop : mobDrop.drops()) {
+                String dropId = baseId(drop.id());
+                if (!dropId.isEmpty() && seenDrops.add(dropId)) {
+                    addUnique(byDrop, dropId, mobDrop);
+                }
+            }
+        }
+        mobDropRecipes = List.copyOf(loadedMobDrops);
+        mobDropsByMob = freezeListMap(byMob);
+        mobDropsByDrop = freezeListMap(byDrop);
+    }
+
+    private static void addUnique(Map<String, List<MobDropRecipe>> map, String key, MobDropRecipe value) {
+        if (key == null || key.isEmpty()) {
+            return;
+        }
+        List<MobDropRecipe> list = map.computeIfAbsent(key, ignored -> new ArrayList<>());
+        if (!list.contains(value)) {
+            list.add(value);
+        }
+    }
+
+    private static Map<String, List<MobDropRecipe>> freezeListMap(Map<String, List<MobDropRecipe>> map) {
+        Map<String, List<MobDropRecipe>> copy = new HashMap<>(map.size());
+        map.forEach((key, value) -> copy.put(key, List.copyOf(value)));
+        return Map.copyOf(copy);
+    }
+
+    private void loadOverlayColors(ZipFile zipFile) {
+        Map<String, ZipEntry> latestEntries = new HashMap<>();
+        Map<String, Integer> latestVersions = new HashMap<>();
+
+        var entries = zipFile.entries();
+        while (entries.hasMoreElements()) {
+            ZipEntry entry = entries.nextElement();
+            String name = entry.getName();
+            if (!name.startsWith("overlays/") || !name.endsWith(".snbt")) {
+                continue;
+            }
+            String[] parts = name.split("/");
+            if (parts.length < 3) {
+                continue;
+            }
+            String id = parts[parts.length - 1];
+            id = id.substring(0, id.length() - ".snbt".length());
+            int version;
+            try {
+                version = Integer.parseInt(parts[1]);
+            } catch (NumberFormatException ignored) {
+                version = 0;
+            }
+            Integer current = latestVersions.get(id);
+            if (current == null || version > current) {
+                latestVersions.put(id, version);
+                latestEntries.put(id, entry);
+            }
+        }
+
+        Map<String, Integer> loaded = new HashMap<>();
+        for (Map.Entry<String, ZipEntry> entry : latestEntries.entrySet()) {
+            NeuItem item = items.get(entry.getKey());
+            if (item == null || !isLeatherArmorItemId(item.itemId())) {
+                continue;
+            }
+            try (InputStream input = zipFile.getInputStream(entry.getValue())) {
+                String text = new String(input.readAllBytes(), StandardCharsets.UTF_8);
+                Matcher matcher = OVERLAY_DYED_COLOR.matcher(text);
+                if (matcher.find()) {
+                    loaded.put(entry.getKey(), Integer.parseInt(matcher.group(1)));
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        overlayColors = Map.copyOf(loaded);
+    }
+
+    private static boolean isLeatherArmorItemId(String itemId) {
+        if (itemId == null) {
+            return false;
+        }
+        return switch (itemId) {
+            case "minecraft:leather_helmet", "minecraft:leather_chestplate",
+                    "minecraft:leather_leggings", "minecraft:leather_boots" -> true;
+            default -> false;
+        };
     }
 
     private void loadParents(ZipFile zipFile) throws IOException {
@@ -607,7 +726,73 @@ public final class NeuItemRepository {
                 stack.set(DataComponents.ITEM_MODEL, modelId);
             }
         }
+
+        if (isDyeableLeatherArmor(stack)) {
+            // NEU 物品本体没有颜色时，以 overlays/<dataVersion>/<ID>.snbt 里的
+            // minecraft:dyed_color 为准；注意不要从玩家当前装备读取，Dye 会改变颜色。
+            Integer color = overlayColors.get(item.internalName());
+            if (color == null) {
+                color = parseDyedColor(nbt);
+            }
+            if (color != null) {
+                stack.set(DataComponents.DYED_COLOR, new DyedItemColor(color));
+            }
+        }
         return stack;
+    }
+
+    private static boolean isDyeableLeatherArmor(ItemStack stack) {
+        return stack.is(Items.LEATHER_HELMET)
+                || stack.is(Items.LEATHER_CHESTPLATE)
+                || stack.is(Items.LEATHER_LEGGINGS)
+                || stack.is(Items.LEATHER_BOOTS);
+    }
+
+    /**
+     * 兼容旧版 {@code display.color}、直接 {@code dyed_color} 和组件形式。
+     */
+    private static Integer parseDyedColor(JsonObject nbt) {
+        if (nbt == null) {
+            return null;
+        }
+        JsonObject display = nbt.getAsJsonObject("display");
+        if (display != null) {
+            Integer color = readColor(display.get("color"));
+            if (color != null) {
+                return color;
+            }
+        }
+
+        Integer direct = readColor(nbt.get("dyed_color"));
+        if (direct != null) {
+            return direct;
+        }
+
+        JsonObject components = nbt.getAsJsonObject("components");
+        if (components != null) {
+            Integer component = readColor(components.get("minecraft:dyed_color"));
+            if (component != null) {
+                return component;
+            }
+        }
+        return null;
+    }
+
+    private static Integer readColor(JsonElement element) {
+        try {
+            if (element == null) {
+                return null;
+            }
+            if (element.isJsonPrimitive()) {
+                return element.getAsInt();
+            }
+            if (element.isJsonObject()) {
+                JsonElement rgb = element.getAsJsonObject().get("rgb");
+                return rgb != null && rgb.isJsonPrimitive() ? rgb.getAsInt() : null;
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
     }
 
     /**
@@ -639,6 +824,63 @@ public final class NeuItemRepository {
 
     public List<Recipe> usagesFor(String internalName) {
         return recipesByInput.getOrDefault(internalName, List.of());
+    }
+
+    public List<MobDropRecipe> mobDropRecipes() {
+        return mobDropRecipes;
+    }
+
+    public List<MobDropRecipe> mobDropsForMob(String internalName) {
+        return mobDropsByMob.getOrDefault(internalName, List.of());
+    }
+
+    public List<MobDropRecipe> mobDropsForDrop(String internalName) {
+        return mobDropsByDrop.getOrDefault(internalName, List.of());
+    }
+
+    /**
+     * 读取 ZIP 内的 JSON 资源（例如 {@code mobs/miner_zombie.json}）。
+     * 每次调用都会重新打开 ZIP，调用方应自行缓存结果。
+     */
+    public JsonObject repositoryJson(String path) {
+        if (path == null || path.isBlank()) {
+            return null;
+        }
+        Path zip = zipPath();
+        if (!Files.exists(zip)) {
+            return null;
+        }
+        try (ZipFile zipFile = new ZipFile(zip.toFile())) {
+            return readJson(zipFile, path);
+        } catch (IOException e) {
+            log.warn("读取 NEU ZIP 资源失败: {}", path, e);
+            return null;
+        }
+    }
+
+    /**
+     * 读取 ZIP 内的任意二进制资源（例如 {@code mobs/abyssal_miner.png}）。
+     */
+    public byte[] repositoryBytes(String path) {
+        if (path == null || path.isBlank()) {
+            return null;
+        }
+        Path zip = zipPath();
+        if (!Files.exists(zip)) {
+            return null;
+        }
+        try (ZipFile zipFile = new ZipFile(zip.toFile())) {
+            ZipEntry entry = zipFile.getEntry(path);
+            if (entry == null) {
+                return null;
+            }
+            try (InputStream input = zipFile.getInputStream(entry)) {
+                return input.readAllBytes();
+            }
+        } catch (IOException e) {
+            log.warn("读取 NEU ZIP 资源失败: {}", path, e);
+            return null;
+        }
     }
 
     public List<Recipe> recipes() {
@@ -1011,6 +1253,130 @@ public final class NeuItemRepository {
         public List<String> outputTokens() {
             return output == null ? List.of() : List.of(output);
         }
+    }
+
+    /**
+     * NEU {@code type: "drops"} 配方。怪物本身是 items.json 里的伪物品，
+     * drops 的每个 id 都是该怪物的掉落物。
+     */
+    public record MobDropRecipe(String sourceItem, String mob, String name, String render,
+                                int level, int coins, String panorama, List<String> extra,
+                                Map<String, Integer> experience, List<MobDrop> drops,
+                                Recipe recipe) {
+
+        static MobDropRecipe from(Recipe recipe) {
+            JsonObject json = recipe.raw();
+            String source = firstNonBlank(
+                    getString(json, "sourceItem"),
+                    recipe.sourceItem(),
+                    getString(json, "mob")
+            );
+            String mob = firstNonBlank(getString(json, "mob"), source);
+
+            Map<String, Integer> experience = new LinkedHashMap<>();
+            for (String key : List.of("combat_xp", "farming_xp", "fishing_xp",
+                    "hunting_xp", "mining_xp", "xp")) {
+                addExperience(experience, json, key);
+            }
+            for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
+                if (entry.getKey().endsWith("_xp")) {
+                    addExperience(experience, json, entry.getKey());
+                }
+            }
+
+            List<MobDrop> drops = new ArrayList<>();
+            JsonArray array = getArray(json, "drops");
+            if (array != null) {
+                for (JsonElement element : array) {
+                    MobDrop drop = MobDrop.from(element);
+                    if (drop != null) {
+                        drops.add(drop);
+                    }
+                }
+            }
+
+            return new MobDropRecipe(
+                    source,
+                    mob,
+                    firstNonBlank(getString(json, "name"), source),
+                    getString(json, "render"),
+                    Math.max(0, getInt(json, "level", 0)),
+                    Math.max(0, getInt(json, "coins", 0)),
+                    getString(json, "panorama"),
+                    readStringList(getArray(json, "extra")),
+                    java.util.Collections.unmodifiableMap(new LinkedHashMap<>(experience)),
+                    List.copyOf(drops),
+                    recipe
+            );
+        }
+
+        private static void addExperience(Map<String, Integer> map, JsonObject json, String key) {
+            if (map.containsKey(key) || !json.has(key)) {
+                return;
+            }
+            int value = getInt(json, key, 0);
+            if (value > 0) {
+                map.put(key, value);
+            }
+        }
+    }
+
+    public record MobDrop(String id, String chance, List<String> extra,
+                          List<MobDropAlternative> alternatives) {
+
+        static MobDrop from(JsonElement element) {
+            if (element == null || element.isJsonNull()) {
+                return null;
+            }
+            if (element.isJsonPrimitive()) {
+                return new MobDrop(element.getAsString(), null, List.of(), List.of());
+            }
+            if (!element.isJsonObject()) {
+                return null;
+            }
+            JsonObject json = element.getAsJsonObject();
+            String id = getString(json, "id");
+            if (id == null || id.isBlank()) {
+                return null;
+            }
+
+            List<MobDropAlternative> alternatives = new ArrayList<>();
+            JsonArray array = getArray(json, "alternatives");
+            if (array != null) {
+                for (JsonElement alternative : array) {
+                    if (!alternative.isJsonObject()) {
+                        continue;
+                    }
+                    JsonObject alternativeJson = alternative.getAsJsonObject();
+                    String alternativeId = getString(alternativeJson, "id");
+                    if (alternativeId != null && !alternativeId.isBlank()) {
+                        alternatives.add(new MobDropAlternative(
+                                alternativeId,
+                                getString(alternativeJson, "chance")
+                        ));
+                    }
+                }
+            }
+
+            return new MobDrop(
+                    id,
+                    getString(json, "chance"),
+                    readStringList(getArray(json, "extra")),
+                    List.copyOf(alternatives)
+            );
+        }
+    }
+
+    public record MobDropAlternative(String id, String chance) {
+    }
+
+    private static String firstNonBlank(String... values) {
+        for (String value : values) {
+            if (value != null && !value.isBlank()) {
+                return value;
+            }
+        }
+        return "";
     }
 
     public record PetNum(int lowLevel, int highLevel,

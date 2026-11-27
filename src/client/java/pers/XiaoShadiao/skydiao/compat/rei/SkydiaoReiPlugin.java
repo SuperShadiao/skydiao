@@ -68,6 +68,7 @@ public class SkydiaoReiPlugin implements REIClientPlugin {
                 Component.literal("Kat Upgrade"), katIcon, 64));
         registry.add(new NpcTrackCategory());
         registry.add(new WikiCategory());
+        registry.add(new MobDropCategory());
 
         registry.addWorkstations(CategoryIdentifier.of(NpcTrackDisplay.CATEGORY_ID),
                 EntryStacks.of(new ItemStack(Items.COMPASS)));
@@ -149,6 +150,10 @@ public class SkydiaoReiPlugin implements REIClientPlugin {
         if (registry.getGlobalDisplayGenerators().stream()
                 .noneMatch(generator -> generator instanceof WikiDisplayGenerator)) {
             registry.registerGlobalDisplayGenerator(new WikiDisplayGenerator());
+        }
+        if (registry.getGlobalDisplayGenerators().stream()
+                .noneMatch(generator -> generator instanceof MobDropDisplayGenerator)) {
+            registry.registerGlobalDisplayGenerator(new MobDropDisplayGenerator());
         }
     }
 

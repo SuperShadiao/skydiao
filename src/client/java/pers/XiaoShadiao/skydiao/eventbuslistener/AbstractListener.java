@@ -123,6 +123,7 @@ public abstract class  AbstractListener extends Thread {
     public static final SlayerBossESPListener slayerBossESPListener = new SlayerBossESPListener();
     public static final BlockOverlayListener blockOverlayListener = new BlockOverlayListener();
     public static final QuickNavListener quickNavListener = new QuickNavListener();
+    public static final ContainerStoragePreviewListener containerStoragePreviewListener = new ContainerStoragePreviewListener();
     public static final EtherwarpPreviewerListener etherwarpPreviewerListener = new EtherwarpPreviewerListener();
     public static final AutoCombineEnchantbookListener autoCombineEnchantbookListener = new AutoCombineEnchantbookListener();
     public static final SyncScreenListener syncScreenListener = new SyncScreenListener();

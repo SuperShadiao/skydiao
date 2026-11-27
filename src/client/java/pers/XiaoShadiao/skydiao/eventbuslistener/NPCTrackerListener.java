@@ -53,7 +53,7 @@ public class NPCTrackerListener extends AbstractListener {
         if (!MacroManagerListener.pathFinderV2Executor.isRunning()) {
             MacroManagerListener.pathFinderV2Executor.startExecution(targetPos);
             MacroManagerListener.pathFinderV2Executor.pauseExecution();
-        } else if (mc.player.blockPosition().distManhattan(targetPos) <= 5) {
+        } else if (mc.player.blockPosition().distManhattan(targetPos) <= 10) {
             MacroManagerListener.pathFinderV2Executor.stopExecution();
             ToolList.printChatMessage(Component.literal(
                     "§a[小沙雕] §e已到达 §b" + getDisplayName() + " §e附近"));

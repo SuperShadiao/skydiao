@@ -26,6 +26,7 @@ import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.config.QuickNavConfig;
 import pers.XiaoShadiao.skydiao.eventbuslistener.AbstractListener;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
+import pers.XiaoShadiao.skydiao.screen.ContainerStoragePreviewScreen;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.neu.NeuItemRepository;
 import pers.XiaoShadiao.skydiao.utils.screen.QuickNavButton;
@@ -72,6 +73,10 @@ public class QuickNavListener extends AbstractListener {
 
     private void onScreenInit(Minecraft client, Screen screen, int scaledWidth, int scaledHeight) {
         if (!(screen instanceof AbstractContainerScreen<?> container)) {
+            return;
+        }
+        // 存储预览界面只是空容器壳，选项卡会与卡片网格重叠。
+        if (screen instanceof ContainerStoragePreviewScreen) {
             return;
         }
         if (!ConfigManager.quickNav.getValue() || !ToolList.isInSkyblock()) {

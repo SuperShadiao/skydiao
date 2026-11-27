@@ -313,40 +313,45 @@ public class DungeonSecretWaypointListener extends AbstractListener {
 
     private void onLastRender(LevelRenderContext context) {
         if (mc.level == null || mc.player == null) return;
+        int mode = ConfigManager.dungeonSecretWaypoint.getValue();
         List<DungeonMapScanListener.Snapshot.SecretView> visible = visibleSecrets;
-        if (visible.isEmpty()) return;
+        if (mode == 0 || visible.isEmpty()) return;
 
         // 方块高亮：填充和描边各用一条管线，所有秘密点合并成两次绘制
-        RenderUtils.WorldRender fill = RenderUtils.createWorldRenderInstance(
-                context, CustomRenderPipeline.THROUGH_WALLS_FILL);
-        RenderUtils.WorldRender line = RenderUtils.createWorldRenderInstance(
-                context, CustomRenderPipeline.THROUGH_WALLS_LINE);
-        for (DungeonMapScanListener.Snapshot.SecretView secret : visible) {
-            int rgb = colorFor(secret);
-            float r = ((rgb >> 16) & 0xFF) / 255f;
-            float g = ((rgb >> 8) & 0xFF) / 255f;
-            float b = (rgb & 0xFF) / 255f;
-            BlockPos pos = new BlockPos(secret.x(), secret.y(), secret.z());
-            RenderUtils.renderESP(fill, pos, r, g, b, 0.45f, true);
-            RenderUtils.renderESP(line, pos, r, g, b, 1f, false);
+        if (mode == 2 || mode == 3) {
+            RenderUtils.WorldRender fill = RenderUtils.createWorldRenderInstance(
+                    context, CustomRenderPipeline.THROUGH_WALLS_FILL);
+            RenderUtils.WorldRender line = RenderUtils.createWorldRenderInstance(
+                    context, CustomRenderPipeline.THROUGH_WALLS_LINE);
+            for (DungeonMapScanListener.Snapshot.SecretView secret : visible) {
+                int rgb = colorFor(secret);
+                float r = ((rgb >> 16) & 0xFF) / 255f;
+                float g = ((rgb >> 8) & 0xFF) / 255f;
+                float b = (rgb & 0xFF) / 255f;
+                BlockPos pos = new BlockPos(secret.x(), secret.y(), secret.z());
+                RenderUtils.renderESP(fill, pos, r, g, b, 0.45f, true);
+                RenderUtils.renderESP(line, pos, r, g, b, 1f, false);
+            }
+            fill.finishDraw();
+            line.finishDraw();
         }
-        fill.finishDraw();
-        line.finishDraw();
 
         // 文字标签：独立渲染，保证大小不随距离变化
-        for (DungeonMapScanListener.Snapshot.SecretView secret : visible) {
-            double distance = Math.sqrt(mc.player.distanceToSqr(
-                    secret.x() + 0.5, secret.y() + 0.5, secret.z() + 0.5));
-            int rgb = colorFor(secret);
-            Component nameLabel = SECRET_LABELS.computeIfAbsent(
-                    rgb + "\u0000" + secret.name(),
-                    key -> Component.literal(secret.name()).withStyle(style -> style.withColor(rgb)));
-            Component label = Component.empty()
-                    .append(nameLabel)
-                    .append(Component.literal(" " + Math.round(distance) + "m")
-                            .withStyle(ChatFormatting.GRAY));
-            RenderUtils.renderWaypoint(context,
-                    new Vec3(secret.x() + 0.5, secret.y() + 1.4, secret.z() + 0.5), label, 1.5f);
+        if (mode == 1 || mode == 3) {
+            for (DungeonMapScanListener.Snapshot.SecretView secret : visible) {
+                double distance = Math.sqrt(mc.player.distanceToSqr(
+                        secret.x() + 0.5, secret.y() + 0.5, secret.z() + 0.5));
+                int rgb = colorFor(secret);
+                Component nameLabel = SECRET_LABELS.computeIfAbsent(
+                        rgb + "\u0000" + secret.name(),
+                        key -> Component.literal(secret.name()).withStyle(style -> style.withColor(rgb)));
+                Component label = Component.empty()
+                        .append(nameLabel)
+                        .append(Component.literal(" " + Math.round(distance) + "m")
+                                .withStyle(ChatFormatting.GRAY));
+                RenderUtils.renderWaypoint(context,
+                        new Vec3(secret.x() + 0.5, secret.y() + 1.4, secret.z() + 0.5), label, 1.5f);
+            }
         }
     }
 

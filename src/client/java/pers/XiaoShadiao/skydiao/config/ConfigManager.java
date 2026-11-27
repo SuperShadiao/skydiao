@@ -94,6 +94,7 @@ public class ConfigManager {
     public static final BooleanConfigOption nosuffoverlay = new BooleanConfigOption("nosuffoverlay", false);
     public static final BooleanConfigOption chocolateFactoryShortcut = new BooleanConfigOption("chocolatefactoryshortcut", false);
     public static final BooleanConfigOption inventoryFilter = new BooleanConfigOption("skyblockinventoryitemfilter", false);
+    public static final BooleanConfigOption betterStorage = new BooleanConfigOption("betterstorage", true);
     public static final BooleanConfigOption dyingtip = new BooleanConfigOption("dyingtip", false);
     public static final StringConfigOption inventoryFilterRegex = new StringConfigOption("inventoryfilterregex", "");
     public static final StringConfigOption inventoryFilterRegexList = new StringConfigOption("inventoryfilterregexlist", "[]");
@@ -214,6 +215,9 @@ public class ConfigManager {
     public static final BooleanConfigOption dungeonCryptsHud = new BooleanConfigOption("dungeoncryptshud", true);
     public static final BooleanConfigOption dungeonDeathsHud = new BooleanConfigOption("dungeondeathshud", true);
     public static final BooleanConfigOption dungeonSecretsHud = new BooleanConfigOption("dungeonsecretshud", true);
+    public static final SelectConfigOption dungeonSecretWaypoint = new SelectConfigOption("dungeonsecretwaypoint", 3,
+            List.of("config.dungeonsecretwaypoint.options.off", "config.dungeonsecretwaypoint.options.text",
+                    "config.dungeonsecretwaypoint.options.esp", "config.dungeonsecretwaypoint.options.both"));
     public static final BooleanConfigOption dungeonDoorESP = new BooleanConfigOption("dungeondooresp", true);
     public static final BooleanConfigOption dungeonLeapMenu = new BooleanConfigOption("dungeonleapmenu", true);
     public static final IntConfigOption dungeonLeapMenuButtonSize = new IntConfigOption("dungeonleapmenubuttonsize", 50);
@@ -511,7 +515,7 @@ public class ConfigManager {
                     f7SimonSaysSolver, f7SimonSaysSolverBlockWrongClicks, dungeonReviveItemCDRender,
                     dungeonMapHudRender, dungeonMapHudShowName, dungeonMapXray,
                     dungeonTipIfCleared, dungeonTipIfAllSecretFound, dungeonScoreHud, dungeonCryptsHud,
-                    dungeonDeathsHud, dungeonSecretsHud, dungeonDoorESP, dungeonLeapMenu, dungeonLeapMenuButtonSize, dungeonLeapSlotPriority,
+                    dungeonDeathsHud, dungeonSecretsHud, dungeonSecretWaypoint, dungeonDoorESP, dungeonLeapMenu, dungeonLeapMenuButtonSize, dungeonLeapSlotPriority,
                     f7DrawWitherDragonESP, f7DrawStormFireballTarget, f7DrawWitherDragonLightning, f7AutoSwapEnderDragonInWitherKing,
 
                     dungeonf7msgbotsimonsaysstart, dungeonf7msgbotsimonsays1, dungeonf7msgbotsimonsays2, dungeonf7msgbotsimonsays3,
@@ -537,6 +541,7 @@ public class ConfigManager {
                     handSwingSpeedMultiplier,
                     itemRarityRender, itemPriceTooltip, itemMuseumDonateStateTooltip, noHurtcam,
                     quickNav, openQuickNavConfig,
+                    betterStorage,
                     statusBars, statusBarsShowHealthMax, statusBarsShowManaMax,
                     statusBarHealthIcon, statusBarManaIcon, statusBarDefenseIcon,
                     statusBarExperienceIcon, statusBarSpeedIcon, statusBarAirIcon, statusBarVitalityIcon,
@@ -604,7 +609,13 @@ public class ConfigManager {
                         if (option instanceof BooleanConfigOption booleanOption) {
                             booleanOption.setValue(jo.get(option.getName()).getAsBoolean());
                         } else if (option instanceof SelectConfigOption selectOption) {
-                            selectOption.setValue(jo.get(option.getName()).getAsInt());
+                            JsonElement value = jo.get(option.getName());
+                            // 兼容旧配置：原来的布尔开关 false -> 关闭，true -> 保持默认选项
+                            if (value.isJsonPrimitive() && value.getAsJsonPrimitive().isBoolean()) {
+                                if (!value.getAsBoolean()) selectOption.setValue(0);
+                            } else {
+                                selectOption.setValue(value.getAsInt());
+                            }
                         } else if (option instanceof StringConfigOption stringOption) {
                             stringOption.setValue(jo.get(option.getName()).getAsString());
                         } else if (option instanceof IntConfigOption intgOption) {

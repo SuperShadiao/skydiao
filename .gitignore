@@ -42,3 +42,7 @@ replay_*.log
 
 # ircinner 仅本地维护, 通过独立的 skydiao-irc-<version>.jar 分发
 src/client/java/pers/XiaoShadiao/skydiao/ircinner/
+
+AGENTS.md
+
+AGENTS.md

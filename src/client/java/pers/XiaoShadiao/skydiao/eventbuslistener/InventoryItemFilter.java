@@ -24,6 +24,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import pers.XiaoShadiao.skydiao.config.ConfigManager;
 import pers.XiaoShadiao.skydiao.fabriccustomevent.CustomFabricEvents;
+import pers.XiaoShadiao.skydiao.screen.ContainerStoragePreviewScreen;
 import pers.XiaoShadiao.skydiao.screen.InventoryRegexSearcherConfigScreen;
 import pers.XiaoShadiao.skydiao.utils.ToolList;
 import pers.XiaoShadiao.skydiao.utils.renderutils.RenderUtils;
@@ -57,6 +58,8 @@ public class InventoryItemFilter extends AbstractListener {
         if(!ConfigManager.inventoryFilter.getValue()) return;
         if(!(screen instanceof AbstractContainerScreen)) return;
         if(screen instanceof CreativeModeInventoryScreen) return;
+        // 存储预览界面没有真实槽位，不需要物品过滤器 UI。
+        if(screen instanceof ContainerStoragePreviewScreen) return;
 
         // ScreenEvents.afterExtract(screen).register(this::postRender);
         ScreenKeyboardEvents.allowKeyPress(screen).register(this::allowKeyPress);

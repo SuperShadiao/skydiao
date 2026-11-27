@@ -38,10 +38,11 @@ public final class PriceDataManager {
 
     private static final long BAZAAR_INTERVAL_MS = 60_000L;
     private static final long AUCTION_INTERVAL_MS = 600_000L;
-    private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(30);
+    private static final Duration CONNECT_TIMEOUT = Duration.ofMinutes(3);
+    private static final Duration REQUEST_TIMEOUT = Duration.ofMinutes(3);
 
     private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(15))
+            .connectTimeout(CONNECT_TIMEOUT)
             .build();
 
     /** endpoint -> ETag */

@@ -1069,6 +1069,16 @@
       "configname": "§e地牢秘密数HUD",
       "description": "§e显示当前房间的秘密进度 Secret: X/X"
     },
+    "dungeonsecretwaypoint": {
+      "configname": "§e地牢秘密点显示",
+      "description": "§e秘密 waypoint 的显示方式: 关闭 / 仅显示文字 / 仅显示ESP / ESP和文字都显示",
+      "options": {
+        "off": "关闭",
+        "text": "仅显示文字",
+        "esp": "仅显示ESP",
+        "both": "ESP和文字都显示"
+      }
+    },
     "dungeonleapmenu": {
       "configname": "§eSpirit Leap 菜单",
       "description": "§e把地牢里的 Spirit Leap 箱子界面替换成玩家头像菜单"
@@ -1585,6 +1595,10 @@
     "openquicknavconfig": {
       "configname": "§e配置快捷导航",
       "description": "§e点击编辑快捷导航按钮、图标、指令与双击设置"
+    },
+    "betterstorage": {
+      "configname": "§e更好的存储界面",
+      "description": "§e用卡片式概览替换 Hypixel 的末影箱/背包容器页面，并缓存打开过的页面内容"
     },
     "statusbarsshowhealthmax": {
       "configname": "§e血量最大值显示",

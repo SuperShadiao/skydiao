@@ -28,12 +28,15 @@ public class TabReader {
 
     private static List<String> tabLines = new ArrayList<>();
     private static List<String> tabNoColorLines = new ArrayList<>();
+    private static List<String> tabOrderedNoColorLines = new ArrayList<>();
 
     public static void refreshTab() {
         Minecraft mc = Minecraft.getInstance();
         ClientPacketListener connection = mc.getConnection();
         if (connection == null) {
             tabLines = null;
+            tabNoColorLines = null;
+            tabOrderedNoColorLines = null;
             return;
         }
 
@@ -47,18 +50,16 @@ public class TabReader {
                 .map(String::trim)
                 .toList();
         tabNoColorLines = tabLines.stream().map(ToolList.getInstance()::deleteColorCode).toList();
-    }
-
-    // 保留 Tab 的行顺序和缩进，用于读取多行组件。
-    public static List<String> getOrderedNoColorLines() {
-        ClientPacketListener connection = Minecraft.getInstance().getConnection();
-        if (connection == null) return List.of();
-
-        return connection.getListedOnlinePlayers().stream()
+        tabOrderedNoColorLines = connection.getListedOnlinePlayers().stream()
                 .sorted(TAB_ORDER)
                 .map(PlayerInfo::getTabListDisplayName)
                 .map(component -> component == null ? "" : ToolList.getInstance().deleteColorCode(component.getString()))
                 .toList();
+    }
+
+    // 保留 Tab 的行顺序和缩进，用于读取多行组件。
+    public static List<String> getOrderedNoColorLines() {
+        return tabOrderedNoColorLines == null ? List.of() : tabOrderedNoColorLines;
     }
 
     // 获取整行文本列表

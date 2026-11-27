@@ -157,6 +157,9 @@ public class PathFinderV2 {
             SearchKey cur = open.poll();
 
             if (!ToolList.mc.level.isLoaded(cur.pos())) {
+                if(cur.pos().equals(startPos)) {
+                    return new PathNodes(List.of(), 0.0, PathFinderV2State.TOUCH_BORDER);
+                }
                 List<PathNode> path = reconstruct(cameFrom, lowestDistanceContext.current());
                 return new PathNodes(path, gScore.getDouble(lowestDistanceContext.current()), PathFinderV2State.TOUCH_BORDER);
             }

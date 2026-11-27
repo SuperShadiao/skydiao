@@ -198,7 +198,7 @@ public class PathFinderV2Executor extends AbstractListener implements IMacro {
                     flagPathfinderAlive();
                 }
 
-                if (path.size() == 1 && path.getFirst().type() == PathNodeType.FLY && !rePathInfoQueue.isEmpty()) {
+                if ((isPaused ? path.size() < 5 : path.size() == 1 && path.getFirst().type() == PathNodeType.FLY) && !rePathInfoQueue.isEmpty()) {
                     break;
                 }
 
